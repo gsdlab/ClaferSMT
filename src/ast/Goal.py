@@ -16,3 +16,6 @@ class Goal(object):
         
     def __str__(self):
         return self.isMaximize + self.exp
+    
+    def toString(self, level):
+        print("A")

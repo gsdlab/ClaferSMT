@@ -21,3 +21,6 @@ class Exp(object):
         
     def __str__(self):
         return "ExpType: " + self.expType
+    
+    def toString(self, level):
+        print("A")

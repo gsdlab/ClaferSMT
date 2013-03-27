@@ -6,7 +6,8 @@ Created on Mar 23, 2013
 
 class Module(object):
     '''
-    IModule
+    elements # the top level clafers/constraints/goals
+    mName   # module name
     '''
     elements = []
     
@@ -23,3 +24,8 @@ class Module(object):
         
     def __str__(self):
         return self.mName + " " + ', '.join(map(str, self.elements))
+    
+    def toString(self, level):
+        print("Module Name:" + self.mName)
+        for i in self.elements:
+            i.toString(level+1)

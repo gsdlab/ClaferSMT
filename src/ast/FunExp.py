@@ -17,3 +17,6 @@ class FunExp(object):
         
     def __str__(self):
         return self.operation + self.elements
+    
+    def toString(self, level):
+        print("A")

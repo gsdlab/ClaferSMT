@@ -16,4 +16,8 @@ class GCard(object):
       
       
     def __str__(self):
-        return self.interval +"" 
+        s = "(" + str(self.interval[0]) + "," + str(self.interval[1]) + ")"
+        return s
+    
+    def toString(self, level):
+        print("A")

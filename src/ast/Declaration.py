@@ -17,3 +17,6 @@ class Declaration(object):
         
     def __str__(self):
         return self.body
+    
+    def toString(self, level):
+        print("A")

@@ -15,3 +15,4 @@ class LocalDeclaration(object):
         
     def __str__(self):
         return self.element
+    
