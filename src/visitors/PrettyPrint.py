@@ -29,7 +29,9 @@ class PrettyPrint(object):
         prettyPrint("elements{")
         self.inc()
         for i in element.elements:
+            prettyPrint("CLAFER:")
             visitors.Visitor.visit(self, i)
+            prettyPrint("END")
         self.dec()
         prettyPrint("}")
     
@@ -40,7 +42,6 @@ class PrettyPrint(object):
             prettyPrint("Module Name=" + element.moduleName)
         prettyPrint("id=" + element.id)
         prettyPrint("isTop=" + str(element.isTop))
-
     
     def constraintVisit(self, element):
         prettyPrint("isHard=" + str(element.isHard))
@@ -55,7 +56,9 @@ class PrettyPrint(object):
         prettyPrint("LocalDeclarations{")
         self.inc()
         for i in element.localDeclarations:
+            prettyPrint("ELEMENT:")
             visitors.Visitor.visit(self, i)
+            prettyPrint("END")
         self.dec()
         prettyPrint("}")
         prettyPrint("body{")
@@ -90,7 +93,9 @@ class PrettyPrint(object):
         prettyPrint("iExp{")
         self.inc()
         for i in element.iExp:
+            prettyPrint("EXPRESSION:")
             visitors.Visitor.visit(self, i)
+            prettyPrint("END")
         self.dec()
         prettyPrint("}")
     
@@ -100,7 +105,9 @@ class PrettyPrint(object):
         prettyPrint("elements{")
         self.inc()
         for i in element.elements:
+            prettyPrint("FUNEXP:")
             visitors.Visitor.visit(self, i)
+            prettyPrint("END")
         self.dec()
         prettyPrint("}")
     
@@ -129,7 +136,9 @@ class PrettyPrint(object):
         prettyPrint("elements{")
         self.inc()
         for i in element.elements:
+            prettyPrint("SUPERS:")
             visitors.Visitor.visit(self, i)
+            prettyPrint("END")
         self.dec()
         prettyPrint("}")
     
