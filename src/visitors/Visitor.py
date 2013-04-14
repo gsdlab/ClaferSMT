@@ -4,7 +4,10 @@ Created on Mar 26, 2013
 @author: ezulkosk
 '''
 import ast.Clafer, ast.Module, ast.ClaferId, ast.Constraint, ast.Declaration, ast.DeclPExp, ast.Exp, \
-    ast.FunExp, ast.GCard, ast.Goal, ast.LocalDeclaration, ast.Supers
+      ast.FunExp, ast.GCard, ast.Goal, ast.LocalDeclaration, ast.Supers, ast.IntegerLiteral, ast.DoubleLiteral, \
+      ast.StringLiteral
+
+
 
 def visit(visitor, element):
     if isinstance(element, ast.Clafer.Clafer):

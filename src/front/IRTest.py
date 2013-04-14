@@ -3,13 +3,13 @@ Created on Mar 23, 2013
 
 @author: ezulkosk
 '''
-#from z3 import *
-from ast import *
-from visitors.PrettyPrint import PrettyPrint
+from z3 import *
+
+
 import imp
 import sys
 import visitors.Visitor
-
+import visitors.PrettyPrint
 
 
 def main(args):
@@ -17,9 +17,9 @@ def main(args):
     src = imp.load_source("input", args[0])
 
     
-    #x = Int('x')
-    #y = Int('y')
-    #solve(x > 2, y < 10, x + 2*y == 7)
+    x = Int('x')
+    y = Int('y')
+    solve(x > 2, y < 10, x + 2*y == 7)
     #src = imp.load_source("ClaferOutput",
     #                      'C:\\Users\\ezulkosk\\git\\clafer\\test\\positive\\books_tutorial.py' )
     module = src.getModule()
