@@ -18,7 +18,7 @@ class PrettyPrint(object):
     
     def claferVisit(self, element):
         prettyPrint("ident="+element.ident)
-        prettyPrint("absract="+str(element.isAbstract))
+        prettyPrint("abstract="+str(element.isAbstract))
         prettyPrint("card="+str(element.card))
         prettyPrint("gcard="+str(element.gcard))
         prettyPrint("glcard="+str(element.glCard))
@@ -127,9 +127,8 @@ class PrettyPrint(object):
         prettyPrint("element="+element.element)
     
     def moduleVisit(self, element):
-        print(element)
-        print(element.elements[0])
-        visitors.Visitor.visit(self, element.elements[0])
+        for i in element.elements:
+            visitors.Visitor.visit(self, i)
     
     def supersVisit(self, element):
         prettyPrint("isOverlapping="+ str(element.isOverlapping))

@@ -6,7 +6,7 @@ Created on Mar 26, 2013
 
 class StringLiteral(object):
     '''
-    classdocs
+    All variables analogous to those described in IntClafer.hs
     '''
 
 

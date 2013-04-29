@@ -6,8 +6,8 @@ Created on Mar 23, 2013
 
 class Module(object):
     '''
-    elements # the top level clafers/constraints/goals
-    mName   # module name
+    elements([]): the top level clafers/constraints/goals
+    mName(str): module name
     '''
     elements = []
     
@@ -23,7 +23,7 @@ class Module(object):
         print(1)
         
     def __str__(self):
-        return self.mName + " " + ', '.join(map(str, self.elements))
+        return self.mName #+ " " + ', '.join(map(str, self.elements))
     
     def toString(self, level):
         print("Module Name:" + self.mName)

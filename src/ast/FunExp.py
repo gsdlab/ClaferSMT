@@ -6,7 +6,7 @@ Created on Mar 24, 2013
 
 class FunExp(object):
     '''
-    classdocs
+    All variables analogous to those described in IntClafer.hs
     '''
 
 
@@ -18,5 +18,4 @@ class FunExp(object):
     def __str__(self):
         return self.operation + self.elements
     
-    def toString(self, level):
-        print("A")
+    

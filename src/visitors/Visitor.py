@@ -3,7 +3,7 @@ Created on Mar 26, 2013
 
 @author: ezulkosk
 '''
-import ast.Clafer, ast.Module, ast.ClaferId, ast.Constraint, ast.Declaration, ast.DeclPExp, ast.Exp, \
+import ast.Clafer, ast.Module, ast.ClaferId, ast.IRConstraint, ast.Declaration, ast.DeclPExp, ast.Exp, \
       ast.FunExp, ast.GCard, ast.Goal, ast.LocalDeclaration, ast.Supers, ast.IntegerLiteral, ast.DoubleLiteral, \
       ast.StringLiteral
 
@@ -14,7 +14,7 @@ def visit(visitor, element):
         visitor.claferVisit(element)
     elif isinstance(element, ast.ClaferId.ClaferId):
         visitor.claferidVisit(element)
-    elif isinstance(element, ast.Constraint.Constraint):
+    elif isinstance(element, ast.IRConstraint.IRConstraint):
         visitor.constraintVisit(element)
     elif isinstance(element, ast.Declaration.Declaration):
         visitor.declarationVisit(element)

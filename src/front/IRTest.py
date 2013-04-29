@@ -2,6 +2,8 @@
 Created on Mar 23, 2013
 
 @author: ezulkosk
+
+testing front
 '''
 from z3 import *
 
@@ -13,17 +15,9 @@ import visitors.PrettyPrint
 
 
 def main(args):
-    #print (args[0])
-    src = imp.load_source("input", args[0])
-
-    
-    x = Int('x')
-    y = Int('y')
-    solve(x > 2, y < 10, x + 2*y == 7)
-    #src = imp.load_source("ClaferOutput",
-    #                      'C:\\Users\\ezulkosk\\git\\clafer\\test\\positive\\books_tutorial.py' )
+    src = imp.load_source("ClaferOutput",
+                          '/home/ezulkosk/clafer/test/positive/simp.py' )
     module = src.getModule()
-    print("A")
     visitors.Visitor.visit(visitors.PrettyPrint.PrettyPrint(), module)
     
 

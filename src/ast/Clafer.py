@@ -6,7 +6,9 @@ Created on Mar 23, 2013
 
 
 class Clafer(object):
-    
+    '''
+    All variables analogous to those described in IntClafer.hs
+    '''
 
 
     def __init__(self, pos, isAbstract, gcard, ident, uid, my_supers, card, glCard):
@@ -21,7 +23,7 @@ class Clafer(object):
         self.elements = []
         
     def addElement(self, element):
-        print(self.elements)
+        #print(self.elements)
         self.elements.append(element)
         
     def __str__(self):

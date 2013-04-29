@@ -6,7 +6,7 @@ Created on Mar 23, 2013
 
 class Supers(object):
     '''
-    classdocs
+    All variables analogous to those described in IntClafer.hs
     '''
 
 

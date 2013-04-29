@@ -6,7 +6,7 @@ Created on Mar 24, 2013
 
 class DeclPExp(object):
     '''
-    classdocs
+    All variables analogous to those described in IntClafer.hs
     '''
 
 

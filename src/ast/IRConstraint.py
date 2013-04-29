@@ -4,9 +4,9 @@ Created on Mar 24, 2013
 @author: ezulkosk
 '''
 
-class Constraint(object):
+class IRConstraint(object):
     '''
-    classdocs
+    All variables analogous to those described in IntClafer.hs
     '''
 
 
