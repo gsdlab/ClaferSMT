@@ -12,15 +12,20 @@ class Constraint(object):
     
     '''
     value(str): contains the string representation of the constraint
+    comment(str): used for debugging constraints
     stack([]): used to process expressions
     '''
-    def __init__(self):
-        self.value = "stub_constraint"
-        self.stack = []
+    def __init__(self, comment, value = None):
+        self.comment = comment
+        if(value is None):
+            self.value = "stub_constraint"
+            self.stack = []
+        else:
+            self.value = value
         
     def addArg(self, arg):
         self.stack.append(arg)
-        
+    
     '''
     Gets operator arity, pops off that number of elements from stack
     Places Z3-operator and args onto stack in string form
@@ -46,4 +51,5 @@ class Constraint(object):
         return self.value
     
     def __repr__(self):
-        return self.__str__()
+        #return self.__str__()
+        return self.comment

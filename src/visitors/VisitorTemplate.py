@@ -6,6 +6,10 @@ Created on Mar 26, 2013
 import visitors.Visitor
 
 class VisitorTemplate(object):
+    '''
+    Visitor that simply traverses the Clafer AST, 
+    used as a superclass for other visitors
+    '''
     
     __TAB__ = "  "
     level = 0

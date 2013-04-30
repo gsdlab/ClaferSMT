@@ -13,84 +13,43 @@ currentConstraint = None #holds the constraint currently being traversed
 class CreateConstraints(VisitorTemplate.VisitorTemplate):
     '''
     converts constraints to z3 syntax,
-    adds constraints to common.Common.z3_constraints
-    uses:
-        common.Common.addConstraint(constraint)
+    adds constraints to z3.z3_constraints
+    fields:
+        z3(Z3Instance): the Z3Instance object
     '''
     
-    def __init__(self):
+    #stack of clafers, used to add comments to constraints
+    claferStack = []
+    
+    def __init__(self, z3instance):
         VisitorTemplate.VisitorTemplate.__init__(self)
+        self.z3 = z3instance
     
     def claferVisit(self, element):
-        #prettyPrint("ident="+element.ident)
-        #prettyPrint("abstract="+str(element.isAbstract))
-        #print("card="+str(element.card))
-        #prettyPrint("gcard="+str(element.gcard))
-        #prettyPrint("glcard="+str(element.glCard))
-        #prettyPrint("uid="+str(element.uid))
-        #prettyPrint("supers{")
+        self.claferStack.append(element.sortID)
         visitors.Visitor.visit(self,element.supers)
         for i in element.elements:
             visitors.Visitor.visit(self, i)
-    
-    def claferidVisit(self, element):
-        #if element.moduleName=="" :
-        #    prettyPrint("Module Name=\"\"")
-        #else:
-        #    prettyPrint("Module Name=" + element.moduleName)
-        #prettyPrint("id=" + element.id)
-        #prettyPrint("isTop=" + str(element.isTop))
-        pass
+        self.claferStack.pop()
     
     def constraintVisit(self, element):
         CreateConstraints.inConstraint = True
-        CreateConstraints.currentConstraint = Constraint.Constraint()
+        if(not self.claferStack):
+            CreateConstraints.currentConstraint = Constraint.Constraint("TopLevelConstraint")
+        else:
+            CreateConstraints.currentConstraint = Constraint.Constraint("Constraint:" + self.claferStack[-1])
         visitors.Visitor.visit(self, element.exp)
-        Common.addConstraint(CreateConstraints.currentConstraint)
+        self.z3.addConstraint(CreateConstraints.currentConstraint)
         CreateConstraints.currentConstraint.endProcessing()
         CreateConstraints.currentConstraint = None
         CreateConstraints.inConstraint = False
     
-    def declarationVisit(self, element):
-        #prettyPrint("isDisjunct="+ str(element.isDisjunct))
-        for i in element.localDeclarations:
-            visitors.Visitor.visit(self, i)
-        visitors.Visitor.visit(self, element.body)
-    
-    def declpexpVisit(self, element):
-        #prettyPrint("quantifier="+ str(element.quantifier))
-        visitors.Visitor.visit(self, element.declaration)
-        visitors.Visitor.visit(self, element.bodyParentExp)
-        
-    def expVisit(self, element):
-        #prettyPrint("expType=" + str(element.expType))
-        #prettyPrint("type=" + str(element.type))
-        #if str(element.parentId)=="" :
-        #    prettyPrint("parentId=\"\"")
-        #else:
-        #    prettyPrint("parentId=" + str(element.parentId))
-        #prettyPrint("pos=" + str(element.pos[0])+str(element.pos[1]))
-        #prettyPrint("iExpType="+str(element.iExpType))
-        for i in element.iExp:
-            visitors.Visitor.visit(self, i)
-    
-    
     def funexpVisit(self, element):
-        #prettyPrint("operation=" + str(element.operation))
         for i in element.elements:
             visitors.Visitor.visit(self, i)
         if(CreateConstraints.inConstraint):
             CreateConstraints.currentConstraint.addOperator(element.operation)
             
-    
-    def gcardVisit(self, element):
-        #prettyPrint("isKeyword=" + str(element.isKeyword))
-        #prettyPrint("interval=" + str(element.interval))
-        pass
-    
-    def goalVisit(self, element):
-        #prettyPrint("isMaximize=" + str(element.isMaximize))
-        visitors.Visitor.visit(self, element.exp)
     
     def localdeclarationVisit(self, element):
         #prettyPrint("element="+element.element)
@@ -106,7 +65,4 @@ class CreateConstraints(VisitorTemplate.VisitorTemplate):
     def stringliteralVisit(self, element):
         return element
     
-    def noneVisit(self):
-        #prettyPrint("None")
-        pass
     

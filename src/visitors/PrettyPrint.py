@@ -9,6 +9,9 @@ def prettyPrint(s):
     print(PrettyPrint.__TAB__ * PrettyPrint.level + s)
 
 class PrettyPrint(object):
+    '''
+    Traverses the AST and prints out all nodes
+    '''
     
     __TAB__ = "  "
     level = 0
