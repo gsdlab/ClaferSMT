@@ -3,18 +3,10 @@ Created on Apr 30, 2013
 
 @author: ezulkosk
 '''
+from constraints import CardinalityConstraint
 from visitors import VisitorTemplate
 import visitors.Visitor
 
-
-
-    
-    
-    
-    
-
-def createLowerConstraint(sortID, lower):
-    pass
 
 class CreateCardinalityConstraints(VisitorTemplate.VisitorTemplate):
     '''
@@ -26,7 +18,7 @@ class CreateCardinalityConstraints(VisitorTemplate.VisitorTemplate):
         self.z3 = z3instance
     
     def claferVisit(self, element):
-        self.z3.addCardinalityConstraints(element.sortID, element.card)
+        self.z3.addConstraint(CardinalityConstraint.CardinalityConstraint(self.z3.z3_sorts[element.uid], element.card))
         visitors.Visitor.visit(self,element.supers)
         for i in element.elements:
             visitors.Visitor.visit(self, i)
