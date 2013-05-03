@@ -7,106 +7,129 @@ import visitors.Visitor
 
 class VisitorTemplate(object):
     '''
+    *see:* :class:`visitors.Visitor`
+    
     Visitor that simply traverses the Clafer AST, 
     used as a superclass for other visitors
     '''
-    
-    __TAB__ = "  "
-    level = 0
-    
     def __init__(self):
         pass
     
     def claferVisit(self, element):
-        #prettyPrint("ident="+element.ident)
-        #prettyPrint("absract="+str(element.isAbstract))
-        #prettyPrint("card="+str(element.card))
-        #prettyPrint("gcard="+str(element.gcard))
-        #prettyPrint("glcard="+str(element.glCard))
-        #prettyPrint("uid="+str(element.uid))
-        #prettyPrint("supers{")
+        '''
+        :param element: A Clafer AST node
+        :type element: :class:`~ast.Clafer`
+        '''
         visitors.Visitor.visit(self,element.supers)
         for i in element.elements:
             visitors.Visitor.visit(self, i)
     
     def claferidVisit(self, element):
-        #if element.moduleName=="" :
-        #    prettyPrint("Module Name=\"\"")
-        #else:
-        #    prettyPrint("Module Name=" + element.moduleName)
-        #prettyPrint("id=" + element.id)
-        #prettyPrint("isTop=" + str(element.isTop))
+        '''
+        :param element: A ClaferId AST node
+        :type element: :class:`~ast.ClaferId`
+        '''
         pass
     
     def constraintVisit(self, element):
-        #prettyPrint("isHard=" + str(element.isHard))
+        '''
+        :param element: An IRConstraint AST node
+        :type element: :class:`~ast.IRConstraint`
+        '''
         visitors.Visitor.visit(self, element.exp)
     
     def declarationVisit(self, element):
-        #prettyPrint("isDisjunct="+ str(element.isDisjunct))
+        '''
+        :param element: A Declaration AST node
+        :type element: :class:`~ast.Declaration`
+        '''
         for i in element.localDeclarations:
             visitors.Visitor.visit(self, i)
         visitors.Visitor.visit(self, element.body)
     
     def declpexpVisit(self, element):
-        #prettyPrint("quantifier="+ str(element.quantifier))
+        '''
+        :param element: A DeclPExp AST node
+        :type element: :class:`~ast.DeclPExp`
+        '''
         visitors.Visitor.visit(self, element.declaration)
         visitors.Visitor.visit(self, element.bodyParentExp)
         
     def expVisit(self, element):
-        #prettyPrint("expType=" + str(element.expType))
-        #prettyPrint("type=" + str(element.type))
-        #if str(element.parentId)=="" :
-        #    prettyPrint("parentId=\"\"")
-        #else:
-        #    prettyPrint("parentId=" + str(element.parentId))
-        #prettyPrint("pos=" + str(element.pos[0])+str(element.pos[1]))
-        #prettyPrint("iExpType="+str(element.iExpType))
+        '''
+        :param element: A Exp AST node
+        :type element: :class:`~ast.Exp`
+        '''
         for i in element.iExp:
             visitors.Visitor.visit(self, i)
     
     
     def funexpVisit(self, element):
-        #prettyPrint("operation=" + str(element.operation))
+        '''
+        :param element: A FunExp AST node
+        :type element: :class:`~ast.FunExp`
+        '''
         for i in element.elements:
             visitors.Visitor.visit(self, i)
     
     def gcardVisit(self, element):
-        #prettyPrint("isKeyword=" + str(element.isKeyword))
-        #prettyPrint("interval=" + str(element.interval))
+        '''
+        :param element: A GCard AST node
+        :type element: :class:`~ast.GCard`
+        '''
         pass
     
     def goalVisit(self, element):
-        #prettyPrint("isMaximize=" + str(element.isMaximize))
+        '''
+        :param element: A Goal AST node
+        :type element: :class:`~ast.Goal`
+        '''
         visitors.Visitor.visit(self, element.exp)
     
     def localdeclarationVisit(self, element):
-        #prettyPrint("element="+element.element)
+        '''
+        :param element: A LocalDeclaration AST node
+        :type element: :class:`~ast.LocalDeclaration`
+        '''
         pass
     
     def moduleVisit(self, element):
-        #print(element.elements[0])
+        '''
+        :param element: A Module AST node
+        :type element: :class:`~ast.Module`
+        '''
         for i in element.elements:
             visitors.Visitor.visit(self, i)
     
     def supersVisit(self, element):
-        #prettyPrint("isOverlapping="+ str(element.isOverlapping))
+        '''
+        :param element: A Supers AST node
+        :type element: :class:`~ast.Supers`
+        '''
         for i in element.elements:
             visitors.Visitor.visit(self, i)
     
     def integerliteralVisit(self, element):
-        #prettyPrint(str(element.value))
+        '''
+        :param element: An IntegerLiteral AST node
+        :type element: :class:`~ast.IntegerLiteral`
+        '''
         pass
         
     def doubleliteralVisit(self, element):
-        #prettyPrint(str(element.value))
+        '''
+        :param element: A DoubleLiteral AST node
+        :type element: :class:`~ast.DoubleLiteral`
+        '''
         pass
         
     def stringliteralVisit(self, element):
-        #prettyPrint(element.value)
+        '''
+        :param element: A StringLiteral AST node
+        :type element: :class:`~ast.StringLiteral`
+        '''
         pass
     
     def noneVisit(self):
-        #prettyPrint("None")
         pass
     

@@ -1,0 +1,63 @@
+visitors Package
+================
+
+Description
+-----------
+Visitors used to traverse the Clafer AST in order to ultimately generate a Z3Instance object.
+
+
+:mod:`CreateBracketedConstraints` Module
+----------------------------------------
+
+.. automodule:: visitors.CreateBracketedConstraints
+    :members:
+    :undoc-members:
+    :show-inheritance:
+       
+:mod:`CreateCardinalityConstraints` Module
+------------------------------------------
+
+.. automodule:: visitors.CreateCardinalityConstraints
+    :members:
+    :show-inheritance:
+
+:mod:`CreateHierarchy` Module
+-----------------------------
+
+.. automodule:: visitors.CreateHierarchy
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`CreateSorts` Module
+-------------------------
+
+.. automodule:: visitors.CreateSorts
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`PrettyPrint` Module
+-------------------------
+
+.. automodule:: visitors.PrettyPrint
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`Visitor` Module
+---------------------
+
+.. automodule:: visitors.Visitor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`VisitorTemplate` Module
+-----------------------------
+
+.. automodule:: visitors.VisitorTemplate
+    :members:
+    :undoc-members:
+    :show-inheritance:
+

@@ -1,0 +1,295 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>constraints Package &mdash; ClaferZ3 0.3.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.3.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ClaferZ3 0.3.3 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">ClaferZ3 0.3.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="constraints-package">
+<h1>constraints Package<a class="headerlink" href="#constraints-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>Store information about various types of constraints, and generate the corresponding Z3 input.</p>
+</div>
+<div class="section" id="module-constraints.BracketedConstraint">
+<span id="bracketedconstraint-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">BracketedConstraint</span></tt> Module<a class="headerlink" href="#module-constraints.BracketedConstraint" title="Permalink to this headline">¶</a></h2>
+<p>Created on Apr 29, 2013</p>
+<p>&#64;author: ezulkosk</p>
+<dl class="class">
+<dt id="constraints.BracketedConstraint.BracketedConstraint">
+<em class="property">class </em><tt class="descclassname">constraints.BracketedConstraint.</tt><tt class="descname">BracketedConstraint</tt><big>(</big><em>comment</em>, <em>stringValue=None</em>, <em>value=None</em><big>)</big><a class="headerlink" href="#constraints.BracketedConstraint.BracketedConstraint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#constraints.Constraint.Constraint" title="constraints.Constraint.Constraint"><tt class="xref py py-class docutils literal"><span class="pre">constraints.Constraint.Constraint</span></tt></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>stack</strong> &#8211; ([Z3_expression]) Used to process a tree of expressionts.</li>
+<li><strong>stringStack</strong> &#8211; ([str]) Used to display/debug expressions.</li>
+<li><strong>stringValue</strong> &#8211; (str) The final string representation of the constraint.</li>
+<li><strong>value</strong> &#8211; (Z3_expression) The final Z3_expression representation of the constraint.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Class for creating bracketed Clafer constraints in Z3.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>comment</strong> (<em>str</em>) &#8211; Description of constraint for debugging purposes.</li>
+<li><strong>stringValue</strong> (<em>str (o)</em>) &#8211; More technical description of the constraint, essentially the string representially of the Z3 constraint.</li>
+<li><strong>value</strong> (<em>Z3_expression (o)</em>) &#8211; The Z3_expression that will be passed to the solver.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="constraints.BracketedConstraint.BracketedConstraint.addArg">
+<tt class="descname">addArg</tt><big>(</big><em>arg</em><big>)</big><a class="headerlink" href="#constraints.BracketedConstraint.BracketedConstraint.addArg" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="constraints.BracketedConstraint.BracketedConstraint.addOperator">
+<tt class="descname">addOperator</tt><big>(</big><em>operation</em><big>)</big><a class="headerlink" href="#constraints.BracketedConstraint.BracketedConstraint.addOperator" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>operation</strong> (<em>str</em>) &#8211; The expression operator in Clafer syntax.</td>
+</tr>
+</tbody>
+</table>
+<p>Gets operator arity, pops off that number of elements from stack and stringStack.
+Places Z3-operator and args onto stringStack in string form,
+and onto stack in Z3_expression form.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="constraints.BracketedConstraint.BracketedConstraint.endProcessing">
+<tt class="descname">endProcessing</tt><big>(</big><big>)</big><a class="headerlink" href="#constraints.BracketedConstraint.BracketedConstraint.endProcessing" title="Permalink to this definition">¶</a></dt>
+<dd><p>When a constraint is finished processing,
+its final representation is the only thing left on the stacks.
+Stores these values in <em>stringValue</em> and <em>value</em>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-constraints.CardinalityConstraint">
+<span id="cardinalityconstraint-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">CardinalityConstraint</span></tt> Module<a class="headerlink" href="#module-constraints.CardinalityConstraint" title="Permalink to this headline">¶</a></h2>
+<p>Created on May 1, 2013</p>
+<p>&#64;author: ezulkosk</p>
+<dl class="class">
+<dt id="constraints.CardinalityConstraint.CardinalityConstraint">
+<em class="property">class </em><tt class="descclassname">constraints.CardinalityConstraint.</tt><tt class="descname">CardinalityConstraint</tt><big>(</big><em>claferSort</em>, <em>card</em><big>)</big><a class="headerlink" href="#constraints.CardinalityConstraint.CardinalityConstraint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#constraints.Constraint.Constraint" title="constraints.Constraint.Constraint"><tt class="xref py py-class docutils literal"><span class="pre">constraints.Constraint.Constraint</span></tt></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>claferSort</strong> &#8211; (<a class="reference internal" href="common.html#module-common.ClaferSort" title="common.ClaferSort"><tt class="xref py py-mod docutils literal"><span class="pre">ClaferSort</span></tt></a>) The Sort that will be constrained.</li>
+<li><strong>lower</strong> &#8211; (int) The lower cardinality bound.</li>
+<li><strong>upper</strong> &#8211; (int) The upper cardinality bound.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Creates very simple cardinality constraints for each clafer
+I suspect this will probably need to change in the future</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>claferSort</strong> (<a class="reference internal" href="common.html#module-common.ClaferSort" title="common.ClaferSort"><tt class="xref py py-mod docutils literal"><span class="pre">ClaferSort</span></tt></a>) &#8211; ClaferSort for a given Clafer object from AST</li>
+<li><strong>card</strong> (<a class="reference internal" href="ast.html#module-ast.IntegerLiteral" title="ast.IntegerLiteral"><tt class="xref py py-mod docutils literal"><span class="pre">IntegerLiteral</span></tt></a>, <a class="reference internal" href="ast.html#module-ast.IntegerLiteral" title="ast.IntegerLiteral"><tt class="xref py py-mod docutils literal"><span class="pre">IntegerLiteral</span></tt></a>) &#8211; contains the lower and upper bounds, stored in lower and upper</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="constraints.CardinalityConstraint.CardinalityConstraint.comment">
+<tt class="descname">comment</tt><a class="headerlink" href="#constraints.CardinalityConstraint.CardinalityConstraint.comment" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>see</em> <a class="reference internal" href="#module-constraints.Constraint" title="constraints.Constraint"><tt class="xref py py-mod docutils literal"><span class="pre">constraints.Constraint</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="constraints.CardinalityConstraint.CardinalityConstraint.generateConstraint">
+<tt class="descname">generateConstraint</tt><big>(</big><big>)</big><a class="headerlink" href="#constraints.CardinalityConstraint.CardinalityConstraint.generateConstraint" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>see</em> <a class="reference internal" href="#module-constraints.Constraint" title="constraints.Constraint"><tt class="xref py py-mod docutils literal"><span class="pre">constraints.Constraint</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="constraints.CardinalityConstraint.CardinalityConstraint.stringValue">
+<tt class="descname">stringValue</tt><a class="headerlink" href="#constraints.CardinalityConstraint.CardinalityConstraint.stringValue" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>see</em> <a class="reference internal" href="#module-constraints.Constraint" title="constraints.Constraint"><tt class="xref py py-mod docutils literal"><span class="pre">constraints.Constraint</span></tt></a></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-constraints.Constraint">
+<span id="constraint-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Constraint</span></tt> Module<a class="headerlink" href="#module-constraints.Constraint" title="Permalink to this headline">¶</a></h2>
+<p>Created on May 1, 2013</p>
+<p>&#64;author: ezulkosk</p>
+<dl class="class">
+<dt id="constraints.Constraint.Constraint">
+<em class="property">class </em><tt class="descclassname">constraints.Constraint.</tt><tt class="descname">Constraint</tt><a class="headerlink" href="#constraints.Constraint.Constraint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<p>Abstract superclass for all constraints</p>
+<dl class="attribute">
+<dt id="constraints.Constraint.Constraint.comment">
+<tt class="descname">comment</tt><a class="headerlink" href="#constraints.Constraint.Constraint.comment" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">str &#8211; Used for debugging constraints.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="constraints.Constraint.Constraint.generateConstraint">
+<tt class="descname">generateConstraint</tt><big>(</big><big>)</big><a class="headerlink" href="#constraints.Constraint.Constraint.generateConstraint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the Z3 constraint to be handled by the solver.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="constraints.Constraint.Constraint.stringValue">
+<tt class="descname">stringValue</tt><a class="headerlink" href="#constraints.Constraint.Constraint.stringValue" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">str &#8211; Contains the string representation of the constraint.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="constraints.Constraint.Constraint.value">
+<tt class="descname">value</tt><a class="headerlink" href="#constraints.Constraint.Constraint.value" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">str &#8211; The actual z3 constraint passed to the solver.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">constraints Package</a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#module-constraints.BracketedConstraint"><tt class="docutils literal"><span class="pre">BracketedConstraint</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-constraints.CardinalityConstraint"><tt class="docutils literal"><span class="pre">CardinalityConstraint</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-constraints.Constraint"><tt class="docutils literal"><span class="pre">Constraint</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/constraints.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">ClaferZ3 0.3.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ed Zulkoski.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

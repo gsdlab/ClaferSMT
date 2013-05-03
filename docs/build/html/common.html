@@ -1,0 +1,410 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>common Package &mdash; ClaferZ3 0.3.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.3.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ClaferZ3 0.3.3 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">ClaferZ3 0.3.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="common-package">
+<h1>common Package<a class="headerlink" href="#common-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>Miscellaneous modules used to create a Z3 instance.</p>
+</div>
+<div class="section" id="module-common.ClaferDatatype">
+<span id="claferdatatype-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">ClaferDatatype</span></tt> Module<a class="headerlink" href="#module-common.ClaferDatatype" title="Permalink to this headline">¶</a></h2>
+<p>Created on May 1, 2013</p>
+<p>&#64;author: ezulkosk</p>
+<dl class="class">
+<dt id="common.ClaferDatatype.ClaferDatatype">
+<em class="property">class </em><tt class="descclassname">common.ClaferDatatype.</tt><tt class="descname">ClaferDatatype</tt><big>(</big><em>z3</em>, <em>claferSort</em>, <em>isInteger=False</em><big>)</big><a class="headerlink" href="#common.ClaferDatatype.ClaferDatatype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>claferSort</strong> &#8211; (<a class="reference internal" href="#module-common.ClaferSort" title="common.ClaferSort"><tt class="xref py py-mod docutils literal"><span class="pre">ClaferSort</span></tt></a>) ClaferSort for a given Clafer object from AST.</li>
+<li><strong>datatype</strong> &#8211; (<a class="reference internal" href="#module-common.ClaferDatatype" title="common.ClaferDatatype"><tt class="xref py py-mod docutils literal"><span class="pre">ClaferDatatype</span></tt></a>) The Z3 Datatype for the given clafer. Datatype constructor is named
+<em>new_sortName</em>, where <em>sortName</em> = <em>claferSort.id</em>. The first field
+is always the same type as <em>self.claferSort</em>, and the remaining fields
+correspond to those added by <a class="reference internal" href="#common.ClaferDatatype.ClaferDatatype.addField" title="common.ClaferDatatype.ClaferDatatype.addField"><tt class="xref py py-meth docutils literal"><span class="pre">addField()</span></tt></a>. 
+If the Clafer is of type integer, an additional integer field called 
+<em>ref</em> is added.</li>
+<li><strong>fields</strong> &#8211; ([<a class="reference internal" href="#module-common.ClaferSort" title="common.ClaferSort"><tt class="xref py py-class docutils literal"><span class="pre">ClaferSort</span></tt></a>]) List of all immediate subclafers.</li>
+<li><strong>isInteger</strong> &#8211; (bool) True if the Clafer is of type integer.</li>
+<li><strong>z3</strong> &#8211; (<a class="reference internal" href="#module-common.Z3Instance" title="common.Z3Instance"><tt class="xref py py-class docutils literal"><span class="pre">Z3Instance</span></tt></a>) The Z3 solver.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Creates the Datatype for a given ClaferSort,
+which will be used to create the hierarchy 
+of clafers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>z3</strong> (<a class="reference internal" href="#module-common.Z3Instance" title="common.Z3Instance"><tt class="xref py py-class docutils literal"><span class="pre">Z3Instance</span></tt></a>) &#8211; The Z3 solver.</li>
+<li><strong>claferSort</strong> (<a class="reference internal" href="#module-common.ClaferSort" title="common.ClaferSort"><tt class="xref py py-mod docutils literal"><span class="pre">ClaferSort</span></tt></a>) &#8211; ClaferSort for a given Clafer object from AST.</li>
+<li><strong>isInteger</strong> (<em>bool</em>) &#8211; True if the Clafer is of type integer.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="common.ClaferDatatype.ClaferDatatype.addField">
+<tt class="descname">addField</tt><big>(</big><em>claferSort</em><big>)</big><a class="headerlink" href="#common.ClaferDatatype.ClaferDatatype.addField" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>claferSort</strong> (<a class="reference internal" href="#module-common.ClaferSort" title="common.ClaferSort"><tt class="xref py py-mod docutils literal"><span class="pre">ClaferSort</span></tt></a>) &#8211; ClaferSort for a given Clafer object from AST</td>
+</tr>
+</tbody>
+</table>
+<p>A new field is added for every child of the given clafer. Fields will 
+become parameters for the Datatype constructor when generated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.ClaferDatatype.ClaferDatatype.generateDatatype">
+<tt class="descname">generateDatatype</tt><big>(</big><big>)</big><a class="headerlink" href="#common.ClaferDatatype.ClaferDatatype.generateDatatype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the actual Z3 Datatype.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-common.ClaferSort">
+<span id="clafersort-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">ClaferSort</span></tt> Module<a class="headerlink" href="#module-common.ClaferSort" title="Permalink to this headline">¶</a></h2>
+<p>Created on Apr 29, 2013</p>
+<p>&#64;author: ezulkosk</p>
+<dl class="class">
+<dt id="common.ClaferSort.ClaferSort">
+<em class="property">class </em><tt class="descclassname">common.ClaferSort.</tt><tt class="descname">ClaferSort</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#common.ClaferSort.ClaferSort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>consts</strong> &#8211; ([Z3_Consts]) The list of Z3 Consts associated with this Sort.</li>
+<li><strong>id</strong> &#8211; (str) The string ID of the Sort</li>
+<li><strong>numConsts</strong> &#8211; The number of Z3 consts of this sort required to
+specify constraints over this Sort.</li>
+<li><strong>sort</strong> &#8211; Z3 Sort associated with the clafer, declared when Z3Instance is ran.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Contains necessary information for each clafer,
+and declares a Z3 Sort associated with it</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; The ID of the sort.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="common.ClaferSort.ClaferSort.addConsts">
+<tt class="descname">addConsts</tt><big>(</big><em>newconsts</em><big>)</big><a class="headerlink" href="#common.ClaferSort.ClaferSort.addConsts" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>newconsts</strong> (<em>int</em>) &#8211; The number of Z3 consts of this sort required to
+specify the constraint that called this method. e.g. A lower bound 
+cardinality constraint <em>c</em> with card (5,10) would call addConsts(11)
+to specify the upper bound.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-common.Common">
+<span id="common-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Common</span></tt> Module<a class="headerlink" href="#module-common.Common" title="Permalink to this headline">¶</a></h2>
+<p>Created on Apr 28, 2013</p>
+<p>&#64;author: ezulkosk</p>
+<dl class="function">
+<dt id="common.Common.getOperationConversion">
+<tt class="descclassname">common.Common.</tt><tt class="descname">getOperationConversion</tt><big>(</big><em>op</em><big>)</big><a class="headerlink" href="#common.Common.getOperationConversion" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>op</strong> (<em>str</em>) &#8211; String representation of Clafer operation.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">4-tuple from ClaferToZ3OperationsMap with the fields:</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>The 4-tuple has the fields:</dt>
+<dd><ol class="first last arabic simple">
+<li>arity</li>
+<li>equivalent operation(str) in Z3 (e.g. &#8216;&amp;&amp;&#8217; maps to &#8216;And&#8217;)</li>
+<li>isPrefix(boolean), states whether the op is prefix or infix in Z3</li>
+<li>function associated with the operator</li>
+</ol>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-common.Z3Instance">
+<span id="z3instance-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Z3Instance</span></tt> Module<a class="headerlink" href="#module-common.Z3Instance" title="Permalink to this headline">¶</a></h2>
+<p>Created on Apr 30, 2013</p>
+<p>&#64;author: ezulkosk</p>
+<dl class="class">
+<dt id="common.Z3Instance.Z3Instance">
+<em class="property">class </em><tt class="descclassname">common.Z3Instance.</tt><tt class="descname">Z3Instance</tt><a class="headerlink" href="#common.Z3Instance.Z3Instance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>z3_constraints</strong> &#8211; ([<a class="reference internal" href="constraints.html#module-constraints.Constraint" title="constraints.Constraint"><tt class="xref py py-mod docutils literal"><span class="pre">constraints.Constraint</span></tt></a>]) Contains ALL constraints that will be fed into z3.</li>
+<li><strong>z3_sorts</strong> &#8211; ({str, <a class="reference internal" href="#module-common.ClaferSort" title="common.ClaferSort"><tt class="xref py py-mod docutils literal"><span class="pre">common.ClaferSort</span></tt></a>}) Holds the Sorts for each clafer, 
+mapped by the clafer&#8217;s ID.</li>
+<li><strong>z3_datatypes</strong> &#8211; ({<a class="reference internal" href="#module-common.ClaferSort" title="common.ClaferSort"><tt class="xref py py-mod docutils literal"><span class="pre">common.ClaferSort</span></tt></a>, <a class="reference internal" href="#module-common.ClaferDatatype" title="common.ClaferDatatype"><tt class="xref py py-mod docutils literal"><span class="pre">common.ClaferDatatype</span></tt></a>}) 
+Maps each ClaferSort to its Datatype.</li>
+<li><strong>solver</strong> &#8211; (Z3_Solver) The actual Z3 solver.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Stores and instantiates all necessary constraints for the ClaferZ3 model.</p>
+<dl class="method">
+<dt id="common.Z3Instance.Z3Instance.addConstraint">
+<tt class="descname">addConstraint</tt><big>(</big><em>constraint</em><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.addConstraint" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>constraint</strong> (<a class="reference internal" href="constraints.html#module-constraints.Constraint" title="constraints.Constraint"><tt class="xref py py-mod docutils literal"><span class="pre">constraints.Constraint</span></tt></a>) &#8211; A constraint.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.Z3Instance.Z3Instance.addDatatype">
+<tt class="descname">addDatatype</tt><big>(</big><em>claferSort</em>, <em>claferDatatype</em><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.addDatatype" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>claferSort</strong> (<a class="reference internal" href="#module-common.ClaferSort" title="common.ClaferSort"><tt class="xref py py-mod docutils literal"><span class="pre">common.ClaferSort</span></tt></a>) &#8211; A ClaferSort.</li>
+<li><strong>claferDatatype</strong> (<a class="reference internal" href="#module-common.ClaferDatatype" title="common.ClaferDatatype"><tt class="xref py py-mod docutils literal"><span class="pre">common.ClaferDatatype</span></tt></a>) &#8211; A ClaferDatatype.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Maps the given ClaferSort to the ClaferDatatype in z3_datatypes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.Z3Instance.Z3Instance.addSort">
+<tt class="descname">addSort</tt><big>(</big><em>sortID</em>, <em>sort</em><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.addSort" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sort</strong> (<a class="reference internal" href="#module-common.ClaferSort" title="common.ClaferSort"><tt class="xref py py-mod docutils literal"><span class="pre">common.ClaferSort</span></tt></a>) &#8211; A ClaferSort.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.Z3Instance.Z3Instance.getConstraints">
+<tt class="descname">getConstraints</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.getConstraints" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#8216;
+:returns: z3_constraints</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.Z3Instance.Z3Instance.getSorts">
+<tt class="descname">getSorts</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.getSorts" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">z3_sorts</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.Z3Instance.Z3Instance.instantiateConstraints">
+<tt class="descname">instantiateConstraints</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.instantiateConstraints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls <tt class="xref py py-meth docutils literal"><span class="pre">generateConstraint()</span></tt> from each constraint.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.Z3Instance.Z3Instance.instantiateConsts">
+<tt class="descname">instantiateConsts</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.instantiateConsts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiate the necessary number of consts for each ClaferSort.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.Z3Instance.Z3Instance.instantiateDatatypes">
+<tt class="descname">instantiateDatatypes</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.instantiateDatatypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiates a Datatype for each ClaferSort, which will be used
+to create the Clafer hierarchy.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.Z3Instance.Z3Instance.instantiateSorts">
+<tt class="descname">instantiateSorts</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.instantiateSorts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Declares z3 sorts.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.Z3Instance.Z3Instance.run">
+<tt class="descname">run</tt><big>(</big><em>__DEBUG__=False</em><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.run" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>__DEBUG__</strong> (<em>(bool (o))</em>) &#8211; Prints out debug statements if true.</td>
+</tr>
+</tbody>
+</table>
+<p>Runs the Z3Instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="common.Z3Instance.Z3Instance.z3_constraints">
+<tt class="descname">z3_constraints</tt><em class="property"> = []</em><a class="headerlink" href="#common.Z3Instance.Z3Instance.z3_constraints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="common.Z3Instance.Z3Instance.z3_datatypes">
+<tt class="descname">z3_datatypes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.Z3Instance.Z3Instance.z3_datatypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="common.Z3Instance.Z3Instance.z3_sorts">
+<tt class="descname">z3_sorts</tt><em class="property"> = {}</em><a class="headerlink" href="#common.Z3Instance.Z3Instance.z3_sorts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">common Package</a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#module-common.ClaferDatatype"><tt class="docutils literal"><span class="pre">ClaferDatatype</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-common.ClaferSort"><tt class="docutils literal"><span class="pre">ClaferSort</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-common.Common"><tt class="docutils literal"><span class="pre">Common</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-common.Z3Instance"><tt class="docutils literal"><span class="pre">Z3Instance</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/common.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">ClaferZ3 0.3.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ed Zulkoski.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

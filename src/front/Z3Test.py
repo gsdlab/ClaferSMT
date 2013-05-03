@@ -13,6 +13,12 @@ import common.Common
 import imp
 
 def main(args):
+    '''
+    :param args: Python output file of the Clafer compiler. Generated with argument "-m python".
+    :type args: file
+    Starting point for ClaferZ3.
+    
+    '''
     #A = DeclareSort('A')
     #w,x,y,z = Consts('w x y z', A)
     #axioms = [ Exists([w,x,y], Distinct(w,x,y)),

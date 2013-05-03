@@ -8,16 +8,27 @@ from visitors import VisitorTemplate
 import visitors.Visitor
 
 
+
 class CreateCardinalityConstraints(VisitorTemplate.VisitorTemplate):
     '''
-    adds cardinality based constraints to Z3Instance
-    fields:
-        z3(Z3Instance): the Z3Instance object
+    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
+    
+    Adds cardinality based constraints to :mod:`~common.Z3Instance`.
     '''
-    def __init__(self, z3instance):
-        self.z3 = z3instance
+    
+    def __init__(self, z3):
+        '''
+        :param z3: The Z3 solver.
+        :type z3: :class:`~common.Z3Instance`
+        '''
+        self.z3 = z3
     
     def claferVisit(self, element):
+        '''
+        Instantiates a Cardinality constraint.
+        
+        *see* :mod:`constraints.CardinalityConstraint`
+        '''
         self.z3.addConstraint(CardinalityConstraint.CardinalityConstraint(self.z3.z3_sorts[element.uid], element.card))
         visitors.Visitor.visit(self,element.supers)
         for i in element.elements:

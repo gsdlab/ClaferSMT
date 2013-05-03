@@ -54,11 +54,19 @@ ClaferToZ3OperationsMap = {
 
 
 
-'''
-op(str): string representation of Clafer operation
-returns: 3-tuple from ClaferToZ3OperationsMap (see above)
-'''
+
 def getOperationConversion(op):
+    '''
+    :param op: String representation of Clafer operation.
+    :type op: str
+    :returns: 4-tuple from ClaferToZ3OperationsMap with the fields:
+    
+    The 4-tuple has the fields:
+        1. arity
+        2. equivalent operation(str) in Z3 (e.g. '&&' maps to 'And')
+        3. isPrefix(boolean), states whether the op is prefix or infix in Z3
+        4. function associated with the operator
+    '''
     if(op in ClaferToZ3OperationsMap):
         return ClaferToZ3OperationsMap[op]
     else:

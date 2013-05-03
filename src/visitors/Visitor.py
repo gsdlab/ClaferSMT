@@ -10,6 +10,14 @@ import ast.Clafer, ast.Module, ast.ClaferId, ast.IRConstraint, ast.Declaration, 
 
 
 def visit(visitor, element):
+    '''
+    Method used to determine which visit method to call, based on the type of element.
+    
+    :param element: A Clafer AST node.
+    :type element: ast.* 
+    
+    *see* :doc:`ast`
+    '''
     if isinstance(element, ast.Clafer.Clafer):
         visitor.claferVisit(element)
     elif isinstance(element, ast.ClaferId.ClaferId):

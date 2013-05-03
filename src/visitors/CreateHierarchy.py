@@ -9,15 +9,22 @@ import visitors
 
 class CreateHierarchy(VisitorTemplate.VisitorTemplate):
     '''
-    creates the Clafer hierarchy using Z3 Datatypes and Sorts
-    the fields will need to be changed to lists ASAP
-    fields:
-        z3(Z3Instance): the Z3Instance object
+    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
+    
+    Creates the Clafer hierarchy using Z3 Datatypes and Sorts.
+    The fields will need to be changed to lists ASAP.
     '''
-    def __init__(self, z3instance):
-        self.z3 = z3instance
+    def __init__(self, z3):
+        '''
+        :param z3: The Z3 solver.
+        :type z3: :class:`~common.Z3Instance`
+        '''
+        self.z3 = z3
     
     def claferVisit(self, element):
+        '''
+        Creates a :mod:`~common.ClaferDatatype` object for each clafer visited.
+        '''
         claferDatatype = ClaferDatatype.ClaferDatatype(self.z3, self.z3.z3_sorts[element.uid])
         self.z3.addDatatype(self.z3.z3_sorts[element.uid], claferDatatype)
         visitors.Visitor.visit(self,element.supers)

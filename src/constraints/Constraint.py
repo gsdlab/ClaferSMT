@@ -5,34 +5,41 @@ Created on May 1, 2013
 '''
 import abc
 
-'''
-Abstract superclass for all constraints
-'''
+
 class Constraint(object):
+    '''
+    Abstract superclass for all constraints
+    '''
     __metaclass__ = abc.ABCMeta
      
-    '''
-    comment(str): used for debugging constraints
-    stringValue(str): contains the string representation of the constraint
-    value(Z3 Expr): the actual z3 constraint passed to the solver
-    '''
+    
     @abc.abstractproperty
     def comment(self):
+        '''
+        :returns: str -- Used for debugging constraints.
+        '''
         return 'comment not implemented'
     
     @abc.abstractproperty
     def stringValue(self):
+        '''
+        :returns: str -- Contains the string representation of the constraint.
+        '''
         return 'stringValue not implemented'
     
     @abc.abstractproperty
     def value(self):
+        '''
+        :returns: str -- The actual z3 constraint passed to the solver.
+        '''
         return 'value not implemented'
     
-    '''
-    returns the constraint in Z3 syntax
-    '''
+    
     @abc.abstractmethod
     def generateConstraint(self):
+        '''
+        Creates the Z3 constraint to be handled by the solver.
+        '''
         raise NotImplementedError("generateConstraint() not implemented")
     
     @abc.abstractmethod

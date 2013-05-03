@@ -3,7 +3,7 @@ Created on Mar 26, 2013
 
 @author: ezulkosk
 '''
-from common import Common
+
 from constraints import BracketedConstraint
 from visitors import VisitorTemplate
 import visitors.Visitor
@@ -14,19 +14,27 @@ currentConstraint = None #holds the constraint currently being traversed
 
 class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     '''
-    converts constraints to z3 syntax,
+    :var CreateBracketedConstraints.currentConstraint: (:mod:`~constraints.BracketedConstraint`) Holds the constraint currently being traversed. 
+    :var CreateBracketedConstraints.inConstraint: (bool) True if the traversal is currently within a constraint.
+    :var claferStack: ([:mod:`~common.ClaferSort`]) Stack of clafers used primarily for debugging.
+    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
+    
+    Converts Clafer constraints to z3 syntax,
     adds constraints to z3.z3_constraints
-    fields:
-        z3(Z3Instance): the Z3Instance object
+    field.
     '''
     
     #stack of clafers, used to add comments to constraints
     claferStack = []
     
-    def __init__(self, z3instance):
+    def __init__(self, z3):
+        '''
+        :param z3: The Z3 solver.
+        :type z3: :class:`~common.Z3Instance`
+        '''
         VisitorTemplate.VisitorTemplate.__init__(self)
         CreateBracketedConstraints.inConstraint = False
-        self.z3 = z3instance
+        self.z3 = z3
     
     def claferVisit(self, element):
         self.claferStack.append(self.z3.z3_sorts[element.uid].id)
@@ -43,11 +51,11 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         if(CreateBracketedConstraints.inConstraint):
             CreateBracketedConstraints.currentConstraint.addArg(element.id)
         #prettyPrint("isTop=" + str(element.isTop))
-
-    '''
-    this class is basically ruined currently
-    '''    
+    
     def constraintVisit(self, element):
+        '''
+        this class is basically ruined currently
+        ''' 
         CreateBracketedConstraints.inConstraint = True
         if(not self.claferStack):
             CreateBracketedConstraints.currentConstraint = BracketedConstraint.BracketedConstraint("TopLevelConstraint")

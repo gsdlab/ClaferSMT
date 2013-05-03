@@ -7,18 +7,31 @@ from z3 import Datatype
 
 class ClaferDatatype(object):
     '''
-    creates the datatype for a given ClaferSort,
+    :var claferSort: (:mod:`~common.ClaferSort`) ClaferSort for a given Clafer object from AST.
+    :var datatype: (:mod:`~common.ClaferDatatype`) The Z3 Datatype for the given clafer. Datatype constructor is named
+        *new\_sortName*, where *sortName* = *claferSort.id*. The first field
+        is always the same type as *self.claferSort*, and the remaining fields
+        correspond to those added by :meth:`addField`. 
+        If the Clafer is of type integer, an additional integer field called 
+        *ref* is added.
+    :var fields: ([:class:`~common.ClaferSort`]) List of all immediate subclafers.
+    :var isInteger: (bool) True if the Clafer is of type integer.
+    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
+    
+    Creates the Datatype for a given ClaferSort,
     which will be used to create the hierarchy 
-    of clafers
-    
-    datatype (Datatype): the actual Z3 datatype
-    fields ([]): sorts of the fields in the constructor of the z3 datatype
-    
-    z3 (Z3Instance)
-    claferSort (ClaferSort)
-    isInteger (bool): true if the clafer is of type integer
+    of clafers.
     '''
+    
     def __init__(self, z3, claferSort, isInteger=False):
+        '''
+        :param z3: The Z3 solver.
+        :type z3: :class:`~common.Z3Instance`
+        :param claferSort: ClaferSort for a given Clafer object from AST.
+        :type claferSort: :mod:`~common.ClaferSort`
+        :param isInteger: True if the Clafer is of type integer.
+        :type isInteger: bool
+        '''
         self.z3 = z3
         self.claferSort = claferSort
         self.isInteger = isInteger
@@ -28,9 +41,19 @@ class ClaferDatatype(object):
             self.addField("ref")
     
     def addField(self, claferSort):
+        '''
+        :param claferSort: ClaferSort for a given Clafer object from AST
+        :type claferSort: :mod:`~common.ClaferSort`
+        
+        A new field is added for every child of the given clafer. Fields will 
+        become parameters for the Datatype constructor when generated.
+        '''
         self.fields.append(claferSort)
     
     def generateDatatype(self):
+        '''
+        Creates the actual Z3 Datatype.
+        '''
         self.datatype = Datatype(self.claferSort.id)
         self.datatype.declare("new_" + self.claferSort.id)
         
