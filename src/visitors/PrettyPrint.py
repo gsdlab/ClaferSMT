@@ -10,7 +10,7 @@ def prettyPrint(s):
 
 class PrettyPrint(object):
     '''
-    Traverses the AST and prints out all nodes
+    Traverses the AST and prints out all nodes.
     '''
     
     __TAB__ = "  "

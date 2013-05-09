@@ -5,6 +5,7 @@ Created on May 1, 2013
 '''
 from common import ClaferDatatype
 from visitors import VisitorTemplate
+import ast
 import visitors
 
 class CreateHierarchy(VisitorTemplate.VisitorTemplate):
@@ -30,5 +31,9 @@ class CreateHierarchy(VisitorTemplate.VisitorTemplate):
         visitors.Visitor.visit(self,element.supers)
         for i in element.elements:
             visitors.Visitor.visit(self, i)
+        for i in element.elements:
+            if isinstance(i, ast.Clafer.Clafer):
+                claferDatatype.addField(self.z3.z3_sorts[i.uid])
+         
     
     

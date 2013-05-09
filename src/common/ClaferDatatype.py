@@ -3,7 +3,8 @@ Created on May 1, 2013
 
 @author: ezulkosk
 '''
-from z3 import Datatype
+from gi.overrides.keysyms import a
+from z3 import Datatype, IntSort
 
 class ClaferDatatype(object):
     '''
@@ -36,7 +37,8 @@ class ClaferDatatype(object):
         self.claferSort = claferSort
         self.isInteger = isInteger
         self.fields = []
-        self.addField(claferSort)
+        #self.addField(claferSort)
+        self.datatype = Datatype("$" + self.claferSort.id + "$")
         if(isInteger):
             self.addField("ref")
     
@@ -54,8 +56,10 @@ class ClaferDatatype(object):
         '''
         Creates the actual Z3 Datatype.
         '''
-        self.datatype = Datatype(self.claferSort.id)
-        self.datatype.declare("new_" + self.claferSort.id)
+        fieldList =  [(i.id, self.z3.z3_datatypes[i].datatype) for i in self.fields] 
+        #print(fieldList)
+        self.datatype.declare("new_"+ self.claferSort.id, (self.claferSort.id, self.claferSort.sort) ,*fieldList ) #("A", IntSort()))
+        #print(self.datatype)
         
     def __str__(self):
        return self.claferSort.id+"("+ "new_" + self.claferSort.id +\

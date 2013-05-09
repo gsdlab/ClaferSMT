@@ -4,11 +4,14 @@ Created on Apr 30, 2013
 @author: ezulkosk
 '''
 
+from visitors import Visitor, CreateSorts, CreateHierarchy, \
+    CreateBracketedConstraints, CreateCardinalityConstraints
 from z3 import *
 import common
 
 class Z3Instance(object):
     ''' 
+    :var module: The Clafer AST
     :var z3_constraints: ([:mod:`constraints.Constraint`]) Contains ALL constraints that will be fed into z3.
     :var z3_sorts: ({str, :mod:`common.ClaferSort`}) Holds the Sorts for each clafer, 
         mapped by the clafer's ID.
@@ -23,26 +26,42 @@ class Z3Instance(object):
     z3_sorts = {}
     z3_datatypes = {}
     
-    
-    
-    def run(self, __DEBUG__ = False):
+    def run(self, module, __DEBUG__ = False):
         '''
         :param __DEBUG__: Prints out debug statements if true.
         :type __DEBUG__: (bool (o)) 
+        :param module: The Clafer AST
+        :type module: Module
         
         Runs the Z3Instance.
         '''
         self.__DEBUG__ = __DEBUG__
+        self.module = module
         
-        self.instantiateSorts()
-        self.instantiateConsts()
-        self.instantiateDatatypes()
-        self.instantiateConstraints()
+        #Visitor.visit(PrettyPrint.PrettyPrint(), module)
+        Visitor.visit(CreateSorts.CreateSorts(self), module)
+        Visitor.visit(CreateHierarchy.CreateHierarchy(self), module)
+        Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), module)
+        Visitor.visit(CreateCardinalityConstraints.CreateCardinalityConstraints(self), module)
+            
         
         self.solver = Solver()
+        self.instantiateSorts()
+        self.instantiateDatatypes()
+        self.createDatatypes()
+        self.instantiateConsts()
+        self.instantiateConstraints()
+        
         #self.solver.add(axioms)
+        print(self.solver.sexpr())
         print(self.solver.check())
-        print(self.solver.model())
+        m = self.solver.model()
+        print(m)
+        for i in self.z3_sorts.values():
+            l= m[i.sort]
+            print(l)
+            
+        
             
     
     def instantiateSorts(self):
@@ -57,29 +76,6 @@ class Z3Instance(object):
                 print("\t" + i.id)
     
     
-    def instantiateConsts(self):
-        '''
-        Instantiate the necessary number of consts for each ClaferSort.
-        '''
-        for i in self.z3_sorts.values():
-            i.consts = [Const(i.id+str(x),i.sort) for x in range(i.numConsts)]
-        if(self.__DEBUG__):
-            print("Consts:")
-            for i in self.z3_sorts.values():
-                print("\t" + str(i.consts))
-    
-           
-    def instantiateConstraints(self):
-        '''
-        Calls :meth:`generateConstraint` from each constraint.
-        '''  
-        for i in self.z3_constraints:
-            i.generateConstraint()
-        if(self.__DEBUG__):
-            print("Constraints:")
-            for i in self.z3_constraints:
-                print("\t" + i.comment)
-                
     def instantiateDatatypes(self):
         '''
         Instantiates a Datatype for each ClaferSort, which will be used
@@ -91,8 +87,42 @@ class Z3Instance(object):
             print("Datatypes:")
             for i in self.z3_datatypes.values():
                 print("\t" + str(i))
-        
     
+    def createDatatypes(self):
+        '''
+        Creates all Z3 Datatypes at the same time. After invoking this method,
+            each ClaferDatatype.datatype contains a pointer to the
+            DataTypeSortRef, rather than the Datatype definition.
+        '''
+        datatypesList = list(CreateDatatypes(*[i.datatype for i in self.z3_datatypes.values()]))
+        for claferDatatype, datatype in zip(self.z3_datatypes.values(), datatypesList):
+            claferDatatype.datatype = datatype
+    
+    def instantiateConsts(self):
+        '''
+        Instantiate the necessary number of consts for each ClaferDatatype.
+        '''
+        for i in self.z3_sorts.values():
+            i.consts = [Const(i.id+str(x),self.z3_datatypes[i].datatype) for x in range(i.numConsts)]
+        if(self.__DEBUG__):
+            print("Consts:")
+            for i in self.z3_sorts.values():
+                print("\t" + str(i.consts))
+    
+           
+    def instantiateConstraints(self):
+        '''
+        Calls :meth:`generateConstraint` from each constraint.
+        '''  
+        for i in self.z3_constraints:
+            self.solver.add(i.generateConstraint())
+        if(self.__DEBUG__):
+            print("Constraints:")
+            for i in self.z3_constraints:
+                print("\t" + i.comment)
+                
+    
+        
     ###############################
     # accessors                   #
     ###############################
