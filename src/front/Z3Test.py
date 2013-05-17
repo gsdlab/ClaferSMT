@@ -12,6 +12,7 @@ from z3 import *
 import common.Common
 import imp
 
+
 def getBit(bitvec, pos):
     bv = BitVecVal(1, bitvec.size())
     return (bitvec & (bv << pos)) >> pos
@@ -27,6 +28,26 @@ def getBitRange(bitvec, lower, upper):
     return (bitvec & (bv << (bitvec.size() - upper))) >> (bitvec.size() - upper)
         
 def main(args):
+    
+    bits = [BitVec("bits"+str(i), 1) for i in range(10)]
+    b = BitVec("a", 10)
+    c1 = Sum([ZeroExt(12, i) for i  in bits])  ==11
+    
+    
+    
+    #s = SolverFor("AUFLIA")
+    s = Solver()
+    s.add(c1)
+    s.check()
+    m = s.model()
+    for i in bits:
+        print(m.eval(i))
+
+    
+    
+    
+    
+    '''
     A = BitVec('A', 2)
     B = BitVec('B', 6)
     Extract(2,0, B)
@@ -40,7 +61,7 @@ def main(args):
     m = s.model()
     print(m.decls())
     print(m[A], m[B])
-    
+    '''
     
 
 if __name__ == '__main__':

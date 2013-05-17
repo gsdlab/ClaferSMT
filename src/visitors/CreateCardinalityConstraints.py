@@ -29,7 +29,7 @@ class CreateCardinalityConstraints(VisitorTemplate.VisitorTemplate):
         
         *see* :mod:`constraints.CardinalityConstraint`
         '''
-        self.z3.addConstraint(CardinalityConstraint.CardinalityConstraint(self.z3.z3_sorts[element.uid], element.card))
+        self.z3.addConstraint(CardinalityConstraint.CardinalityConstraint(self.z3.z3_sorts[element.uid], element.card, element.glCard))
         visitors.Visitor.visit(self,element.supers)
         for i in element.elements:
             visitors.Visitor.visit(self, i)

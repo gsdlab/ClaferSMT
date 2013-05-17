@@ -37,7 +37,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.z3 = z3
     
     def claferVisit(self, element):
-        self.claferStack.append(self.z3.z3_sorts[element.uid].id)
+        self.claferStack.append(self.z3.z3_sorts[element.uid])
         visitors.Visitor.visit(self,element.supers)
         for i in element.elements:
             visitors.Visitor.visit(self, i)
@@ -60,7 +60,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         if(not self.claferStack):
             CreateBracketedConstraints.currentConstraint = BracketedConstraint.BracketedConstraint("TopLevelConstraint")
         else:
-            CreateBracketedConstraints.currentConstraint = BracketedConstraint.BracketedConstraint("BracketedConstraint:" + self.claferStack[-1])
+            CreateBracketedConstraints.currentConstraint = BracketedConstraint.BracketedConstraint("BracketedConstraint:" + str(self.claferStack[-1]))
         visitors.Visitor.visit(self, element.exp)
         self.z3.addConstraint(CreateBracketedConstraints.currentConstraint)
         CreateBracketedConstraints.currentConstraint.endProcessing()

@@ -22,6 +22,7 @@ class CreateSorts(VisitorTemplate.VisitorTemplate):
         :type z3: :class:`~common.Z3Instance`
         '''
         self.z3 = z3
+        self.stack = []
     
     def claferVisit(self, element):
         '''
@@ -30,6 +31,9 @@ class CreateSorts(VisitorTemplate.VisitorTemplate):
         *see* :mod:`common.ClaferSort`
         '''
         visitors.Visitor.visit(self,element.supers)
-        self.z3.addSort(element.uid, ClaferSort.ClaferSort(element.uid))  
+        sort = ClaferSort.ClaferSort(element, self.z3, self.stack)
+        self.z3.addSort(element.uid, sort)  
+        self.stack.append(sort)
         for i in element.elements:
             visitors.Visitor.visit(self, i)
+            

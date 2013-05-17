@@ -21,19 +21,15 @@ class CreateHierarchy(VisitorTemplate.VisitorTemplate):
         :type z3: :class:`~common.Z3Instance`
         '''
         self.z3 = z3
+
     
     def claferVisit(self, element):
-        '''
-        Creates a :mod:`~common.ClaferDatatype` object for each clafer visited.
-        '''
-        claferDatatype = ClaferDatatype.ClaferDatatype(self.z3, self.z3.z3_sorts[element.uid])
-        self.z3.addDatatype(self.z3.z3_sorts[element.uid], claferDatatype)
         visitors.Visitor.visit(self,element.supers)
         for i in element.elements:
             visitors.Visitor.visit(self, i)
         for i in element.elements:
             if isinstance(i, ast.Clafer.Clafer):
-                claferDatatype.addField(self.z3.z3_sorts[i.uid])
+                self.z3.z3_sorts[element.uid].addField(self.z3.z3_sorts[i.uid])
          
     
     

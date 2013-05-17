@@ -18,10 +18,11 @@ class Z3Instance(object):
     :var z3_datatypes: ({:mod:`common.ClaferSort`, :mod:`common.ClaferDatatype`}) 
         Maps each ClaferSort to its Datatype.
     :var solver: (Z3_Solver) The actual Z3 solver. 
+    :var scope: (int) The number of allowed clafers in the model.
 
     Stores and instantiates all necessary constraints for the ClaferZ3 model.
     '''
-    
+    count = 1
     z3_constraints = []
     z3_sorts = {}
     z3_datatypes = {}
@@ -37,32 +38,71 @@ class Z3Instance(object):
         '''
         self.__DEBUG__ = __DEBUG__
         self.module = module
+        self.scope = 20
         
         #Visitor.visit(PrettyPrint.PrettyPrint(), module)
         Visitor.visit(CreateSorts.CreateSorts(self), module)
         Visitor.visit(CreateHierarchy.CreateHierarchy(self), module)
         Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), module)
-        Visitor.visit(CreateCardinalityConstraints.CreateCardinalityConstraints(self), module)
-            
+        #Visitor.visit(CreateCardinalityConstraints.CreateCardinalityConstraints(self), module)
         
         self.solver = Solver()
-        self.instantiateSorts()
-        self.instantiateDatatypes()
-        self.createDatatypes()
-        self.instantiateConsts()
-        self.instantiateConstraints()
-        
+        #self.instantiateSorts()
+        #self.instantiateDatatypes()
+        #self.instantiateConsts()
+        #self.instantiateConstraints()
         #self.solver.add(axioms)
-        print(self.solver.sexpr())
-        print(self.solver.check())
-        m = self.solver.model()
-        print(m)
-        for i in self.z3_sorts.values():
-            l= m[i.sort]
-            print(l)
-            
         
-            
+        self.addConstraints()
+        #print(self.solver.sexpr())
+        #print(self.solver.check())
+        #self.model = self.solver.model()
+        #self.printVars(self.model)
+        models = self.get_models(self.solver, -1)
+        #for i in models:
+        #    self.printVars(i)
+
+    
+    def printVars(self, model):
+        print("Model: " + str(self.count))
+        self.count = self.count + 1
+        for i in self.z3_sorts.values():
+            for j in i.bits:
+                if str(model.eval(j)) == "1":
+                    print(j, model.eval(j))
+        print("\n")
+    
+    def addConstraints(self):
+        for i in self.z3_sorts.values():
+            for j in i.constraints:
+                self.solver.add(j)
+    
+    def get_models(self, s, M):
+        result = []
+        count = 0
+        #s = Solver()
+        #s.add(F)
+        while True:
+            if s.check() == sat and count != M:
+                m = s.model()
+                result.append(m)
+                
+                # Create a new constraint the blocks the current model
+                block = []
+                for d in m:
+                    # d is a declaration
+                    if d.arity() > 0:
+                        raise Z3Exception("uninterpreted functions are not suppported")
+                    # create a constant from declaration
+                    c = d()
+                    if is_array(c) or c.sort().kind() == Z3_UNINTERPRETED_SORT:
+                        raise Z3Exception("arrays and uninterpreted sorts are not supported")
+                    block.append(c != m[d])
+                s.add(Or(block))
+                self.printVars(m)
+                count += 1
+            else:
+                return result
     
     def instantiateSorts(self):
         '''
@@ -87,8 +127,9 @@ class Z3Instance(object):
             print("Datatypes:")
             for i in self.z3_datatypes.values():
                 print("\t" + str(i))
+        self.instantiateDatatypes_h()
     
-    def createDatatypes(self):
+    def instantiateDatatypes_h(self):
         '''
         Creates all Z3 Datatypes at the same time. After invoking this method,
             each ClaferDatatype.datatype contains a pointer to the
@@ -104,6 +145,7 @@ class Z3Instance(object):
         '''
         for i in self.z3_sorts.values():
             i.consts = [Const(i.id+str(x),self.z3_datatypes[i].datatype) for x in range(i.numConsts)]
+            
         if(self.__DEBUG__):
             print("Consts:")
             for i in self.z3_sorts.values():
@@ -136,7 +178,7 @@ class Z3Instance(object):
         '''
         :returns: z3_sorts
         '''
-        return self.z3_sorts
+        return self.z3_sorts.values()
     ###############################
     # end accessors               # 
     ###############################
@@ -153,6 +195,8 @@ class Z3Instance(object):
         
     def addSort(self, sortID, sort):
         '''
+        :param sortID: The uid of the Clafer
+        :type sortID: str
         :param sort: A ClaferSort.
         :type sort: :mod:`common.ClaferSort`
         '''

@@ -15,7 +15,7 @@ class ClaferDatatype(object):
         correspond to those added by :meth:`addField`. 
         If the Clafer is of type integer, an additional integer field called 
         *ref* is added.
-    :var fields: ([:class:`~common.ClaferSort`]) List of all immediate subclafers.
+    
     :var isInteger: (bool) True if the Clafer is of type integer.
     :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
     
@@ -42,15 +42,7 @@ class ClaferDatatype(object):
         if(isInteger):
             self.addField("ref")
     
-    def addField(self, claferSort):
-        '''
-        :param claferSort: ClaferSort for a given Clafer object from AST
-        :type claferSort: :mod:`~common.ClaferSort`
-        
-        A new field is added for every child of the given clafer. Fields will 
-        become parameters for the Datatype constructor when generated.
-        '''
-        self.fields.append(claferSort)
+    
     
     def generateDatatype(self):
         '''
