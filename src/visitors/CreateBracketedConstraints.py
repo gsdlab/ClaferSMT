@@ -49,21 +49,21 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         #else:
         #    prettyPrint("Module Name=" + element.moduleName)
         if(CreateBracketedConstraints.inConstraint):
-            CreateBracketedConstraints.currentConstraint.addArg(element.id)
+            CreateBracketedConstraints.currentConstraint.addArg(self.claferStack,element)
         #prettyPrint("isTop=" + str(element.isTop))
     
     def constraintVisit(self, element):
-        '''
-        this class is basically ruined currently
-        ''' 
         CreateBracketedConstraints.inConstraint = True
         if(not self.claferStack):
-            CreateBracketedConstraints.currentConstraint = BracketedConstraint.BracketedConstraint("TopLevelConstraint")
+            CreateBracketedConstraints.currentConstraint = BracketedConstraint.BracketedConstraint(self.z3)
         else:
-            CreateBracketedConstraints.currentConstraint = BracketedConstraint.BracketedConstraint("BracketedConstraint:" + str(self.claferStack[-1]))
+            CreateBracketedConstraints.currentConstraint = BracketedConstraint.BracketedConstraint(self.z3)
         visitors.Visitor.visit(self, element.exp)
-        self.z3.addConstraint(CreateBracketedConstraints.currentConstraint)
-        CreateBracketedConstraints.currentConstraint.endProcessing()
+        #self.z3.addConstraint(CreateBracketedConstraints.currentConstraint)
+        if self.claferStack:
+            CreateBracketedConstraints.currentConstraint.endProcessing(self.claferStack[-1])
+        else:
+            CreateBracketedConstraints.currentConstraint.endProcessing(None)
         CreateBracketedConstraints.currentConstraint = None
         CreateBracketedConstraints.inConstraint = False
     
@@ -80,12 +80,11 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     
     def integerliteralVisit(self, element):
         if(CreateBracketedConstraints.inConstraint):
-            CreateBracketedConstraints.currentConstraint.addArg(element.value)
+            CreateBracketedConstraints.currentConstraint.addArg(self.claferStack, [element.value])
         
     def doubleliteralVisit(self, element):
         return element
         
     def stringliteralVisit(self, element):
         return element
-    
     

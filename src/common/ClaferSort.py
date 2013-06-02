@@ -29,7 +29,10 @@ class ClaferSort(object):
     :var partitionSize: (int) Essentially an alias to the clafer's upper cardinality constraint.
     :var constraints: contains all Z3 constraints associated with this clafer
     :var parentStack: The stack of parent clafers.
+    :var refs:
+    
     Contains necessary information for each clafer.
+    
     '''
     
     
@@ -48,10 +51,14 @@ class ClaferSort(object):
         self.parentStack = stack
         self.fields = []
         self.constraints = []
-        self.hasSuper = self.checkSuper()
         self.setCardinalityConstraints()
+        self.super = self.checkSuper()
+        if(self.super != "clafer"):
+            self.addRef()
+        else:
+            self.refs = []
         self.makeDistinct()
-        self.removeIsomorphism()
+        #self.removeIsomorphism()
         
         
         #for i in self.constraints:
@@ -60,8 +67,15 @@ class ClaferSort(object):
     def checkSuper(self):
         #assumes that "supers" can only have one element
         supers = self.element.supers
-        return str(supers.elements[0].iExp[0].id) != "clafer"
+        return str(supers.elements[0].iExp[0].id)
         
+    def addRef(self):
+        if self.super == "integer":
+            self.refs = [ Int(str(i) + "_ref") for i in self.bits ]
+            self.constraints.extend([Implies(i == 0, j == 0) for i,j in zip(self.bits, self.refs)])
+        #print(self.refs)        
+        
+    
     def addField(self, claferSort):
         '''
         :param claferSort: ClaferSort for a given Clafer object from AST

@@ -29,12 +29,15 @@ def main(args):
                           #'/home/ezulkosk/myclafers/iso.py')
                           #'/home/ezulkosk/myclafers/bigiso.py')
                           #'/home/ezulkosk/myclafers/bigiso2.py')
-                          '/home/ezulkosk/myclafers/constraint.py')
+                          #'/home/ezulkosk/myclafers/constraint.py')
+                          #'/home/ezulkosk/myclafers/test.py')
+                          #'/home/ezulkosk/myclafers/conjunction.py')
+                          '/home/ezulkosk/myclafers/setcard.py')
     module = src.getModule()
     
     z3 = Z3Instance.Z3Instance()
     #print(z3)
-    z3.run(module, True)
+    z3.run(module, False)
    
 if __name__ == '__main__':
     main(sys.argv[1:])

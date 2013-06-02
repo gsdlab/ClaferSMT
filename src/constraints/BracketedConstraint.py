@@ -11,32 +11,44 @@ from z3 import *
 
 class BracketedConstraint(object):
     '''
-    :var stack: ([Z3_expression]) Used to process a tree of expressionts.
-    :var value: (Z3_expression) The final Z3_expression representation of the constraint.
-    
+    :var stack: ([Z3_expression]) Used to process a tree of expressions.
     Class for creating bracketed Clafer constraints in Z3.
     '''
     
-    def __init__(self, value = None):
-        self.value = value
+    def __init__(self, z3):
+        self.z3 = z3
         self.stack = []
         
-    def addArg(self, arg):
+    def addArg(self, claferStack, arg):
+        #self.stack.append(arg)
+        #handle this, and eventually parent
+        '''if arg == "this":
+            this_sort =  ("this",claferStack[-1])
+            self.stack.append(this_sort)
+        elif arg == "ref":
+            self.stack.append("ref")
+        elif isinstance(arg, int):
+            self.stack.append(arg)
+        else:
+            self.stack.append(self.z3.z3_sorts[arg])'''
         self.stack.append(arg)
-    
+            
     
     def addOperator(self, operation):
-        (arity, z3_op, isPrefix, operator) = Common.getOperationConversion(operation)
-        args = deque([])
+        (arity, operator) = Common.getOperationConversion(operation)
+        args = []
         for _ in range(0,arity):
-            args.appendleft(self.stack.pop())
-        print(args)
-        
+            args.insert(0, self.stack.pop())
+        #print(args)
         self.stack.append(operator(*args))
     
-    def endProcessing(self):
+    def endProcessing(self, parentClafer):
         self.value = self.stack.pop()
-        print(self.value)
+        #print(self.value)    
+        if(parentClafer):
+            self.z3.z3_bracketed_constraints.append([Implies(j == 1, i) for i,j in zip(self.value, parentClafer.bits)])
+        else:
+            self.z3.z3_bracketed_constraints.append(self.value)
     
     def __str__(self):
         return str(self.value)

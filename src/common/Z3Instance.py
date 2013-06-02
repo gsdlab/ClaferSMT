@@ -4,8 +4,10 @@ Created on Apr 30, 2013
 @author: ezulkosk
 '''
 
+from gi.overrides.keysyms import m
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
-    CreateBracketedConstraints, CreateCardinalityConstraints
+    CreateBracketedConstraints, CreateCardinalityConstraints, ResolveClaferIds, \
+    PrintHierarchy
 from z3 import *
 import common
 
@@ -24,6 +26,7 @@ class Z3Instance(object):
     '''
     count = 1
     z3_constraints = []
+    z3_bracketed_constraints = []
     z3_sorts = {}
     z3_datatypes = {}
     
@@ -42,6 +45,7 @@ class Z3Instance(object):
         
         #Visitor.visit(PrettyPrint.PrettyPrint(), module)
         Visitor.visit(CreateSorts.CreateSorts(self), module)
+        Visitor.visit(ResolveClaferIds.ResolveClaferIds(self), module)
         Visitor.visit(CreateHierarchy.CreateHierarchy(self), module)
         Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), module)
         #Visitor.visit(CreateCardinalityConstraints.CreateCardinalityConstraints(self), module)
@@ -54,28 +58,32 @@ class Z3Instance(object):
         #self.solver.add(axioms)
         
         self.addConstraints()
+        self.addBracketedConstraints()
         #print(self.solver.sexpr())
         #print(self.solver.check())
         #self.model = self.solver.model()
         #self.printVars(self.model)
-        models = self.get_models(self.solver, -1)
+        models = self.get_models(self.solver, 2)
         #for i in models:
         #    self.printVars(i)
 
-    
+        
     def printVars(self, model):
-        print("Model: " + str(self.count))
+        print("###########################")
+        print("# Model: " + str(self.count))
+        print("###########################")
         self.count = self.count + 1
-        for i in self.z3_sorts.values():
-            for j in i.bits:
-                if str(model.eval(j)) == "1":
-                    print(j, model.eval(j))
-        print("\n")
+        Visitor.visit(PrintHierarchy.PrintHierarchy(self, model), self.module)
+        print()
     
     def addConstraints(self):
         for i in self.z3_sorts.values():
             for j in i.constraints:
                 self.solver.add(j)
+    
+    def addBracketedConstraints(self):
+        for i in self.z3_bracketed_constraints:
+            self.solver.add(i)
     
     def get_models(self, s, M):
         result = []
@@ -92,7 +100,7 @@ class Z3Instance(object):
                 for d in m:
                     # d is a declaration
                     if d.arity() > 0:
-                        raise Z3Exception("uninterpreted functions are not suppported")
+                        raise Z3Exception("uninterpreted functions are not supported")
                     # create a constant from declaration
                     c = d()
                     if is_array(c) or c.sort().kind() == Z3_UNINTERPRETED_SORT:
@@ -102,6 +110,8 @@ class Z3Instance(object):
                 self.printVars(m)
                 count += 1
             else:
+                if count == 0:
+                    print("UNSAT")
                 return result
     
     def instantiateSorts(self):

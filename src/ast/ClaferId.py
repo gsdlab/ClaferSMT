@@ -7,6 +7,8 @@ Created on Mar 24, 2013
 class ClaferId(object):
     '''
     All variables analogous to those described in IntClafer.hs
+    
+    claferSort points to its sort //Z3Clafer
     '''
 
 
@@ -14,6 +16,7 @@ class ClaferId(object):
         self.moduleName = moduleName
         self.id = my_id
         self.isTop = isTop
+        self.claferSort = None #Z3Clafer
         
         
     def __str__(self):
@@ -21,3 +24,6 @@ class ClaferId(object):
     
     def toString(self, level):
         print('\t' * level + "A")
+        
+    def __repr__(self):
+        return self.id
