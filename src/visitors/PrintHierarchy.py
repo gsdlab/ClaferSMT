@@ -42,12 +42,8 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
     def claferVisit(self, element):
         indent = "  " * (len(self.partition) - 1)
         sort = self.z3.z3_sorts[element.uid]
-        if self.partition[-1] == 0:
-            lowBit = 0
-            highBit = len(sort.bits)
-        else:
-            lowBit = sort.partitionSize * (self.partition[-1] - 1)
-            highBit = sort.partitionSize * self.partition[-1]
+        lowBit = sort.partitionSize * self.partition[-1]
+        highBit = sort.partitionSize * (self.partition[-1]+1)
         for j in range(lowBit,highBit):
             isOn = str(self.model.eval(sort.bits[j])) == "1" 
             if isOn:
@@ -55,10 +51,7 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                     print(str(indent) + str(sort.bits[j]))
                 else:
                     print(str(indent) + str(sort.bits[j]) + " = " + str(self.model.eval(sort.refs[j])))
-                if(self.partition[-1] == 0):
-                    self.partition.append(j+1)
-                else:
-                    self.partition.append(self.partition[-1] * j)
+                self.partition.append(j)
                 for i in element.elements:
                     visitors.Visitor.visit(self, i)
                 self.partition.pop()

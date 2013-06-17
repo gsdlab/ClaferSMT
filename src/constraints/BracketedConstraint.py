@@ -19,18 +19,8 @@ class BracketedConstraint(object):
         self.z3 = z3
         self.stack = []
         
-    def addArg(self, claferStack, arg):
-        #self.stack.append(arg)
+    def addArg(self, arg):
         #handle this, and eventually parent
-        '''if arg == "this":
-            this_sort =  ("this",claferStack[-1])
-            self.stack.append(this_sort)
-        elif arg == "ref":
-            self.stack.append("ref")
-        elif isinstance(arg, int):
-            self.stack.append(arg)
-        else:
-            self.stack.append(self.z3.z3_sorts[arg])'''
         self.stack.append(arg)
             
     
@@ -40,15 +30,16 @@ class BracketedConstraint(object):
         for _ in range(0,arity):
             args.insert(0, self.stack.pop())
         #print(args)
-        self.stack.append(operator(*args))
+        a = operator(*args)
+        self.stack.append(a)
     
     def endProcessing(self, parentClafer):
         self.value = self.stack.pop()
         #print(self.value)    
         if(parentClafer):
-            self.z3.z3_bracketed_constraints.append([Implies(j == 1, i) for i,j in zip(self.value, parentClafer.bits)])
+            self.z3.z3_bracketed_constraints.append([Implies(j == 1, i) for i,j in zip(self.value[1], parentClafer.bits)])
         else:
-            self.z3.z3_bracketed_constraints.append(self.value)
+            self.z3.z3_bracketed_constraints.append(self.value[1])
     
     def __str__(self):
         return str(self.value)

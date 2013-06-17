@@ -6,7 +6,7 @@ Created on Apr 28, 2013
 
 
 
-from ast import ClaferId
+from ast import ClaferId, IntegerLiteral
 from common import ClaferSort
 from lxml.builder import basestring
 from z3 import *
@@ -22,16 +22,26 @@ def resolve(arg):
 #ensures the lists are the same size through replication of the smaller list
 def extend(l,r):
     #believe this only happens for int literals
-    l = list(l)
-    r = list(r)
-    if len(l) < len(r):
-        l = l * int(len(r)/len(l))
-    elif len(l) > len(r):
-        r = r * int(len(l)/len(r))       
-    return (l,r)
+    (lsort, lbits) = l
+    (rsort, rbits) = r
+    
+    if len(lbits) < len(r):
+        lbits = [i for i in lbits for _ in range(int(len(rbits)/len(lbits)))]
+    elif len(lbits) > len(rbits):
+        rbits = [i for i in rbits for _ in range(int(len(lbits)/len(rbits)))]       
+    return (lbits, rbits)
 
 def op_join(l, r):
-    if isinstance(r, ClaferId.ClaferId) and r.id == "ref":
+    (lsort, lbits) = l
+    (rsort, rbits) = r
+    if rsort == "ref":
+        return (lsort, [lsort[-1].refs[i] for i in range(len(lsort[-1].bits))])
+    else:
+        a = rsort[0].partitionSize * rsort[0].partitions // len(lbits)
+        rbits = sum(rbits,[])
+        return (lsort + rsort, [rbits[x:x+rsort[0].partitionSize * rsort[0].partitions // len(lbits)] \
+                                     for x in range(0,len(rbits),rsort[0].partitionSize * rsort[0].partitions // len(lbits))])
+    '''if isinstance(r, ClaferId.ClaferId) and r.id == "ref":
         return l.claferSort.refs
     elif isinstance(l, ClaferId.ClaferId) and l.id == "this":
         rightHandPartitions = l.claferSort.partitionSize * l.claferSort.partitions
@@ -40,32 +50,45 @@ def op_join(l, r):
                   for i in range(len(l.claferSort.bits))]
     elif isinstance(r[0], ArithRef):
         #needs to be fixed
-        return [Sum(*r)]    #(str(l) + " join " +str(r))
+        return [Sum(*r)]    #(str(l) + " join " +str(r))'''
     raise Exception("Join error")
 
 def op_add(l,r):
     (l,r) = extend(l,r)
-    return [i+j for i,j in zip(l,r)]
+    return ("int",[i+j for i,j in zip(l,r)])
 
 def op_sub(l,r):
     (l,r) = extend(l,r)
-    return [i-j for i,j in zip(l,r)]
+    return ("int",[i-j for i,j in zip(l,r)])
 
 def op_mul(l,r):
     (l,r) = extend(l,r)
-    return [i*j for i,j in zip(l,r)]
+    return ("int",[i*j for i,j in zip(l,r)])
 
 #integer division
 def op_div(l,r):
     (l,r) = extend(l,r)
-    return [i//j for i,j in zip(l,r)]
+    return ("int",[i//j for i,j in zip(l,r)])
     
 def op_un_minus(e):
-    return [-i for i in e]
+    return (e[0], [[-i for i in j] for j in e[1]])
     
-def op_eq(l,r):    
+def op_eq(l,r):   
+    leftint = isinstance(l[0], IntegerLiteral.IntegerLiteral)
+    rightint = isinstance(r[0], IntegerLiteral.IntegerLiteral)
     (l,r) = extend(l,r)
-    return [i == j for i,j in zip(l,r)]
+    
+    
+    if not leftint:
+        l = [Sum(*[k for k in i]) for i in l]
+    else:
+        l = sum(l+[])
+    if not rightint:
+        r = [Sum(*[k for k in i]) for i in r]
+    else:
+        r = sum(r,[])
+    #assume its integers for now
+    return ("boolean", [i == j for i,j in zip(l,r)])
     
 def op_ne(l,r):
     (l,r) = extend(l,r)
@@ -93,6 +116,13 @@ def op_or(l,r):
     #test
     return[Or(i,j) for i,j in zip(l,r)]
 
+def op_union(l,r):
+    #fix obviously
+    return [i < j for i,j in zip(l,r)]
+
+def op_in(l,r):
+    return [i < j for i,j in zip(l,r)]
+
 '''
     Map used to convert Clafer operations to Z3 operations
     keys: operation(str) returned by Clafer Python generator
@@ -107,6 +137,7 @@ ClaferToZ3OperationsMap = {
                            "#"           : (1, "TODO"),
                            "max"         : (1, "TODO"),
                            "min"         : (1, "TODO"),
+                           "sum"         : (1, "TODO"),    
                            #Binary Ops
                            "<=>"         : (2, lambda *args: args),
                            "=>"          : (2, lambda *args: args),
@@ -119,13 +150,13 @@ ClaferToZ3OperationsMap = {
                            ">="          : (2, op_ge),
                            "="           : (2, op_eq),
                            "!="          : (2, op_ne),
-                           "in"          : (2, lambda *args: args),
+                           "in"          : (2, op_in),
                            "nin"         : (2, lambda *args: args),
                            "+"           : (2, op_add),
                            "-"           : (2, op_sub),
                            "*"           : (2, op_mul),
                            "/"           : (2, op_div),
-                           "++"          : (2, "TODO"),
+                           "++"          : (2, op_union),
                            "--"          : (2, "TODO"),
                            "&"           : (2, "TODO"),
                            "<:"          : (2, "TODO"),

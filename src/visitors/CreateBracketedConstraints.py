@@ -44,14 +44,14 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.claferStack.pop()
     
     def claferidVisit(self, element):
-        #if element.moduleName=="" :
-        #    prettyPrint("Module Name=\"\"")
-        #else:
-        #    prettyPrint("Module Name=" + element.moduleName)
         if(CreateBracketedConstraints.inConstraint):
-            CreateBracketedConstraints.currentConstraint.addArg(self.claferStack,element)
-        #prettyPrint("isTop=" + str(element.isTop))
-    
+            #CreateBracketedConstraints.currentConstraint.addArg(element)
+            if element.id != "ref" and element.id != "this":
+                CreateBracketedConstraints.currentConstraint.addArg(([element.claferSort], [element.claferSort.bits]))
+            elif element.id == "this":
+                CreateBracketedConstraints.currentConstraint.addArg(([element.claferSort], [[i] for i in element.claferSort.bits]))
+            else:
+                CreateBracketedConstraints.currentConstraint.addArg(("ref",[]))
     def constraintVisit(self, element):
         CreateBracketedConstraints.inConstraint = True
         if(not self.claferStack):
@@ -80,7 +80,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     
     def integerliteralVisit(self, element):
         if(CreateBracketedConstraints.inConstraint):
-            CreateBracketedConstraints.currentConstraint.addArg(self.claferStack, [element.value])
+            CreateBracketedConstraints.currentConstraint.addArg((element, [[element.value]]))
         
     def doubleliteralVisit(self, element):
         return element

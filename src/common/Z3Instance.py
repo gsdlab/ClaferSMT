@@ -62,8 +62,8 @@ class Z3Instance(object):
         #print(self.solver.sexpr())
         #print(self.solver.check())
         #self.model = self.solver.model()
-        #self.printVars(self.model)
-        models = self.get_models(self.solver, 2)
+        #self.printVars(self.model)    
+        models = self.get_models(self.solver, 1)
         #for i in models:
         #    self.printVars(i)
 
@@ -83,7 +83,8 @@ class Z3Instance(object):
     
     def addBracketedConstraints(self):
         for i in self.z3_bracketed_constraints:
-            self.solver.add(i)
+            for j in i:
+                self.solver.add(j)
     
     def get_models(self, s, M):
         result = []

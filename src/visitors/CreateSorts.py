@@ -36,4 +36,5 @@ class CreateSorts(VisitorTemplate.VisitorTemplate):
         self.stack.append(sort)
         for i in element.elements:
             visitors.Visitor.visit(self, i)
+        self.stack.pop()
             

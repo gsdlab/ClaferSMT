@@ -7,14 +7,15 @@ Created on Apr 29, 2013
 from z3 import *
 import math
 
-
+#FIXME stack needs to be changed to only the IMMEDIATE parent of the clafer
 def live(index, glcard, stack):
     #if stack is empty, top level clafer (MAYBE), exit
     if not stack:
         return True
     mult = glcard
+    #stack.reverse()
     bits = BitVecVal(1,1)
-    for i in stack:
+    for i in [stack[-1]]:#stack: 
         mult = int(mult / i.element.card[1].value)
         bits &= i.bits[int(index/mult)]
         index -= int(index/mult) * mult 
@@ -57,7 +58,7 @@ class ClaferSort(object):
             self.addRef()
         else:
             self.refs = []
-        self.makeDistinct()
+        #self.makeDistinct()
         #self.removeIsomorphism()
         
         
@@ -70,9 +71,9 @@ class ClaferSort(object):
         return str(supers.elements[0].iExp[0].id)
         
     def addRef(self):
-        if self.super == "integer":
-            self.refs = [ Int(str(i) + "_ref") for i in self.bits ]
-            self.constraints.extend([Implies(i == 0, j == 0) for i,j in zip(self.bits, self.refs)])
+        #if self.super == "integer":
+        self.refs = [ Int(str(i) + "_ref") for i in self.bits ]
+        self.constraints.extend([Implies(i == 0, j == 0) for i,j in zip(self.bits, self.refs)])
         #print(self.refs)        
         
     
@@ -90,7 +91,7 @@ class ClaferSort(object):
     def setCardinalityConstraints(self):
         gl_div_upper = int(self.element.glCard[1].value / self.element.card[1].value)
         self.partitions = gl_div_upper #if gl_div_upper != 1 else self.element.glCard[1].value
-        self.partitionSize = self.element.glCard[1].value   
+        self.partitionSize = self.element.card[1].value#self.element.glCard[1].value   
         #print(self.partitions , self.partitionSize)
         
         self.bits = [BitVec(self.element.uid.split("_",1)[1] + "$"+str(i), 1) \
@@ -108,7 +109,8 @@ class ClaferSort(object):
                                             Sum([ZeroExt(self.zeroExt,self.bits[(i*self.partitionSize+j)]) for j in range(self.partitionSize)]) \
                                         <= self.element.card[1].value))
             #if the superclafer is zero, the subs are all zero
-            self.constraints.append(Implies(Not(live(int(i*self.partitionSize/self.partitions), self.element.glCard[1].value, self.parentStack)), \
+            if self.parentStack:
+                self.constraints.append(Implies(Not(live(int(i*self.partitionSize/self.partitions), self.element.glCard[1].value, self.parentStack)), \
                                             Sum([ZeroExt(self.zeroExt,self.bits[(i*self.partitionSize+j)]) for j in range(self.partitionSize)]) \
                                         == 0))
         

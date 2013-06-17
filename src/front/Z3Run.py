@@ -29,10 +29,10 @@ def main(args):
                           #'/home/ezulkosk/myclafers/iso.py')
                           #'/home/ezulkosk/myclafers/bigiso.py')
                           #'/home/ezulkosk/myclafers/bigiso2.py')
-                          #'/home/ezulkosk/myclafers/constraint.py')
+                          '/home/ezulkosk/myclafers/constraint.py')
                           #'/home/ezulkosk/myclafers/test.py')
                           #'/home/ezulkosk/myclafers/conjunction.py')
-                          '/home/ezulkosk/myclafers/setcard.py')
+                          #'/home/ezulkosk/myclafers/setcard.py')
     module = src.getModule()
     
     z3 = Z3Instance.Z3Instance()
