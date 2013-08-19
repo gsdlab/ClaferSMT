@@ -34,8 +34,11 @@ def extend(l,r):
 def op_join(l, r):
     (lsort, lbits) = l
     (rsort, rbits) = r
-    if rsort == "ref":
-        return (lsort, [lsort[-1].refs[i] for i in range(len(lsort[-1].bits))])
+    if isinstance(rsort[0],str) and rsort[0] == "ref":
+        return (lsort+rsort, [lsort[-1].refs[i] for i in range(len(lsort[-1].bits))])
+    elif lsort == "ref":
+        rsort.insert(0,"ref")
+        return (rsort, rbits)
     else:
         a = rsort[0].partitionSize * rsort[0].partitions // len(lbits)
         rbits = sum(rbits,[])
@@ -123,6 +126,10 @@ def op_union(l,r):
 def op_in(l,r):
     return [i < j for i,j in zip(l,r)]
 
+def op_card(arg):
+    pass    
+    
+
 '''
     Map used to convert Clafer operations to Z3 operations
     keys: operation(str) returned by Clafer Python generator
@@ -134,7 +141,7 @@ ClaferToZ3OperationsMap = {
                            #Unary Ops
                            "!"           : (1, Not),
                            "UNARY_MINUS" : (1, op_un_minus),
-                           "#"           : (1, "TODO"),
+                           "#"           : (1, op_card),
                            "max"         : (1, "TODO"),
                            "min"         : (1, "TODO"),
                            "sum"         : (1, "TODO"),    

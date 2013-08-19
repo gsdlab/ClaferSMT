@@ -22,17 +22,19 @@ def main(args):
     
     src = imp.load_source("ClaferOutput",
                           #'/home/ezulkosk/myclafers/nonewline.py')
-                          #'/home/ezulkosk/myclafers/simple.py')
+                          '/home/ezulkosk/myclafers/simple.py')
                           #'/home/ezulkosk/myclafers/supersimple2.py')
                           #'/home/ezulkosk/myclafers/supersimple.py')
                           #'/home/ezulkosk/myclafers/car.py')
                           #'/home/ezulkosk/myclafers/iso.py')
                           #'/home/ezulkosk/myclafers/bigiso.py')
                           #'/home/ezulkosk/myclafers/bigiso2.py')
-                          '/home/ezulkosk/myclafers/constraint.py')
+                          #'/home/ezulkosk/myclafers/constraint.py')
                           #'/home/ezulkosk/myclafers/test.py')
                           #'/home/ezulkosk/myclafers/conjunction.py')
                           #'/home/ezulkosk/myclafers/setcard.py')
+                          #'/home/ezulkosk/myclafers/abstract.py')
+                          #'/home/ezulkosk/myclafers/bagOfAbstracts.py')
     module = src.getModule()
     
     z3 = Z3Instance.Z3Instance()

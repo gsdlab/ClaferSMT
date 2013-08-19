@@ -4,7 +4,7 @@ Created on Apr 29, 2013
 @author: ezulkosk
 '''
 
-from collections import deque
+
 from common import Common
 from constraints import Constraint
 from z3 import *

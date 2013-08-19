@@ -58,7 +58,6 @@ class ClaferSort(object):
             self.addRef()
         else:
             self.refs = []
-        #self.makeDistinct()
         #self.removeIsomorphism()
         
         
@@ -71,7 +70,6 @@ class ClaferSort(object):
         return str(supers.elements[0].iExp[0].id)
         
     def addRef(self):
-        #if self.super == "integer":
         self.refs = [ Int(str(i) + "_ref") for i in self.bits ]
         self.constraints.extend([Implies(i == 0, j == 0) for i,j in zip(self.bits, self.refs)])
         #print(self.refs)        
@@ -112,16 +110,8 @@ class ClaferSort(object):
             if self.parentStack:
                 self.constraints.append(Implies(Not(live(int(i*self.partitionSize/self.partitions), self.element.glCard[1].value, self.parentStack)), \
                                             Sum([ZeroExt(self.zeroExt,self.bits[(i*self.partitionSize+j)]) for j in range(self.partitionSize)]) \
-                                        == 0))
-        
-            
+                                        == 0))            
     
-    def makeDistinct(self):
-        #ensures that two clafers cannot have the same subclafer instance
-        for i in range(self.partitionSize):
-            self.constraints.append(Sum([ZeroExt(self.zeroExt,self.bits[(j*self.partitionSize+i)]) \
-                                         for j in range(self.partitions)]) <= 1)
-        
     def removeIsomorphism(self):
         #isomorphism problem
         #essentially a bitvector "sorting", kind of...
