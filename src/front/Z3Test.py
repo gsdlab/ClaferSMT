@@ -34,13 +34,14 @@ def BitVecVector(prefix, sz, N):
 
 def main(args):
     f = Function('f', IntSort(), IntSort(), IntSort())
-    A = Array("A", 1, 2)
-    B = Array("B", 1, 6)    
+    A = Array("A", IntSort(), IntSort())
+    B = Array("B", IntSort(), IntSort())
     s = Solver()
-    C = IntSort()
-    s.add(Or(A[0]==1, And(B[0] == 1, B[1] == 0, B[2] == 0)))
-    s.add(A[0] == 0)
-    
+    #c = IntSort()
+    s.add(A[0]==1)
+    #s.add(Or(A[0]==1, And(B[0] == 1, B[1] == 0, B[2] == 0)))
+    #s.add(A[0] == 0)
+    #s.add(If())
     s.check()
     print(s.model());
     

@@ -21,7 +21,7 @@ def live(index, glcard, stack):
         index -= int(index/mult) * mult 
     return bits == 1
 
-class ClaferSort(object):
+class  ClaferSort(object):
     '''
     :var fields: ([:class:`~common.ClaferSort`]) List of all immediate subclafers.
     :var bits: ([BitVec]) List of 1-bit elements with total size equal to the global cardinality.
