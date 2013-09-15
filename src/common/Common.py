@@ -11,6 +11,7 @@ from common import ClaferSort
 from lxml.builder import basestring
 from z3 import *
 import operator
+import time
 
 def resolve(arg):
     if not isinstance(arg,tuple):
@@ -31,30 +32,46 @@ def extend(l,r):
         rbits = [i for i in rbits for _ in range(int(len(lbits)/len(rbits)))]       
     return (lbits, rbits)
 
+def addFuncs():
+    pass
+
 def op_join(l, r):
-    (lsort, lbits) = l
-    (rsort, rbits) = r
-    if isinstance(rsort[0],str) and rsort[0] == "ref":
-        return (lsort+rsort, [lsort[-1].refs[i] for i in range(len(lsort[-1].bits))])
-    elif lsort == "ref":
-        rsort.insert(0,"ref")
-        return (rsort, rbits)
+    (lsorts, linstances) = l
+    (rsorts, rinstances) = r
+    leftJoinPoint = lsorts[-1]
+    rightJoinPoint = rsorts[0]
+    
+    #newinstances = [False for _ in range(len(rinstances))]
+    #for i in range(len(linstances)):
+    #for i in range(len(rinstances)):
+    #    newinstances[i] = Or(newinstances[i], If(leftJoinPoint.full(rinstances[i]), True, False))
+    millis = int(round(time.time() * 1000))
+    joinFunc = Function("join:" + str(leftJoinPoint) + "." + str(rightJoinPoint) + str(leftJoinPoint.z3.getFunctionUID()), IntSort(), BoolSort())
+    constraints = [joinFunc(i) == (linstances[i] != leftJoinPoint.parentInstances) for i in range(len(linstances))]
+    leftJoinPoint.z3.z3_constraints = leftJoinPoint.z3.z3_constraints + constraints
+    leftJoinPoint.z3.join = joinFunc
+    #print(constraints)
+    #print()
+    newinstances = [If(joinFunc(rinstances[i]), rinstances[i], rightJoinPoint.parentInstances) for i in range(len(rinstances))]
+    
+    #for i in range(len(rinstances)):
+    #    newinstances[i] = If(newinstances[i], rinstances[i], rightJoinPoint.parentInstances)
+    return (lsorts + rsorts, newinstances)        
+    
+    
+    '''
+    if isinstance(l, ClaferSort.ClaferSort) and isinstance(r, ClaferSort.ClaferSort):
+        return (r.full, r.numInstances)
     else:
-        a = rsort[0].partitionSize * rsort[0].partitions // len(lbits)
-        rbits = sum(rbits,[])
-        return (lsort + rsort, [rbits[x:x+rsort[0].partitionSize * rsort[0].partitions // len(lbits)] \
-                                     for x in range(0,len(rbits),rsort[0].partitionSize * rsort[0].partitions // len(lbits))])
-    '''if isinstance(r, ClaferId.ClaferId) and r.id == "ref":
-        return l.claferSort.refs
-    elif isinstance(l, ClaferId.ClaferId) and l.id == "this":
-        rightHandPartitions = l.claferSort.partitionSize * l.claferSort.partitions
-        rightHandPartitionSize = int(len(r) / rightHandPartitions)
-        return [ Sum(r[i*rightHandPartitionSize : (i+1)*rightHandPartitionSize]) 
-                  for i in range(len(l.claferSort.bits))]
-    elif isinstance(r[0], ArithRef):
-        #needs to be fixed
-        return [Sum(*r)]    #(str(l) + " join " +str(r))'''
-    raise Exception("Join error")
+        (lfunc, linstances) = l
+        constraints = [0 for _ in range(r.numInstances)]
+        #joinFunc = Function("join:" + r.element.uid , IntSort(), IntSort())
+        for i in range(linstances):
+            for j in range(len(constraints)):
+                constraints[j] = constraints[j] + If(lfunc(i), r.mask(i,j),0)   #r.mask()
+        return constraints
+    #rightFunc = r.
+    '''
 
 def op_add(l,r):
     (l,r) = extend(l,r)
@@ -76,26 +93,16 @@ def op_div(l,r):
 def op_un_minus(e):
     return (e[0], [[-i for i in j] for j in e[1]])
     
-def op_eq(l,r):   
-    leftint = isinstance(l[0], IntegerLiteral.IntegerLiteral)
-    rightint = isinstance(r[0], IntegerLiteral.IntegerLiteral)
-    (l,r) = extend(l,r)
-    
-    
-    if not leftint:
-        l = [Sum(*[k for k in i]) for i in l]
-    else:
-        l = sum(l+[])
-    if not rightint:
-        r = [Sum(*[k for k in i]) for i in r]
-    else:
-        r = sum(r,[])
-    #assume its integers for now
-    return ("boolean", [i == j for i,j in zip(l,r)])
+def op_eq(l,r):
+    #leftint = isinstance(l, IntegerLiteral.IntegerLiteral)
+    #rightint = isinstance(r, IntegerLiteral.IntegerLiteral)
+    #(l,r) = extend(l,r)
+    (lsorts, lvalue) = l
+    (rsorts, rvalue) = r
+    return (lsorts+rsorts, lvalue == rvalue)  
     
 def op_ne(l,r):
-    (l,r) = extend(l,r)
-    return [i != j for i,j in zip(l,r)]
+    return Not(op_eq(l,r))
     
 def op_lt(l,r):
     (l,r) = extend(l,r)
@@ -120,14 +127,17 @@ def op_or(l,r):
     return[Or(i,j) for i,j in zip(l,r)]
 
 def op_union(l,r):
-    #fix obviously
-    return [i < j for i,j in zip(l,r)]
+    pass 
 
 def op_in(l,r):
-    return [i < j for i,j in zip(l,r)]
+    pass
 
 def op_card(arg):
-    pass    
+    (sorts, instances) = arg
+    rightmostInstance = sorts[-1]
+    bool2Int = rightmostInstance.z3.bool2Int
+    instances = [bool2Int(rightmostInstance.parentInstances != instances[i]) for i in range(len(instances))]
+    return (sorts, Sum(instances))    
     
 
 '''

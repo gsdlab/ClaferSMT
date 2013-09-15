@@ -23,7 +23,7 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
         '''
         self.z3 = z3
         self.model = model
-        self.partition = [0] #used to determine the parent of each clafer
+        self.parentStack = [0] #used to determine the parent of each clafer
         
 
     '''
@@ -40,21 +40,19 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
     '''
     
     def claferVisit(self, element):
-        indent = "  " * (len(self.partition) - 1)
+        indent = "  " * (len(self.parentStack) - 1)
         sort = self.z3.z3_sorts[element.uid]
-        lowBit = sort.partitionSize * self.partition[-1]
-        highBit = sort.partitionSize * (self.partition[-1]+1)
-        for j in range(lowBit,highBit):
-            isOn = str(self.model.eval(sort.bits[j])) == "1" 
+        for j in range(sort.numInstances):
+            isOn = str(self.model.eval(sort.instances[j])) == str(self.parentStack[-1]) 
             if isOn:
                 if not sort.refs:
-                    print(str(indent) + str(sort.bits[j]))
+                    print(str(indent) + str(sort.instances[j]))
                 else:
-                    print(str(indent) + str(sort.bits[j]) + " = " + str(self.model.eval(sort.refs[j])))
-                self.partition.append(j)
+                    print(str(indent) + str(sort.instances[j]) + " = " + str(self.model.eval(sort.refs[j])))
+                self.parentStack.append(j)
                 for i in element.elements:
                     visitors.Visitor.visit(self, i)
-                self.partition.pop()
+                self.parentStack.pop()
         
          
     

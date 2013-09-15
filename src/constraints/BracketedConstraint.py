@@ -11,35 +11,63 @@ from z3 import *
 
 class BracketedConstraint(object):
     '''
-    :var stack: ([Z3_expression]) Used to process a tree of expressions.
+    :var stack: ([]) Used to process a tree of expressions.
     Class for creating bracketed Clafer constraints in Z3.
     '''
     
     def __init__(self, z3):
         self.z3 = z3
         self.stack = []
+        self.value = "bracketed constraint"
         
     def addArg(self, arg):
         #handle this, and eventually parent
         self.stack.append(arg)
             
-    
+    def extend(self, args):
+        maxInstances = 0
+        extendedArgs = []
+        for i in args:
+            (_, instances) = i
+            maxInstances = max(maxInstances, len(instances))
+        for i in args:
+            (sorts, instances) = i
+            if len(instances) != maxInstances:
+                tempInstances = []
+                for i in range(maxInstances):
+                    tempInstances.append(instances[0])
+                extendedArgs.append((sorts, tempInstances))
+            else:
+                extendedArgs.append(i)
+        return (maxInstances, extendedArgs)
+                
     def addOperator(self, operation):
         (arity, operator) = Common.getOperationConversion(operation)
         args = []
         for _ in range(0,arity):
             args.insert(0, self.stack.pop())
         #print(args)
-        a = operator(*args)
-        self.stack.append(a)
+        (maxInstances, extendedArgs) = self.extend(args)
+        finalExprs = []
+        for i in range(maxInstances):
+            tempExprs = []
+            for j in extendedArgs:
+                (sorts, instances) = j
+                tempExprs.append((sorts,instances[i]))
+            finalExprs.append(tempExprs)
+        finalExprs = [operator(*finalExprs[i]) for i in range(len(finalExprs))]
+        (sorts,_) = finalExprs[0]
+        finalExprs = [exprs for (_,exprs) in finalExprs]
+        self.stack.append((sorts,finalExprs))
     
     def endProcessing(self, parentClafer):
         self.value = self.stack.pop()
-        #print(self.value)    
-        if(parentClafer):
-            self.z3.z3_bracketed_constraints.append([Implies(j == 1, i) for i,j in zip(self.value[1], parentClafer.bits)])
+        if(self.this):
+            for i in range(self.this.numInstances):
+                self.z3.z3_bracketed_constraints.append(Implies(self.this.instances[i] != self.this.parentInstances, self.value[1][i]))
         else:
-            self.z3.z3_bracketed_constraints.append(self.value[1])
+            #fixme
+            self.z3.z3_bracketed_constraints.append(self.value)
     
     def __str__(self):
         return str(self.value)

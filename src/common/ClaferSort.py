@@ -7,19 +7,9 @@ Created on Apr 29, 2013
 from z3 import *
 import math
 
-#FIXME stack needs to be changed to only the IMMEDIATE parent of the clafer
-def live(index, glcard, stack):
-    #if stack is empty, top level clafer (MAYBE), exit
-    if not stack:
-        return True
-    mult = glcard
-    #stack.reverse()
-    bits = BitVecVal(1,1)
-    for i in [stack[-1]]:#stack: 
-        mult = int(mult / i.element.card[1].value)
-        bits &= i.bits[int(index/mult)]
-        index -= int(index/mult) * mult 
-    return bits == 1
+#FIXME 
+def live():
+    return True
 
 class  ClaferSort(object):
     '''
@@ -49,10 +39,13 @@ class  ClaferSort(object):
         
         self.element = element
         self.z3 = z3
-        self.parentStack = stack
+        self.parentStack = stack[:]
         self.fields = []
         self.constraints = []
-        self.setCardinalityConstraints()
+        self.summs = []
+        self.numInstances = int(self.element.glCard[1].value)
+        self.instances = IntVector(self.element.uid.split("_",1)[1],self.numInstances)
+        self.addInstancesConstraints()
         self.super = self.checkSuper()
         if(self.super != "clafer"):
             self.addRef()
@@ -63,6 +56,26 @@ class  ClaferSort(object):
         
         #for i in self.constraints:
         #   print(str(i) + "\n\n")
+       
+       
+    def addGroupCardConstraints(self):
+        if(len(self.fields) == 0):
+            return
+        #lower bounds
+        upperGCard = self.element.gcard.interval[1].value
+        lowerGCard = self.element.gcard.interval[0].value
+        for i in range(self.numInstances):
+            #print(str(i) + " " + str(self.numInstances))
+            bigSumm = 0
+            
+            for j in self.fields:
+                bigSumm = bigSumm +  j.summs[i]
+            #print("A\n" + str(bigSumm)+ "\n\n")
+            self.constraints.append(bigSumm >= lowerGCard)
+            if upperGCard != -1:
+                self.constraints.append(bigSumm <= upperGCard)
+        
+        
         
     def checkSuper(self):
         #assumes that "supers" can only have one element
@@ -71,59 +84,80 @@ class  ClaferSort(object):
         
     def addRef(self):
         self.refs = [ Int(str(i) + "_ref") for i in self.bits ]
-        self.constraints.extend([Implies(i == 0, j == 0) for i,j in zip(self.bits, self.refs)])
+        self.constraints.extend([Implies(i == self.upperBound, j == 0) for i,j in zip(self.instances, self.refs)])
         #print(self.refs)        
         
     
     def addField(self, claferSort):
-        '''
-        :param claferSort: ClaferSort for a given Clafer object from AST
-        :type claferSort: :mod:`~common.ClaferSort`
-        
-        A new field is added for every child of the given clafer. Fields will 
-        become parameters for the Datatype constructor when generated.
-        '''
         self.fields.append(claferSort)
     
     
-    def setCardinalityConstraints(self):
-        gl_div_upper = int(self.element.glCard[1].value / self.element.card[1].value)
-        self.partitions = gl_div_upper #if gl_div_upper != 1 else self.element.glCard[1].value
-        self.partitionSize = self.element.card[1].value#self.element.glCard[1].value   
-        #print(self.partitions , self.partitionSize)
+    def addInstancesConstraints(self):
+        #lower and upper bounds
+        lowerCardConstraint = self.element.card[0].value
+        upperCardConstraint = self.element.card[1].value
         
-        self.bits = [BitVec(self.element.uid.split("_",1)[1] + "$"+str(i), 1) \
-                     for i in range(self.partitions * self.partitionSize)]#(self.z3.scope*self.z3.scope)]#self.element.glCard[1].value)]
+        #gets the upper card bound of the parent clafer
+        if not self.parentStack:
+            parent = None
+            self.parentUpper = 1
+            self.parentInstances = 1
+        else:
+            parent = self.parentStack[-1]
+            self.parentUpper = parent.element.card[1].value
+            self.parentInstances = len(parent.instances)
         
-        self.zeroExt = int(1 + math.log(len(self.bits),2))
-        #sets lower and upper cardinality bound on each partition
-        for i in range(self.partitions):
-            #lower
-            self.constraints.append(Implies(live(int(i*self.partitionSize/self.partitions), self.element.glCard[1].value ,self.parentStack), \
-                                            Sum([ZeroExt(self.zeroExt,self.bits[(i*self.partitionSize+j)]) for j in range(self.partitionSize)]) \
-                                        >= self.element.card[0].value))
-            #upper
-            self.constraints.append(Implies(live(int(i*self.partitionSize/self.partitions), self.element.glCard[1].value, self.parentStack), \
-                                            Sum([ZeroExt(self.zeroExt,self.bits[(i*self.partitionSize+j)]) for j in range(self.partitionSize)]) \
-                                        <= self.element.card[1].value))
-            #if the superclafer is zero, the subs are all zero
-            if self.parentStack:
-                self.constraints.append(Implies(Not(live(int(i*self.partitionSize/self.partitions), self.element.glCard[1].value, self.parentStack)), \
-                                            Sum([ZeroExt(self.zeroExt,self.bits[(i*self.partitionSize+j)]) for j in range(self.partitionSize)]) \
-                                        == 0))            
-    
-    def removeIsomorphism(self):
-        #isomorphism problem
-        #essentially a bitvector "sorting", kind of...
-        for i in range(len(self.bits)):
-            orlist = [[j*self.partitionSize + k \
-                    for j in range(i // self.partitionSize + 1)] \
-                    for k in range(i % self.partitionSize)]
-            list2 = [Or(*[self.bits[l2] == 1 for l2 in l])  for l in orlist]
-            if not list2: 
-                continue
+        for i in range(self.numInstances):
+            #parent pointer is > 0
+            self.constraints.append(self.instances[i] >= 0) 
+            #parent pointer is < upper card of parent           
+            self.constraints.append(self.instances[i] <= self.parentInstances)
+            #sorted parent pointers
+            if i != self.numInstances - 1:
+                self.constraints.append(self.instances[i] <= self.instances[i+1])    
+        
+        #masks the instances that do not have the current parent 
+        #mask(i,j): i == the parent number, j == the value of the child
+        #outputs 1 if equal to parent, 0 otherwise
+        self.mask = Function(self.element.uid + "_mask", IntSort(), IntSort(), IntSort())
+        for i in range(self.parentInstances):    
+            for j in range(self.numInstances):
+                #print(str(i) + " " + str(j))
+                self.constraints.append(self.mask(i, j) == If(i == self.instances[j], 1, 0))
+        #mask should be replaced by this
+        #self.correctMask = Function(self.element.uid + "_correctmask", IntSort(), IntSort(), IntSort())
+        #for i in range(self.numInstances):
+        #    for
+        #self.constraints.append(ForAll([x,y], self.correctMask(x, y) == If(x == y, y, self.parentInstances)))
+        #function that returns 1 for all instances that are on
+        self.full = Function(self.element.uid + "_full", IntSort(), BoolSort())
+        for i in range(self.numInstances):    
+            self.constraints.append(self.full(i) == If(self.instances[i] != self.parentInstances, True, False))   
+        #cardinality constraints
+        for i in range(self.parentInstances):
+            summ = 0;
+            for j in range(self.numInstances):
+               
+                summ = summ +  self.mask(i, j)#self.instances[j])
+            if parent:
+                self.constraints.append(Implies(parent.instances[i] != parent.parentUpper,summ >= lowerCardConstraint))
+                if upperCardConstraint != -1:
+                    self.constraints.append(Implies(parent.instances[i] != parent.parentUpper,summ <= upperCardConstraint))
             else:
-                self.constraints.append(Implies(self.bits[i] == 1, And(*list2)))
+                self.constraints.append(summ >= lowerCardConstraint)
+                if upperCardConstraint != -1:
+                    self.constraints.append(summ <= upperCardConstraint)
+            self.summs.append(summ)
+        
+        if not parent:
+            return 
+        #if the parent is not live, then no child can point to it  
+        for i in range(parent.numInstances):
+            for j in range(self.numInstances):
+                self.constraints.append(Implies(parent.instances[i] == parent.parentUpper, self.instances[j] != i)) 
+                
+        #group card constraints  
+    
     
     def __str__(self):
         return self.element.uid + "_sort"

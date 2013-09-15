@@ -24,8 +24,6 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     field.
     '''
     
-    #stack of clafers, used to add comments to constraints
-    claferStack = []
     
     def __init__(self, z3):
         '''
@@ -37,33 +35,30 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.z3 = z3
     
     def claferVisit(self, element):
-        self.claferStack.append(self.z3.z3_sorts[element.uid])
         visitors.Visitor.visit(self,element.supers)
         for i in element.elements:
             visitors.Visitor.visit(self, i)
-        self.claferStack.pop()
     
     def claferidVisit(self, element):
         if(CreateBracketedConstraints.inConstraint):
             #CreateBracketedConstraints.currentConstraint.addArg(element)
             if element.id != "ref" and element.id != "this":
-                CreateBracketedConstraints.currentConstraint.addArg(([element.claferSort], [element.claferSort.bits]))
-            elif element.id == "this":
-                CreateBracketedConstraints.currentConstraint.addArg(([element.claferSort], [[i] for i in element.claferSort.bits]))
+                CreateBracketedConstraints.currentConstraint.addArg(([element.claferSort], [element.claferSort.instances]))
+            elif element.id == "this":           
+                instances = []
+                for i in range(element.claferSort.numInstances):
+                    instances.append([element.claferSort.parentInstances if i != j else element.claferSort.instances[j] 
+                                      for j in range(element.claferSort.numInstances)])
+                CreateBracketedConstraints.currentConstraint.addArg(([element.claferSort], instances))
+                CreateBracketedConstraints.currentConstraint.this = element.claferSort
             else:
-                CreateBracketedConstraints.currentConstraint.addArg(("ref",[]))
+                CreateBracketedConstraints.currentConstraint.addArg("ref")
+   
     def constraintVisit(self, element):
         CreateBracketedConstraints.inConstraint = True
-        if(not self.claferStack):
-            CreateBracketedConstraints.currentConstraint = BracketedConstraint.BracketedConstraint(self.z3)
-        else:
-            CreateBracketedConstraints.currentConstraint = BracketedConstraint.BracketedConstraint(self.z3)
+        CreateBracketedConstraints.currentConstraint = BracketedConstraint.BracketedConstraint(self.z3)
         visitors.Visitor.visit(self, element.exp)
-        #self.z3.addConstraint(CreateBracketedConstraints.currentConstraint)
-        if self.claferStack:
-            CreateBracketedConstraints.currentConstraint.endProcessing(self.claferStack[-1])
-        else:
-            CreateBracketedConstraints.currentConstraint.endProcessing(None)
+        CreateBracketedConstraints.currentConstraint.endProcessing(None)
         CreateBracketedConstraints.currentConstraint = None
         CreateBracketedConstraints.inConstraint = False
     
@@ -80,7 +75,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     
     def integerliteralVisit(self, element):
         if(CreateBracketedConstraints.inConstraint):
-            CreateBracketedConstraints.currentConstraint.addArg((element, [[element.value]]))
+            CreateBracketedConstraints.currentConstraint.addArg(([element], [element.value]))
         
     def doubleliteralVisit(self, element):
         return element

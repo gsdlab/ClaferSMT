@@ -44,11 +44,10 @@ def main(args):
     #s.add(If())
     s.check()
     print(s.model());
-    
-    '''
+    c = Int('a')
     A = Array("A", IntSort(), IntSort())
     B = Array("B", IntSort(), IntSort())
-    a = [f(A[i], B[i]) == A[i] + B[i] for i in range(4)]
+    a = [f(c,c) == A[i] + B[i] for i in range(4)]
     s = Solver()
     s.add(A[0] + A[1] + A[2] >  1)
     s.add(A[0] <= 1)
@@ -60,6 +59,8 @@ def main(args):
     
     s.add(a)
     print(s.check())
+    '''
+    
     m = s.model()
     print(m.eval(A[0]))
     print(m.eval(A[1]))

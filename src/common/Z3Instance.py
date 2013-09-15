@@ -7,7 +7,7 @@ Created on Apr 30, 2013
 from gi.overrides.keysyms import m
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, CreateCardinalityConstraints, ResolveClaferIds, \
-    PrintHierarchy
+    PrintHierarchy, GroupCardConstraints
 from z3 import *
 import common
 
@@ -29,6 +29,34 @@ class Z3Instance(object):
     z3_bracketed_constraints = []
     z3_sorts = {}
     z3_datatypes = {}
+    functionID = 0
+    constraintID = 0
+    trackers = []
+    
+    def getFunctionUID(self):
+        self.functionID = self.functionID + 1
+        return self.functionID
+    
+    def getConstraintUID(self):
+        self.constraintID = self.constraintID + 1
+        return self.constraintID
+    
+    def addGroupCardConstraints(self):
+        for i in self.z3_sorts.values():
+            i.addGroupCardConstraints()
+    
+    def assertConstraint(self, constraint):
+        #BAD self.solver.assert_and_track(constraint, "p" + str(self.getConstraintUID()))
+        self.solver.add(constraint)
+        #GOOD p = Bool("p" + str(self.getConstraintUID()))
+        #GOOD self.trackers.append(p)
+        #GOOD self.solver.add(Implies(p, constraint))
+        
+    def createCommonFunctions(self):
+        self.bool2Int = Function("bool2Int", BoolSort(), IntSort())
+        self.z3_constraints.append(self.bool2Int(True) == 1)
+        self.z3_constraints.append(self.bool2Int(False) == 0)
+                
     
     def run(self, module, __DEBUG__ = False):
         '''
@@ -42,11 +70,16 @@ class Z3Instance(object):
         self.__DEBUG__ = __DEBUG__
         self.module = module
         self.scope = 20
-        
+        set_option(max_depth=10)
+        set_option(auto_config=False)
+        self.createCommonFunctions()
         #Visitor.visit(PrettyPrint.PrettyPrint(), module)
         Visitor.visit(CreateSorts.CreateSorts(self), module)
         Visitor.visit(ResolveClaferIds.ResolveClaferIds(self), module)
         Visitor.visit(CreateHierarchy.CreateHierarchy(self), module)
+        print("Adding group cardinality constraints.")
+        self.addGroupCardConstraints()
+        print("Adding bracketed constraints.")
         Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), module)
         #Visitor.visit(CreateCardinalityConstraints.CreateCardinalityConstraints(self), module)
         
@@ -58,12 +91,20 @@ class Z3Instance(object):
         #self.solver.add(axioms)
         
         self.addConstraints()
+        
         self.addBracketedConstraints()
         #print(self.solver.sexpr())
         #print(self.solver.check())
         #self.model = self.solver.model()
-        #self.printVars(self.model)    
-        models = self.get_models(self.solver, 1)
+        #self.printVars(self.model)
+        #for i in self.solver.assertions():
+        #    print(i)
+        #    print()
+        print("Getting models.")    
+        #print(self.solver.check(self.trackers))
+        #print(self.solver.unsat_core())
+        #print(self.solver.assertions())
+        models = self.get_models(self.solver, -1)
         #for i in models:
         #    self.printVars(i)
 
@@ -79,21 +120,28 @@ class Z3Instance(object):
     def addConstraints(self):
         for i in self.z3_sorts.values():
             for j in i.constraints:
-                self.solver.add(j)
+                self.assertConstraint(j)
+        for i in self.z3_constraints:
+            self.assertConstraint(i)
     
     def addBracketedConstraints(self):
         for i in self.z3_bracketed_constraints:
-            for j in i:
-                self.solver.add(j)
-    
+            #for j in i:
+            self.assertConstraint(i)
+            
+    #this is not my method, some stackoverflow or z3.codeplex.com method. Can't remember, should find it.
     def get_models(self, s, M):
         result = []
         count = 0
         #s = Solver()
         #s.add(F)
+        #print(s.assertions())
         while True:
+            #print(s.assertions())
             if s.check() == sat and count != M:
                 m = s.model()
+                #if count == 0:
+                #    print(m)
                 result.append(m)
                 
                 # Create a new constraint the blocks the current model
@@ -101,16 +149,21 @@ class Z3Instance(object):
                 for d in m:
                     # d is a declaration
                     if d.arity() > 0:
-                        raise Z3Exception("uninterpreted functions are not supported")
+                        continue #raise Z3Exception("uninterpreted functions are not supported")
                     # create a constant from declaration
                     c = d()
                     if is_array(c) or c.sort().kind() == Z3_UNINTERPRETED_SORT:
                         raise Z3Exception("arrays and uninterpreted sorts are not supported")
                     block.append(c != m[d])
+                    #print(str(d) + ":" + str(m[d]))
                 s.add(Or(block))
                 self.printVars(m)
                 count += 1
             else:
+                print(s.check())
+                core = s.unsat_core()
+                print(len(core))
+                print(self.solver.unsat_core())
                 if count == 0:
                     print("UNSAT")
                 return result
