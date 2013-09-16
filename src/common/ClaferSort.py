@@ -3,13 +3,7 @@ Created on Apr 29, 2013
 
 @author: ezulkosk
 '''
-
-from z3 import *
-import math
-
-#FIXME 
-def live():
-    return True
+from z3 import IntVector, Function, IntSort, If, BoolSort, Implies
 
 class  ClaferSort(object):
     '''
@@ -65,17 +59,12 @@ class  ClaferSort(object):
         upperGCard = self.element.gcard.interval[1].value
         lowerGCard = self.element.gcard.interval[0].value
         for i in range(self.numInstances):
-            #print(str(i) + " " + str(self.numInstances))
             bigSumm = 0
-            
             for j in self.fields:
                 bigSumm = bigSumm +  j.summs[i]
-            #print("A\n" + str(bigSumm)+ "\n\n")
             self.constraints.append(bigSumm >= lowerGCard)
             if upperGCard != -1:
                 self.constraints.append(bigSumm <= upperGCard)
-        
-        
         
     def checkSuper(self):
         #assumes that "supers" can only have one element
@@ -83,10 +72,7 @@ class  ClaferSort(object):
         return str(supers.elements[0].iExp[0].id)
         
     def addRef(self):
-        self.refs = [ Int(str(i) + "_ref") for i in self.bits ]
-        self.constraints.extend([Implies(i == self.upperBound, j == 0) for i,j in zip(self.instances, self.refs)])
-        #print(self.refs)        
-        
+        pass
     
     def addField(self, claferSort):
         self.fields.append(claferSort)
@@ -156,7 +142,6 @@ class  ClaferSort(object):
             for j in range(self.numInstances):
                 self.constraints.append(Implies(parent.instances[i] == parent.parentUpper, self.instances[j] != i)) 
                 
-        #group card constraints  
     
     
     def __str__(self):

@@ -7,7 +7,7 @@ testing method for the Z3 backend of Clafer
 '''
 from common import Z3Instance
 from visitors import Visitor, PrettyPrint, CreateSorts, \
-    CreateBracketedConstraints, CreateCardinalityConstraints, CreateHierarchy
+    CreateBracketedConstraints, CreateHierarchy
 from z3 import *
 import common.Common
 import imp

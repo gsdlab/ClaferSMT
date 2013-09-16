@@ -9,11 +9,12 @@ class Module(object):
     elements([]): the top level clafers/constraints/goals
     mName(str): module name
     '''
-    elements = []
+    
     
 
     def __init__(self, mName):
         self.mName = mName
+        self.elements = []
         
     def addElement(self, element):
         self.elements.append(element)

@@ -21,10 +21,6 @@ class ResolveClaferIds(VisitorTemplate.VisitorTemplate):
     adds constraints to z3.z3_constraints
     field.
     '''
-    
-    #stack of clafers, used to add comments to constraints
-    claferStack = []
-    
     def __init__(self, z3):
         '''
         :param z3: The Z3 solver.
@@ -32,6 +28,7 @@ class ResolveClaferIds(VisitorTemplate.VisitorTemplate):
         '''
         VisitorTemplate.VisitorTemplate.__init__(self)
         self.z3 = z3
+        self.claferStack = []
     
     def claferVisit(self, element):
         self.claferStack.append(self.z3.z3_sorts[element.uid])

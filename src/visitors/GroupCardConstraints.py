@@ -3,7 +3,7 @@ Created on May 1, 2013
 
 @author: ezulkosk
 '''
-from common import ClaferDatatype
+
 from visitors import VisitorTemplate
 import ast
 import visitors

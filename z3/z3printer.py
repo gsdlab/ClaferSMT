@@ -392,7 +392,7 @@ class StopPPException:
 
 class PP:
     def __init__(self):
-        self.max_lines  = 200
+        self.max_lines  = 1000#200 ED
         self.max_width  = 60
         self.bounded    = False
         self.max_indent = 40

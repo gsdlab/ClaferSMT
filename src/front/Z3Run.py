@@ -3,14 +3,14 @@ Created on April 27, 2013
 
 @author: ezulkosk
 
-testing method for the Z3 backend of Clafer
 '''
-from common import Z3Instance
-from visitors import Visitor, PrettyPrint, CreateSorts, \
-    CreateBracketedConstraints, CreateCardinalityConstraints, CreateHierarchy
-from z3 import *
-import common.Common
+from common import Z3Instance, Common
+from test import TestClafers
 import imp
+import sys
+
+
+
 
 def main(args):
     '''
@@ -19,30 +19,17 @@ def main(args):
     
     Starting point for ClaferZ3.
     '''
+    Common.MODE = Common.TEST
     
-    src = imp.load_source("ClaferOutput",
-                          #'/home/ezulkosk/myclafers/nonewline.py')
-                          #'/home/ezulkosk/myclafers/simple.py')
-                          #'/home/ezulkosk/myclafers/supersimple2.py')
-                          #'/home/ezulkosk/myclafers/groupcard.py')
-                          #'/home/ezulkosk/myclafers/supersimple.py')
-                          #'/home/ezulkosk/myclafers/car.py')
-                          #'/home/ezulkosk/myclafers/iso.py')
-                          #'/home/ezulkosk/myclafers/bigiso.py')
-                          #'/home/ezulkosk/myclafers/bigiso2.py')
-                          #'/home/ezulkosk/myclafers/constraint.py')
-                          '/home/ezulkosk/myclafers/constraint2.py')
-                          #'/home/ezulkosk/myclafers/constraint3.py')
-                          #'/home/ezulkosk/myclafers/test.py')
-                          #'/home/ezulkosk/myclafers/conjunction.py')
-                          #'/home/ezulkosk/myclafers/setcard.py')
-                          #'/home/ezulkosk/myclafers/abstract.py')
-                          #'/home/ezulkosk/myclafers/bagOfAbstracts.py')
-    module = src.getModule()
-    
-    z3 = Z3Instance.Z3Instance()
-    #print(z3)
-    z3.run(module, False)
+    if Common.MODE == Common.TEST:
+        TestClafers.run()
+    else:
+        src = imp.load_source("ClaferOutput",
+                          #'/home/ezulkosk/myclafers/testclafers/py/bracketedconstraint_this.py')
+                          '/home/ezulkosk/myclafers/testclafers/py/multiple_joins.py')
+        module = src.getModule()
+        z3 = Z3Instance.Z3Instance(module)
+        z3.run()
    
 if __name__ == '__main__':
     main(sys.argv[1:])

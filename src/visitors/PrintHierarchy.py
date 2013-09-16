@@ -3,7 +3,7 @@ Created on May 31, 2013
 
 @author: ezulkosk
 '''
-from common import ClaferDatatype
+from common.Common import standard_print
 from visitors import VisitorTemplate
 import ast
 import visitors
@@ -24,20 +24,6 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
         self.z3 = z3
         self.model = model
         self.parentStack = [0] #used to determine the parent of each clafer
-        
-
-    '''
-    def printVars(self, model):
-        print("Model: " + str(self.count))
-        self.count = self.count + 1
-        for i in self.z3_sorts.values():
-            for j in range(len(i.bits)):
-                if str(model.eval(i.bits[j])) == "1" and not i.refs:
-                    print(i.bits[j])
-                elif str(model.eval(i.bits[j])) == "1" and i.refs:
-                    print(str(i.bits[j]) + " = " + str(model.eval(i.refs[j])))
-        print("\n")
-    '''
     
     def claferVisit(self, element):
         indent = "  " * (len(self.parentStack) - 1)
@@ -46,9 +32,9 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
             isOn = str(self.model.eval(sort.instances[j])) == str(self.parentStack[-1]) 
             if isOn:
                 if not sort.refs:
-                    print(str(indent) + str(sort.instances[j]))
+                    standard_print(str(indent) + str(sort.instances[j]))
                 else:
-                    print(str(indent) + str(sort.instances[j]) + " = " + str(self.model.eval(sort.refs[j])))
+                    standard_print(str(indent) + str(sort.instances[j]) + " = " + str(self.model.eval(sort.refs[j])))
                 self.parentStack.append(j)
                 for i in element.elements:
                     visitors.Visitor.visit(self, i)

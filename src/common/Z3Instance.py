@@ -4,9 +4,11 @@ Created on Apr 30, 2013
 @author: ezulkosk
 '''
 
+from common import Common
+from common.Common import debug_print, standard_print
 from gi.overrides.keysyms import m
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
-    CreateBracketedConstraints, CreateCardinalityConstraints, ResolveClaferIds, \
+    CreateBracketedConstraints, ResolveClaferIds, \
     PrintHierarchy, GroupCardConstraints
 from z3 import *
 import common
@@ -17,21 +19,29 @@ class Z3Instance(object):
     :var z3_constraints: ([:mod:`constraints.Constraint`]) Contains ALL constraints that will be fed into z3.
     :var z3_sorts: ({str, :mod:`common.ClaferSort`}) Holds the Sorts for each clafer, 
         mapped by the clafer's ID.
-    :var z3_datatypes: ({:mod:`common.ClaferSort`, :mod:`common.ClaferDatatype`}) 
-        Maps each ClaferSort to its Datatype.
     :var solver: (Z3_Solver) The actual Z3 solver. 
     :var scope: (int) The number of allowed clafers in the model.
 
     Stores and instantiates all necessary constraints for the ClaferZ3 model.
     '''
-    count = 1
-    z3_constraints = []
-    z3_bracketed_constraints = []
-    z3_sorts = {}
-    z3_datatypes = {}
-    functionID = 0
-    constraintID = 0
-    trackers = []
+    
+    
+    
+    def __init__(self, module):
+        self.module = module
+        self.model_count = 0
+        self.z3_constraints = []
+        self.z3_bracketed_constraints = []
+        self.z3_sorts = {}
+        self.z3_datatypes = {}
+        self.functionID = 0
+        self.constraintID = 0
+        self.unsat_core_trackers = []
+        self.setOptions()
+        self.solver = Solver() 
+        self.createCommonFunctions()
+        
+    
     
     def getFunctionUID(self):
         self.functionID = self.functionID + 1
@@ -41,16 +51,16 @@ class Z3Instance(object):
         self.constraintID = self.constraintID + 1
         return self.constraintID
     
-    def addGroupCardConstraints(self):
+    def createGroupCardConstraints(self):
         for i in self.z3_sorts.values():
             i.addGroupCardConstraints()
     
     def assertConstraint(self, constraint):
-        #BAD self.solver.assert_and_track(constraint, "p" + str(self.getConstraintUID()))
         self.solver.add(constraint)
-        #GOOD p = Bool("p" + str(self.getConstraintUID()))
-        #GOOD self.trackers.append(p)
-        #GOOD self.solver.add(Implies(p, constraint))
+        if Common.MODE == Common.DEBUG:
+            p = Bool("p" + str(self.getConstraintUID()))
+            self.unsat_core_trackers.append(p)
+            self.solver.add(Implies(p, constraint))
         
     def createCommonFunctions(self):
         self.bool2Int = Function("bool2Int", BoolSort(), IntSort())
@@ -58,92 +68,62 @@ class Z3Instance(object):
         self.z3_constraints.append(self.bool2Int(False) == 0)
                 
     
-    def run(self, module, __DEBUG__ = False):
+    def setOptions(self):
+        set_option(max_depth=7)
+        if Common.MODE == Common.DEBUG:
+            set_option(auto_config=False)
+    
+    def run(self):
         '''
-        :param __DEBUG__: Prints out debug statements if true.
-        :type __DEBUG__: (bool (o)) 
         :param module: The Clafer AST
         :type module: Module
         
-        Runs the Z3Instance.
+        Converts Clafer constraints to Z3 constraints and computes models.
         '''
-        self.__DEBUG__ = __DEBUG__
-        self.module = module
-        self.scope = 20
-        set_option(max_depth=10)
-        set_option(auto_config=False)
-        self.createCommonFunctions()
-        #Visitor.visit(PrettyPrint.PrettyPrint(), module)
-        Visitor.visit(CreateSorts.CreateSorts(self), module)
-        Visitor.visit(ResolveClaferIds.ResolveClaferIds(self), module)
-        Visitor.visit(CreateHierarchy.CreateHierarchy(self), module)
-        print("Adding group cardinality constraints.")
-        self.addGroupCardConstraints()
-        print("Adding bracketed constraints.")
-        Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), module)
-        #Visitor.visit(CreateCardinalityConstraints.CreateCardinalityConstraints(self), module)
+        Visitor.visit(CreateSorts.CreateSorts(self), self.module)
+        Visitor.visit(ResolveClaferIds.ResolveClaferIds(self), self.module)
+        Visitor.visit(CreateHierarchy.CreateHierarchy(self), self.module)
         
-        self.solver = Solver()
-        #self.instantiateSorts()
-        #self.instantiateDatatypes()
-        #self.instantiateConsts()
-        #self.instantiateConstraints()
-        #self.solver.add(axioms)
+        debug_print("Creating group cardinality constraints.")
+        self.createGroupCardConstraints()        
+        debug_print("Creating bracketed constraints.")
+        Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
+           
+        self.assertConstraints()        
         
-        self.addConstraints()
-        
-        self.addBracketedConstraints()
-        #print(self.solver.sexpr())
-        #print(self.solver.check())
-        #self.model = self.solver.model()
-        #self.printVars(self.model)
-        #for i in self.solver.assertions():
-        #    print(i)
-        #    print()
-        print("Getting models.")    
-        #print(self.solver.check(self.trackers))
-        #print(self.solver.unsat_core())
-        #print(self.solver.assertions())
-        models = self.get_models(self.solver, -1)
-        #for i in models:
-        #    self.printVars(i)
-
+        debug_print("Getting models.")    
+        models = self.get_models(-1)
+        return len(models)
         
     def printVars(self, model):
-        print("###########################")
-        print("# Model: " + str(self.count))
-        print("###########################")
-        self.count = self.count + 1
+        self.model_count = self.model_count + 1
+        standard_print("###########################")
+        standard_print("# Model: " + str(self.model_count))    
+        standard_print("###########################")
         Visitor.visit(PrintHierarchy.PrintHierarchy(self, model), self.module)
-        print()
+        standard_print("")
     
-    def addConstraints(self):
+    def assertConstraints(self):
         for i in self.z3_sorts.values():
             for j in i.constraints:
                 self.assertConstraint(j)
         for i in self.z3_constraints:
             self.assertConstraint(i)
-    
-    def addBracketedConstraints(self):
         for i in self.z3_bracketed_constraints:
-            #for j in i:
             self.assertConstraint(i)
             
     #this is not my method, some stackoverflow or z3.codeplex.com method. Can't remember, should find it.
-    def get_models(self, s, M):
+    def get_models(self, desired_number_of_models):
+        #for i in self.solver.assertions():
+        #    print(i)
+    
+        
         result = []
         count = 0
-        #s = Solver()
-        #s.add(F)
-        #print(s.assertions())
         while True:
-            #print(s.assertions())
-            if s.check() == sat and count != M:
-                m = s.model()
-                #if count == 0:
-                #    print(m)
+            if self.solver.check() == sat and count != desired_number_of_models:
+                m = self.solver.model()
                 result.append(m)
-                
                 # Create a new constraint the blocks the current model
                 block = []
                 for d in m:
@@ -155,79 +135,19 @@ class Z3Instance(object):
                     if is_array(c) or c.sort().kind() == Z3_UNINTERPRETED_SORT:
                         raise Z3Exception("arrays and uninterpreted sorts are not supported")
                     block.append(c != m[d])
-                    #print(str(d) + ":" + str(m[d]))
-                s.add(Or(block))
+                self.solver.add(Or(block))
                 self.printVars(m)
                 count += 1
             else:
-                print(s.check())
-                core = s.unsat_core()
-                print(len(core))
-                print(self.solver.unsat_core())
+                if(Common.MODE == Common.DEBUG):
+                    debug_print(self.solver.check(self.unsat_core_trackers))
+                    core = self.solver.unsat_core()
+                    debug_print(len(core))
+                    debug_print(self.solver.unsat_core())
                 if count == 0:
-                    print("UNSAT")
+                    standard_print("UNSAT")
                 return result
-    
-    def instantiateSorts(self):
-        '''
-        Declares z3 sorts.
-        '''
-        for i in self.z3_sorts.values():
-            i.sort = DeclareSort(i.id)
-        if(self.__DEBUG__):
-            print("Sorts:")
-            for i in self.z3_sorts.values():
-                print("\t" + i.id)
-    
-    
-    def instantiateDatatypes(self):
-        '''
-        Instantiates a Datatype for each ClaferSort, which will be used
-            to create the Clafer hierarchy.
-        '''
-        for i in self.z3_datatypes.values():
-            i.generateDatatype()
-        if(self.__DEBUG__):
-            print("Datatypes:")
-            for i in self.z3_datatypes.values():
-                print("\t" + str(i))
-        self.instantiateDatatypes_h()
-    
-    def instantiateDatatypes_h(self):
-        '''
-        Creates all Z3 Datatypes at the same time. After invoking this method,
-            each ClaferDatatype.datatype contains a pointer to the
-            DataTypeSortRef, rather than the Datatype definition.
-        '''
-        datatypesList = list(CreateDatatypes(*[i.datatype for i in self.z3_datatypes.values()]))
-        for claferDatatype, datatype in zip(self.z3_datatypes.values(), datatypesList):
-            claferDatatype.datatype = datatype
-    
-    def instantiateConsts(self):
-        '''
-        Instantiate the necessary number of consts for each ClaferDatatype.
-        '''
-        for i in self.z3_sorts.values():
-            i.consts = [Const(i.id+str(x),self.z3_datatypes[i].datatype) for x in range(i.numConsts)]
-            
-        if(self.__DEBUG__):
-            print("Consts:")
-            for i in self.z3_sorts.values():
-                print("\t" + str(i.consts))
-    
-           
-    def instantiateConstraints(self):
-        '''
-        Calls :meth:`generateConstraint` from each constraint.
-        '''  
-        for i in self.z3_constraints:
-            self.solver.add(i.generateConstraint())
-        if(self.__DEBUG__):
-            print("Constraints:")
-            for i in self.z3_constraints:
-                print("\t" + i.comment)
-                
-    
+   
         
     ###############################
     # accessors                   #
@@ -237,12 +157,16 @@ class Z3Instance(object):
         :returns: z3_constraints
         '''
         return self.z3_constraints
+    
+    def getSort(self, uid):
+        return self.z3_sorts.get(uid)
         
     def getSorts(self):
         '''
         :returns: z3_sorts
         '''
         return self.z3_sorts.values()
+    
     ###############################
     # end accessors               # 
     ###############################

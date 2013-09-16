@@ -6,7 +6,6 @@
 <path>/PythonIR/src</path>
 </pydev_pathproperty>
 <pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH">
-<path>C:\Python27\Lib\site-packages</path>
 <path>/home/ezulkosk/git/PythonIR/z3</path>
 </pydev_pathproperty>
 </pydev_project>

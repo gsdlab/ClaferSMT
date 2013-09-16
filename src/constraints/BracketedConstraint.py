@@ -15,8 +15,9 @@ class BracketedConstraint(object):
     Class for creating bracketed Clafer constraints in Z3.
     '''
     
-    def __init__(self, z3):
+    def __init__(self, z3, claferStack):
         self.z3 = z3
+        self.claferStack = claferStack
         self.stack = []
         self.value = "bracketed constraint"
         
@@ -62,13 +63,23 @@ class BracketedConstraint(object):
     
     def endProcessing(self, parentClafer):
         self.value = self.stack.pop()
-        if(self.this):
-            for i in range(self.this.numInstances):
-                self.z3.z3_bracketed_constraints.append(Implies(self.this.instances[i] != self.this.parentInstances, self.value[1][i]))
+        (_, exprs) = self.value
+        if(self.claferStack):
+            thisClafer = self.claferStack[-1]
+            for i in range(thisClafer.numInstances):
+                self.z3.z3_bracketed_constraints.append(Implies(thisClafer.instances[i] != thisClafer.parentInstances, exprs[i]))
         else:
-            #fixme
-            self.z3.z3_bracketed_constraints.append(self.value)
-    
+            for i in exprs:
+                self.z3.z3_bracketed_constraints.append(i)
+    '''
+self.value = self.stack.pop()
+        (_, exprs) = self.value
+        if(parentClafer):
+            for i in range(self.this.numInstances):
+                self.z3.z3_bracketed_constraints.append(Implies(self.this.instances[i] != self.this.parentInstances, exprs[i]))
+        else:
+            for i in exprs:
+                self.z3.z3_bracketed_constraints.append(i)'''
     def __str__(self):
         return str(self.value)
     

@@ -8,6 +8,7 @@ from constraints import BracketedConstraint
 from visitors import VisitorTemplate
 import visitors.Visitor
 
+claferStack = [] #used to determine where the constraint is in the clafer hierarchy
 inConstraint = False #true if beneath a constraint node
 currentConstraint = None #holds the constraint currently being traversed
 
@@ -36,8 +37,10 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     
     def claferVisit(self, element):
         visitors.Visitor.visit(self,element.supers)
+        claferStack.append(self.z3.getSort(element.uid))
         for i in element.elements:
             visitors.Visitor.visit(self, i)
+        claferStack.pop()
     
     def claferidVisit(self, element):
         if(CreateBracketedConstraints.inConstraint):
@@ -56,7 +59,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
    
     def constraintVisit(self, element):
         CreateBracketedConstraints.inConstraint = True
-        CreateBracketedConstraints.currentConstraint = BracketedConstraint.BracketedConstraint(self.z3)
+        CreateBracketedConstraints.currentConstraint = BracketedConstraint.BracketedConstraint(self.z3, claferStack)
         visitors.Visitor.visit(self, element.exp)
         CreateBracketedConstraints.currentConstraint.endProcessing(None)
         CreateBracketedConstraints.currentConstraint = None
