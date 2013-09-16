@@ -9,7 +9,7 @@ from common.Common import debug_print, standard_print
 from gi.overrides.keysyms import m
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, \
-    PrintHierarchy, GroupCardConstraints
+    PrintHierarchy
 from z3 import *
 import common
 
@@ -24,9 +24,6 @@ class Z3Instance(object):
 
     Stores and instantiates all necessary constraints for the ClaferZ3 model.
     '''
-    
-    
-    
     def __init__(self, module):
         self.module = module
         self.model_count = 0
@@ -54,6 +51,10 @@ class Z3Instance(object):
     def createGroupCardConstraints(self):
         for i in self.z3_sorts.values():
             i.addGroupCardConstraints()
+            
+    def createCardinalityConstraints(self):
+        for i in self.z3_sorts.values():
+            i.createCardinalityConstraints()
     
     def assertConstraint(self, constraint):
         self.solver.add(constraint)
@@ -84,8 +85,12 @@ class Z3Instance(object):
         Visitor.visit(ResolveClaferIds.ResolveClaferIds(self), self.module)
         Visitor.visit(CreateHierarchy.CreateHierarchy(self), self.module)
         
+        debug_print("Creating cardinality constraints.")
+        self.createCardinalityConstraints()
+        
         debug_print("Creating group cardinality constraints.")
-        self.createGroupCardConstraints()        
+        self.createGroupCardConstraints()
+                
         debug_print("Creating bracketed constraints.")
         Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
            
@@ -114,10 +119,6 @@ class Z3Instance(object):
             
     #this is not my method, some stackoverflow or z3.codeplex.com method. Can't remember, should find it.
     def get_models(self, desired_number_of_models):
-        #for i in self.solver.assertions():
-        #    print(i)
-    
-        
         result = []
         count = 0
         while True:
@@ -139,7 +140,7 @@ class Z3Instance(object):
                 self.printVars(m)
                 count += 1
             else:
-                if(Common.MODE == Common.DEBUG):
+                if Common.MODE == Common.DEBUG and count == 0:
                     debug_print(self.solver.check(self.unsat_core_trackers))
                     core = self.solver.unsat_core()
                     debug_print(len(core))

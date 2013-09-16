@@ -5,8 +5,8 @@ Created on April 27, 2013
 
 '''
 from common import Z3Instance, Common
-from test import TestClafers
-import imp
+from test import TestClafers, bracketedconstraint_this, multiple_joins, \
+    this_dot_parent
 import sys
 
 
@@ -19,15 +19,14 @@ def main(args):
     
     Starting point for ClaferZ3.
     '''
-    Common.MODE = Common.TEST
+    Common.MODE = Common.NORMAL
     
     if Common.MODE == Common.TEST:
         TestClafers.run()
     else:
-        src = imp.load_source("ClaferOutput",
-                          #'/home/ezulkosk/myclafers/testclafers/py/bracketedconstraint_this.py')
-                          '/home/ezulkosk/myclafers/testclafers/py/multiple_joins.py')
-        module = src.getModule()
+        #module = bracketedconstraint_this.getModule()
+        #module = multiple_joins.getModule()
+        module = this_dot_parent.getModule()
         z3 = Z3Instance.Z3Instance(module)
         z3.run()
    
