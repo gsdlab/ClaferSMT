@@ -25,28 +25,18 @@ class Z3Instance(object):
     Stores and instantiates all necessary constraints for the ClaferZ3 model.
     '''
     def __init__(self, module):
+        if(Common.MODE == Common.TEST):
+            Common.reset()
         self.module = module
         self.model_count = 0
         self.z3_constraints = []
         self.z3_bracketed_constraints = []
         self.z3_sorts = {}
         self.z3_datatypes = {}
-        self.functionID = 0
-        self.constraintID = 0
         self.unsat_core_trackers = []
         self.setOptions()
         self.solver = Solver() 
         self.createCommonFunctions()
-        
-    
-    
-    def getFunctionUID(self):
-        self.functionID = self.functionID + 1
-        return self.functionID
-    
-    def getConstraintUID(self):
-        self.constraintID = self.constraintID + 1
-        return self.constraintID
     
     def createGroupCardConstraints(self):
         for i in self.z3_sorts.values():
@@ -59,15 +49,14 @@ class Z3Instance(object):
     def assertConstraint(self, constraint):
         self.solver.add(constraint)
         if Common.MODE == Common.DEBUG:
-            p = Bool("p" + str(self.getConstraintUID()))
+            p = Bool("p" + str(Common.getConstraintUID()))
             self.unsat_core_trackers.append(p)
             self.solver.add(Implies(p, constraint))
         
     def createCommonFunctions(self):
         self.bool2Int = Function("bool2Int", BoolSort(), IntSort())
         self.z3_constraints.append(self.bool2Int(True) == 1)
-        self.z3_constraints.append(self.bool2Int(False) == 0)
-                
+        self.z3_constraints.append(self.bool2Int(False) == 0)               
     
     def setOptions(self):
         set_option(max_depth=7)

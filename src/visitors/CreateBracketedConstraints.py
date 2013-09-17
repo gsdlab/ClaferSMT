@@ -44,18 +44,19 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     
     def claferidVisit(self, element):
         if(CreateBracketedConstraints.inConstraint):
-            #CreateBracketedConstraints.currentConstraint.addArg(element)
-            if element.id != "ref" and element.id != "this":
-                CreateBracketedConstraints.currentConstraint.addArg(([element.claferSort], [element.claferSort.instances]))
-            elif element.id == "this":           
+            if element.id == "this":
                 instances = []
                 for i in range(element.claferSort.numInstances):
                     instances.append([element.claferSort.parentInstances if i != j else element.claferSort.instances[j] 
                                       for j in range(element.claferSort.numInstances)])
                 CreateBracketedConstraints.currentConstraint.addArg(([element.claferSort], instances))
                 CreateBracketedConstraints.currentConstraint.this = element.claferSort
+            elif element.id == "ref":
+                CreateBracketedConstraints.currentConstraint.addArg(["ref"])
+            elif element.id == "parent":
+                CreateBracketedConstraints.currentConstraint.addArg((["parent"], ["parent"]))
             else:
-                CreateBracketedConstraints.currentConstraint.addArg("ref")
+                CreateBracketedConstraints.currentConstraint.addArg(([element.claferSort], [element.claferSort.instances]))
    
     def constraintVisit(self, element):
         CreateBracketedConstraints.inConstraint = True

@@ -39,7 +39,7 @@ class ResolveClaferIds(VisitorTemplate.VisitorTemplate):
     
     def claferidVisit(self, element):
         #parent not supported yet
-        if element.id == "clafer" or element.id == "integer"  or element.id == "ref":
+        if element.id == "clafer" or element.id == "integer"  or element.id == "ref" or element.id == "parent":
             return
         elif(element.id == "this"):
             element.claferSort = self.claferStack[-1]

@@ -115,7 +115,7 @@ class  ClaferSort(object):
         return self.__str__()
     
     def __eq__(self, other):
-        return self.id == other.id
+        return self.element.uid == other.element.uid
     
     def __hash__(self):
         return hash(self.id)

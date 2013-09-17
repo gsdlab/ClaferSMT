@@ -3,35 +3,55 @@ Created on Apr 29, 2013
 
 @author: ezulkosk
 '''
-from z3 import Function, IntSort, BoolSort, If, Not, Sum, Implies
+from common import Common
+from lxml.builder import basestring
+from z3 import Function, IntSort, BoolSort, If, Not, Sum, Implies, Or
 import sys
 
 
 
+#fix the return sorts so that they only contain the type of the final instances: e.g. A.B returns B, not A.B
+#can optimize this.parent
 def op_join(l, r):
     (lsorts, linstances) = l
     (rsorts, rinstances) = r
     leftJoinPoint = lsorts[-1]
     rightJoinPoint = rsorts[0]
-    
-    join_function = Function("join:" + str(leftJoinPoint) + "." + str(rightJoinPoint) + str(leftJoinPoint.z3.getFunctionUID()), IntSort(), BoolSort())
-    constraints = [join_function(i) == (linstances[i] != leftJoinPoint.parentInstances) for i in range(len(linstances))]
-    leftJoinPoint.z3.z3_constraints = leftJoinPoint.z3.z3_constraints + constraints
-    newinstances = [If(join_function(rinstances[i]), rinstances[i], rightJoinPoint.parentInstances) for i in range(len(rinstances))]
-    return (lsorts + rsorts, newinstances)        
+    if isinstance(rightJoinPoint, basestring):
+        newinstances = []
+        if rightJoinPoint == "parent":
+            for i in range(leftJoinPoint.parent.numInstances):
+                clause = Or(*[j == i for j in linstances])
+                newinstances.append(If(clause, leftJoinPoint.parent.instances[i], leftJoinPoint.parent.parentInstances))
+        return([leftJoinPoint.parent], newinstances)
+    else:
+        join_function = Function("join" + str(Common.getFunctionUID()) + ":" + str(leftJoinPoint) + "." + str(rightJoinPoint), IntSort(), BoolSort())
+        constraints = [join_function(i) == (linstances[i] != leftJoinPoint.parentInstances) for i in range(len(linstances))]
+        leftJoinPoint.z3.z3_constraints = leftJoinPoint.z3.z3_constraints + constraints
+        newinstances = [If(join_function(rinstances[i]), rinstances[i], rightJoinPoint.parentInstances) for i in range(len(rinstances))]
+        return (rsorts, newinstances)        
     
 def op_add(l,r):
-    pass
+    (lsorts, linstance) = l
+    (rsorts, rinstance) = r
+    return(lsorts + rsorts, linstance + rinstance)
 
 def op_sub(l,r):
-    pass
+    (lsorts, linstance) = l
+    (rsorts, rinstance) = r
+    return(lsorts + rsorts, linstance - rinstance)
 
 def op_mul(l,r):
-    pass
+    (lsorts, linstance) = l
+    (rsorts, rinstance) = r
+    return(lsorts + rsorts, linstance * rinstance)
 
 #integer division
 def op_div(l,r):
-    pass
+    (lsorts, linstance) = l
+    (rsorts, rinstance) = r
+    return(lsorts + rsorts, linstance / rinstance if((not isinstance(linstance, int)) or (not isinstance(rinstance, int)))
+                             else linstance // rinstance)
     
 def op_un_minus(e):
     return (e[0], [[-i for i in j] for j in e[1]])
@@ -42,13 +62,18 @@ def op_eq(l,r):
     return (lsorts+rsorts, lvalue == rvalue)  
     
 def op_ne(l,r):
-    return Not(op_eq(l,r))
+    (sorts, expr) = op_eq(l,r)
+    return (sorts, Not(expr))
     
 def op_lt(l,r):
-    pass
+    (lsorts, lvalue) = l
+    (rsorts, rvalue) = r
+    return (lsorts+rsorts, lvalue < rvalue)  
         
 def op_le(l,r):
-    pass
+    (lsorts, lvalue) = l
+    (rsorts, rvalue) = r
+    return (lsorts+rsorts, lvalue <= rvalue)  
 
 def op_gt(l,r):
     return op_lt(r,l)
@@ -118,9 +143,6 @@ ClaferToZ3OperationsMap = {
                            #Ternary Ops
                            "ifthenelse"  : (3, "TODO")       
                            }
-
-
-
 
 def getOperationConversion(op):
     '''

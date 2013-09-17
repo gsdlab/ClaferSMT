@@ -4,12 +4,15 @@ Created on Sep 15, 2013
 @author: ezulkosk
 '''
 from common import Z3Instance
-from test import multiple_joins, bracketedconstraint_this, this_dot_parent
+from test import multiple_joins, bracketedconstraint_this, this_dot_parent, \
+    arithmetic, relations
 
 tests = [ 
           (multiple_joins, 1),
           (bracketedconstraint_this, 6),
-          (this_dot_parent, 2)
+          (this_dot_parent, 2),
+          (arithmetic, 2),
+          (relations,1)
          ]
 
 def run():
