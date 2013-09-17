@@ -56,7 +56,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             elif element.id == "parent":
                 CreateBracketedConstraints.currentConstraint.addArg((["parent"], ["parent"]))
             else:
-                CreateBracketedConstraints.currentConstraint.addArg(([element.claferSort], [element.claferSort.instances]))
+                CreateBracketedConstraints.currentConstraint.addArg(([element.claferSort], [element.claferSort.instances[:]]))
    
     def constraintVisit(self, element):
         CreateBracketedConstraints.inConstraint = True

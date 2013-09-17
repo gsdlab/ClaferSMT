@@ -3,6 +3,7 @@ Created on Apr 28, 2013
 
 @author: ezulkosk
 '''
+from z3 import If
 
 NORMAL = 0
 DEBUG = 1
@@ -36,5 +37,15 @@ def reset():
     FUNCTION_ID = 0
     CONSTRAINT_ID = 0
 
+def min2(l,r):
+    '''
+    returns the min of two integers
+    '''
+    return If(l <= r, l, r)
 
+def max2(l,r):
+    '''
+    returns the min of two integers
+    '''
+    return If(l <= r, r, l)
     

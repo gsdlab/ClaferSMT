@@ -5,8 +5,9 @@ Created on Apr 29, 2013
 '''
 from common import Common
 from lxml.builder import basestring
-from z3 import Function, IntSort, BoolSort, If, Not, Sum, Implies, Or
+from z3 import Function, IntSort, BoolSort, If, Not, Sum, Implies, Or, And, Xor
 import sys
+
 
 
 
@@ -29,51 +30,59 @@ def op_join(l, r):
         constraints = [join_function(i) == (linstances[i] != leftJoinPoint.parentInstances) for i in range(len(linstances))]
         leftJoinPoint.z3.z3_constraints = leftJoinPoint.z3.z3_constraints + constraints
         newinstances = [If(join_function(rinstances[i]), rinstances[i], rightJoinPoint.parentInstances) for i in range(len(rinstances))]
-        return (rsorts, newinstances)        
+        return ([rightJoinPoint], newinstances)        
     
+def op_card(arg):
+    (sorts, instances) = arg
+    rightmostInstance = sorts[-1]
+    bool2Int = rightmostInstance.z3.bool2Int
+    instances = [bool2Int(rightmostInstance.parentInstances != instances[i]) for i in range(len(instances))]
+    return (["int"], Sum(instances))    
+
 def op_add(l,r):
-    (lsorts, linstance) = l
-    (rsorts, rinstance) = r
-    return(lsorts + rsorts, linstance + rinstance)
+    (_, linstance) = l
+    (_, rinstance) = r
+    return(["int"], linstance + rinstance)
 
 def op_sub(l,r):
-    (lsorts, linstance) = l
-    (rsorts, rinstance) = r
-    return(lsorts + rsorts, linstance - rinstance)
+    (_, linstance) = l
+    (_, rinstance) = r
+    return(["int"], linstance - rinstance)
 
 def op_mul(l,r):
-    (lsorts, linstance) = l
-    (rsorts, rinstance) = r
-    return(lsorts + rsorts, linstance * rinstance)
+    (_, linstance) = l
+    (_, rinstance) = r
+    return(["int"], linstance * rinstance)
 
 #integer division
 def op_div(l,r):
-    (lsorts, linstance) = l
-    (rsorts, rinstance) = r
-    return(lsorts + rsorts, linstance / rinstance if((not isinstance(linstance, int)) or (not isinstance(rinstance, int)))
+    (_, linstance) = l
+    (_, rinstance) = r
+    return(["int"], linstance / rinstance if((not isinstance(linstance, int)) or (not isinstance(rinstance, int)))
                              else linstance // rinstance)
     
-def op_un_minus(e):
-    return (e[0], [[-i for i in j] for j in e[1]])
+def op_un_minus(arg):
+    (_, expr) = arg
+    return (["int"], -(expr))
     
 def op_eq(l,r):
-    (lsorts, lvalue) = l
-    (rsorts, rvalue) = r
-    return (lsorts+rsorts, lvalue == rvalue)  
+    (_, lvalue) = l
+    (_, rvalue) = r
+    return (["bool"], lvalue == rvalue)  
     
 def op_ne(l,r):
-    (sorts, expr) = op_eq(l,r)
-    return (sorts, Not(expr))
+    (_, expr) = op_eq(l,r)
+    return (["bool"], Not(expr))
     
 def op_lt(l,r):
-    (lsorts, lvalue) = l
-    (rsorts, rvalue) = r
-    return (lsorts+rsorts, lvalue < rvalue)  
+    (_, lvalue) = l
+    (_, rvalue) = r
+    return (["bool"], lvalue < rvalue)  
         
 def op_le(l,r):
-    (lsorts, lvalue) = l
-    (rsorts, rvalue) = r
-    return (lsorts+rsorts, lvalue <= rvalue)  
+    (_, lvalue) = l
+    (_, rvalue) = r
+    return (["bool"], lvalue <= rvalue)  
 
 def op_gt(l,r):
     return op_lt(r,l)
@@ -82,24 +91,137 @@ def op_ge(l,r):
     return op_le(r,l)
 
 def op_and(l,r):
-    pass
+    (_, lvalue) = l
+    (_, rvalue) = r
+    return (["bool"], And(lvalue, rvalue))  
 
 def op_or(l,r):
-    pass
+    (_, lvalue) = l
+    (_, rvalue) = r
+    return (["bool"], Or(lvalue, rvalue))  
+
+def op_xor(l,r):
+    (_, lvalue) = l
+    (_, rvalue) = r
+    return (["bool"], Xor(lvalue, rvalue))  
+
+def op_implies(l,r):
+    (_, lvalue) = l
+    (_, rvalue) = r
+    return (["bool"], Implies(lvalue, rvalue)) 
+
+def op_equivalence(l,r):
+    (_, lvalue) = l
+    (_, rvalue) = r
+    return (["bool"], And(Implies(lvalue, rvalue), Implies(rvalue, lvalue)))
+
+def op_ifthenelse(cond, ifexpr, elseexpr):
+    (_, condvalue) = cond
+    (_, ifvalue) = ifexpr
+    (_, elsevalue) = elseexpr
+    return (["bool"], If(condvalue, ifvalue, elsevalue))
+
+
+
+def set_extend(l,r):
+    '''
+    extends two sets to facilitate set operations
+    Simplified Example:
+       Extend(Set(A,B), Set(B,C)) => (Set(A,B,C), Set(A,B,C)),
+       In this case, the C's in the left set are "zeroed", and
+       the A's in the right set are "zeroed"
+    '''
+    (lsorts, linstances) = l
+    (rsorts, rinstances) = r
+    finalsorts = []
+    finalLinstances = []
+    finalRinstances = []
+    while lsorts or rsorts:
+        if (not rsorts):
+            nextsort = lsorts.pop(0)
+            for _ in range(nextsort.numInstances):
+                finalLinstances.append(linstances.pop(0))
+                finalRinstances.append(nextsort.parentInstances)
+        elif (not lsorts):
+            nextsort = rsorts.pop(0)
+            for _ in range(nextsort.numInstances):
+                finalLinstances.append(nextsort.parentInstances)
+                finalRinstances.append(rinstances.pop(0))
+        elif lsorts[0].element.uid < rsorts[0].element.uid:
+            nextsort = lsorts.pop(0)
+            for _ in range(nextsort.numInstances):
+                finalLinstances.append(linstances.pop(0))
+                finalRinstances.append(nextsort.parentInstances)
+        elif lsorts[0].element.uid > rsorts[0].element.uid:
+            nextsort = rsorts.pop(0)
+            for _ in range(nextsort.numInstances):
+                finalLinstances.append(nextsort.parentInstances)
+                finalRinstances.append(rinstances.pop(0))        
+        else:
+            nextsort = lsorts.pop(0)
+            rsorts.pop(0)
+            for _ in range(nextsort.numInstances):
+                finalLinstances.append(linstances.pop(0))
+                finalRinstances.append(rinstances.pop(0))
+        
+        finalsorts.append(nextsort)
+    return((finalsorts, finalLinstances), (finalsorts, finalRinstances))
 
 def op_union(l,r):
-    pass 
+    (extendedL, extendedR) = set_extend(l,r)
+    (sorts, extendedLinstances) = extendedL
+    (_, extendedRinstances) = extendedR
+    finalInstances = []
+    for i in sorts:
+        for _ in range(i.numInstances):
+            finalInstances.append(Common.min2(extendedLinstances.pop(0), extendedRinstances.pop(0)))
+    return (sorts, finalInstances)
+
+def op_intersection(l,r):
+    (extendedL, extendedR) = set_extend(l,r)
+    (sorts, extendedLinstances) = extendedL
+    (_, extendedRinstances) = extendedR
+    finalInstances = []
+    for i in sorts:
+        for _ in range(i.numInstances):
+            finalInstances.append(Common.max2(extendedLinstances.pop(0), extendedRinstances.pop(0)))
+    return (sorts, finalInstances)
+
+def op_difference(l,r):
+    (extendedL, extendedR) = set_extend(l,r)
+    (sorts, extendedLinstances) = extendedL
+    (_, extendedRinstances) = extendedR
+    finalInstances = []
+    for i in sorts:
+        for _ in range(i.numInstances):
+            linstance = extendedLinstances.pop(0)
+            finalInstances.append(If(And(linstance != i.parentInstances, extendedRinstances.pop(0) == i.parentInstances)
+                                     , linstance
+                                     , i.parentInstances))
+    return (sorts, finalInstances)
 
 def op_in(l,r):
+    (extendedL, extendedR) = set_extend(l,r)
+    (sorts, extendedLinstances) = extendedL
+    (_, extendedRinstances) = extendedR
+    finalExpr = True
+    for i in sorts:
+        for _ in range(i.numInstances):
+            finalExpr = And(finalExpr, Implies(extendedLinstances.pop(0) != i.parentInstances, 
+                                               extendedRinstances.pop(0) != i.parentInstances))
+    return (sorts, finalExpr)
+
+def op_nin(l,r):
+    (sorts, finalExpr) = op_in(l,r)
+    return (sorts, Not(finalExpr))
+
+def op_domain_restriction(l,r):
     pass
 
-def op_card(arg):
-    (sorts, instances) = arg
-    rightmostInstance = sorts[-1]
-    bool2Int = rightmostInstance.z3.bool2Int
-    instances = [bool2Int(rightmostInstance.parentInstances != instances[i]) for i in range(len(instances))]
-    return (sorts, Sum(instances))    
-    
+def op_range_restriction(l,r):
+    pass
+
+
 
 '''
     Map used to convert Clafer operations to Z3 operations
@@ -117,10 +239,10 @@ ClaferToZ3OperationsMap = {
                            "min"         : (1, "TODO"),
                            "sum"         : (1, "TODO"),    
                            #Binary Ops
-                           "<=>"         : (2, lambda *args: args),
-                           "=>"          : (2, lambda *args: args),
+                           "<=>"         : (2, op_equivalence),
+                           "=>"          : (2, op_implies),
                            "||"          : (2, op_or),
-                           "xor"         : (2, lambda *args: args),
+                           "xor"         : (2, op_xor),
                            "&&"          : (2, op_and),
                            "<"           : (2, op_lt),
                            ">"           : (2, op_gt),
@@ -129,16 +251,16 @@ ClaferToZ3OperationsMap = {
                            "="           : (2, op_eq),
                            "!="          : (2, op_ne),
                            "in"          : (2, op_in),
-                           "nin"         : (2, lambda *args: args),
+                           "nin"         : (2, op_nin),
                            "+"           : (2, op_add),
                            "-"           : (2, op_sub),
                            "*"           : (2, op_mul),
                            "/"           : (2, op_div),
                            "++"          : (2, op_union),
-                           "--"          : (2, "TODO"),
-                           "&"           : (2, "TODO"),
-                           "<:"          : (2, "TODO"),
-                           ":>"          : (2, "TODO"),
+                           "--"          : (2, op_difference),
+                           "&"           : (2, op_intersection),
+                           "<:"          : (2, op_domain_restriction),
+                           ":>"          : (2, op_range_restriction),
                            "."           : (2, op_join),
                            #Ternary Ops
                            "ifthenelse"  : (3, "TODO")       
@@ -202,11 +324,11 @@ class BracketedConstraint(object):
         args = []
         for _ in range(0,arity):
             args.insert(0, self.stack.pop())
-        (maxInstances, extendedArgs) = self.extend(args)
+        (maxInstances, duplicatedArgs) = self.extend(args)
         finalExprs = []
         for i in range(maxInstances):
             tempExprs = []
-            for j in extendedArgs:
+            for j in duplicatedArgs:
                 (sorts, instances) = j
                 tempExprs.append((sorts,instances[i]))
             finalExprs.append(tempExprs)

@@ -6,7 +6,7 @@ Created on April 27, 2013
 '''
 from common import Z3Instance, Common
 from test import TestClafers, bracketedconstraint_this, multiple_joins, \
-    this_dot_parent, arithmetic, relations
+    this_dot_parent, arithmetic, relations, boolean_connectives, union
 import sys
 
 
@@ -28,7 +28,9 @@ def main(args):
         #module = multiple_joins.getModule()
         #module = this_dot_parent.getModule()
         #module = arithmetic.getModule()
-        module = relations.getModule()
+        #module = relations.getModule()
+        #module = boolean_connectives.getModule()
+        module = union.getModule()
         z3 = Z3Instance.Z3Instance(module)
         z3.run()
    
