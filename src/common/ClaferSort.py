@@ -3,7 +3,7 @@ Created on Apr 29, 2013
 
 @author: ezulkosk
 '''
-from z3 import IntVector, Function, IntSort, If, BoolSort, Implies
+from z3 import IntVector, Function, IntSort, If, BoolSort, Implies, And
 
 class  ClaferSort(object):
     '''
@@ -20,11 +20,13 @@ class  ClaferSort(object):
         self.summs = []
         self.numInstances = int(self.element.glCard[1].value)
         self.instances = IntVector(self.element.uid.split("_",1)[1],self.numInstances)
-        self.super = self.checkSuper()
-        if(self.super != "clafer"):
-            self.addRef()
-        else:
-            self.refs = []
+        self.refs = []
+        self.subs = []
+        self.indexInSuper = 0
+        self.currentSubIndex = 0
+        self.checkSuperAndRef()
+        if(self.superSort):
+            pass
         #gets the upper card bound of the parent clafer
         if not self.parentStack:
             self.parent = None
@@ -54,7 +56,6 @@ class  ClaferSort(object):
         self.mask = Function(self.element.uid + "_mask", IntSort(), IntSort(), IntSort())
         for i in range(self.parentInstances):    
             for j in range(self.numInstances):
-                #print(str(i) + " " + str(j))
                 self.constraints.append(self.mask(i, j) == If(i == self.instances[j], 1, 0))           
         #function that returns True for all instances that are on
         self.full = Function(self.element.uid + "_full", IntSort(), BoolSort())
@@ -97,13 +98,32 @@ class  ClaferSort(object):
             if upperGCard != -1:
                 self.constraints.append(bigSumm <= upperGCard)
     
-    def checkSuper(self):
+    def checkSuperAndRef(self):
         #assumes that "supers" can only have one element
         supers = self.element.supers
-        return str(supers.elements[0].iExp[0].id)
+        if(supers.elements[0].iExp[0].id != "clafer"):
+            if(supers.elements[0].type == "Ref"):
+                self.refSort = self.z3.getSort(supers.elements[0].iExp[0].id)
+                self.superSort = None
+            else:
+                self.refSort = None
+                self.superSort = self.z3.getSort(supers.elements[0].iExp[0].id)
+        else:
+            self.superSort = None
+            self.refSort = None
         
     def addRef(self):
         pass
+    
+    def addSubSort(self, sub):
+        self.subs.append(sub)
+        oldSubIndex = self.currentSubIndex
+        self.currentSubIndex = self.currentSubIndex + sub.numInstances
+        #the super cannot exist without the sub, and vice-versa
+        for i in range(sub.numInstances):
+            self.constraints.append(And(Implies(self.instances[i + oldSubIndex] != self.parentInstances, sub.instances[i] != sub.parentInstances),
+                                         Implies(sub.instances[i] != sub.parentInstances,self.instances[i + oldSubIndex] != self.parentInstances)))
+        return oldSubIndex
     
     def addField(self, claferSort):
         self.fields.append(claferSort)

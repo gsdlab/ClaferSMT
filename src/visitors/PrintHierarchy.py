@@ -26,8 +26,11 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
         self.parentStack = [0] #used to determine the parent of each clafer
     
     def claferVisit(self, element):
+        if element.isAbstract:
+            return
         indent = "  " * (len(self.parentStack) - 1)
         sort = self.z3.z3_sorts[element.uid]
+        
         for j in range(sort.numInstances):
             isOn = str(self.model.eval(sort.instances[j])) == str(self.parentStack[-1]) 
             if isOn:
@@ -38,6 +41,11 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                 self.parentStack.append(j)
                 for i in element.elements:
                     visitors.Visitor.visit(self, i)
+                if sort.superSort:
+                    self.parentStack.append(j + sort.indexInSuper)
+                    for i in sort.superSort.element.elements:
+                        visitors.Visitor.visit(self, i)
+                    self.parentStack.pop()
                 self.parentStack.pop()
         
          

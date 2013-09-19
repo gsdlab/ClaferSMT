@@ -6,7 +6,8 @@ Created on April 27, 2013
 '''
 from common import Z3Instance, Common
 from test import TestClafers, bracketedconstraint_this, multiple_joins, \
-    this_dot_parent, arithmetic, relations, boolean_connectives, union
+    this_dot_parent, arithmetic, relations, boolean_connectives, union, \
+    simple_abstract
 import sys
 
 
@@ -19,7 +20,7 @@ def main(args):
     
     Starting point for ClaferZ3.
     '''
-    Common.MODE = Common.NORMAL
+    Common.MODE = Common.TEST
     
     if Common.MODE == Common.TEST:
         TestClafers.run()
@@ -30,7 +31,8 @@ def main(args):
         #module = arithmetic.getModule()
         #module = relations.getModule()
         #module = boolean_connectives.getModule()
-        module = union.getModule()
+        #module = union.getModule()
+        module = simple_abstract.getModule()
         z3 = Z3Instance.Z3Instance(module)
         z3.run()
    

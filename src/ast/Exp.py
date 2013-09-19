@@ -8,8 +8,6 @@ class Exp(object):
     '''
     All variables analogous to those described in IntClafer.hs
     '''
-
-
     def __init__(self, expType, my_type, parentId, pos, iExpType ,iExp):
         self.expType = expType
         self.type = my_type

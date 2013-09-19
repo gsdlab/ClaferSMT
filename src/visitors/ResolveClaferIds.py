@@ -32,13 +32,12 @@ class ResolveClaferIds(VisitorTemplate.VisitorTemplate):
     
     def claferVisit(self, element):
         self.claferStack.append(self.z3.z3_sorts[element.uid])
-        visitors.Visitor.visit(self,element.supers)
+        #visitors.Visitor.visit(self,element.supers)
         for i in element.elements:
             visitors.Visitor.visit(self, i)
         self.claferStack.pop()
     
     def claferidVisit(self, element):
-        #parent not supported yet
         if element.id == "clafer" or element.id == "integer"  or element.id == "ref" or element.id == "parent":
             return
         elif(element.id == "this"):

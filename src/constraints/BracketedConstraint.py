@@ -9,9 +9,12 @@ from z3 import Function, IntSort, BoolSort, If, Not, Sum, Implies, Or, And, Xor
 import sys
 
 
+def joinWithSuper(sort, instances):
+    newinstances = []
+    for i in range(len(instances)):
+        newinstances.append(If(instances[i] != sort.parentInstances, sort.superSort.instances[i + sort.indexInSuper], sort.superSort.parentInstances))
+    return(sort.superSort, newinstances)
 
-
-#fix the return sorts so that they only contain the type of the final instances: e.g. A.B returns B, not A.B
 #can optimize this.parent
 def op_join(l, r):
     (lsorts, linstances) = l
@@ -26,6 +29,13 @@ def op_join(l, r):
                 newinstances.append(If(clause, leftJoinPoint.parent.instances[i], leftJoinPoint.parent.parentInstances))
         return([leftJoinPoint.parent], newinstances)
     else:
+        #join with super abstract
+        if not(rightJoinPoint in leftJoinPoint.fields):
+            #deep copy list, should change eventually
+            lsorts = lsorts[:]
+            lsorts.pop()
+            (leftJoinPoint, linstances) = joinWithSuper(leftJoinPoint, linstances)
+            lsorts.append(leftJoinPoint)
         join_function = Function("join" + str(Common.getFunctionUID()) + ":" + str(leftJoinPoint) + "." + str(rightJoinPoint), IntSort(), BoolSort())
         constraints = [join_function(i) == (linstances[i] != leftJoinPoint.parentInstances) for i in range(len(linstances))]
         leftJoinPoint.z3.z3_constraints = leftJoinPoint.z3.z3_constraints + constraints

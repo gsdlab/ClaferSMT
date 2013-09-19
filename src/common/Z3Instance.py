@@ -46,6 +46,11 @@ class Z3Instance(object):
         for i in self.z3_sorts.values():
             i.createCardinalityConstraints()
     
+    def mapColonClafers(self):
+        for i in self.z3_sorts.values():
+            if i.superSort:
+                i.indexInSuper = i.superSort.addSubSort(i)     
+    
     def assertConstraint(self, constraint):
         self.solver.add(constraint)
         if Common.MODE == Common.DEBUG:
@@ -77,6 +82,10 @@ class Z3Instance(object):
         debug_print("Creating cardinality constraints.")
         self.createCardinalityConstraints()
         
+        debug_print("Mapping colon clafers.")
+        self.mapColonClafers()
+        
+        #FIX for abstracts
         debug_print("Creating group cardinality constraints.")
         self.createGroupCardConstraints()
                 
@@ -84,6 +93,9 @@ class Z3Instance(object):
         Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
            
         self.assertConstraints()        
+        
+        #for i in self.solver.assertions():
+        #    print(i)
         
         debug_print("Getting models.")    
         models = self.get_models(-1)
