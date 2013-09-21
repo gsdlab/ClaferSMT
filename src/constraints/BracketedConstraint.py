@@ -27,7 +27,14 @@ def op_join(l, r):
             for i in range(leftJoinPoint.parent.numInstances):
                 clause = Or(*[j == i for j in linstances])
                 newinstances.append(If(clause, leftJoinPoint.parent.instances[i], leftJoinPoint.parent.parentInstances))
-        return([leftJoinPoint.parent], newinstances)
+            return([leftJoinPoint.parent], newinstances)
+        elif rightJoinPoint == "ref":
+            for i in range(leftJoinPoint.refSort.numInstances):
+                tempRefs = [If(linstances[j] != leftJoinPoint.parentInstances, leftJoinPoint.refs[j]
+                               , leftJoinPoint.refSort.parentInstances) for j in range(len(linstances))]
+                clause = Or(*[j == i for j in tempRefs])
+                newinstances.append(If(clause, leftJoinPoint.refSort.instances[i], leftJoinPoint.refSort.parentInstances))
+            return([leftJoinPoint.refSort], newinstances)
     else:
         #join with super abstract
         if not(rightJoinPoint in leftJoinPoint.fields):
@@ -78,7 +85,10 @@ def op_un_minus(arg):
 def op_eq(l,r):
     (_, lvalue) = l
     (_, rvalue) = r
-    return (["bool"], lvalue == rvalue)  
+    if(isinstance(lvalue, list)):
+        return(["bool"], And(*[i == j for i,j in zip(lvalue, rvalue)]))
+    else:
+        return (["bool"], lvalue == rvalue)  
     
 def op_ne(l,r):
     (_, expr) = op_eq(l,r)
@@ -303,15 +313,47 @@ class BracketedConstraint(object):
         self.z3 = z3
         self.claferStack = claferStack
         self.stack = []
+        self.locals = {}
         self.value = "bracketed constraint"
         
-    
-    
+    def addLocal(self, id, sort, instances):
+        self.locals[id] = (sort, instances)
     
     def addArg(self, arg):
-        #handle this, and eventually parent
         self.stack.append(arg)
             
+    #might need to join better (e.g. B and B should be B+B, not [B, B]
+    def addQuantifier(self, quantifier, num_args):
+        sorts = []
+        instances = []
+        if quantifier == "Some":
+            for _ in range(num_args):
+                (currSorts, currInstances) = self.stack.pop()
+                sorts = sorts + currSorts
+                instances = instances + currInstances
+                instances = [item for sublist in instances for item in sublist]
+            if len(instances) == 0:
+                return False
+            expr = False
+            firstIndexOfCurrentSort = 0
+            for i in sorts:
+                for j in range(i.numInstances):
+                    expr = Or(expr, instances[firstIndexOfCurrentSort + j] != i.parentInstances)
+                firstIndexOfCurrentSort = firstIndexOfCurrentSort + i.numInstances
+            self.stack.append((["bool"], [expr]))
+        elif quantifier == "All":
+            for _ in range(num_args):
+                (currSorts, currInstances) = self.stack.pop()
+                sorts = sorts + currSorts
+                instances = instances + currInstances
+            if len(instances) == 0:
+                return True #?..probably can't happen anyway
+            else:
+                self.stack.append((["bool"], [And(*instances)]))
+        else:
+            print("lone, no, and one still unimplemented")
+            sys.exit()
+                
     def extend(self, args):
         maxInstances = 0
         extendedArgs = []
@@ -347,7 +389,7 @@ class BracketedConstraint(object):
         finalExprs = [exprs for (_,exprs) in finalExprs]
         self.stack.append((sorts,finalExprs))
     
-    def endProcessing(self, parentClafer):
+    def endProcessing(self):
         self.value = self.stack.pop()
         (_, exprs) = self.value
         if(self.claferStack):

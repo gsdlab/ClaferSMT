@@ -5,7 +5,8 @@ Created on Sep 15, 2013
 '''
 from common import Z3Instance
 from test import multiple_joins, bracketedconstraint_this, this_dot_parent, \
-    arithmetic, relations, boolean_connectives, union, simple_abstract
+    arithmetic, relations, boolean_connectives, union, simple_abstract, some, \
+    simple_set
 
 tests = [ 
           (multiple_joins, 1),
@@ -15,7 +16,9 @@ tests = [
           (relations, 1),
           (boolean_connectives, 2),
           (union, 6),
-          (simple_abstract, 1)
+          (simple_abstract, 0),
+          (some, 1),
+          (simple_set, 6)
          ]
 
 def run():

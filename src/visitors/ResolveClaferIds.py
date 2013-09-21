@@ -43,6 +43,9 @@ class ResolveClaferIds(VisitorTemplate.VisitorTemplate):
         elif(element.id == "this"):
             element.claferSort = self.claferStack[-1]
         else:
+            if(not element.id in self.z3.z3_sorts):
+                #local variable decl
+                return
             element.claferSort = self.z3.z3_sorts[element.id]
     
     

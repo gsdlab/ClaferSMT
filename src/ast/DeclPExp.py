@@ -8,8 +8,6 @@ class DeclPExp(object):
     '''
     All variables analogous to those described in IntClafer.hs
     '''
-
-
     def __init__(self, quantifier, declaration, bodyParentExp):
         self.quantifier = quantifier
         self.declaration = declaration

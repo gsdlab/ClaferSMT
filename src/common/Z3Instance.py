@@ -32,7 +32,6 @@ class Z3Instance(object):
         self.z3_constraints = []
         self.z3_bracketed_constraints = []
         self.z3_sorts = {}
-        self.z3_datatypes = {}
         self.unsat_core_trackers = []
         self.setOptions()
         self.solver = Solver() 
@@ -41,6 +40,10 @@ class Z3Instance(object):
     def createGroupCardConstraints(self):
         for i in self.z3_sorts.values():
             i.addGroupCardConstraints()
+            
+    def createRefConstraints(self):
+        for i in self.z3_sorts.values():
+            i.addRefConstraints()
             
     def createCardinalityConstraints(self):
         for i in self.z3_sorts.values():
@@ -64,7 +67,7 @@ class Z3Instance(object):
         self.z3_constraints.append(self.bool2Int(False) == 0)               
     
     def setOptions(self):
-        set_option(max_depth=7)
+        set_option(max_depth=10)
         if Common.MODE == Common.DEBUG:
             set_option(auto_config=False)
     
@@ -88,14 +91,18 @@ class Z3Instance(object):
         #FIX for abstracts
         debug_print("Creating group cardinality constraints.")
         self.createGroupCardConstraints()
+        
+        debug_print("Creating ref constraints.")
+        self.createRefConstraints()
                 
         debug_print("Creating bracketed constraints.")
         Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
            
         self.assertConstraints()        
         
-        #for i in self.solver.assertions():
-        #    print(i)
+        if(Common.MODE == Common.DEBUG):
+            for i in self.solver.assertions():
+                debug_print(i)
         
         debug_print("Getting models.")    
         models = self.get_models(-1)
@@ -192,16 +199,7 @@ class Z3Instance(object):
         '''
         self.z3_sorts[sortID] = sort
         
-    def addDatatype(self, claferSort, claferDatatype):
-        '''
-        :param claferSort: A ClaferSort.
-        :type claferSort: :mod:`common.ClaferSort`
-        :param claferDatatype: A ClaferDatatype.
-        :type claferDatatype: :mod:`common.ClaferDatatype`
-        
-        Maps the given ClaferSort to the ClaferDatatype in z3_datatypes.
-        '''
-        self.z3_datatypes[claferSort] = claferDatatype
+
     ###############################
     # end adders                  #
     ###############################

@@ -3,6 +3,7 @@ Created on Apr 29, 2013
 
 @author: ezulkosk
 '''
+from lxml.builder import basestring
 from z3 import IntVector, Function, IntSort, If, BoolSort, Implies, And
 
 class  ClaferSort(object):
@@ -25,8 +26,9 @@ class  ClaferSort(object):
         self.indexInSuper = 0
         self.currentSubIndex = 0
         self.checkSuperAndRef()
-        if(self.superSort):
-            pass
+        if(self.refSort):
+            self.refs = IntVector(self.element.uid.split("_",1)[1] + "_ref",self.numInstances)
+                
         #gets the upper card bound of the parent clafer
         if not self.parentStack:
             self.parent = None
@@ -41,11 +43,31 @@ class  ClaferSort(object):
         self.upperCardConstraint = self.element.card[1].value
         self.createInstancesConstraintsAndFunctions()
     
+    def addRefConstraints(self):
+        if not self.refSort:
+            return  
+        for i in range(self.numInstances):
+            #refs pointer is >= 0
+            self.constraints.append(self.refs[i] >= 0) 
+            #ref pointer is <= upper card of ref parent           
+            self.constraints.append(self.refs[i] <= self.refSort.numInstances)
+        #if integer refs, zero out refs that do not have live parents,
+        #if clafer refs, set equal to ref.parentInstances if not live   
+        for i in range(self.numInstances):
+            if isinstance(self.refSort, basestring):
+                if self.refSort == "integer":
+                    self.constraints.append(Implies(self.instances[i] == self.parentInstances, self.refs[i] == 0))    
+            else:
+                self.constraints.append(If(self.instances[i] == self.parentInstances
+                                           , self.refs[i] == self.refSort.numInstances
+                                           , self.refs[i] != self.refSort.numInstances))    
+                
+    
     def createInstancesConstraintsAndFunctions(self):
         for i in range(self.numInstances):
-            #parent pointer is > 0
+            #parent pointer is >= 0
             self.constraints.append(self.instances[i] >= 0) 
-            #parent pointer is < upper card of parent           
+            #parent pointer is <= upper card of parent           
             self.constraints.append(self.instances[i] <= self.parentInstances)
             #sorted parent pointers
             if i != self.numInstances - 1:
@@ -85,7 +107,7 @@ class  ClaferSort(object):
             self.summs.append(summ)
         
     def addGroupCardConstraints(self):
-        if(len(self.fields) == 0):
+        if(len(self.fields) == 0 and ((not self.superSort) or self.superSort.fields == 0)):
             return
         #lower bounds
         upperGCard = self.element.gcard.interval[1].value
@@ -94,9 +116,13 @@ class  ClaferSort(object):
             bigSumm = 0
             for j in self.fields:
                 bigSumm = bigSumm +  j.summs[i]
+            if self.superSort:
+                for j in self.superSort.fields:
+                    bigSumm = bigSumm +  j.summs[i + self.indexInSuper]
             self.constraints.append(bigSumm >= lowerGCard)
             if upperGCard != -1:
                 self.constraints.append(bigSumm <= upperGCard)
+        
     
     def checkSuperAndRef(self):
         #assumes that "supers" can only have one element
@@ -111,7 +137,19 @@ class  ClaferSort(object):
         else:
             self.superSort = None
             self.refSort = None
-        
+       
+    #mask all but the "current" instance for 'this' constraints   
+    def maskForThis(self):
+        instances = []
+        for i in range(self.numInstances):
+            instances.append([self.parentInstances if i != j else self.instances[j] 
+                              for j in range(self.numInstances)])
+        return instances
+    
+    def maskForOne(self, integer):
+        return [self.parentInstances if integer != j else self.instances[j] 
+                              for j in range(self.numInstances)]
+     
     def addRef(self):
         pass
     
