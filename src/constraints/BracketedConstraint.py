@@ -29,12 +29,15 @@ def op_join(l, r):
                 newinstances.append(If(clause, leftJoinPoint.parent.instances[i], leftJoinPoint.parent.parentInstances))
             return([leftJoinPoint.parent], newinstances)
         elif rightJoinPoint == "ref":
-            for i in range(leftJoinPoint.refSort.numInstances):
-                tempRefs = [If(linstances[j] != leftJoinPoint.parentInstances, leftJoinPoint.refs[j]
-                               , leftJoinPoint.refSort.parentInstances) for j in range(len(linstances))]
-                clause = Or(*[j == i for j in tempRefs])
-                newinstances.append(If(clause, leftJoinPoint.refSort.instances[i], leftJoinPoint.refSort.parentInstances))
-            return([leftJoinPoint.refSort], newinstances)
+            if isinstance(leftJoinPoint.refSort, basestring):
+                return(["int"], [If(linstances[i] != leftJoinPoint.parentInstances, leftJoinPoint.refs[i], 0)  for i in range(leftJoinPoint.numInstances)])
+            else: 
+                for i in range(leftJoinPoint.refSort.numInstances):
+                    tempRefs = [If(linstances[j] != leftJoinPoint.parentInstances, leftJoinPoint.refs[j]
+                                   , leftJoinPoint.refSort.parentInstances) for j in range(len(linstances))]
+                    clause = Or(*[j == i for j in tempRefs])
+                    newinstances.append(If(clause, leftJoinPoint.refSort.instances[i], leftJoinPoint.refSort.parentInstances))
+                return([leftJoinPoint.refSort], newinstances)
     else:
         #join with super abstract
         if not(rightJoinPoint in leftJoinPoint.fields):
@@ -83,10 +86,18 @@ def op_un_minus(arg):
     return (["int"], -(expr))
     
 def op_eq(l,r):
-    (_, lvalue) = l
+    (sort, lvalue) = l
     (_, rvalue) = r
-    if(isinstance(lvalue, list)):
-        return(["bool"], And(*[i == j for i,j in zip(lvalue, rvalue)]))
+    if(isinstance(lvalue, list) and isinstance(rvalue, list)):
+        #ref case
+        if sort == ["int"]:
+            return(["bool"], Sum(*lvalue) == Sum(*rvalue))
+        else:
+            return(["bool"], And(*[i == j for i,j in zip(lvalue, rvalue)]))
+    elif(isinstance(lvalue, list)):
+        return(["bool"], Sum(*lvalue) == rvalue)
+    elif(isinstance(rvalue, list)):
+        return(["bool"], Sum(*rvalue) == lvalue)
     else:
         return (["bool"], lvalue == rvalue)  
     
@@ -140,8 +151,6 @@ def op_ifthenelse(cond, ifexpr, elseexpr):
     (_, ifvalue) = ifexpr
     (_, elsevalue) = elseexpr
     return (["bool"], If(condvalue, ifvalue, elsevalue))
-
-
 
 def set_extend(l,r):
     '''
@@ -241,7 +250,9 @@ def op_domain_restriction(l,r):
 def op_range_restriction(l,r):
     pass
 
-
+def op_sum(arg):
+    (_, instances) = arg
+    return(["int"], Sum(instances))
 
 '''
     Map used to convert Clafer operations to Z3 operations
@@ -257,7 +268,7 @@ ClaferToZ3OperationsMap = {
                            "#"           : (1, op_card),
                            "max"         : (1, "TODO"),
                            "min"         : (1, "TODO"),
-                           "sum"         : (1, "TODO"),    
+                           "sum"         : (1, op_sum),    
                            #Binary Ops
                            "<=>"         : (2, op_equivalence),
                            "=>"          : (2, op_implies),
@@ -283,7 +294,7 @@ ClaferToZ3OperationsMap = {
                            ":>"          : (2, op_range_restriction),
                            "."           : (2, op_join),
                            #Ternary Ops
-                           "ifthenelse"  : (3, "TODO")       
+                           "ifthenelse"  : (3, op_ifthenelse)       
                            }
 
 def getOperationConversion(op):
@@ -323,7 +334,7 @@ class BracketedConstraint(object):
         self.stack.append(arg)
             
     #might need to join better (e.g. B and B should be B+B, not [B, B]
-    def addQuantifier(self, quantifier, num_args):
+    def addQuantifier(self, quantifier, num_args, num_quantifiers, ifconstraints):
         sorts = []
         instances = []
         if quantifier == "Some":
@@ -342,14 +353,20 @@ class BracketedConstraint(object):
                 firstIndexOfCurrentSort = firstIndexOfCurrentSort + i.numInstances
             self.stack.append((["bool"], [expr]))
         elif quantifier == "All":
-            for _ in range(num_args):
-                (currSorts, currInstances) = self.stack.pop()
-                sorts = sorts + currSorts
-                instances = instances + currInstances
-            if len(instances) == 0:
-                return True #?..probably can't happen anyway
-            else:
-                self.stack.append((["bool"], [And(*instances)]))
+            newinstances = []
+            for _ in range(num_quantifiers):
+                instances = []
+                currIfConstraints = ifconstraints.pop()
+                for _ in range(num_args):
+                    (_, currInstances) = self.stack.pop()
+                    currIfConstraint = currIfConstraints.pop()
+                    instances = instances + [Implies(currIfConstraint, *currInstances)]
+                if len(instances) == 0:
+                    return True #?..probably can't happen anyway
+                else:
+                    newinstances.append(And(*instances))
+            newinstances.reverse()
+            self.stack.append((["bool"], newinstances))
         else:
             print("lone, no, and one still unimplemented")
             sys.exit()

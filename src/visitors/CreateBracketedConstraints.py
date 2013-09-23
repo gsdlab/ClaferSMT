@@ -6,6 +6,7 @@ Created on Mar 26, 2013
 
 from constraints import BracketedConstraint
 from visitors import VisitorTemplate
+from z3 import And
 import itertools
 import visitors.Visitor
 
@@ -76,16 +77,24 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             self.currentConstraint.addOperator(element.operation)
            
     #assume their is only one sort at this time
-    def createAllLocalsCombinations(self, locals, sort, isDisjunct):
-        ranges = [range(sort.numInstances) for i in locals]
-        integer_combinations = itertools.product(*ranges)
-        instances = []
-        for i in integer_combinations: 
-            list_of_ints = list(i)
-            if(isDisjunct and (len(set(list_of_ints)) != len(list_of_ints))):
-                continue
-            instances.append([sort.maskForOne(j) for j in list_of_ints])
-        return instances
+    def createAllLocalsCombinations(self, localDecls, sort, instances, isDisjunct):
+        ranges = [range(sort.numInstances) for i in localDecls]
+        newinstances = []
+        ifconstraints = []
+        for h in instances:
+            integer_combinations = itertools.product(*ranges)
+            innerinstances = []
+            innerIfConstraints = []
+            for i in integer_combinations: 
+                list_of_ints = list(i)
+                if(isDisjunct and (len(set(list_of_ints)) != len(list_of_ints))):
+                    continue
+                #newinstances.append([sort.maskForOne(j) for j in list_of_ints])
+                innerinstances.append([[h[j] if j == k  else sort.parentInstances for j in range(len(instances))] for k in list_of_ints])
+                innerIfConstraints.append(And(*[h[k] != sort.parentInstances for k in list_of_ints]))
+            newinstances.append(innerinstances[:])
+            ifconstraints.append(innerIfConstraints)
+        return (newinstances, ifconstraints)
      
     #handle local declarations (some, all, lone, one, no) 
     #not fully implemented
@@ -94,19 +103,24 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         #needs to be more robust, but need example programs.
         num_args = 0
         if element.declaration:
-            sort = element.declaration.body.iExp[0].claferSort
+            #sort = []#element.declaration.body.iExp[0].claferSort
+            visitors.Visitor.visit(self, element.declaration.body.iExp[0])
+            ([sort], instances) = self.currentConstraint.stack.pop()
             isDisjunct = element.declaration.isDisjunct
-            combinations = self.createAllLocalsCombinations(element.declaration.localDeclarations, sort, isDisjunct)
-            for i in range(len(combinations)):
-                for j in range(len(combinations[i])):
-                    self.currentConstraint.addLocal(element.declaration.localDeclarations[j].element
-                                                                      , sort, combinations[i][j])
-                visitors.Visitor.visit(self, element.bodyParentExp)
-                num_args = num_args + 1 
+            (combinations, ifconstraints) = self.createAllLocalsCombinations(element.declaration.localDeclarations, sort, instances, isDisjunct)
+            num_args = len(combinations[0])
+            num_quantifiers = len(combinations)
+            for i in combinations:
+                for j in i:
+                    for k in range(len(j)):
+                        self.currentConstraint.addLocal(element.declaration.localDeclarations[k].element
+                                                                        , sort, j[k])
+                    visitors.Visitor.visit(self, element.bodyParentExp)
+
         else:
             visitors.Visitor.visit(self, element.bodyParentExp)
             num_args = 1
-        self.currentConstraint.addQuantifier(element.quantifier, num_args)
+        self.currentConstraint.addQuantifier(element.quantifier, num_args,num_quantifiers, ifconstraints)
     
     def localdeclarationVisit(self, element):
         #prettyPrint("element="+element.element)

@@ -46,11 +46,12 @@ class  ClaferSort(object):
     def addRefConstraints(self):
         if not self.refSort:
             return  
-        for i in range(self.numInstances):
-            #refs pointer is >= 0
-            self.constraints.append(self.refs[i] >= 0) 
-            #ref pointer is <= upper card of ref parent           
-            self.constraints.append(self.refs[i] <= self.refSort.numInstances)
+        if not isinstance(self.refSort, basestring):
+            for i in range(self.numInstances):
+                #refs pointer is >= 0
+                self.constraints.append(self.refs[i] >= 0) 
+                #ref pointer is <= upper card of ref parent           
+                self.constraints.append(self.refs[i] <= self.refSort.numInstances)
         #if integer refs, zero out refs that do not have live parents,
         #if clafer refs, set equal to ref.parentInstances if not live   
         for i in range(self.numInstances):
@@ -129,7 +130,11 @@ class  ClaferSort(object):
         supers = self.element.supers
         if(supers.elements[0].iExp[0].id != "clafer"):
             if(supers.elements[0].type == "Ref"):
-                self.refSort = self.z3.getSort(supers.elements[0].iExp[0].id)
+                ref_id = supers.elements[0].iExp[0].id
+                if ref_id == "integer":
+                    self.refSort = ref_id
+                else:
+                    self.refSort = self.z3.getSort(ref_id)
                 self.superSort = None
             else:
                 self.refSort = None

@@ -35,6 +35,7 @@ class Z3Instance(object):
         self.unsat_core_trackers = []
         self.setOptions()
         self.solver = Solver() 
+        #self.solver.help()
         self.createCommonFunctions()
     
     def createGroupCardConstraints(self):
@@ -67,7 +68,9 @@ class Z3Instance(object):
         self.z3_constraints.append(self.bool2Int(False) == 0)               
     
     def setOptions(self):
-        set_option(max_depth=10)
+        set_option(max_depth=1000)
+        set_option(max_args=1000)
+        #set_option(max_width=1000)
         if Common.MODE == Common.DEBUG:
             set_option(auto_config=False)
     
@@ -101,8 +104,7 @@ class Z3Instance(object):
         self.assertConstraints()        
         
         if(Common.MODE == Common.DEBUG):
-            for i in self.solver.assertions():
-                debug_print(i)
+            self.printConstraints()
         
         debug_print("Getting models.")    
         models = self.get_models(-1)
@@ -124,7 +126,16 @@ class Z3Instance(object):
             self.assertConstraint(i)
         for i in self.z3_bracketed_constraints:
             self.assertConstraint(i)
-            
+    
+    def printConstraints(self):
+        for i in self.z3_sorts.values():
+            for j in i.constraints:
+                debug_print(j)
+        for i in self.z3_constraints:
+            debug_print(i)
+        for i in self.z3_bracketed_constraints:
+            debug_print(i)
+    
     #this is not my method, some stackoverflow or z3.codeplex.com method. Can't remember, should find it.
     def get_models(self, desired_number_of_models):
         result = []
@@ -170,7 +181,7 @@ class Z3Instance(object):
     def getSort(self, uid):
         return self.z3_sorts.get(uid)
         
-    def getSorts(self):
+    def getSorts(self): 
         '''
         :returns: z3_sorts
         '''
