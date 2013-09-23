@@ -90,7 +90,7 @@ def op_eq(l,r):
     (_, rvalue) = r
     if(isinstance(lvalue, list) and isinstance(rvalue, list)):
         #ref case
-        if sort == ["int"]:
+        if isinstance(sort[0], basestring) and sort[0] == "int":
             return(["bool"], Sum(*lvalue) == Sum(*rvalue))
         else:
             return(["bool"], And(*[i == j for i,j in zip(lvalue, rvalue)]))
