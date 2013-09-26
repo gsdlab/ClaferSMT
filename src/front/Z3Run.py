@@ -37,10 +37,10 @@ def main(args):
         #module = simple_abstract.getModule()
         #module = some.getModule()
         #module = simple_set.getModule()
-        #module = zoo.getModule()
+        module = zoo.getModule()
         #module = simple_zoo.getModule()
         #module = integer_refs.getModule()
-        module = phone_feature_model.getModule()
+        #module = phone_feature_model.getModule()
         z3 = Z3Instance.Z3Instance(module)
         z3.run()
    

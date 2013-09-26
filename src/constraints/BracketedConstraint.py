@@ -501,15 +501,18 @@ class BracketedConstraint(object):
     #may need to reverse pops
     def addQuantifier(self, quantifier, num_args, num_quantifiers, ifconstraints):
         finalInstances = []
+        localStack = []
         for _ in range(num_quantifiers):
-            instanceSorts = []
-            joinSorts = []
-            instances = []
-            finalInnerInstances = []
             for _ in range(num_args):
-                currExpr = self.stack.pop()
+                localStack.append(self.stack.pop())
+        for q in range(num_quantifiers):
+            instances = []
+            instanceSorts = []
+            finalInnerInstances = []
+            currIfConstraints = ifconstraints.pop(0)
+            for a in range(num_args):
+                currExpr = localStack.pop()
                 instanceSorts = instanceSorts + currExpr.instanceSorts
-                joinSorts = joinSorts + currExpr.joinSorts
                 #essentially a zip
                 if not instances:
                     instances = [[i] for i in currExpr.instances]
@@ -527,9 +530,8 @@ class BracketedConstraint(object):
                     finalInnerInstances.append(innerExpr)
                 finalInstances.append(And(*finalInnerInstances))
             elif quantifier == "All":
-                finalInstances = []
                 for i in instances:
-                    finalInstances.append(And(*i))
+                    finalInstances.append(And(*[Implies(currIfConstraints[j], i[j]) for j in range(len(i))]))
                     
                 '''
                 for _ in range(num_quantifiers):
@@ -543,7 +545,7 @@ class BracketedConstraint(object):
                         finalInstances.append(And(*instances))
                 finalInstances.reverse()
                 '''
-            self.stack.append(BoolArg([And(*finalInstances)]))
+        self.stack.append(BoolArg(finalInstances))
         '''
         Reimplement DONT FORGET IFCONSTRAINTS IN SOME
         
