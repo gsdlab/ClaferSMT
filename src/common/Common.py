@@ -3,7 +3,7 @@ Created on Apr 28, 2013
 
 @author: ezulkosk
 '''
-from z3 import If
+from z3 import If, Function, BoolSort, IntSort
 
 NORMAL = 0
 DEBUG = 1
@@ -12,6 +12,8 @@ MODE = NORMAL
 
 FUNCTION_ID = 0 
 CONSTRAINT_ID = 0
+
+bool2Int = None
 
 def debug_print(string):
     if(MODE == DEBUG):
@@ -36,6 +38,9 @@ def getConstraintUID():
 def reset():
     FUNCTION_ID = 0
     CONSTRAINT_ID = 0
+
+def bool2Int():
+    return bool2Int
 
 def min2(l,r):
     '''

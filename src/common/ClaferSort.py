@@ -43,6 +43,7 @@ class  ClaferSort(object):
         self.upperCardConstraint = self.element.card[1].value
         self.createInstancesConstraintsAndFunctions()
     
+    
     def addRefConstraints(self):
         if not self.refSort:
             return  
@@ -71,8 +72,9 @@ class  ClaferSort(object):
             #parent pointer is <= upper card of parent           
             self.constraints.append(self.instances[i] <= self.parentInstances)
             #sorted parent pointers
-            if i != self.numInstances - 1:
-                self.constraints.append(self.instances[i] <= self.instances[i+1])    
+            if(not self.element.isAbstract):
+                if i != self.numInstances - 1:
+                    self.constraints.append(self.instances[i] <= self.instances[i+1])    
         #masks the instances that do not have the current parent 
         #mask(i,j): i == the parent number, j == the value of the child
         #outputs 1 if equal to parent, 0 otherwise
@@ -117,9 +119,10 @@ class  ClaferSort(object):
             bigSumm = 0
             for j in self.fields:
                 bigSumm = bigSumm +  j.summs[i]
-            if self.superSort:
-                for j in self.superSort.fields:
-                    bigSumm = bigSumm +  j.summs[i + self.indexInSuper]
+            #don't include inherited fields for now
+            #if self.superSort:
+            #    for j in self.superSort.fields:
+            #        bigSumm = bigSumm +  j.summs[i + self.indexInSuper]
             self.constraints.append(bigSumm >= lowerGCard)
             if upperGCard != -1:
                 self.constraints.append(bigSumm <= upperGCard)

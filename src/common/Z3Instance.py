@@ -8,8 +8,7 @@ from common import Common
 from common.Common import debug_print, standard_print
 from gi.overrides.keysyms import m
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
-    CreateBracketedConstraints, ResolveClaferIds, \
-    PrintHierarchy
+    CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy
 from z3 import *
 import common
 
@@ -33,8 +32,10 @@ class Z3Instance(object):
         self.z3_bracketed_constraints = []
         self.z3_sorts = {}
         self.unsat_core_trackers = []
+        self.unsat_map = {}
         self.setOptions()
         self.solver = Solver() 
+        self.solver.set(unsat_core=True)
         #self.solver.help()
         self.createCommonFunctions()
     
@@ -56,16 +57,19 @@ class Z3Instance(object):
                 i.indexInSuper = i.superSort.addSubSort(i)     
     
     def assertConstraint(self, constraint):
-        self.solver.add(constraint)
+        if Common.MODE != Common.DEBUG: 
+            self.solver.add(constraint)
         if Common.MODE == Common.DEBUG:
             p = Bool("p" + str(Common.getConstraintUID()))
             self.unsat_core_trackers.append(p)
+            self.unsat_map[str(p)] = constraint
             self.solver.add(Implies(p, constraint))
+            #print(Implies(p, constraint))
         
     def createCommonFunctions(self):
-        self.bool2Int = Function("bool2Int", BoolSort(), IntSort())
-        self.z3_constraints.append(self.bool2Int(True) == 1)
-        self.z3_constraints.append(self.bool2Int(False) == 0)               
+        Common.bool2Int = Function("bool2Int", BoolSort(), IntSort())
+        self.z3_constraints.append(Common.bool2Int(True) == 1)
+        self.z3_constraints.append(Common.bool2Int(False) == 0)               
     
     def setOptions(self):
         set_option(max_depth=1000)
@@ -103,9 +107,17 @@ class Z3Instance(object):
            
         self.assertConstraints()        
         
-        if(Common.MODE == Common.DEBUG):
-            self.printConstraints()
+        #if(Common.MODE == Common.DEBUG):
+        #    self.printConstraints()
         
+        #for i in self.solver.assertions():
+        #    print(i)
+        #    print()
+        
+        #debug_print(self.solver.check(self.unsat_core_trackers))
+        #core = self.solver.unsat_core()
+        #debug_print(len(core))
+        #debug_print(self.solver.unsat_core())
         debug_print("Getting models.")    
         models = self.get_models(-1)
         return len(models)
@@ -141,8 +153,12 @@ class Z3Instance(object):
         result = []
         count = 0
         while True:
-            if self.solver.check() == sat and count != desired_number_of_models:
+            
+            if (Common.MODE != Common.DEBUG and self.solver.check() == sat and count != desired_number_of_models) or \
+                (Common.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == sat and count != desired_number_of_models):
                 m = self.solver.model()
+                #if count ==0:
+                #    print(m)
                 result.append(m)
                 # Create a new constraint the blocks the current model
                 block = []
@@ -155,6 +171,7 @@ class Z3Instance(object):
                     if is_array(c) or c.sort().kind() == Z3_UNINTERPRETED_SORT:
                         raise Z3Exception("arrays and uninterpreted sorts are not supported")
                     block.append(c != m[d])
+                    #print(str(d) + " = " + str(m[d]))
                 self.solver.add(Or(block))
                 self.printVars(m)
                 count += 1
@@ -163,7 +180,10 @@ class Z3Instance(object):
                     debug_print(self.solver.check(self.unsat_core_trackers))
                     core = self.solver.unsat_core()
                     debug_print(len(core))
-                    debug_print(self.solver.unsat_core())
+                    for i in core:
+                        print(self.unsat_map[str(i)])
+                        print()
+                    return result
                 if count == 0:
                     standard_print("UNSAT")
                 return result

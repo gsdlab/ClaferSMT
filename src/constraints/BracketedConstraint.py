@@ -9,19 +9,147 @@ from z3 import Function, IntSort, BoolSort, If, Not, Sum, Implies, Or, And, Xor
 import sys
 
 
+class ExprArg():
+    def __init__(self, joinSorts, instanceSorts, instances):
+        self.joinSorts = joinSorts
+        self.instanceSorts = instanceSorts
+        self.instances = instances
+        
+    def modifyInstances(self, newInstances):
+        return ExprArg(self.joinSorts[:], self.instanceSorts[:], newInstances)
+      
+    def __str__(self):
+        return (str(self.instances)) 
+     
+    def __repr__(self):
+        return (str(self.instances)) 
+               
+class IntArg(ExprArg):
+    def __init__(self, instances):
+        self.joinSorts = ["int"]
+        self.instanceSorts = ["int"]
+        self.instances = instances
+        
+class BoolArg(ExprArg):
+    def __init__(self, instances):
+        self.joinSorts = ["bool"]
+        self.instanceSorts = ["bool"]
+        self.instances = instances
+
 def joinWithSuper(sort, instances):
-    newinstances = []
+    newInstances = []
+    for i in range(0, sort.indexInSuper):
+        newInstances.append(sort.superSort.parentInstances)
     for i in range(len(instances)):
-        newinstances.append(If(instances[i] != sort.parentInstances, sort.superSort.instances[i + sort.indexInSuper], sort.superSort.parentInstances))
-    return(sort.superSort, newinstances)
+        newInstances.append(If(instances[i] != sort.parentInstances, sort.superSort.instances[i + sort.indexInSuper], sort.superSort.parentInstances))
+    for i in range(len(instances), sort.superSort.numInstances):
+        newInstances.append(sort.superSort.parentInstances)
+    return(sort.superSort, newInstances)
+
+def createJoinFunction(leftSort, rightSort, linstances, rinstances, zeroedVal):
+    joinFunction = Function("join" + str(Common.getFunctionUID()) + ":" + str(leftSort) , IntSort(), IntSort())
+    joinHelperFunction = Function("joinhelper" + str(Common.getFunctionUID()) + ":" + str(leftSort) , IntSort(), IntSort())
+    constraints = []
+    for i in range(len(linstances)):
+        constraints.append(joinHelperFunction(i) == linstances[i])
+    constraints.append(joinHelperFunction(len(linstances)) == leftSort.parentInstances)
+    for i in range(len(rinstances)):  
+        #clause = Or(*[j == i for j in linstances])  
+        constraints.append(joinFunction(i) == If(joinHelperFunction(rightSort.instances[i]) != leftSort.parentInstances, rinstances[i], zeroedVal))
+    constraints.append(joinFunction(len(rinstances)) == zeroedVal)
+    leftSort.z3.z3_constraints = leftSort.z3.z3_constraints + constraints
+    return joinFunction
 
 #can optimize this.parent
-def op_join(l, r):
-    (lsorts, linstances) = l
-    (rsorts, rinstances) = r
-    leftJoinPoint = lsorts[-1]
-    rightJoinPoint = rsorts[0]
+#need to range newInstances over ALL sorts in instanceSorts (don't have a test case yet)
+#   for example, leftJoinPoint.parentInstances CHANGES if there are multiple sorts here
+def op_join(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    
+    leftJoinPoint = left.joinSorts[-1]
+    rightJoinPoint = right.joinSorts[0]
+    newInstances = []
+    
     if isinstance(rightJoinPoint, basestring):
+        if rightJoinPoint == "parent":
+            joinSorts = left.joinSorts + [leftJoinPoint.parent] +  [right.joinSorts[i] for i in range(1, len(right.joinSorts))]
+            for i in range(leftJoinPoint.parent.numInstances):
+                clause = Or(*[j == i for j in left.instances])
+                newInstances.append(If(clause, leftJoinPoint.parent.instances[i], leftJoinPoint.parent.parentInstances))
+            return(ExprArg(joinSorts, [leftJoinPoint.parent], newInstances))
+        elif rightJoinPoint == "ref":
+            if isinstance(leftJoinPoint.refSort, basestring):
+                if leftJoinPoint.refSort == "integer":
+                    return(ExprArg(left.joinSorts + ["int"], 
+                                   ["int"], 
+                                   [If(left.instances[i] != leftJoinPoint.parentInstances, leftJoinPoint.refs[i], 0)  
+                                    for i in range(leftJoinPoint.numInstances)]))      
+                else:
+                    print("Error on: " + leftJoinPoint.refSort + "string refs other than int (e.g. double) unimplemented")
+                    sys.exit()
+            else: 
+                joinSorts = left.joinSorts + [leftJoinPoint.refSort] +  [right.joinSorts[i] for i in range(1, len(right.joinSorts))]
+                for i in range(leftJoinPoint.refSort.numInstances):
+                    tempRefs = [If(left.instances[j] != leftJoinPoint.parentInstances, leftJoinPoint.refs[j]
+                                   , leftJoinPoint.refSort.parentInstances) for j in range(len(left.instances))]
+                    clause = Or(*[j == i for j in tempRefs])
+                    newInstances.append(If(clause, leftJoinPoint.refSort.instances[i], leftJoinPoint.refSort.parentInstances))
+                return(ExprArg(joinSorts, [leftJoinPoint.refSort], newInstances))
+    else:
+        if(rightJoinPoint in leftJoinPoint.fields):
+            joinSorts = left.joinSorts + right.joinSorts
+            instanceSorts = right.instanceSorts
+            if(isinstance(instanceSorts[0],basestring) and instanceSorts[0] == "int"):
+                zeroedVal = 0
+            else:
+                zeroedVal = instanceSorts[0].parentInstances
+            joinFunction = createJoinFunction(leftJoinPoint, rightJoinPoint, left.instances, right.instances, zeroedVal)    
+            for i in range(len(right.instances)):
+                newInstances.append(joinFunction(i))
+            return(ExprArg(joinSorts, instanceSorts, newInstances))
+        else:
+            #join with super abstract
+            #i think this only works for one level of inheritance...just loop it
+            (superLeftJoinPoint, superLeftInstances) = joinWithSuper(leftJoinPoint, left.instances)
+            instanceSorts = right.instanceSorts
+            if(isinstance(instanceSorts[0],basestring) and instanceSorts[0] == "int"):
+                zeroedVal = 0
+            else:
+                zeroedVal = instanceSorts[0].parentInstances
+            joinFunction = createJoinFunction(superLeftJoinPoint, rightJoinPoint, superLeftInstances, right.instances, zeroedVal)
+            joinSorts = left.joinSorts + [superLeftJoinPoint] + right.joinSorts
+            #for i in range(len(right.instances)):
+            #    newInstances.append(If(joinFunction(right.instances[i]), right.instances[i], rightJoinPoint.parentInstances))
+            #newInstances = [zeroedVal for i in range(leftJoinPoint.indexInSuper)] \
+            #    + [If(left.instances[i] != leftJoinPoint.parentInstances, right.instances[i + leftJoinPoint.indexInSuper], zeroedVal) for i in range(len(left.instances))] \
+            #    + [zeroedVal for i in range(leftJoinPoint.indexInSuper + len(leftJoinPoint.instances), len(rightJoinPoint.instances))]
+            for i in range(len(right.instances)):
+                newInstances.append(joinFunction(i))
+            return(ExprArg(joinSorts, instanceSorts, newInstances))
+            
+        '''
+        indexInSuper = leftJoinPoint.indexInSuper
+        if leftJoinPoint.superSort and (isinstance(rightJoinPoint, basestring) or not(rightJoinPoint in leftJoinPoint.fields)):
+            #deep copy list, should change eventually
+            lsorts = lsorts[:]
+            lsorts.pop()
+            (leftJoinPoint, linstances) = joinWithSuper(leftJoinPoint, linstances)
+            lsorts.append(leftJoinPoint)
+        # i dont think this join function makes any sense
+        
+        join_function = Function("join" + str(Common.getFunctionUID()) + ":" + str(leftJoinPoint) + "." + str(rightJoinPoint), IntSort(), BoolSort())
+        constraints = [join_function(i) == (linstances[i] != leftJoinPoint.parentInstances) for i in range(len(linstances))]
+        leftJoinPoint.z3.z3_constraints = leftJoinPoint.z3.z3_constraints + constraints
+        if isinstance(rsorts[0], basestring) and rsorts[0] == "int":
+            zeroedVal = 0
+        else:
+            zeroedVal = len(rinstances) 
+        newinstances = [zeroedVal for i in range(indexInSuper)] + linstances + [zeroedVal for i in range(indexInSuper + len(linstances), len(rinstances))] # [rinstances[i] for i in range(len(rinstances))] # If(join_function(rinstances[i]), rinstances[i], zeroedVal) #rightJoinPoint.parentInstances should be instead of len(rinstances)
+        return ([rightJoinPoint], newinstances)    
+    '''
+    '''
+    if isinstance(rightJoinPoint, basestring) and rightJoinPoint != "int":
         newinstances = []
         if rightJoinPoint == "parent":
             for i in range(leftJoinPoint.parent.numInstances):
@@ -40,119 +168,139 @@ def op_join(l, r):
                 return([leftJoinPoint.refSort], newinstances)
     else:
         #join with super abstract
-        if not(rightJoinPoint in leftJoinPoint.fields):
+        indexInSuper = leftJoinPoint.indexInSuper
+        if leftJoinPoint.superSort and (isinstance(rightJoinPoint, basestring) or not(rightJoinPoint in leftJoinPoint.fields)):
             #deep copy list, should change eventually
             lsorts = lsorts[:]
             lsorts.pop()
             (leftJoinPoint, linstances) = joinWithSuper(leftJoinPoint, linstances)
             lsorts.append(leftJoinPoint)
+        # i dont think this join function makes any sense
+        
         join_function = Function("join" + str(Common.getFunctionUID()) + ":" + str(leftJoinPoint) + "." + str(rightJoinPoint), IntSort(), BoolSort())
         constraints = [join_function(i) == (linstances[i] != leftJoinPoint.parentInstances) for i in range(len(linstances))]
         leftJoinPoint.z3.z3_constraints = leftJoinPoint.z3.z3_constraints + constraints
-        newinstances = [If(join_function(rinstances[i]), rinstances[i], rightJoinPoint.parentInstances) for i in range(len(rinstances))]
-        return ([rightJoinPoint], newinstances)        
+        if isinstance(rsorts[0], basestring) and rsorts[0] == "int":
+            zeroedVal = 0
+        else:
+            zeroedVal = len(rinstances) 
+        newinstances = [zeroedVal for i in range(indexInSuper)] + linstances + [zeroedVal for i in range(indexInSuper + len(linstances), len(rinstances))] # [rinstances[i] for i in range(len(rinstances))] # If(join_function(rinstances[i]), rinstances[i], zeroedVal) #rightJoinPoint.parentInstances should be instead of len(rinstances)
+        return ([rightJoinPoint], newinstances)    
+        '''    
     
 def op_card(arg):
-    (sorts, instances) = arg
-    rightmostInstance = sorts[-1]
-    bool2Int = rightmostInstance.z3.bool2Int
-    instances = [bool2Int(rightmostInstance.parentInstances != instances[i]) for i in range(len(instances))]
-    return (["int"], Sum(instances))    
+    assert isinstance(arg, ExprArg)
+    index = 0
+    newInstances = []
+    for i in arg.instanceSorts:
+        for _ in range(i.numInstances):
+            newInstances.append(Common.bool2Int(arg.instances[index] != i.parentInstances))
+            index = index + 1
+    return IntArg(Sum(newInstances))
 
-def op_add(l,r):
-    (_, linstance) = l
-    (_, rinstance) = r
-    return(["int"], linstance + rinstance)
+def op_add(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    return IntArg(left.instances + right.instances)
 
-def op_sub(l,r):
-    (_, linstance) = l
-    (_, rinstance) = r
-    return(["int"], linstance - rinstance)
+def op_sub(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    return IntArg(left.instances - right.instances)
 
-def op_mul(l,r):
-    (_, linstance) = l
-    (_, rinstance) = r
-    return(["int"], linstance * rinstance)
+def op_mul(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    return IntArg(left.instances * right.instances)
 
 #integer division
-def op_div(l,r):
-    (_, linstance) = l
-    (_, rinstance) = r
-    return(["int"], linstance / rinstance if((not isinstance(linstance, int)) or (not isinstance(rinstance, int)))
-                             else linstance // rinstance)
+def op_div(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    return IntArg(left.instances / right.instances 
+                   if((not isinstance(left.instances, int)) or (not isinstance(right.instances, int)))
+                             else left.instances // right.instances)
     
 def op_un_minus(arg):
-    (_, expr) = arg
-    return (["int"], -(expr))
+    assert isinstance(arg, ExprArg)
+    return IntArg(-(arg.instances))
     
-def op_eq(l,r):
-    (sort, lvalue) = l
-    (_, rvalue) = r
-    if(isinstance(lvalue, list) and isinstance(rvalue, list)):
+def op_eq(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    if(isinstance(left.instances, list) and isinstance(right.instances, list)):
         #ref case
-        if isinstance(sort[0], basestring) and sort[0] == "int":
-            return(["bool"], Sum(*lvalue) == Sum(*rvalue))
+        if isinstance(left.instanceSorts[0], basestring) and left.instanceSorts[0] == "int":
+            return BoolArg(Sum(*left.instances) == Sum(*right.instances))
         else:
-            return(["bool"], And(*[i == j for i,j in zip(lvalue, rvalue)]))
-    elif(isinstance(lvalue, list)):
-        return(["bool"], Sum(*lvalue) == rvalue)
-    elif(isinstance(rvalue, list)):
-        return(["bool"], Sum(*rvalue) == lvalue)
+            return BoolArg(And(*[i == j for i,j in zip(left.instances, right.instances)]))
+    elif(isinstance(left.instances, list)):
+        return BoolArg(Sum(*left.instances) == right.instances)
+    elif(isinstance(right.instances, list)):
+        return BoolArg(Sum(*right.instances) == left.instances)
     else:
-        return (["bool"], lvalue == rvalue)  
+        return BoolArg(left.instances == right.instances)  
     
-def op_ne(l,r):
-    (_, expr) = op_eq(l,r)
-    return (["bool"], Not(expr))
+def op_ne(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    expr = op_eq(left, right)
+    expr.instances = Not(expr.instances)
+    return expr
     
-def op_lt(l,r):
-    (_, lvalue) = l
-    (_, rvalue) = r
-    return (["bool"], lvalue < rvalue)  
+def op_lt(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    return BoolArg(left.instances < right.instances)  
         
-def op_le(l,r):
-    (_, lvalue) = l
-    (_, rvalue) = r
-    return (["bool"], lvalue <= rvalue)  
+def op_le(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    return BoolArg(left.instances <= right.instances)  
 
-def op_gt(l,r):
-    return op_lt(r,l)
+def op_gt(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    return op_lt(right, left)
 
-def op_ge(l,r):
-    return op_le(r,l)
+def op_ge(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    return op_le(right, left)
 
-def op_and(l,r):
-    (_, lvalue) = l
-    (_, rvalue) = r
-    return (["bool"], And(lvalue, rvalue))  
+def op_and(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    return BoolArg(And(left.instances, right.instances))  
 
-def op_or(l,r):
-    (_, lvalue) = l
-    (_, rvalue) = r
-    return (["bool"], Or(lvalue, rvalue))  
+def op_or(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    return BoolArg(Or(left.instances, right.instances)) 
 
-def op_xor(l,r):
-    (_, lvalue) = l
-    (_, rvalue) = r
-    return (["bool"], Xor(lvalue, rvalue))  
+def op_xor(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    return BoolArg(Xor(left.instances, right.instances)) 
 
-def op_implies(l,r):
-    (_, lvalue) = l
-    (_, rvalue) = r
-    return (["bool"], Implies(lvalue, rvalue)) 
+def op_implies(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    return BoolArg(Implies(left.instances, right.instances)) 
 
-def op_equivalence(l,r):
-    (_, lvalue) = l
-    (_, rvalue) = r
-    return (["bool"], And(Implies(lvalue, rvalue), Implies(rvalue, lvalue)))
+def op_equivalence(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    return BoolArg(And(Implies(left.instances, right.instances),
+                       Implies(right.instances, left.instances))) 
 
 def op_ifthenelse(cond, ifexpr, elseexpr):
-    (_, condvalue) = cond
-    (_, ifvalue) = ifexpr
-    (_, elsevalue) = elseexpr
-    return (["bool"], If(condvalue, ifvalue, elsevalue))
+    assert isinstance(cond, ExprArg)
+    assert isinstance(ifexpr, ExprArg)
+    assert isinstance(elseexpr, ExprArg)
+    return BoolArg(If(cond.instances, ifexpr.instances, elseexpr.instances))
 
-def set_extend(l,r):
+def set_extend(left,right):
     '''
     extends two sets to facilitate set operations
     Simplified Example:
@@ -160,89 +308,102 @@ def set_extend(l,r):
        In this case, the C's in the left set are "zeroed", and
        the A's in the right set are "zeroed"
     '''
-    (lsorts, linstances) = l
-    (rsorts, rinstances) = r
-    finalsorts = []
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    #(lsorts, linstances) = l
+    #(rsorts, rinstances) = r
+    finalSorts = []
+    finalJoinSorts = []
     finalLinstances = []
     finalRinstances = []
-    while lsorts or rsorts:
-        if (not rsorts):
-            nextsort = lsorts.pop(0)
-            for _ in range(nextsort.numInstances):
-                finalLinstances.append(linstances.pop(0))
-                finalRinstances.append(nextsort.parentInstances)
-        elif (not lsorts):
-            nextsort = rsorts.pop(0)
-            for _ in range(nextsort.numInstances):
-                finalLinstances.append(nextsort.parentInstances)
-                finalRinstances.append(rinstances.pop(0))
-        elif lsorts[0].element.uid < rsorts[0].element.uid:
-            nextsort = lsorts.pop(0)
-            for _ in range(nextsort.numInstances):
-                finalLinstances.append(linstances.pop(0))
-                finalRinstances.append(nextsort.parentInstances)
-        elif lsorts[0].element.uid > rsorts[0].element.uid:
-            nextsort = rsorts.pop(0)
-            for _ in range(nextsort.numInstances):
-                finalLinstances.append(nextsort.parentInstances)
-                finalRinstances.append(rinstances.pop(0))        
+    while left.instanceSorts or right.instanceSorts:
+        if (not right.instanceSorts):
+            nextSort = left.instanceSorts.pop(0)
+            nextJoinSort = left.joinSorts.pop(0)
+            for _ in range(nextSort.numInstances):
+                finalLinstances.append(left.instances.pop(0))
+                finalRinstances.append(nextSort.parentInstances)
+        elif (not left.instanceSorts):
+            nextSort = right.instanceSorts.pop(0)
+            nextJoinSort = right.joinSorts.pop(0)
+            for _ in range(nextSort.numInstances):
+                finalLinstances.append(nextSort.parentInstances)
+                finalRinstances.append(right.instances.pop(0))
+        elif left.instanceSorts[0].element.uid < right.instanceSorts[0].element.uid:
+            nextSort = left.instanceSorts.pop(0)
+            nextJoinSort = left.joinSorts.pop(0)
+            for _ in range(nextSort.numInstances):
+                finalLinstances.append(left.instances.pop(0))
+                finalRinstances.append(nextSort.parentInstances)
+        elif left.instanceSorts[0].element.uid > right.instanceSorts[0].element.uid:
+            nextSort = right.instanceSorts.pop(0)
+            nextJoinSort = right.joinSorts.pop(0)
+            for _ in range(nextSort.numInstances):
+                finalLinstances.append(nextSort.parentInstances)
+                finalRinstances.append(right.instances.pop(0))        
         else:
-            nextsort = lsorts.pop(0)
-            rsorts.pop(0)
-            for _ in range(nextsort.numInstances):
-                finalLinstances.append(linstances.pop(0))
-                finalRinstances.append(rinstances.pop(0))
-        
-        finalsorts.append(nextsort)
-    return((finalsorts, finalLinstances), (finalsorts, finalRinstances))
+            nextSort = left.instanceSorts.pop(0)
+            nextJoinSort = left.joinSorts.pop(0)
+            right.instanceSorts.pop(0)
+            right.joinSorts.pop(0)
+            for _ in range(nextSort.numInstances):
+                finalLinstances.append(left.instances.pop(0))
+                finalRinstances.append(right.instances.pop(0))  
+        finalSorts.append(nextSort)
+        finalJoinSorts.append(nextJoinSort)
+    return(ExprArg(finalJoinSorts, finalSorts, finalLinstances), 
+           ExprArg(finalJoinSorts, finalSorts, finalRinstances))
 
-def op_union(l,r):
-    (extendedL, extendedR) = set_extend(l,r)
-    (sorts, extendedLinstances) = extendedL
-    (_, extendedRinstances) = extendedR
+def op_union(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    (extendedL, extendedR) = set_extend(left,right)
     finalInstances = []
-    for i in sorts:
+    for i in extendedL.instanceSorts:
         for _ in range(i.numInstances):
-            finalInstances.append(Common.min2(extendedLinstances.pop(0), extendedRinstances.pop(0)))
-    return (sorts, finalInstances)
+            finalInstances.append(Common.min2(extendedL.instances.pop(0), extendedR.instances.pop(0)))
+    return ExprArg(extendedR.joinSorts, extendedR.instanceSorts, finalInstances)
 
-def op_intersection(l,r):
-    (extendedL, extendedR) = set_extend(l,r)
-    (sorts, extendedLinstances) = extendedL
-    (_, extendedRinstances) = extendedR
+def op_intersection(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    (extendedL, extendedR) = set_extend(left,right)
     finalInstances = []
-    for i in sorts:
+    for i in extendedL.instanceSorts:
         for _ in range(i.numInstances):
-            finalInstances.append(Common.max2(extendedLinstances.pop(0), extendedRinstances.pop(0)))
-    return (sorts, finalInstances)
+            finalInstances.append(Common.max2(extendedL.instances.pop(0), extendedR.instances.pop(0)))
+    return ExprArg(extendedR.joinSorts, extendedR.instanceSorts, finalInstances)
 
-def op_difference(l,r):
-    (extendedL, extendedR) = set_extend(l,r)
-    (sorts, extendedLinstances) = extendedL
-    (_, extendedRinstances) = extendedR
+def op_difference(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    (extendedL, extendedR) = set_extend(left,right)
     finalInstances = []
-    for i in sorts:
+    for i in extendedL.instanceSorts:
         for _ in range(i.numInstances):
-            linstance = extendedLinstances.pop(0)
-            finalInstances.append(If(And(linstance != i.parentInstances, extendedRinstances.pop(0) == i.parentInstances)
+            linstance = extendedL.instances.pop(0)
+            rinstance = extendedR.instances.pop(0)
+            finalInstances.append(If(And(linstance != i.parentInstances, rinstance == i.parentInstances)
                                      , linstance
                                      , i.parentInstances))
-    return (sorts, finalInstances)
+    return ExprArg(extendedR.joinSorts, extendedR.instanceSorts, finalInstances)
 
-def op_in(l,r):
-    (extendedL, extendedR) = set_extend(l,r)
-    (sorts, extendedLinstances) = extendedL
-    (_, extendedRinstances) = extendedR
+def op_in(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    (extendedL, extendedR) = set_extend(left,right)
     finalExpr = True
-    for i in sorts:
+    for i in extendedL.instanceSorts:
         for _ in range(i.numInstances):
-            finalExpr = And(finalExpr, Implies(extendedLinstances.pop(0) != i.parentInstances, 
-                                               extendedRinstances.pop(0) != i.parentInstances))
-    return (sorts, finalExpr)
+            finalExpr = And(finalExpr, Implies(extendedL.instances.pop(0) != i.parentInstances, 
+                                               extendedR.instances.pop(0) != i.parentInstances))
+    return BoolArg(finalExpr)
 
-def op_nin(l,r):
-    (sorts, finalExpr) = op_in(l,r)
-    return (sorts, Not(finalExpr))
+def op_nin(left,right):
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
+    expr = op_in(left,right)
+    return ExprArg(expr.joinSorts, expr.instanceSorts, Not(expr.instances))
 
 def op_domain_restriction(l,r):
     pass
@@ -251,8 +412,8 @@ def op_range_restriction(l,r):
     pass
 
 def op_sum(arg):
-    (_, instances) = arg
-    return(["int"], Sum(instances))
+    assert isinstance(arg, ExprArg)
+    return IntArg(Sum(arg.instances))
 
 '''
     Map used to convert Clafer operations to Z3 operations
@@ -327,21 +488,71 @@ class BracketedConstraint(object):
         self.locals = {}
         self.value = "bracketed constraint"
         
-    def addLocal(self, id, sort, instances):
-        self.locals[id] = (sort, instances)
+    def addLocal(self, uid, expr):
+        assert isinstance(expr, ExprArg)
+        self.locals[uid] = expr
     
     def addArg(self, arg):
+        assert isinstance(arg, ExprArg)
         self.stack.append(arg)
             
     #might need to join better (e.g. B and B should be B+B, not [B, B]
+    #SHOULD JOIN THE INDIVIDUAL INSTANCES, NOT THE WHOLE THING
+    #may need to reverse pops
     def addQuantifier(self, quantifier, num_args, num_quantifiers, ifconstraints):
-        sorts = []
-        instances = []
+        finalInstances = []
+        for _ in range(num_quantifiers):
+            instanceSorts = []
+            joinSorts = []
+            instances = []
+            finalInnerInstances = []
+            for _ in range(num_args):
+                currExpr = self.stack.pop()
+                instanceSorts = instanceSorts + currExpr.instanceSorts
+                joinSorts = joinSorts + currExpr.joinSorts
+                #essentially a zip
+                if not instances:
+                    instances = [[i] for i in currExpr.instances]
+                else:
+                    instances = [instances[i] + [currExpr.instances[i]] for i in range(len(currExpr.instances))]
+            if quantifier == "Some":
+                for h in instances:
+                    firstIndexOfCurrentSort = 0
+                    innerExpr = False
+                    for i in instanceSorts:
+                        for j in range(i.numInstances): 
+                            innerExpr = Or(innerExpr, 
+                                           Or(*[k != i.parentInstances for k in h[firstIndexOfCurrentSort + j] ]))
+                        firstIndexOfCurrentSort = firstIndexOfCurrentSort + i.numInstances
+                    finalInnerInstances.append(innerExpr)
+                finalInstances.append(And(*finalInnerInstances))
+            elif quantifier == "All":
+                finalInstances = []
+                for i in instances:
+                    finalInstances.append(And(*i))
+                    
+                '''
+                for _ in range(num_quantifiers):
+                    instances = []
+                    currIfConstraints = ifconstraints.pop()
+                    for _ in range(num_args):
+                        arg = self.stack.pop()
+                        currIfConstraint = currIfConstraints.pop()
+                        instances = instances + [Implies(currIfConstraint, *arg.instances)]
+                    else:
+                        finalInstances.append(And(*instances))
+                finalInstances.reverse()
+                '''
+            self.stack.append(BoolArg([And(*finalInstances)]))
+        '''
+        Reimplement DONT FORGET IFCONSTRAINTS IN SOME
+        
         if quantifier == "Some":
             for _ in range(num_args):
-                (currSorts, currInstances) = self.stack.pop()
-                sorts = sorts + currSorts
-                instances = instances + currInstances
+                currExpr = self.stack.pop()
+                instanceSorts = instanceSorts + currExpr.instanceSorts
+                joinSorts = joinSorts + currExpr.joinSorts
+                instances = instances + currExpr.instances
                 instances = [item for sublist in instances for item in sublist]
             if len(instances) == 0:
                 return False
@@ -370,20 +581,22 @@ class BracketedConstraint(object):
         else:
             print("lone, no, and one still unimplemented")
             sys.exit()
+            
+        '''
                 
     def extend(self, args):
+        for i in args:
+            assert isinstance(i, ExprArg)
         maxInstances = 0
         extendedArgs = []
         for i in args:
-            (_, instances) = i
-            maxInstances = max(maxInstances, len(instances))
+            maxInstances = max(maxInstances, len(i.instances))
         for i in args:
-            (sorts, instances) = i
-            if len(instances) != maxInstances:
+            if len(i.instances) != maxInstances:
                 tempInstances = []
-                for i in range(maxInstances):
-                    tempInstances.append(instances[0])
-                extendedArgs.append((sorts, tempInstances))
+                for _ in range(maxInstances):
+                    tempInstances.append(i.instances[0])
+                extendedArgs.append(ExprArg(i.joinSorts, i.instanceSorts, tempInstances))
             else:
                 extendedArgs.append(i)
         return (maxInstances, extendedArgs)
@@ -393,28 +606,26 @@ class BracketedConstraint(object):
         args = []
         for _ in range(0,arity):
             args.insert(0, self.stack.pop())
-        (maxInstances, duplicatedArgs) = self.extend(args)
+        (maxInstances, extendedArgs) = self.extend(args)
         finalExprs = []
         for i in range(maxInstances):
             tempExprs = []
-            for j in duplicatedArgs:
-                (sorts, instances) = j
-                tempExprs.append((sorts,instances[i]))
+            for j in extendedArgs:
+                tempExprs.append(j.modifyInstances(j.instances[i]))
             finalExprs.append(tempExprs)
         finalExprs = [operator(*finalExprs[i]) for i in range(len(finalExprs))]
-        (sorts,_) = finalExprs[0]
-        finalExprs = [exprs for (_,exprs) in finalExprs]
-        self.stack.append((sorts,finalExprs))
+        finalInstances = [i.instances for i in finalExprs]
+        self.stack.append(finalExprs[0].modifyInstances(finalInstances))
     
     def endProcessing(self):
         self.value = self.stack.pop()
-        (_, exprs) = self.value
+        expr = self.value
         if(self.claferStack):
             thisClafer = self.claferStack[-1]
             for i in range(thisClafer.numInstances):
-                self.z3.z3_bracketed_constraints.append(Implies(thisClafer.instances[i] != thisClafer.parentInstances, exprs[i]))
+                self.z3.z3_bracketed_constraints.append(Implies(thisClafer.instances[i] != thisClafer.parentInstances, expr.instances[i]))
         else:
-            for i in exprs:
+            for i in expr.instances:
                 self.z3.z3_bracketed_constraints.append(i)
     
     def __str__(self):
