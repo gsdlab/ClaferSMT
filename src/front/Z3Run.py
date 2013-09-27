@@ -8,7 +8,7 @@ from common import Z3Instance, Common
 from test import TestClafers, bracketedconstraint_this, multiple_joins, \
     this_dot_parent, arithmetic, relations, boolean_connectives, union, \
     simple_abstract, some, simple_set, zoo, integer_refs, simple_zoo, \
-    phone_feature_model
+    phone_feature_model, higher_inheritance
 from z3 import get_version_string
 import sys
 
@@ -41,6 +41,7 @@ def main(args):
         #module = simple_zoo.getModule()
         #module = integer_refs.getModule()
         #module = phone_feature_model.getModule()
+        #module = higher_inheritance.getModule()
         z3 = Z3Instance.Z3Instance(module)
         z3.run()
    

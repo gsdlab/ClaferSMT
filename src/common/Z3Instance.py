@@ -64,7 +64,6 @@ class Z3Instance(object):
             self.unsat_core_trackers.append(p)
             self.unsat_map[str(p)] = constraint
             self.solver.add(Implies(p, constraint))
-            #print(Implies(p, constraint))
         
     def createCommonFunctions(self):
         Common.bool2Int = Function("bool2Int", BoolSort(), IntSort())

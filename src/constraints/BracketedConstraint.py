@@ -111,14 +111,16 @@ def op_join(left,right):
         else:
             #join with super abstract
             #i think this only works for one level of inheritance...just loop it
-            (superLeftJoinPoint, superLeftInstances) = joinWithSuper(leftJoinPoint, left.instances)
+            leftInstances = left.instances
+            while not(rightJoinPoint in leftJoinPoint.fields):
+                (leftJoinPoint, leftInstances) = joinWithSuper(leftJoinPoint, leftInstances)
             instanceSorts = right.instanceSorts
             if(isinstance(instanceSorts[0],basestring) and instanceSorts[0] == "int"):
                 zeroedVal = 0
             else:
                 zeroedVal = instanceSorts[0].parentInstances
-            joinFunction = createJoinFunction(superLeftJoinPoint, rightJoinPoint, superLeftInstances, right.instances, zeroedVal)
-            joinSorts = left.joinSorts + [superLeftJoinPoint] + right.joinSorts
+            joinFunction = createJoinFunction(leftJoinPoint, rightJoinPoint, leftInstances, right.instances, zeroedVal)
+            joinSorts = left.joinSorts + [leftJoinPoint] + right.joinSorts
             #for i in range(len(right.instances)):
             #    newInstances.append(If(joinFunction(right.instances[i]), right.instances[i], rightJoinPoint.parentInstances))
             #newInstances = [zeroedVal for i in range(leftJoinPoint.indexInSuper)] \

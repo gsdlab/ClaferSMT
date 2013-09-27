@@ -6,7 +6,7 @@ Created on Sep 15, 2013
 from common import Z3Instance
 from test import multiple_joins, bracketedconstraint_this, this_dot_parent, \
     arithmetic, relations, boolean_connectives, union, simple_abstract, some, \
-    simple_set, integer_refs
+    simple_set, integer_refs, higher_inheritance
 
 tests = [ 
           (multiple_joins, 1),
@@ -19,7 +19,8 @@ tests = [
           (simple_abstract, 0),
           (some, 1),
           (simple_set, 6),
-          (integer_refs, 1)
+          (integer_refs, 1),
+          (higher_inheritance, 1)
          ]
 
 def run():

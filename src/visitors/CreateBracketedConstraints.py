@@ -90,7 +90,6 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
                 list_of_ints = list(i)
                 if(isDisjunct and (len(set(list_of_ints)) != len(list_of_ints))):
                     continue
-                #newinstances.append([sort.maskForOne(j) for j in list_of_ints])
                 innerinstances.append([[h[j] if j == k  else sort.parentInstances for j in range(len(h))] for k in list_of_ints])
                 innerIfConstraints.append(And(*[h[k] != sort.parentInstances for k in list_of_ints]))
             newinstances.append(innerinstances[:])
@@ -132,7 +131,6 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.currentConstraint.addQuantifier(element.quantifier, num_args,num_quantifiers, ifconstraints)
     
     def localdeclarationVisit(self, element):
-        #prettyPrint("element="+element.element)
         pass
     
     def integerliteralVisit(self, element):
