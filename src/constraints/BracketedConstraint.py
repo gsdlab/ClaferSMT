@@ -97,6 +97,7 @@ def op_join(left,right):
                     newInstances.append(If(clause, leftJoinPoint.refSort.instances[i], leftJoinPoint.refSort.parentInstances))
                 return(ExprArg(joinSorts, [leftJoinPoint.refSort], newInstances))
     else:
+        #this can be entirely subsumed by the below case
         if(rightJoinPoint in leftJoinPoint.fields):
             joinSorts = left.joinSorts + right.joinSorts
             instanceSorts = right.instanceSorts
@@ -129,66 +130,7 @@ def op_join(left,right):
             for i in range(len(right.instances)):
                 newInstances.append(joinFunction(i))
             return(ExprArg(joinSorts, instanceSorts, newInstances))
-            
-        '''
-        indexInSuper = leftJoinPoint.indexInSuper
-        if leftJoinPoint.superSort and (isinstance(rightJoinPoint, basestring) or not(rightJoinPoint in leftJoinPoint.fields)):
-            #deep copy list, should change eventually
-            lsorts = lsorts[:]
-            lsorts.pop()
-            (leftJoinPoint, linstances) = joinWithSuper(leftJoinPoint, linstances)
-            lsorts.append(leftJoinPoint)
-        # i dont think this join function makes any sense
-        
-        join_function = Function("join" + str(Common.getFunctionUID()) + ":" + str(leftJoinPoint) + "." + str(rightJoinPoint), IntSort(), BoolSort())
-        constraints = [join_function(i) == (linstances[i] != leftJoinPoint.parentInstances) for i in range(len(linstances))]
-        leftJoinPoint.z3.z3_constraints = leftJoinPoint.z3.z3_constraints + constraints
-        if isinstance(rsorts[0], basestring) and rsorts[0] == "int":
-            zeroedVal = 0
-        else:
-            zeroedVal = len(rinstances) 
-        newinstances = [zeroedVal for i in range(indexInSuper)] + linstances + [zeroedVal for i in range(indexInSuper + len(linstances), len(rinstances))] # [rinstances[i] for i in range(len(rinstances))] # If(join_function(rinstances[i]), rinstances[i], zeroedVal) #rightJoinPoint.parentInstances should be instead of len(rinstances)
-        return ([rightJoinPoint], newinstances)    
-    '''
-    '''
-    if isinstance(rightJoinPoint, basestring) and rightJoinPoint != "int":
-        newinstances = []
-        if rightJoinPoint == "parent":
-            for i in range(leftJoinPoint.parent.numInstances):
-                clause = Or(*[j == i for j in linstances])
-                newinstances.append(If(clause, leftJoinPoint.parent.instances[i], leftJoinPoint.parent.parentInstances))
-            return([leftJoinPoint.parent], newinstances)
-        elif rightJoinPoint == "ref":
-            if isinstance(leftJoinPoint.refSort, basestring):
-                return(["int"], [If(linstances[i] != leftJoinPoint.parentInstances, leftJoinPoint.refs[i], 0)  for i in range(leftJoinPoint.numInstances)])
-            else: 
-                for i in range(leftJoinPoint.refSort.numInstances):
-                    tempRefs = [If(linstances[j] != leftJoinPoint.parentInstances, leftJoinPoint.refs[j]
-                                   , leftJoinPoint.refSort.parentInstances) for j in range(len(linstances))]
-                    clause = Or(*[j == i for j in tempRefs])
-                    newinstances.append(If(clause, leftJoinPoint.refSort.instances[i], leftJoinPoint.refSort.parentInstances))
-                return([leftJoinPoint.refSort], newinstances)
-    else:
-        #join with super abstract
-        indexInSuper = leftJoinPoint.indexInSuper
-        if leftJoinPoint.superSort and (isinstance(rightJoinPoint, basestring) or not(rightJoinPoint in leftJoinPoint.fields)):
-            #deep copy list, should change eventually
-            lsorts = lsorts[:]
-            lsorts.pop()
-            (leftJoinPoint, linstances) = joinWithSuper(leftJoinPoint, linstances)
-            lsorts.append(leftJoinPoint)
-        # i dont think this join function makes any sense
-        
-        join_function = Function("join" + str(Common.getFunctionUID()) + ":" + str(leftJoinPoint) + "." + str(rightJoinPoint), IntSort(), BoolSort())
-        constraints = [join_function(i) == (linstances[i] != leftJoinPoint.parentInstances) for i in range(len(linstances))]
-        leftJoinPoint.z3.z3_constraints = leftJoinPoint.z3.z3_constraints + constraints
-        if isinstance(rsorts[0], basestring) and rsorts[0] == "int":
-            zeroedVal = 0
-        else:
-            zeroedVal = len(rinstances) 
-        newinstances = [zeroedVal for i in range(indexInSuper)] + linstances + [zeroedVal for i in range(indexInSuper + len(linstances), len(rinstances))] # [rinstances[i] for i in range(len(rinstances))] # If(join_function(rinstances[i]), rinstances[i], zeroedVal) #rightJoinPoint.parentInstances should be instead of len(rinstances)
-        return ([rightJoinPoint], newinstances)    
-        '''    
+    
     
 def op_card(arg):
     assert isinstance(arg, ExprArg)
@@ -312,8 +254,6 @@ def set_extend(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    #(lsorts, linstances) = l
-    #(rsorts, rinstances) = r
     finalSorts = []
     finalJoinSorts = []
     finalLinstances = []
@@ -511,7 +451,10 @@ class BracketedConstraint(object):
             instances = []
             instanceSorts = []
             finalInnerInstances = []
-            currIfConstraints = ifconstraints.pop(0)
+            if ifconstraints:
+                currIfConstraints = ifconstraints.pop(0)
+            else:
+                currIfConstraints = []
             for a in range(num_args):
                 currExpr = localStack.pop()
                 instanceSorts = instanceSorts + currExpr.instanceSorts
@@ -534,60 +477,11 @@ class BracketedConstraint(object):
             elif quantifier == "All":
                 for i in instances:
                     finalInstances.append(And(*[Implies(currIfConstraints[j], i[j]) for j in range(len(i))]))
-                    
-                '''
-                for _ in range(num_quantifiers):
-                    instances = []
-                    currIfConstraints = ifconstraints.pop()
-                    for _ in range(num_args):
-                        arg = self.stack.pop()
-                        currIfConstraint = currIfConstraints.pop()
-                        instances = instances + [Implies(currIfConstraint, *arg.instances)]
-                    else:
-                        finalInstances.append(And(*instances))
-                finalInstances.reverse()
-                '''
+            else:
+                print("lone, no, and one still unimplemented")
+                sys.exit()
         self.stack.append(BoolArg(finalInstances))
-        '''
-        Reimplement DONT FORGET IFCONSTRAINTS IN SOME
-        
-        if quantifier == "Some":
-            for _ in range(num_args):
-                currExpr = self.stack.pop()
-                instanceSorts = instanceSorts + currExpr.instanceSorts
-                joinSorts = joinSorts + currExpr.joinSorts
-                instances = instances + currExpr.instances
-                instances = [item for sublist in instances for item in sublist]
-            if len(instances) == 0:
-                return False
-            expr = False
-            firstIndexOfCurrentSort = 0
-            for i in sorts:
-                for j in range(i.numInstances):
-                    expr = Or(expr, instances[firstIndexOfCurrentSort + j] != i.parentInstances)
-                firstIndexOfCurrentSort = firstIndexOfCurrentSort + i.numInstances
-            self.stack.append((["bool"], [expr]))
-        elif quantifier == "All":
-            newinstances = []
-            for _ in range(num_quantifiers):
-                instances = []
-                currIfConstraints = ifconstraints.pop()
-                for _ in range(num_args):
-                    (_, currInstances) = self.stack.pop()
-                    currIfConstraint = currIfConstraints.pop()
-                    instances = instances + [Implies(currIfConstraint, *currInstances)]
-                if len(instances) == 0:
-                    return True #?..probably can't happen anyway
-                else:
-                    newinstances.append(And(*instances))
-            newinstances.reverse()
-            self.stack.append((["bool"], newinstances))
-        else:
-            print("lone, no, and one still unimplemented")
-            sys.exit()
-            
-        '''
-                
+           
     def extend(self, args):
         for i in args:
             assert isinstance(i, ExprArg)

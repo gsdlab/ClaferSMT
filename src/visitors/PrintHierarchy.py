@@ -35,7 +35,11 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
         sort = self.z3.z3_sorts[element.uid]
         
         for j in range(sort.numInstances):
-            isOn = str(self.model.eval(sort.instances[j])) == str(self.parentStack[-1]) 
+            if not element.isAbstract:
+                isOn = str(self.model.eval(sort.instances[j])) == str(self.parentStack[-1])
+            else:
+                isOn = str(self.model.eval(sort.instances[j])) != str(sort.parentInstances) and \
+                    str(j) == str(self.parentStack[-1])
             if isOn:
                 if not sort.refs and not element.isAbstract:
                     standard_print(str(indent) + str(sort.instances[j]))
