@@ -24,6 +24,10 @@ tests = [
          ]
 
 def run():
+    '''
+    Runs the Z3-translator on each pair (file, numInstances) in tests, 
+    and ensures that the number of generated models equals numInstances.
+    '''
     count = 0
     for t in tests:
         count = count+1

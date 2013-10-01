@@ -11,11 +11,28 @@ import sys
 
 class ExprArg():
     def __init__(self, joinSorts, instanceSorts, instances):
+        '''
+        :param joinSorts: The list of sorts used to determine which ClaferSorts to join.
+        :type joinSorts: [:class:`~common.ClaferSort`]
+        :param instanceSorts: The list of sorts that are actually in instances.
+        :type instancesSorts: [:class:`~common.ClaferSort`]
+        :param instances: The set of Z3-int expressions associated with the bracketed constraint up to this point.
+        :type instances: [Int()]
+        
+        Struct used to hold information as a bracketed constraint is traversed. 
+        '''
         self.joinSorts = joinSorts
         self.instanceSorts = instanceSorts
         self.instances = instances
         
     def modifyInstances(self, newInstances):
+        '''
+        :param newInstances:
+        :type newInstances: [Int()]
+        :returns: :class:`~ExprArg`
+        
+        Returns the old ExprArg, with its instances changed to **newInstances**.
+        '''
         return ExprArg(self.joinSorts[:], self.instanceSorts[:], newInstances)
       
     def __str__(self):
@@ -26,17 +43,32 @@ class ExprArg():
                
 class IntArg(ExprArg):
     def __init__(self, instances):
+        '''
+        Convenience class that extends ExprArg and holds an integer instance.
+        '''
         self.joinSorts = ["int"]
         self.instanceSorts = ["int"]
         self.instances = instances
         
 class BoolArg(ExprArg):
     def __init__(self, instances):
+        '''
+        Convenience class that extends ExprArg and holds a boolean instance.
+        '''
         self.joinSorts = ["bool"]
         self.instanceSorts = ["bool"]
         self.instances = instances
 
 def joinWithSuper(sort, instances):
+    '''
+    :param sort:
+    :type sort: :class:`~common.ClaferSort`
+    :param instances:
+    :type instances: [Int()]
+    :returns: (:class:`~common.ClaferSort`, [Int()]) 
+    
+    Maps each instance of the subclafer **sort** to the corresponding super instance. Returns the super sort and its instances.
+    '''
     newInstances = []
     for i in range(0, sort.indexInSuper):
         newInstances.append(sort.superSort.parentInstances)
@@ -47,6 +79,34 @@ def joinWithSuper(sort, instances):
     return(sort.superSort, newInstances)
 
 def createJoinFunction(leftSort, rightSort, linstances, rinstances, zeroedVal):
+    '''
+    :param leftSort:
+    :type leftSort: :class:`~common.ClaferSort`
+    :param rightSort:
+    :type rightSort: :class:`~common.ClaferSort`
+    :param linstances:
+    :type linstances: [Int()]
+    :param rinstances:
+    :type rinstances: [Int()]
+    :param zeroedVal: the number of parentInstances of rightSort, or zero if rightSort is "int"
+    :type zeroedVal: int
+    :returns: Z3-function(int, int) 
+    
+    Creates a Z3-function that ranges over len(rinstances). For each index in rinstances, 
+    returns the instance if its corresponding instance in linstances is on
+    , else the instances is *masked* to be zeroedVal. ::
+    
+    >>> zeroedVal = 3
+    >>> leftSort.parentInstances = 1
+    >>> linst = [0,0,1]
+    >>> rinst = [0,1,1,2,2,3]
+    >>> join([0,0,1], [0,1,1,2,2,3]) 
+    >>>    => [mask(0), mask(1), mask(1), mask(2), mask(2), mask(3]]
+    >>>    => [0,1,1,3,3,3]
+    
+    Here, since linst[2] = leftSort.parentInstances, any instance in rinstances that points to linst[2] is *zeroed*. 
+    The other instances remain the same.
+    '''
     joinFunction = Function("join" + str(Common.getFunctionUID()) + ":" + str(leftSort) , IntSort(), IntSort())
     joinHelperFunction = Function("joinhelper" + str(Common.getFunctionUID()) + ":" + str(leftSort) , IntSort(), IntSort())
     constraints = []
@@ -54,8 +114,7 @@ def createJoinFunction(leftSort, rightSort, linstances, rinstances, zeroedVal):
         constraints.append(joinHelperFunction(i) == linstances[i])
     constraints.append(joinHelperFunction(len(linstances)) == leftSort.parentInstances)
     for i in range(len(rinstances)):  
-        #clause = Or(*[j == i for j in linstances])  
-        constraints.append(joinFunction(i) == If(joinHelperFunction(rightSort.instances[i]) != leftSort.parentInstances, rinstances[i], zeroedVal))
+        constraints.append(joinFunction(i) == If(joinHelperFunction(rinstances[i]) != leftSort.parentInstances, rinstances[i], zeroedVal))
     constraints.append(joinFunction(len(rinstances)) == zeroedVal)
     leftSort.z3.z3_constraints = leftSort.z3.z3_constraints + constraints
     return joinFunction
@@ -133,6 +192,15 @@ def op_join(left,right):
     
     
 def op_card(arg):
+    '''
+    :param arg:
+    :type left: :class:`~arg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~IntArg` 
+    
+    Returns the number of instances that are *on* in arg.
+    '''
     assert isinstance(arg, ExprArg)
     index = 0
     newInstances = []
@@ -143,22 +211,58 @@ def op_card(arg):
     return IntArg(Sum(newInstances))
 
 def op_add(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~IntArg` 
+    
+    Returns left + right.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return IntArg(left.instances + right.instances)
 
 def op_sub(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~IntArg` 
+    
+    Returns left - right.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return IntArg(left.instances - right.instances)
 
 def op_mul(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~IntArg` 
+    
+    Returns left * right.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return IntArg(left.instances * right.instances)
 
 #integer division
 def op_div(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~IntArg` 
+    
+    Returns left / right.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return IntArg(left.instances / right.instances 
@@ -166,10 +270,26 @@ def op_div(left,right):
                              else left.instances // right.instances)
     
 def op_un_minus(arg):
+    '''
+    :param arg:
+    :type arg: :class:`~ExprArg`
+    :returns: :class:`~IntArg` 
+    
+    Negates arg.
+    '''
     assert isinstance(arg, ExprArg)
     return IntArg(-(arg.instances))
     
 def op_eq(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~BoolArg` 
+    
+    Ensures that the left = right.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     if(isinstance(left.instances, list) and isinstance(right.instances, list)):
@@ -186,6 +306,15 @@ def op_eq(left,right):
         return BoolArg(left.instances == right.instances)  
     
 def op_ne(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~BoolArg` 
+    
+    Ensures that the left != right.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     expr = op_eq(left, right)
@@ -193,64 +322,163 @@ def op_ne(left,right):
     return expr
     
 def op_lt(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~BoolArg` 
+    
+    Ensures that the left < right.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return BoolArg(left.instances < right.instances)  
         
 def op_le(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~BoolArg` 
+    
+    Ensures that the left <= right.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return BoolArg(left.instances <= right.instances)  
 
 def op_gt(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~BoolArg` 
+    
+    Ensures that the left > right.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return op_lt(right, left)
 
 def op_ge(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~BoolArg` 
+    
+    Ensures that the left >= right.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return op_le(right, left)
 
 def op_and(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~BoolArg` 
+    
+    Computes the boolean conjunction of the left and right instances.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return BoolArg(And(left.instances, right.instances))  
 
 def op_or(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~BoolArg` 
+    
+    Computes the boolean disjunction of the left and right instances.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return BoolArg(Or(left.instances, right.instances)) 
 
 def op_xor(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~BoolArg` 
+    
+    Computes the boolean XOR of the left and right instances.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return BoolArg(Xor(left.instances, right.instances)) 
 
 def op_implies(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~BoolArg` 
+    
+    Computes the set union (left ++ right)
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return BoolArg(Implies(left.instances, right.instances)) 
 
 def op_equivalence(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~BoolArg` 
+    
+    Ensures that an element of left is *on* iff it is *on* in right.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return BoolArg(And(Implies(left.instances, right.instances),
                        Implies(right.instances, left.instances))) 
 
-def op_ifthenelse(cond, ifexpr, elseexpr):
+def op_ifthenelse(cond, ifExpr, elseExpr):
+    '''
+    :param cond:
+    :type cond: :class:`~ExprArg`
+    :param ifExpr:
+    :type ifExpr: :class:`~ExprArg`
+    :param elseExpr:
+    :type elseExpr: :class:`~ExprArg`
+    :returns: :class:`~BoolArg` 
+    
+    Returns the corresponding Z3 If-construct over the instances of the arguments.
+    '''
     assert isinstance(cond, ExprArg)
-    assert isinstance(ifexpr, ExprArg)
-    assert isinstance(elseexpr, ExprArg)
-    return BoolArg(If(cond.instances, ifexpr.instances, elseexpr.instances))
+    assert isinstance(ifExpr, ExprArg)
+    assert isinstance(elseExpr, ExprArg)
+    return BoolArg(If(cond.instances, ifExpr.instances, elseExpr.instances))
 
 def set_extend(left,right):
     '''
-    extends two sets to facilitate set operations
-    Simplified Example:
-       Extend(Set(A,B), Set(B,C)) => (Set(A,B,C), Set(A,B,C)),
-       In this case, the C's in the left set are "zeroed", and
-       the A's in the right set are "zeroed"
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~ExprArg` 
+    
+    Extends two sets to facilitate set operations.
+    Simplified Example: ::
+    
+    >>> Extend(Set(A,B), Set(B,C)) => (Set(A,B,C), Set(A,B,C))
+    
+    In this case, the C's in the left set are "zeroed", and the A's in the right set are "zeroed."
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
@@ -297,6 +525,15 @@ def set_extend(left,right):
            ExprArg(finalJoinSorts, finalSorts, finalRinstances))
 
 def op_union(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~ExprArg` 
+    
+    Computes the set union (left ++ right)
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     (extendedL, extendedR) = set_extend(left,right)
@@ -307,6 +544,15 @@ def op_union(left,right):
     return ExprArg(extendedR.joinSorts, extendedR.instanceSorts, finalInstances)
 
 def op_intersection(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~ExprArg` 
+    
+    Computes the set intersection (left & right)
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     (extendedL, extendedR) = set_extend(left,right)
@@ -317,6 +563,15 @@ def op_intersection(left,right):
     return ExprArg(extendedR.joinSorts, extendedR.instanceSorts, finalInstances)
 
 def op_difference(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~ExprArg` 
+    
+    Computes the set difference (left - - right)
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     (extendedL, extendedR) = set_extend(left,right)
@@ -331,6 +586,15 @@ def op_difference(left,right):
     return ExprArg(extendedR.joinSorts, extendedR.instanceSorts, finalInstances)
 
 def op_in(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~BoolArg` 
+    
+    Ensures that left is a subset of right.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     (extendedL, extendedR) = set_extend(left,right)
@@ -342,18 +606,52 @@ def op_in(left,right):
     return BoolArg(finalExpr)
 
 def op_nin(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~ExprArg` 
+    
+    Ensures that left is not a subset of right.
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     expr = op_in(left,right)
-    return ExprArg(expr.joinSorts, expr.instanceSorts, Not(expr.instances))
+    return expr.modifyInstances(Not(expr.instances))
 
 def op_domain_restriction(l,r):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~ExprArg` 
+    
+    No idea what this does.
+    '''
     pass
 
 def op_range_restriction(l,r):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~ExprArg` 
+    
+    Nope.
+    '''
     pass
 
 def op_sum(arg):
+    '''
+    :param arg:
+    :type arg: :class:`~ExprArg`
+    :returns: :class:`~IntArg` 
+    
+    Computes the sum of all integer instances in arg. May not match the semantics of the Alloy backend.
+    '''
     assert isinstance(arg, ExprArg)
     return IntArg(Sum(arg.instances))
 
@@ -404,18 +702,14 @@ def getOperationConversion(op):
     '''
     :param op: String representation of Clafer operation.
     :type op: str
-    :returns: 4-tuple from ClaferToZ3OperationsMap with the fields:
+    :returns: 2-tuple from ClaferToZ3OperationsMap with the fields:
     
-    The 4-tuple has the fields:
-        1. arity
-        2. equivalent operation(str) in Z3 (e.g. '&&' maps to 'And')
-        3. isPrefix(boolean), states whether the op is prefix or infix in Z3
-        4. function associated with the operator
+    The 2-tuple has the fields:
+        1. arity of the function
+        2. function associated with the operator
     '''
-    if(op in ClaferToZ3OperationsMap):
-        return ClaferToZ3OperationsMap[op]
-    else:
-        sys.exit("Error in getOperationConversion(op)")
+    return ClaferToZ3OperationsMap[op]
+
 
 class BracketedConstraint(object):
     '''
@@ -438,9 +732,6 @@ class BracketedConstraint(object):
         assert isinstance(arg, ExprArg)
         self.stack.append(arg)
             
-    #might need to join better (e.g. B and B should be B+B, not [B, B]
-    #SHOULD JOIN THE INDIVIDUAL INSTANCES, NOT THE WHOLE THING
-    #may need to reverse pops
     def addQuantifier(self, quantifier, num_args, num_quantifiers, ifconstraints):
         finalInstances = []
         localStack = []
