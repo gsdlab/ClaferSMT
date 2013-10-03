@@ -12,6 +12,7 @@ from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy
 from z3 import *
 import common
+import time
 
 class Z3Instance(object):
     ''' 
@@ -76,6 +77,7 @@ class Z3Instance(object):
         
         Converts Clafer constraints to Z3 constraints and computes models.
         '''
+        self.initTime = time.clock()
         Visitor.visit(CreateSorts.CreateSorts(self), self.module)
         Visitor.visit(ResolveClaferIds.ResolveClaferIds(self), self.module)
         Visitor.visit(CreateHierarchy.CreateHierarchy(self), self.module)
@@ -109,8 +111,12 @@ class Z3Instance(object):
         #core = self.solver.unsat_core()
         #debug_print(len(core))
         #debug_print(self.solver.unsat_core())
-        debug_print("Getting models.")    
+        debug_print("Getting models.")  
+        self.endTranslationTime = time.clock()  
         models = self.get_models(-1)
+        #print("Ticks: " + str(self.initTime) + " " + str(self.endTranslationTime) + " " + str(self.endOfFirstInstanceTime))
+        print("Translation time:" + str(self.endTranslationTime - self.initTime))
+        print("First Model time:" + str(self.endOfFirstInstanceTime - self.endTranslationTime))
         return len(models)
         
     def printVars(self, model):
@@ -130,6 +136,8 @@ class Z3Instance(object):
             i.assertConstraints(self)
     
     def printConstraints(self):
+        if not Common.MODE == Common.DEBUG:
+            return
         for i in self.z3_sorts.values():
             i.constraints.print()
         self.join_constraints.print()
@@ -162,8 +170,11 @@ class Z3Instance(object):
                     #print(str(d) + " = " + str(m[d]))
                 self.solver.add(Or(block))
                 self.printVars(m)
+                if count == 0:
+                    self.endOfFirstInstanceTime = time.clock()
                 count += 1
             else:
+                self.endOfFirstInstanceTime = time.clock()
                 if Common.MODE == Common.DEBUG and count == 0:
                     debug_print(self.solver.check(self.unsat_core_trackers))
                     core = self.solver.unsat_core()

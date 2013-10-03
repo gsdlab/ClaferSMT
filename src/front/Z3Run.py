@@ -22,7 +22,7 @@ def main(args):
     
     Starting point for ClaferZ3.
     '''
-    Common.MODE = Common.NORMAL
+    Common.MODE = Common.TEST
     
     if Common.MODE == Common.TEST:
         TestClafers.run()
