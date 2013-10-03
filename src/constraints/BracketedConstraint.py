@@ -4,6 +4,8 @@ Created on Apr 29, 2013
 @author: ezulkosk
 '''
 from common import Common
+from constraints import Constraints
+from constraints.Constraints import GenericConstraints
 from lxml.builder import basestring
 from z3 import Function, IntSort, BoolSort, If, Not, Sum, Implies, Or, And, Xor
 import sys
@@ -113,16 +115,25 @@ def createJoinFunction(leftSort, rightSort, linstances, rinstances, zeroedVal):
     for i in range(len(linstances)):
         constraints.append(joinHelperFunction(i) == linstances[i])
     constraints.append(joinHelperFunction(len(linstances)) == leftSort.parentInstances)
-    for i in range(len(rinstances)):  
-        constraints.append(joinFunction(i) == If(joinHelperFunction(rinstances[i]) != leftSort.parentInstances, rinstances[i], zeroedVal))
+    for i in range(len(rinstances)):  #rinstance[i] in joinHelperFunction arg
+        constraints.append(joinFunction(i) == If(joinHelperFunction(rightSort.instances[i]) != leftSort.parentInstances, rinstances[i], zeroedVal))
     constraints.append(joinFunction(len(rinstances)) == zeroedVal)
-    leftSort.z3.z3_constraints = leftSort.z3.z3_constraints + constraints
+    leftSort.z3.join_constraints.addAll(constraints)
     return joinFunction
 
 #can optimize this.parent
 #need to range newInstances over ALL sorts in instanceSorts (don't have a test case yet)
 #   for example, leftJoinPoint.parentInstances CHANGES if there are multiple sorts here
 def op_join(left,right):
+    '''
+    :param left:
+    :type left: :class:`~ExprArg`
+    :param right:
+    :type right: :class:`~ExprArg`
+    :returns: :class:`~IntArg` 
+    
+    Returns the join of left and right, using the join function created in createJoinFunction().
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     
@@ -156,41 +167,20 @@ def op_join(left,right):
                     newInstances.append(If(clause, leftJoinPoint.refSort.instances[i], leftJoinPoint.refSort.parentInstances))
                 return(ExprArg(joinSorts, [leftJoinPoint.refSort], newInstances))
     else:
-        #this can be entirely subsumed by the below case
-        if(rightJoinPoint in leftJoinPoint.fields):
-            joinSorts = left.joinSorts + right.joinSorts
-            instanceSorts = right.instanceSorts
-            if(isinstance(instanceSorts[0],basestring) and instanceSorts[0] == "int"):
-                zeroedVal = 0
-            else:
-                zeroedVal = instanceSorts[0].parentInstances
-            joinFunction = createJoinFunction(leftJoinPoint, rightJoinPoint, left.instances, right.instances, zeroedVal)    
-            for i in range(len(right.instances)):
-                newInstances.append(joinFunction(i))
-            return(ExprArg(joinSorts, instanceSorts, newInstances))
+        leftInstances = left.instances
+        while not(rightJoinPoint in leftJoinPoint.fields):
+            (leftJoinPoint, leftInstances) = joinWithSuper(leftJoinPoint, leftInstances)
+        instanceSorts = right.instanceSorts
+        if(isinstance(instanceSorts[0],basestring) and instanceSorts[0] == "int"):
+            zeroedVal = 0
         else:
-            #join with super abstract
-            #i think this only works for one level of inheritance...just loop it
-            leftInstances = left.instances
-            while not(rightJoinPoint in leftJoinPoint.fields):
-                (leftJoinPoint, leftInstances) = joinWithSuper(leftJoinPoint, leftInstances)
-            instanceSorts = right.instanceSorts
-            if(isinstance(instanceSorts[0],basestring) and instanceSorts[0] == "int"):
-                zeroedVal = 0
-            else:
-                zeroedVal = instanceSorts[0].parentInstances
-            joinFunction = createJoinFunction(leftJoinPoint, rightJoinPoint, leftInstances, right.instances, zeroedVal)
-            joinSorts = left.joinSorts + [leftJoinPoint] + right.joinSorts
-            #for i in range(len(right.instances)):
-            #    newInstances.append(If(joinFunction(right.instances[i]), right.instances[i], rightJoinPoint.parentInstances))
-            #newInstances = [zeroedVal for i in range(leftJoinPoint.indexInSuper)] \
-            #    + [If(left.instances[i] != leftJoinPoint.parentInstances, right.instances[i + leftJoinPoint.indexInSuper], zeroedVal) for i in range(len(left.instances))] \
-            #    + [zeroedVal for i in range(leftJoinPoint.indexInSuper + len(leftJoinPoint.instances), len(rightJoinPoint.instances))]
-            for i in range(len(right.instances)):
-                newInstances.append(joinFunction(i))
-            return(ExprArg(joinSorts, instanceSorts, newInstances))
-    
-    
+            zeroedVal = instanceSorts[0].parentInstances
+        joinFunction = createJoinFunction(leftJoinPoint, rightJoinPoint, leftInstances, right.instances, zeroedVal)
+        joinSorts = left.joinSorts + [leftJoinPoint] + right.joinSorts
+        for i in range(len(right.instances)):
+            newInstances.append(joinFunction(i))
+        return(ExprArg(joinSorts, instanceSorts, newInstances))
+
 def op_card(arg):
     '''
     :param arg:
@@ -208,7 +198,7 @@ def op_card(arg):
         for _ in range(i.numInstances):
             newInstances.append(Common.bool2Int(arg.instances[index] != i.parentInstances))
             index = index + 1
-    return IntArg(Sum(newInstances))
+    return IntArg([Sum(newInstances)])
 
 def op_add(left,right):
     '''
@@ -222,7 +212,8 @@ def op_add(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return IntArg(left.instances + right.instances)
+    return IntArg([sum(left.instances) + sum(right.instances)])
+    #return IntArg(left.instances + right.instances)
 
 def op_sub(left,right):
     '''
@@ -236,7 +227,7 @@ def op_sub(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return IntArg(left.instances - right.instances)
+    return IntArg([sum(left.instances) - sum(right.instances)])
 
 def op_mul(left,right):
     '''
@@ -250,7 +241,7 @@ def op_mul(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return IntArg(left.instances * right.instances)
+    return IntArg([sum(left.instances) * sum(right.instances)])
 
 #integer division
 def op_div(left,right):
@@ -265,9 +256,11 @@ def op_div(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return IntArg(left.instances / right.instances 
-                   if((not isinstance(left.instances, int)) or (not isinstance(right.instances, int)))
-                             else left.instances // right.instances)
+    lsum = sum(left.instances)
+    rsum = sum(right.instances)
+    return IntArg(lsum / rsum
+                   if((not isinstance(lsum, int)) or (not isinstance(rsum, int)))
+                             else lsum // rsum)
     
 def op_un_minus(arg):
     '''
@@ -278,8 +271,9 @@ def op_un_minus(arg):
     Negates arg.
     '''
     assert isinstance(arg, ExprArg)
-    return IntArg(-(arg.instances))
+    return IntArg([-(sum(arg.instances))])
     
+#need to iterate over all instancesorts, maybe not
 def op_eq(left,right):
     '''
     :param left:
@@ -292,19 +286,27 @@ def op_eq(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
+    
+    #integer equality case
+    if isinstance(left.instanceSorts[0], basestring) and left.instanceSorts[0] == "int":
+        return BoolArg([sum(left.instances) == sum(right.instances)])
+    #clafer-set equality case
+    else:
+        return BoolArg([And(*[i == j for i,j in zip(left.instances, right.instances)])])
+    '''
     if(isinstance(left.instances, list) and isinstance(right.instances, list)):
         #ref case
         if isinstance(left.instanceSorts[0], basestring) and left.instanceSorts[0] == "int":
-            return BoolArg(Sum(*left.instances) == Sum(*right.instances))
+            return BoolArg([sum(left.instances) == sum(right.instances)])
         else:
             return BoolArg(And(*[i == j for i,j in zip(left.instances, right.instances)]))
     elif(isinstance(left.instances, list)):
-        return BoolArg(Sum(*left.instances) == right.instances)
+        return BoolArg(sum(*left.instances) == right.instances)
     elif(isinstance(right.instances, list)):
-        return BoolArg(Sum(*right.instances) == left.instances)
+        return BoolArg(sum(right.instances) == left.instances)
     else:
         return BoolArg(left.instances == right.instances)  
-    
+    '''
 def op_ne(left,right):
     '''
     :param left:
@@ -318,7 +320,7 @@ def op_ne(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     expr = op_eq(left, right)
-    expr.instances = Not(expr.instances)
+    expr.instances = [Not(i) for i in expr.instances]
     return expr
     
 def op_lt(left,right):
@@ -333,7 +335,7 @@ def op_lt(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return BoolArg(left.instances < right.instances)  
+    return BoolArg([sum(left.instances) < sum(right.instances)])  
         
 def op_le(left,right):
     '''
@@ -347,7 +349,7 @@ def op_le(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return BoolArg(left.instances <= right.instances)  
+    return BoolArg([sum(left.instances) <= sum(right.instances)])  
 
 def op_gt(left,right):
     '''
@@ -389,7 +391,7 @@ def op_and(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return BoolArg(And(left.instances, right.instances))  
+    return BoolArg([And(left.instances[0], right.instances[0])])  
 
 def op_or(left,right):
     '''
@@ -403,7 +405,7 @@ def op_or(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return BoolArg(Or(left.instances, right.instances)) 
+    return BoolArg([Or(left.instances[0], right.instances[0])]) 
 
 def op_xor(left,right):
     '''
@@ -417,7 +419,7 @@ def op_xor(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return BoolArg(Xor(left.instances, right.instances)) 
+    return BoolArg([Xor(left.instances[0], right.instances[0])]) 
 
 def op_implies(left,right):
     '''
@@ -427,11 +429,11 @@ def op_implies(left,right):
     :type right: :class:`~ExprArg`
     :returns: :class:`~BoolArg` 
     
-    Computes the set union (left ++ right)
+    Ensure that if instance *i* of left is on, so is instance *i* of right.
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return BoolArg(Implies(left.instances, right.instances)) 
+    return BoolArg([And(*[Implies(i,j) for i,j in zip(left.instances, right.instances)])])
 
 def op_equivalence(left,right):
     '''
@@ -445,8 +447,9 @@ def op_equivalence(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return BoolArg(And(Implies(left.instances, right.instances),
-                       Implies(right.instances, left.instances))) 
+    return BoolArg([And(*[And(Implies(i,j), Implies(j,i)) for i,j in zip(left.instances, right.instances)])])
+    #return BoolArg(And(Implies(left.instances, right.instances),
+    #                   Implies(right.instances, left.instances))) 
 
 def op_ifthenelse(cond, ifExpr, elseExpr):
     '''
@@ -463,7 +466,7 @@ def op_ifthenelse(cond, ifExpr, elseExpr):
     assert isinstance(cond, ExprArg)
     assert isinstance(ifExpr, ExprArg)
     assert isinstance(elseExpr, ExprArg)
-    return BoolArg(If(cond.instances, ifExpr.instances, elseExpr.instances))
+    return BoolArg([If(cond.instances[0], ifExpr.instances[0], elseExpr.instances[0])])
 
 def set_extend(left,right):
     '''
@@ -603,7 +606,7 @@ def op_in(left,right):
         for _ in range(i.numInstances):
             finalExpr = And(finalExpr, Implies(extendedL.instances.pop(0) != i.parentInstances, 
                                                extendedR.instances.pop(0) != i.parentInstances))
-    return BoolArg(finalExpr)
+    return BoolArg([finalExpr])
 
 def op_nin(left,right):
     '''
@@ -653,7 +656,7 @@ def op_sum(arg):
     Computes the sum of all integer instances in arg. May not match the semantics of the Alloy backend.
     '''
     assert isinstance(arg, ExprArg)
-    return IntArg(Sum(arg.instances))
+    return IntArg([Sum(arg.instances)])
 
 '''
     Map used to convert Clafer operations to Z3 operations
@@ -711,13 +714,14 @@ def getOperationConversion(op):
     return ClaferToZ3OperationsMap[op]
 
 
-class BracketedConstraint(object):
+class BracketedConstraint(Constraints.GenericConstraints):
     '''
     :var stack: ([]) Used to process a tree of expressions.
     Class for creating bracketed Clafer constraints in Z3.
     '''
     
     def __init__(self, z3, claferStack):
+        GenericConstraints.__init__(self)
         self.z3 = z3
         self.claferStack = claferStack
         self.stack = []
@@ -764,10 +768,10 @@ class BracketedConstraint(object):
                                            Or(*[k != i.parentInstances for k in h[firstIndexOfCurrentSort + j] ]))
                         firstIndexOfCurrentSort = firstIndexOfCurrentSort + i.numInstances
                     finalInnerInstances.append(innerExpr)
-                finalInstances.append(And(*finalInnerInstances))
+                finalInstances.append([And(*finalInnerInstances)])
             elif quantifier == "All":
                 for i in instances:
-                    finalInstances.append(And(*[Implies(currIfConstraints[j], i[j]) for j in range(len(i))]))
+                    finalInstances.append([And(*[Implies(currIfConstraints[j], i[j][0]) for j in range(len(i))])])
             else:
                 print("lone, no, and one still unimplemented")
                 sys.exit()
@@ -784,7 +788,10 @@ class BracketedConstraint(object):
             if len(i.instances) != maxInstances:
                 tempInstances = []
                 for _ in range(maxInstances):
-                    tempInstances.append(i.instances[0])
+                    if not isinstance(i.instances[0], int):
+                        tempInstances.append(i.instances[0])
+                    else:
+                        tempInstances.append([i.instances[0]])
                 extendedArgs.append(ExprArg(i.joinSorts, i.instanceSorts, tempInstances))
             else:
                 extendedArgs.append(i)
@@ -812,10 +819,12 @@ class BracketedConstraint(object):
         if(self.claferStack):
             thisClafer = self.claferStack[-1]
             for i in range(thisClafer.numInstances):
-                self.z3.z3_bracketed_constraints.append(Implies(thisClafer.instances[i] != thisClafer.parentInstances, expr.instances[i]))
+                self.addConstraint(Implies(thisClafer.instances[i] != thisClafer.parentInstances, expr.instances[i][0]))
         else:
             for i in expr.instances:
-                self.z3.z3_bracketed_constraints.append(i)
+                for j in i:
+                    self.addConstraint(j)
+        self.z3.z3_bracketed_constraints.append(self)
     
     def __str__(self):
         return str(self.value)

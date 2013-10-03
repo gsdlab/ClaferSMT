@@ -6,6 +6,7 @@ Created on Apr 30, 2013
 
 from common import Common
 from common.Common import debug_print, standard_print
+from constraints import Constraints
 from gi.overrides.keysyms import m
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy
@@ -15,7 +16,6 @@ import common
 class Z3Instance(object):
     ''' 
     :var module: The Clafer AST
-    :var z3_constraints: ([:mod:`constraints.Constraint`]) Contains ALL constraints that will be fed into z3.
     :var z3_sorts: ({str, :mod:`common.ClaferSort`}) Holds the Sorts for each clafer, 
         mapped by the clafer's ID.
     :var solver: (Z3_Solver) The actual Z3 solver. 
@@ -28,7 +28,8 @@ class Z3Instance(object):
             Common.reset()
         self.module = module
         self.model_count = 0
-        self.z3_constraints = []
+        self.common_function_constraints = Constraints.GenericConstraints()
+        self.join_constraints = Constraints.GenericConstraints()
         self.z3_bracketed_constraints = []
         self.z3_sorts = {}
         self.unsat_core_trackers = []
@@ -55,20 +56,11 @@ class Z3Instance(object):
         for i in self.z3_sorts.values():
             if i.superSort:
                 i.indexInSuper = i.superSort.addSubSort(i)     
-    
-    def assertConstraint(self, constraint):
-        if Common.MODE != Common.DEBUG: 
-            self.solver.add(constraint)
-        if Common.MODE == Common.DEBUG:
-            p = Bool("p" + str(Common.getConstraintUID()))
-            self.unsat_core_trackers.append(p)
-            self.unsat_map[str(p)] = constraint
-            self.solver.add(Implies(p, constraint))
         
     def createCommonFunctions(self):
         Common.bool2Int = Function("bool2Int", BoolSort(), IntSort())
-        self.z3_constraints.append(Common.bool2Int(True) == 1)
-        self.z3_constraints.append(Common.bool2Int(False) == 0)               
+        self.common_function_constraints.addConstraint(Common.bool2Int(True) == 1)
+        self.common_function_constraints.addConstraint(Common.bool2Int(False) == 0)               
     
     def setOptions(self):
         set_option(max_depth=1000)
@@ -105,7 +97,7 @@ class Z3Instance(object):
         Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
            
         self.assertConstraints()        
-        
+        self.printConstraints()
         #if(Common.MODE == Common.DEBUG):
         #    self.printConstraints()
         
@@ -131,22 +123,19 @@ class Z3Instance(object):
     
     def assertConstraints(self):
         for i in self.z3_sorts.values():
-            for j in i.constraints:
-                self.assertConstraint(j)
-        for i in self.z3_constraints:
-            self.assertConstraint(i)
+            i.constraints.assertConstraints(self)
+        self.common_function_constraints.assertConstraints(self)
+        self.join_constraints.assertConstraints(self)
         for i in self.z3_bracketed_constraints:
-            self.assertConstraint(i)
+            i.assertConstraints(self)
     
     def printConstraints(self):
         for i in self.z3_sorts.values():
-            for j in i.constraints:
-                debug_print(j)
-        for i in self.z3_constraints:
-            debug_print(i)
+            i.constraints.print()
+        self.join_constraints.print()
         for i in self.z3_bracketed_constraints:
-            debug_print(i)
-    
+            i.print()
+        
     #this is not my method, some stackoverflow or z3.codeplex.com method. Can't remember, should find it.
     def get_models(self, desired_number_of_models):
         result = []
@@ -191,11 +180,6 @@ class Z3Instance(object):
     ###############################
     # accessors                   #
     ###############################
-    def getConstraints(self):
-        ''''
-        :returns: z3_constraints
-        '''
-        return self.z3_constraints
     
     def getSort(self, uid):
         return self.z3_sorts.get(uid)

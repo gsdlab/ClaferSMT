@@ -135,7 +135,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     
     def integerliteralVisit(self, element):
         if(self.inConstraint):
-            self.currentConstraint.addArg(IntArg([element.value]))
+            self.currentConstraint.addArg(IntArg([[element.value]]))
         
     def doubleliteralVisit(self, element):
         return element

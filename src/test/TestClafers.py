@@ -6,7 +6,7 @@ Created on Sep 15, 2013
 from common import Z3Instance
 from test import multiple_joins, bracketedconstraint_this, this_dot_parent, \
     arithmetic, relations, boolean_connectives, union, simple_abstract, some, \
-    simple_set, integer_refs, higher_inheritance
+    simple_set, integer_refs, higher_inheritance, this_integer_relation
 
 tests = [ 
           (multiple_joins, 1),
@@ -20,7 +20,8 @@ tests = [
           (some, 1),
           (simple_set, 6),
           (integer_refs, 1),
-          (higher_inheritance, 1)
+          (higher_inheritance, 1),
+          (this_integer_relation, 36)
          ]
 
 def run():
@@ -33,6 +34,7 @@ def run():
         count = count+1
         (file, expected_model_count) = t
         module = file.getModule()
+        print("Attempting: " + str(file))
         z3 = Z3Instance.Z3Instance(module)
         actual_model_count = z3.run()
         
