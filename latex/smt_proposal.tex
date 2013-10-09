@@ -1,0 +1,59 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amstext}    % defines the \text command, needed here
+\usepackage{array} 
+\usepackage[margin=1in]{geometry}
+\usepackage{mathpartir}
+\usepackage{enumerate}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{enumitem}
+\setenumerate{listparindent=\parindent}
+\begin{document}
+
+
+\newenvironment{myenumerate}{%
+  \edef\backupindent{\the\parindent}%
+  \itemize%
+  \setlength{\parindent}{\backupindent}%
+}{\endenumerate}
+
+\title{Extending Clafer with an SMT Backend}	
+\author{Ed Zulkoski \\
+(ezulkosk)}
+
+\maketitle
+\begin{abstract}
+We propose to develop a new backend solver for Clafer - a variability modeling language developed in the GSD Lab at the University of Waterloo - using the Z3 SMT solver. Z3 is well respected for its speed and has been shown to outperform other solvers in the domain of partial modeling -- one type of modeling within the scope of Clafer. The project will mostly involve a translation from Clafer constraints to Z3 constraints. Furthermore, by using Z3 we should be able to support language features not previously available in Clafer, including constraints over real numbers, and possibly string constraints. The other aspect of this project will involve a comparison of the new Z3 backend with the previously existing Alloy and Choco backends. If feasible, comparison to a bare-bones SAT backend of Clafer would also be useful. Optimistically, we wish to experimentally derive interesting hypotheses on the complexity of Clafer models through these comparisons. 
+\end{abstract}
+\section{Introduction}
+Clafer is a modeling language with first-class support for feature and meta-modeling \cite{Bak}. In its current state, Clafer is supported by two backend solvers 1) Alloy -- a bounded relational model checker, and 2) Choco -- a library for constraint satisfaction problems. Clafer input is translated to either of these two backends, which then determine the satisfiability of the Clafer model, and produce instances if the model is satisfiable. Depending on the type of constraints within the Clafer model, one backend may be more suitable than the other. For example, Alloy does not perform well on arithmetic constraints over large integers, however the Choco solver is much more capable on these types of constraints. Some desirable language features are not currently supported by either backend, due to restrictions of the solvers. For example, neither the Alloy nor Choco backends currently support real numbers; although it may be feasible in Choco, it is not currently implemented. The goal of this project is to therefore develop and explore a new backend for Clafer using Z3 - an SMT solver. \\
+\indent Z3 is well known to be a fast solver, motivating our desire to create a new backend using it. In an experiment by \cite{Saadatpanah2012}, randomly generated partial models were analyzed by four solvers: Alloy, a relational logic solver; Minizinc, a  \textit{constraint satisfaction problems} (CSP) solver; Clasp with GrinGo, an \textit{answer set programming} (ASP) solver; and Z3. Z3 was shown to be more efficient (based on solving time) in general, and also scaled better to harder problems.Z3 has also been shown to perform well relative to other SMT solvers, winning SMTCOMP 2012 competition in the theory categories of \texttt{QF\_UFLIA}, \texttt{QF\_UFLRA}, and \texttt{QF\_BV}, among others\footnote{Results can be found at \url{http://www.smtexec.org/exec/?jobs=1004} .}.
+
+\section{Clafer Overview}
+
+\section{Solution Overview}
+
+
+\section{Related and Previous Work}
+The work of Michel et. al. \cite{Michel2012} discusses how configuration problems can be encoded in SMT using TVL \cite{Classen2011} -- a text based feature modeling language similar to Clafer. TVL supports many of the components of feature modeling, including hierarchy, group cardinality, attributes, enums, and cross-tree constraints. However, several aspects of Clafer make the translation to an SMT solver much more difficult than that of TVL in \cite{Michel2012}. Most notably, Clafer supports many set constraints that make translation much more difficult. \\
+\indent  A previous project \cite{Olaechea2013} within the GSD lab was capable of translating a small subset of Clafer to Z3, in order to support attributed feature models for multi-objective optimization. The primary components of Clafer necessary for this domain include hierarchical constraints, fixed-size cardinalities (e.g. [0..1]), and basic arithmetic constraints. This project subsumes that translation by allowing arbitrary Clafer constraints.
+
+\section{Planned Contributions}
+The main deliverables for this project will be the implementation of the translation from Clafer to Z3, as well as hypotheses as to \textit{why} certain solvers outperform other solvers, and which characteristics of Clafer models make solving difficult. The expected components of this project are: 
+\begin{myenumerate}
+\item \textbf{A translation of all base-components of Clafer to Z3.} This includes hierarchical constraints, set constraints, arithmetic, and cross-tree constraints. 
+\item \textbf{Additional Clafer functionality not supported by other backends.} Two important constructs not currently supported by Clafer are real numbers and strings. We would like to support these with our project to expand the scope of models that can be evaluated with Clafer. 
+
+\item \textbf{An evaluation against other backend implementations.} This would be primarily beneficial for Clafer users, as it would be difficult to make a fair comparison of how the underlying solvers (Z3, Alloy, Choco) perform on Clafer specifications. This is primarily due to the large differences in implementations; certain backends have different optimizations and general structure, and would certainly bias results.
+
+\item \textbf{Hypotheses regarding which Clafer components make solving difficult.} First, it will be necessary to somehow measure the complexity of a given Clafer model. One suggested approach would be to translate Clafer models to SAT formulas, and, using known metrics for the complexity of SAT formulas, approximate the complexity of the original Clafer model. However, no current translation from Clafer to SAT exists (aside from through Alloy), so this will require investigation. Then, we will need to determine which Clafer components add the most to the overall complexity of the model. It will be beneficial to generate random Clafer models to conduct this experiment, however this in itself is a difficult task, as Clafer has many components. \\
+\indent This experiment can have multiple implications. First (and most obviously), we can gain insight as to what makes Clafer models hard. However, since Clafer is general enough to support both feature and class modeling, we may gain insights on these domains as well.
+
+\end{myenumerate}
+
+
+\bibliographystyle{abbrv}
+\bibliography{doc}
+\end{document}
