@@ -273,6 +273,18 @@ def op_un_minus(arg):
     assert isinstance(arg, ExprArg)
     return IntArg([-(sum(arg.instances))])
     
+
+def op_not(arg):
+    '''
+    :param arg:
+    :type arg: :class:`~ExprArg`
+    :returns: :class:`~IntArg` 
+    
+    Boolean negation of arg.
+    '''
+    assert isinstance(arg, ExprArg)
+    return BoolArg([Not(arg.instances[0])])
+    
 #need to iterate over all instancesorts, maybe not
 def op_eq(left,right):
     '''
@@ -485,6 +497,8 @@ def set_extend(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
+    left = ExprArg(left.joinSorts[:], left.instanceSorts[:], left.instances[:])
+    right = ExprArg(right.joinSorts[:], right.instanceSorts[:], right.instances[:])
     finalSorts = []
     finalJoinSorts = []
     finalLinstances = []
@@ -667,7 +681,7 @@ def op_sum(arg):
 '''
 ClaferToZ3OperationsMap = {
                            #Unary Ops
-                           "!"           : (1, Not),
+                           "!"           : (1, op_not),
                            "UNARY_MINUS" : (1, op_un_minus),
                            "#"           : (1, op_card),
                            "max"         : (1, "TODO"),
@@ -762,16 +776,24 @@ class BracketedConstraint(Constraints.GenericConstraints):
                 for h in instances:
                     firstIndexOfCurrentSort = 0
                     innerExpr = False
-                    for i in instanceSorts:
-                        for j in range(i.numInstances): 
-                            innerExpr = Or(innerExpr, 
-                                           Or(*[k != i.parentInstances for k in h[firstIndexOfCurrentSort + j] ]))
-                        firstIndexOfCurrentSort = firstIndexOfCurrentSort + i.numInstances
+                    if instanceSorts and not isinstance(instanceSorts[0], basestring):
+                        for i in instanceSorts:
+                            for j in range(i.numInstances): 
+                                innerExpr = Or(innerExpr, 
+                                               Or(*[k != i.parentInstances for k in h[firstIndexOfCurrentSort + j] ]))
+                            firstIndexOfCurrentSort = firstIndexOfCurrentSort + i.numInstances
+                    else:
+                        #refactor me
+                        j = 0
+                        innerExpr = Or(innerExpr, 
+                                               Or(*[k for k in h[firstIndexOfCurrentSort + j] ]))
                     finalInnerInstances.append(innerExpr)
                 finalInstances.append([And(*finalInnerInstances)])
             elif quantifier == "All":
                 for i in instances:
                     finalInstances.append([And(*[Implies(currIfConstraints[j], i[j][0]) for j in range(len(i))])])
+                if not instances:
+                    finalInstances = [[True]]
             else:
                 print("lone, no, and one still unimplemented")
                 sys.exit()

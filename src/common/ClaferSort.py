@@ -3,7 +3,7 @@ Created on Apr 29, 2013
 
 @author: ezulkosk
 '''
-from common import Common
+from common import Common, Options
 from constraints import Constraints
 from lxml.builder import basestring
 from z3 import IntVector, Function, IntSort, If, BoolSort, Implies, And, Bool
@@ -18,18 +18,23 @@ class  ClaferSort(object):
         self.element = element
         self.z3 = z3
         self.parentStack = stack[:]
+        if(not self.parentStack):
+            self.isTopLevel = True
+        else:
+            self.isTopLevel = False
         self.fields = []
         self.constraints = Constraints.ClaferConstraints(self)
         self.summs = []
         self.numInstances = int(self.element.glCard[1].value)
+        if(self.numInstances == -1):
+            self.numInstances = Options.GLOBAL_SCOPE
         self.instances = IntVector(self.element.uid.split("_",1)[1],self.numInstances)
         self.refs = []
+        self.isReffed = False
         self.subs = []
         self.indexInSuper = 0
         self.currentSubIndex = 0
-        self.checkSuperAndRef()
-        if(self.refSort):
-            self.refs = IntVector(self.element.uid.split("_",1)[1] + "_ref",self.numInstances)
+        
                 
         #gets the upper card bound of the parent clafer
         if not self.parentStack:
@@ -39,14 +44,22 @@ class  ClaferSort(object):
         else:
             self.parent = self.parentStack[-1]
             self.parentUpper = self.parent.element.card[1].value
+            if self.parentUpper == -1:
+                self.parentUpper = Options.GLOBAL_SCOPE
             self.parentInstances = len(self.parent.instances)
         #lower and upper cardinality bounds
         self.lowerCardConstraint = self.element.card[0].value
         self.upperCardConstraint = self.element.card[1].value
+        #this eventually has to change
+        if(self.upperCardConstraint == -1):
+            self.upperCardConstraint = Options.GLOBAL_SCOPE
         self.createInstancesConstraintsAndFunctions()
     
     
     def addRefConstraints(self):
+        self.checkSuperAndRef()
+        if(self.refSort):
+            self.refs = IntVector(self.element.uid.split("_",1)[1] + "_ref",self.numInstances)
         if not self.refSort:
             return  
         if not isinstance(self.refSort, basestring):
@@ -65,6 +78,9 @@ class  ClaferSort(object):
                 self.constraints.addRefConstraint(If(self.instances[i] == self.parentInstances
                                            , self.refs[i] == self.refSort.numInstances
                                            , self.refs[i] != self.refSort.numInstances))    
+                #the clafer that the reference points to must be "on"
+                self.constraints.addRefConstraint(Implies(self.refs[i] != self.refSort.numInstances
+                                                     , self.refSort.full(self.refs[i]) == True))
                 
     
     def createInstancesConstraintsAndFunctions(self):
@@ -140,6 +156,9 @@ class  ClaferSort(object):
                     self.refSort = ref_id
                 else:
                     self.refSort = self.z3.getSort(ref_id)
+                    #only used to create alloy isomorphism constraint
+                    self.refSort.instanceIsReffed = [0 for _ in range(self.refSort.numInstances)]
+                    self.refSort.isReffed = True
                 self.superSort = None
             else:
                 self.refSort = None

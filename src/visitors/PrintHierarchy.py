@@ -4,6 +4,7 @@ Created on May 31, 2013
 @author: ezulkosk
 '''
 from common.Common import standard_print
+from lxml.builder import basestring
 from visitors import VisitorTemplate
 import ast
 import visitors
@@ -12,8 +13,6 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
     '''
     :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
     
-    Creates the Clafer hierarchy using Z3 Datatypes and Sorts.
-    The fields will need to be changed to lists ASAP.
     '''
     
     def __init__(self, z3, model):
@@ -44,7 +43,12 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                 if not sort.refs and not element.isAbstract:
                     standard_print(str(indent) + str(sort.instances[j]))
                 elif not element.isAbstract:
-                    standard_print(str(indent) + str(sort.instances[j]) + " = " + str(self.model.eval(sort.refs[j])))
+                    if isinstance(sort.refSort, basestring) and sort.refSort == "integer":
+                        standard_print(str(indent) + str(sort.instances[j]) + " = " + str(self.model.eval(sort.refs[j])))
+                    else:
+                        standard_print(str(indent) + str(sort.instances[j]) + " = " + 
+                                       str(sort.refSort.element.uid.split("_",1)[1]) + 
+                                       "__"+ str(self.model.eval(sort.refs[j])))
                 self.parentStack.append(j)
                 for i in element.elements:
                     visitors.Visitor.visit(self, i)

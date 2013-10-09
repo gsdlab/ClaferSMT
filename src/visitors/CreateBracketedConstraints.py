@@ -61,6 +61,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             else:
                 #localdecl case
                 expr = self.currentConstraint.locals[element.id]
+                expr = expr.modifyInstances(expr.instances[:])
                 self.currentConstraint.addArg(expr)
    
     def constraintVisit(self, element):
@@ -131,6 +132,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.currentConstraint.addQuantifier(element.quantifier, num_args,num_quantifiers, ifconstraints)
     
     def localdeclarationVisit(self, element):
+        a = 0
         pass
     
     def integerliteralVisit(self, element):

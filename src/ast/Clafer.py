@@ -25,19 +25,13 @@ class Clafer(object):
     def addElement(self, element):
         #print(self.elements)
         self.elements.append(element)
+       
+    def nonUniqueID(self):
+        return self.uid.split("_")[1]
         
     def __str__(self):
         return self.uid
     
     def toString(self, level):
-        print("  " * level + "ident="+self.ident)
-        print("  " * level + "absract="+self.isAbstract)
-        print("  " * level + "card="+self.card)
-        print("  " * level + "gcard="+self.gcard)
-        print("  " * level + "glcard="+self.glcard)
-        print("  " * level + "uid="+self.uid)
-        print("  " * level + "supers="+self.supers)
-        print("  " * level + "elements=")
-        for i in self.elements:
-            i.toString(level+1)
+        self.uid.split("_",1)[1]
         

@@ -4,12 +4,13 @@ Created on Apr 30, 2013
 @author: ezulkosk
 '''
 
-from common import Common
+from common import Common, Options
 from common.Common import debug_print, standard_print
 from constraints import Constraints
 from gi.overrides.keysyms import m
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
-    CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy
+    CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, \
+    IsomorphismConstraint
 from z3 import *
 import common
 import time
@@ -36,9 +37,10 @@ class Z3Instance(object):
         self.unsat_core_trackers = []
         self.unsat_map = {}
         self.setOptions()
-        self.solver = Solver() 
+        self.solver = Solver()
         self.solver.set(unsat_core=True)
         #self.solver.help()
+        #print(get_version_string())
         self.createCommonFunctions()
     
     def createGroupCardConstraints(self):
@@ -57,7 +59,35 @@ class Z3Instance(object):
         for i in self.z3_sorts.values():
             if i.superSort:
                 i.indexInSuper = i.superSort.addSubSort(i)     
-        
+         
+    def createTopologicalSort(self):
+        '''
+        TopSort over the DAG constructed by reference clafers
+        Simplified algorithm due to the structure of Clafer 
+        Note that we want the topsort in REVERSED order
+        '''
+        allSorts = list(self.getSorts())
+        S = list(self.getSorts())
+        for i in allSorts:
+            if i.refSort and i in S:
+                S.remove(i.refSort)
+        #S -- nodes not pointed to
+        L = [] #outputted top sort
+        while S:
+            n = S.pop()
+            allSorts.remove(n)
+            if n.refSort:
+                flag = True
+                for i in allSorts:
+                    if i.refSort and i.refSort == n.refSort:
+                        flag = False
+                if flag:
+                    S.append(n.refSort)    
+            L.append(n)
+        L.reverse()
+        self.topological_sort = L
+        print(self.topological_sort)
+
     def createCommonFunctions(self):
         Common.bool2Int = Function("bool2Int", BoolSort(), IntSort())
         self.common_function_constraints.addConstraint(Common.bool2Int(True) == 1)
@@ -77,7 +107,8 @@ class Z3Instance(object):
         
         Converts Clafer constraints to Z3 constraints and computes models.
         '''
-        self.initTime = time.clock()
+        if Options.PROFILING:
+            self.initTime = time.clock()
         Visitor.visit(CreateSorts.CreateSorts(self), self.module)
         Visitor.visit(ResolveClaferIds.ResolveClaferIds(self), self.module)
         Visitor.visit(CreateHierarchy.CreateHierarchy(self), self.module)
@@ -85,15 +116,20 @@ class Z3Instance(object):
         debug_print("Creating cardinality constraints.")
         self.createCardinalityConstraints()
         
+        debug_print("Creating ref constraints.")
+        self.createRefConstraints()
+        
         debug_print("Mapping colon clafers.")
         self.mapColonClafers()
+        
+        debug_print("Creating topological sort over clafers (used in isomorphism prevention).")
+        self.createTopologicalSort()
         
         #FIX for abstracts
         debug_print("Creating group cardinality constraints.")
         self.createGroupCardConstraints()
         
-        debug_print("Creating ref constraints.")
-        self.createRefConstraints()
+        
                 
         debug_print("Creating bracketed constraints.")
         Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
@@ -112,11 +148,13 @@ class Z3Instance(object):
         #debug_print(len(core))
         #debug_print(self.solver.unsat_core())
         debug_print("Getting models.")  
-        self.endTranslationTime = time.clock()  
-        models = self.get_models(-1)
+        if Options.PROFILING:
+            self.endTranslationTime = time.clock()  
+        models = self.get_models(Options.NUM_INSTANCES)
         #print("Ticks: " + str(self.initTime) + " " + str(self.endTranslationTime) + " " + str(self.endOfFirstInstanceTime))
-        print("Translation time:" + str(self.endTranslationTime - self.initTime))
-        print("First Model time:" + str(self.endOfFirstInstanceTime - self.endTranslationTime))
+        if Options.PROFILING:
+            print("Translation time:" + str(self.endTranslationTime - self.initTime))
+            print("First Model time:" + str(self.endOfFirstInstanceTime - self.endTranslationTime))
         return len(models)
         
     def printVars(self, model):
@@ -170,11 +208,15 @@ class Z3Instance(object):
                     #print(str(d) + " = " + str(m[d]))
                 self.solver.add(Or(block))
                 self.printVars(m)
-                if count == 0:
+                if Options.GET_ISOMORPHISM_CONSTRAINT:
+                    Visitor.visit(IsomorphismConstraint.HandleRefs(self, m), self.module)
+                    Visitor.visit(IsomorphismConstraint.IsomorphismConstraint(self, m), self.module)  
+                if count == 0 and Options.PROFILING:
                     self.endOfFirstInstanceTime = time.clock()
                 count += 1
             else:
-                self.endOfFirstInstanceTime = time.clock()
+                if Options.PROFILING:
+                    self.endOfFirstInstanceTime = time.clock()
                 if Common.MODE == Common.DEBUG and count == 0:
                     debug_print(self.solver.check(self.unsat_core_trackers))
                     core = self.solver.unsat_core()
