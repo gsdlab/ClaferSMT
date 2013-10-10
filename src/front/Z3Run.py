@@ -10,8 +10,8 @@ from test import TestClafers, bracketedconstraint_this, multiple_joins, \
     simple_abstract, some, simple_set, zoo, integer_refs, simple_zoo, \
     phone_feature_model, higher_inheritance, this_integer_relation, equal_references
 from z3 import get_version_string
-
 import sys
+
 
 
 
@@ -29,8 +29,10 @@ def main(args):
         TestClafers.run()
     else:
         module = Options.MODULE
+        
         z3 = Z3Instance.Z3Instance(module)
         z3.run()
+        
    
 if __name__ == '__main__':
     main(sys.argv[1:])

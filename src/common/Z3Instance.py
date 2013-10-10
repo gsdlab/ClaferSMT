@@ -8,6 +8,7 @@ from common import Common, Options
 from common.Common import debug_print, standard_print
 from constraints import Constraints
 from gi.overrides.keysyms import m
+from lxml.builder import basestring
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, \
     IsomorphismConstraint
@@ -34,6 +35,7 @@ class Z3Instance(object):
         self.join_constraints = Constraints.GenericConstraints()
         self.z3_bracketed_constraints = []
         self.z3_sorts = {}
+        
         self.unsat_core_trackers = []
         self.unsat_map = {}
         self.setOptions()
@@ -60,6 +62,7 @@ class Z3Instance(object):
             if i.superSort:
                 i.indexInSuper = i.superSort.addSubSort(i)     
          
+    #BROKEN but dont need
     def createTopologicalSort(self):
         '''
         TopSort over the DAG constructed by reference clafers
@@ -69,7 +72,7 @@ class Z3Instance(object):
         allSorts = list(self.getSorts())
         S = list(self.getSorts())
         for i in allSorts:
-            if i.refSort and i in S:
+            if i.refSort and i.refSort in S:
                 S.remove(i.refSort)
         #S -- nodes not pointed to
         L = [] #outputted top sort
@@ -88,8 +91,75 @@ class Z3Instance(object):
         self.topological_sort = L
         print(self.topological_sort)
 
+    def isOn(self, inst, sort):
+        return int(str(inst)) != sort.parentInstances
+
+    def getIsomorphicConstraint(self, model):
+        assert isinstance(model, ModelRef)
+        sorts = self.getSorts()
+        instsMap = {}
+        someStrings = []
+        topCardStrings = []
+        otherConstraints = []
+        refConstraints = []
+        #create the (some's
+        for i in sorts:
+            insts = []
+            for j in range(len(i.instances)):
+                ev = model.eval(i.instances[j])
+                if self.isOn(ev, i):
+                    insts.append(str(i) + "_" + str(j))
+            currSome = "(some "
+            instsMap[i.element.uid] = insts
+            for j in range(len(insts) - 1):
+                currSome = currSome + insts[j] + " ; "
+            currSome = currSome + insts[-1] + " : " + i.element.nonUniqueID() + " | "
+            someStrings.append(currSome)
+        #handle top-level clafer cardinalities
+        for i in sorts:
+            if i.isTopLevel:
+                insts = instsMap[i.element.uid]
+                topCardStrings.append("#" + i.element.nonUniqueID() + " = " + str(len(insts)))
+        #handle non-top level clafer cardinalities
+        for i in sorts:
+            for j in range(len(i.instances)):
+                ev = model.eval(i.instances[j])
+                if self.isOn(ev, i):
+                    for k in i.fields:
+                        currChildren = []
+                        for l in range(len(k.instances)):
+                            if str(model.eval(k.instances[l])) == str(j):
+                                child = str(k) + "_" + str(l) 
+                                currChildren.append(child)
+                                otherConstraints.append(child \
+                                      + " in " + str(i) + "_" + str(j) + "." \
+                                      + k.element.nonUniqueID())
+                        otherConstraints.append("#" + str(i) + "_" + str(j) + "." + k.element.nonUniqueID()\
+                              + " = " + str(len(currChildren)))
+                        for l in currChildren:
+                            for m in currChildren:
+                                if l != m:
+                                    otherConstraints.append(l + " != " + m)
+        #handle ref constraints
+        for i in sorts: 
+            if i.refSort:
+                for j in range(len(i.instances)):
+                    if self.isOn(model.eval(i.instances[j]), i):
+                        if isinstance(i.refSort, basestring) and i.refSort == "integer":
+                            refConstraints.append(str(i) + "_" + str(j) + ".ref = " + str(model.eval(i.refs[j])))
+                        else:
+                            refConstraints.append(str(i) + "_" + str(j) + ".ref = " + str(i.refSort) + "_" + str(model.eval(i.refs[j])))
+        print("[ !(")
+        for i in topCardStrings:
+            print(i + " &&")
+        for i in someStrings:
+            print(i)
+        print(" &&\n".join(otherConstraints + refConstraints))
+        print(")"*(len(someStrings) + 1))
+        print("]")
+        
     def createCommonFunctions(self):
-        Common.bool2Int = Function("bool2Int", BoolSort(), IntSort())
+        return
         self.common_function_constraints.addConstraint(Common.bool2Int(True) == 1)
         self.common_function_constraints.addConstraint(Common.bool2Int(False) == 0)               
     
@@ -122,15 +192,10 @@ class Z3Instance(object):
         debug_print("Mapping colon clafers.")
         self.mapColonClafers()
         
-        debug_print("Creating topological sort over clafers (used in isomorphism prevention).")
-        self.createTopologicalSort()
-        
         #FIX for abstracts
         debug_print("Creating group cardinality constraints.")
         self.createGroupCardConstraints()
         
-        
-                
         debug_print("Creating bracketed constraints.")
         Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
            
@@ -209,8 +274,7 @@ class Z3Instance(object):
                 self.solver.add(Or(block))
                 self.printVars(m)
                 if Options.GET_ISOMORPHISM_CONSTRAINT:
-                    Visitor.visit(IsomorphismConstraint.HandleRefs(self, m), self.module)
-                    Visitor.visit(IsomorphismConstraint.IsomorphismConstraint(self, m), self.module)  
+                    self.getIsomorphicConstraint(m)
                 if count == 0 and Options.PROFILING:
                     self.endOfFirstInstanceTime = time.clock()
                 count += 1

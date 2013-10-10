@@ -13,7 +13,8 @@ MODE = NORMAL
 FUNCTION_ID = 0 
 CONSTRAINT_ID = 0
 
-bool2Int = None
+#this is the exception.......
+bool2Int = Function("bool2Int", BoolSort(), IntSort())
 
 def debug_print(string):
     if(MODE == DEBUG):
@@ -39,8 +40,6 @@ def reset():
     FUNCTION_ID = 0
     CONSTRAINT_ID = 0
 
-def bool2Int():
-    return bool2Int
 
 def min2(l,r):
     '''

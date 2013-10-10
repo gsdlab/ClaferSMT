@@ -13,9 +13,9 @@ from test import bracketedconstraint_this, multiple_joins, this_dot_parent, \
 GLOBAL_SCOPE = 5
 
 MODE = Common.NORMAL # 
-NUM_INSTANCES = 1 # -1 to produce all instances
+NUM_INSTANCES = -1 # -1 to produce all instances
 PROFILING = False # True to output the translation time, and time to get first model
-GET_ISOMORPHISM_CONSTRAINT=False
+GET_ISOMORPHISM_CONSTRAINT=True
 
 MY_TESTS = 1
 POSITIVE_TESTS = 2
