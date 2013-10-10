@@ -14,7 +14,8 @@ FUNCTION_ID = 0
 CONSTRAINT_ID = 0
 
 #this is the exception.......
-bool2Int = Function("bool2Int", BoolSort(), IntSort())
+#bool2Int = Function("bool2Int", BoolSort(), IntSort())
+
 
 def debug_print(string):
     if(MODE == DEBUG):

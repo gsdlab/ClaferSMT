@@ -5,8 +5,8 @@ src
    :maxdepth: 4
 
    ast
-   .. automodule:: ast
    common
    constraints
    front
+   test
    visitors

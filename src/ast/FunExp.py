@@ -16,6 +16,9 @@ class FunExp(object):
         
         
     def __str__(self):
-        return self.operation + self.elements
+        return self.operation + str(self.elements)
+    
+    def __repr__(self):
+        return str(self.operation) + str(self.elements)
     
     

@@ -48,13 +48,6 @@
             
   <div class="section" id="common-package">
 <h1>common Package<a class="headerlink" href="#common-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="description">
-<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>Miscellaneous modules used to create a Z3 instance.</p>
-</div>
-<div class="section" id="claferdatatype-module">
-<h2><tt class="xref py py-mod docutils literal"><span class="pre">ClaferDatatype</span></tt> Module<a class="headerlink" href="#claferdatatype-module" title="Permalink to this headline">¶</a></h2>
-</div>
 <div class="section" id="module-common.ClaferSort">
 <span id="clafersort-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">ClaferSort</span></tt> Module<a class="headerlink" href="#module-common.ClaferSort" title="Permalink to this headline">¶</a></h2>
 <p>Created on Apr 29, 2013</p>
@@ -122,11 +115,6 @@
 <p>Created on Apr 28, 2013</p>
 <p>&#64;author: ezulkosk</p>
 <dl class="function">
-<dt id="common.Common.bool2Int">
-<tt class="descclassname">common.Common.</tt><tt class="descname">bool2Int</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Common.bool2Int" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="common.Common.debug_print">
 <tt class="descclassname">common.Common.</tt><tt class="descname">debug_print</tt><big>(</big><em>string</em><big>)</big><a class="headerlink" href="#common.Common.debug_print" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -164,6 +152,11 @@
 <dd></dd></dl>
 
 </div>
+<div class="section" id="module-common.Options">
+<span id="options-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Options</span></tt> Module<a class="headerlink" href="#module-common.Options" title="Permalink to this headline">¶</a></h2>
+<p>Created on Oct 6, 2013</p>
+<p>&#64;author: ezulkosk</p>
+</div>
 <div class="section" id="module-common.Z3Instance">
 <span id="z3instance-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Z3Instance</span></tt> Module<a class="headerlink" href="#module-common.Z3Instance" title="Permalink to this headline">¶</a></h2>
 <p>Created on Apr 30, 2013</p>
@@ -178,7 +171,6 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
 <li><strong>module</strong> &#8211; The Clafer AST</li>
-<li><strong>z3_constraints</strong> &#8211; ([<tt class="xref py py-mod docutils literal"><span class="pre">constraints.Constraint</span></tt>]) Contains ALL constraints that will be fed into z3.</li>
 <li><strong>z3_sorts</strong> &#8211; ({str, <a class="reference internal" href="#module-common.ClaferSort" title="common.ClaferSort"><tt class="xref py py-mod docutils literal"><span class="pre">common.ClaferSort</span></tt></a>}) Holds the Sorts for each clafer, 
 mapped by the clafer&#8217;s ID.</li>
 <li><strong>solver</strong> &#8211; (Z3_Solver) The actual Z3 solver.</li>
@@ -220,11 +212,6 @@ mapped by the clafer&#8217;s ID.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="common.Z3Instance.Z3Instance.assertConstraint">
-<tt class="descname">assertConstraint</tt><big>(</big><em>constraint</em><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.assertConstraint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
 <dt id="common.Z3Instance.Z3Instance.assertConstraints">
 <tt class="descname">assertConstraints</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.assertConstraints" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -248,13 +235,6 @@ mapped by the clafer&#8217;s ID.</li>
 <dt id="common.Z3Instance.Z3Instance.createRefConstraints">
 <tt class="descname">createRefConstraints</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.createRefConstraints" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.getConstraints">
-<tt class="descname">getConstraints</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.getConstraints" title="Permalink to this definition">¶</a></dt>
-<dd><p>&#8216;
-:returns: z3_constraints</p>
-</dd></dl>
 
 <dl class="method">
 <dt id="common.Z3Instance.Z3Instance.getSort">
@@ -327,10 +307,9 @@ mapped by the clafer&#8217;s ID.</li>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">common Package</a><ul>
-<li><a class="reference internal" href="#description">Description</a></li>
-<li><a class="reference internal" href="#claferdatatype-module"><tt class="docutils literal"><span class="pre">ClaferDatatype</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-common.ClaferSort"><tt class="docutils literal"><span class="pre">ClaferSort</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-common.Common"><tt class="docutils literal"><span class="pre">Common</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-common.Options"><tt class="docutils literal"><span class="pre">Options</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-common.Z3Instance"><tt class="docutils literal"><span class="pre">Z3Instance</span></tt> Module</a></li>
 </ul>
 </li>

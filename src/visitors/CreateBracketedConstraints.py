@@ -28,16 +28,23 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     field.
     '''
     
-    
-    def __init__(self, z3):
+    def __init__(self, z3, inConstraint=False):
         '''
         :param z3: The Z3 solver.
         :type z3: :class:`~common.Z3Instance`
         '''
         VisitorTemplate.VisitorTemplate.__init__(self)
-        self.inConstraint = False
+        self.inConstraint = inConstraint
         self.currentConstraint = None
         self.z3 = z3
+    
+    def isomorphismVisit(self, element):
+        self.inConstraint = True
+        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.z3, [])
+        self.funexpVisit(element)
+        self.currentConstraint.endProcessing()
+        self.currentConstraint = None
+        self.inConstraint = False
     
     def claferVisit(self, element):
         visitors.Visitor.visit(self,element.supers)

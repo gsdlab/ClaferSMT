@@ -1,10 +1,13 @@
 front Package
 =============
 
-Description
------------
+:mod:`Z3Run` Module
+-------------------
 
-Front end for the ClaferZ3 converter.
+.. automodule:: front.Z3Run
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 :mod:`Z3Test` Module
 --------------------

@@ -4,14 +4,13 @@ Created on Apr 30, 2013
 @author: ezulkosk
 '''
 
-from common import Common, Options
+from common import Common, Options, Clock
 from common.Common import debug_print, standard_print
-from constraints import Constraints
+from constraints import Constraints, IsomorphismConstraint
 from gi.overrides.keysyms import m
 from lxml.builder import basestring
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
-    CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, \
-    IsomorphismConstraint
+    CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy
 from z3 import *
 import common
 import time
@@ -19,10 +18,6 @@ import time
 class Z3Instance(object):
     ''' 
     :var module: The Clafer AST
-    :var z3_sorts: ({str, :mod:`common.ClaferSort`}) Holds the Sorts for each clafer, 
-        mapped by the clafer's ID.
-    :var solver: (Z3_Solver) The actual Z3 solver. 
-    :var scope: (int) The number of allowed clafers in the model.
 
     Stores and instantiates all necessary constraints for the ClaferZ3 model.
     '''
@@ -31,18 +26,23 @@ class Z3Instance(object):
             Common.reset()
         self.module = module
         self.model_count = 0
-        self.common_function_constraints = Constraints.GenericConstraints()
-        self.join_constraints = Constraints.GenericConstraints()
         self.z3_bracketed_constraints = []
         self.z3_sorts = {}
+        self.solver = Solver()
+        self.setOptions()
+        self.clock = Clock.Clock()
         
+        """ Create simple objects used to store Z3 constraints. """
+        self.join_constraints = Constraints.GenericConstraints()
+        
+        """ 
+        Used to map constraints in the UNSAT core to Boolean variables.
+        Will eventually be used to map UNSAT core back to the Clafer model.
+        """
         self.unsat_core_trackers = []
         self.unsat_map = {}
-        self.setOptions()
-        self.solver = Solver()
-        self.solver.set(unsat_core=True)
-        #self.solver.help()
-        #print(get_version_string())
+        
+        """ Create simple functions and constraints, that may be used in many places. """
         self.createCommonFunctions()
     
     def createGroupCardConstraints(self):
@@ -62,112 +62,22 @@ class Z3Instance(object):
             if i.superSort:
                 i.indexInSuper = i.superSort.addSubSort(i)     
          
-    #BROKEN but dont need
-    def createTopologicalSort(self):
-        '''
-        TopSort over the DAG constructed by reference clafers
-        Simplified algorithm due to the structure of Clafer 
-        Note that we want the topsort in REVERSED order
-        '''
-        allSorts = list(self.getSorts())
-        S = list(self.getSorts())
-        for i in allSorts:
-            if i.refSort and i.refSort in S:
-                S.remove(i.refSort)
-        #S -- nodes not pointed to
-        L = [] #outputted top sort
-        while S:
-            n = S.pop()
-            allSorts.remove(n)
-            if n.refSort:
-                flag = True
-                for i in allSorts:
-                    if i.refSort and i.refSort == n.refSort:
-                        flag = False
-                if flag:
-                    S.append(n.refSort)    
-            L.append(n)
-        L.reverse()
-        self.topological_sort = L
-        print(self.topological_sort)
-
-    def isOn(self, inst, sort):
-        return int(str(inst)) != sort.parentInstances
-
-    def getIsomorphicConstraint(self, model):
-        assert isinstance(model, ModelRef)
-        sorts = self.getSorts()
-        instsMap = {}
-        someStrings = []
-        topCardStrings = []
-        otherConstraints = []
-        refConstraints = []
-        #create the (some's
-        for i in sorts:
-            insts = []
-            for j in range(len(i.instances)):
-                ev = model.eval(i.instances[j])
-                if self.isOn(ev, i):
-                    insts.append(str(i) + "_" + str(j))
-            currSome = "(some "
-            instsMap[i.element.uid] = insts
-            for j in range(len(insts) - 1):
-                currSome = currSome + insts[j] + " ; "
-            currSome = currSome + insts[-1] + " : " + i.element.nonUniqueID() + " | "
-            someStrings.append(currSome)
-        #handle top-level clafer cardinalities
-        for i in sorts:
-            if i.isTopLevel:
-                insts = instsMap[i.element.uid]
-                topCardStrings.append("#" + i.element.nonUniqueID() + " = " + str(len(insts)))
-        #handle non-top level clafer cardinalities
-        for i in sorts:
-            for j in range(len(i.instances)):
-                ev = model.eval(i.instances[j])
-                if self.isOn(ev, i):
-                    for k in i.fields:
-                        currChildren = []
-                        for l in range(len(k.instances)):
-                            if str(model.eval(k.instances[l])) == str(j):
-                                child = str(k) + "_" + str(l) 
-                                currChildren.append(child)
-                                otherConstraints.append(child \
-                                      + " in " + str(i) + "_" + str(j) + "." \
-                                      + k.element.nonUniqueID())
-                        otherConstraints.append("#" + str(i) + "_" + str(j) + "." + k.element.nonUniqueID()\
-                              + " = " + str(len(currChildren)))
-                        for l in currChildren:
-                            for m in currChildren:
-                                if l != m:
-                                    otherConstraints.append(l + " != " + m)
-        #handle ref constraints
-        for i in sorts: 
-            if i.refSort:
-                for j in range(len(i.instances)):
-                    if self.isOn(model.eval(i.instances[j]), i):
-                        if isinstance(i.refSort, basestring) and i.refSort == "integer":
-                            refConstraints.append(str(i) + "_" + str(j) + ".ref = " + str(model.eval(i.refs[j])))
-                        else:
-                            refConstraints.append(str(i) + "_" + str(j) + ".ref = " + str(i.refSort) + "_" + str(model.eval(i.refs[j])))
-        print("[ !(")
-        for i in topCardStrings:
-            print(i + " &&")
-        for i in someStrings:
-            print(i)
-        print(" &&\n".join(otherConstraints + refConstraints))
-        print(")"*(len(someStrings) + 1))
-        print("]")
-        
     def createCommonFunctions(self):
-        return
-        self.common_function_constraints.addConstraint(Common.bool2Int(True) == 1)
-        self.common_function_constraints.addConstraint(Common.bool2Int(False) == 0)               
+        self.common_function_constraints = Constraints.GenericConstraints()
+        #self.common_function_constraints.addConstraint(Common.bool2Int(True) == 1)
+        #self.common_function_constraints.addConstraint(Common.bool2Int(False) == 0)               
     
     def setOptions(self):
-        set_option(max_depth=1000)
-        set_option(max_args=1000)
-        #set_option(max_width=1000)
+        """
+        Sets basic options for the Z3 solver.
+        Adds additional options for better pretty-printing, if debugging.
+        """
+        self.solver.set(unsat_core=True)
+        
         if Common.MODE == Common.DEBUG:
+            #set_option(max_width=2)
+            set_option(max_depth=1000)
+            set_option(max_args=1000)
             set_option(auto_config=False)
     
     def run(self):
@@ -177,10 +87,16 @@ class Z3Instance(object):
         
         Converts Clafer constraints to Z3 constraints and computes models.
         '''
-        if Options.PROFILING:
-            self.initTime = time.clock()
+        
+        self.clock.tick("translation")
+        
+        """ Create a ClaferSort associated with each Clafer. """  
         Visitor.visit(CreateSorts.CreateSorts(self), self.module)
+        
+        """ Resolve any 'parent' or 'this' ClaferID's. """
         Visitor.visit(ResolveClaferIds.ResolveClaferIds(self), self.module)
+        
+        """ Add subclafers to the *fields* variable in the corresponding parent clafer. """
         Visitor.visit(CreateHierarchy.CreateHierarchy(self), self.module)
         
         debug_print("Creating cardinality constraints.")
@@ -192,34 +108,24 @@ class Z3Instance(object):
         debug_print("Mapping colon clafers.")
         self.mapColonClafers()
         
-        #FIX for abstracts
         debug_print("Creating group cardinality constraints.")
         self.createGroupCardConstraints()
         
         debug_print("Creating bracketed constraints.")
         Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
            
-        self.assertConstraints()        
+        debug_print("Asserting constraints.")
+        self.assertConstraints()     
+        
+        debug_print("Printing constraints.") 
         self.printConstraints()
-        #if(Common.MODE == Common.DEBUG):
-        #    self.printConstraints()
-        
-        #for i in self.solver.assertions():
-        #    print(i)
-        #    print()
-        
-        #debug_print(self.solver.check(self.unsat_core_trackers))
-        #core = self.solver.unsat_core()
-        #debug_print(len(core))
-        #debug_print(self.solver.unsat_core())
+    
         debug_print("Getting models.")  
-        if Options.PROFILING:
-            self.endTranslationTime = time.clock()  
+        self.clock.tock("translation")
         models = self.get_models(Options.NUM_INSTANCES)
-        #print("Ticks: " + str(self.initTime) + " " + str(self.endTranslationTime) + " " + str(self.endOfFirstInstanceTime))
-        if Options.PROFILING:
-            print("Translation time:" + str(self.endTranslationTime - self.initTime))
-            print("First Model time:" + str(self.endOfFirstInstanceTime - self.endTranslationTime))
+        
+        self.clock.printEvents()
+        
         return len(models)
         
     def printVars(self, model):
@@ -243,16 +149,20 @@ class Z3Instance(object):
             return
         for i in self.z3_sorts.values():
             i.constraints.print()
-        self.join_constraints.print()
+        #self.join_constraints.print()
         for i in self.z3_bracketed_constraints:
             i.print()
         
     #this is not my method, some stackoverflow or z3.codeplex.com method. Can't remember, should find it.
+    # i no longer need this method, if i implement the isomorphism detection
     def get_models(self, desired_number_of_models):
         result = []
         count = 0
+        
+        self.clock.tick("first model")
         while True:
-            
+            self.clock.tick("unsat")
+           
             if (Common.MODE != Common.DEBUG and self.solver.check() == sat and count != desired_number_of_models) or \
                 (Common.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == sat and count != desired_number_of_models):
                 m = self.solver.model()
@@ -274,13 +184,15 @@ class Z3Instance(object):
                 self.solver.add(Or(block))
                 self.printVars(m)
                 if Options.GET_ISOMORPHISM_CONSTRAINT:
-                    self.getIsomorphicConstraint(m)
-                if count == 0 and Options.PROFILING:
-                    self.endOfFirstInstanceTime = time.clock()
+                    IsomorphismConstraint.IsomorphismConstraint(self, m).createIsomorphicConstraint()
+                    self.printConstraints()
+                    self.z3_bracketed_constraints.pop().assertConstraints(self)
+                    
+                if count == 0:
+                    self.clock.tock("first model")
                 count += 1
             else:
-                if Options.PROFILING:
-                    self.endOfFirstInstanceTime = time.clock()
+                self.clock.tock("unsat")
                 if Common.MODE == Common.DEBUG and count == 0:
                     debug_print(self.solver.check(self.unsat_core_trackers))
                     core = self.solver.unsat_core()
@@ -314,12 +226,6 @@ class Z3Instance(object):
     ###############################
     # adders                      #
     ###############################
-    def addConstraint(self, constraint):
-        '''
-        :param constraint: A constraint.
-        :type constraint: :mod:`constraints.Constraint`
-        '''
-        self.z3_constraints.append(constraint)
         
     def addSort(self, sortID, sort):
         '''

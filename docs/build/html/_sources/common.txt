@@ -1,18 +1,6 @@
 common Package
 ==============
 
-Description
------------
-Miscellaneous modules used to create a Z3 instance.
-
-:mod:`ClaferDatatype` Module
-----------------------------
-
-.. automodule:: common.ClaferDatatype
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`ClaferSort` Module
 ------------------------
 
@@ -25,6 +13,14 @@ Miscellaneous modules used to create a Z3 instance.
 --------------------
 
 .. automodule:: common.Common
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`Options` Module
+---------------------
+
+.. automodule:: common.Options
     :members:
     :undoc-members:
     :show-inheritance:

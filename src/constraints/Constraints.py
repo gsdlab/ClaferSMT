@@ -10,6 +10,10 @@ from z3 import Bool, Implies
 
 
 class Constraints():
+    """
+    Adds a generated constraint to the solver.
+    If in debug mode, add a Boolean tracker for the constraint, to obtain possible UNSAT cores.
+    """
     def assertConstraint(self, constraint, z3):
         if Common.MODE != Common.DEBUG: 
             z3.solver.add(constraint)

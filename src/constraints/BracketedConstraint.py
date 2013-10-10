@@ -196,7 +196,7 @@ def op_card(arg):
     newInstances = []
     for i in arg.instanceSorts:
         for _ in range(i.numInstances):
-            newInstances.append(Common.bool2Int(arg.instances[index] != i.parentInstances))
+            newInstances.append(If(arg.instances[index] != i.parentInstances, 1, 0))
             index = index + 1
     return IntArg([Sum(newInstances)])
 

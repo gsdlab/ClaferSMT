@@ -1,10 +1,6 @@
 constraints Package
 ===================
 
-Description
------------
-Store information about various types of constraints, and generate the corresponding Z3 input.
-
 :mod:`BracketedConstraint` Module
 ---------------------------------
 
@@ -13,18 +9,10 @@ Store information about various types of constraints, and generate the correspon
     :undoc-members:
     :show-inheritance:
 
-:mod:`CardinalityConstraint` Module
------------------------------------
+:mod:`Constraints` Module
+-------------------------
 
-.. automodule:: constraints.CardinalityConstraint
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`Constraint` Module
-------------------------
-
-.. automodule:: constraints.Constraint
+.. automodule:: constraints.Constraints
     :members:
     :undoc-members:
     :show-inheritance:

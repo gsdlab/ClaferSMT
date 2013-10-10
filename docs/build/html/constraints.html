@@ -48,10 +48,6 @@
             
   <div class="section" id="constraints-package">
 <h1>constraints Package<a class="headerlink" href="#constraints-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="description">
-<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>Store information about various types of constraints, and generate the corresponding Z3 input.</p>
-</div>
 <div class="section" id="module-constraints.BracketedConstraint">
 <span id="bracketedconstraint-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">BracketedConstraint</span></tt> Module<a class="headerlink" href="#module-constraints.BracketedConstraint" title="Permalink to this headline">¶</a></h2>
 <p>Created on Apr 29, 2013</p>
@@ -66,7 +62,7 @@
 <dl class="class">
 <dt id="constraints.BracketedConstraint.BracketedConstraint">
 <em class="property">class </em><tt class="descclassname">constraints.BracketedConstraint.</tt><tt class="descname">BracketedConstraint</tt><big>(</big><em>z3</em>, <em>claferStack</em><big>)</big><a class="headerlink" href="#constraints.BracketedConstraint.BracketedConstraint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <a class="reference internal" href="#constraints.Constraints.GenericConstraints" title="constraints.Constraints.GenericConstraints"><tt class="xref py py-class docutils literal"><span class="pre">constraints.Constraints.GenericConstraints</span></tt></a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -482,7 +478,7 @@ The other instances remain the same.</p>
 </tr>
 </tbody>
 </table>
-<p>Computes the set union (left ++ right)</p>
+<p>Ensure that if instance <em>i</em> of left is on, so is instance <em>i</em> of right.</p>
 </dd></dl>
 
 <dl class="function">
@@ -654,6 +650,22 @@ The other instances remain the same.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="constraints.BracketedConstraint.op_not">
+<tt class="descclassname">constraints.BracketedConstraint.</tt><tt class="descname">op_not</tt><big>(</big><em>arg</em><big>)</big><a class="headerlink" href="#constraints.BracketedConstraint.op_not" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>arg</strong> (<a class="reference internal" href="#constraints.BracketedConstraint.ExprArg" title="constraints.BracketedConstraint.ExprArg"><tt class="xref py py-class docutils literal"><span class="pre">ExprArg</span></tt></a>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#constraints.BracketedConstraint.IntArg" title="constraints.BracketedConstraint.IntArg"><tt class="xref py py-class docutils literal"><span class="pre">IntArg</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+<p>Boolean negation of arg.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="constraints.BracketedConstraint.op_or">
 <tt class="descclassname">constraints.BracketedConstraint.</tt><tt class="descname">op_or</tt><big>(</big><em>left</em>, <em>right</em><big>)</big><a class="headerlink" href="#constraints.BracketedConstraint.op_or" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -817,11 +829,91 @@ Simplified Example:</p>
 </dd></dl>
 
 </div>
-<div class="section" id="cardinalityconstraint-module">
-<h2><tt class="xref py py-mod docutils literal"><span class="pre">CardinalityConstraint</span></tt> Module<a class="headerlink" href="#cardinalityconstraint-module" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="constraint-module">
-<h2><tt class="xref py py-mod docutils literal"><span class="pre">Constraint</span></tt> Module<a class="headerlink" href="#constraint-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-constraints.Constraints">
+<span id="constraints-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Constraints</span></tt> Module<a class="headerlink" href="#module-constraints.Constraints" title="Permalink to this headline">¶</a></h2>
+<p>Created on Oct 3, 2013</p>
+<p>&#64;author: ezulkosk</p>
+<dl class="class">
+<dt id="constraints.Constraints.ClaferConstraints">
+<em class="property">class </em><tt class="descclassname">constraints.Constraints.</tt><tt class="descname">ClaferConstraints</tt><big>(</big><em>claferSort</em><big>)</big><a class="headerlink" href="#constraints.Constraints.ClaferConstraints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#constraints.Constraints.Constraints" title="constraints.Constraints.Constraints"><tt class="xref py py-class docutils literal"><span class="pre">constraints.Constraints.Constraints</span></tt></a></p>
+<dl class="method">
+<dt id="constraints.Constraints.ClaferConstraints.addCardConstraint">
+<tt class="descname">addCardConstraint</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#constraints.Constraints.ClaferConstraints.addCardConstraint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="constraints.Constraints.ClaferConstraints.addGroupCardConstraint">
+<tt class="descname">addGroupCardConstraint</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#constraints.Constraints.ClaferConstraints.addGroupCardConstraint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="constraints.Constraints.ClaferConstraints.addInheritanceConstraint">
+<tt class="descname">addInheritanceConstraint</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#constraints.Constraints.ClaferConstraints.addInheritanceConstraint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="constraints.Constraints.ClaferConstraints.addInstanceConstraint">
+<tt class="descname">addInstanceConstraint</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#constraints.Constraints.ClaferConstraints.addInstanceConstraint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="constraints.Constraints.ClaferConstraints.addRefConstraint">
+<tt class="descname">addRefConstraint</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#constraints.Constraints.ClaferConstraints.addRefConstraint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="constraints.Constraints.ClaferConstraints.assertConstraints">
+<tt class="descname">assertConstraints</tt><big>(</big><em>z3</em><big>)</big><a class="headerlink" href="#constraints.Constraints.ClaferConstraints.assertConstraints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to add all constraints associated with this clafer to the solver.
+Can turn off different lists for debugging purposes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="constraints.Constraints.ClaferConstraints.print">
+<tt class="descname">print</tt><big>(</big><big>)</big><a class="headerlink" href="#constraints.Constraints.ClaferConstraints.print" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="constraints.Constraints.Constraints">
+<em class="property">class </em><tt class="descclassname">constraints.Constraints.</tt><tt class="descname">Constraints</tt><a class="headerlink" href="#constraints.Constraints.Constraints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dl class="method">
+<dt id="constraints.Constraints.Constraints.assertConstraint">
+<tt class="descname">assertConstraint</tt><big>(</big><em>constraint</em>, <em>z3</em><big>)</big><a class="headerlink" href="#constraints.Constraints.Constraints.assertConstraint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="constraints.Constraints.GenericConstraints">
+<em class="property">class </em><tt class="descclassname">constraints.Constraints.</tt><tt class="descname">GenericConstraints</tt><a class="headerlink" href="#constraints.Constraints.GenericConstraints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#constraints.Constraints.Constraints" title="constraints.Constraints.Constraints"><tt class="xref py py-class docutils literal"><span class="pre">constraints.Constraints.Constraints</span></tt></a></p>
+<dl class="method">
+<dt id="constraints.Constraints.GenericConstraints.addAll">
+<tt class="descname">addAll</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#constraints.Constraints.GenericConstraints.addAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="constraints.Constraints.GenericConstraints.addConstraint">
+<tt class="descname">addConstraint</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#constraints.Constraints.GenericConstraints.addConstraint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="constraints.Constraints.GenericConstraints.assertConstraints">
+<tt class="descname">assertConstraints</tt><big>(</big><em>z3</em><big>)</big><a class="headerlink" href="#constraints.Constraints.GenericConstraints.assertConstraints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to add all constraints to the solver.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="constraints.Constraints.GenericConstraints.print">
+<tt class="descname">print</tt><big>(</big><big>)</big><a class="headerlink" href="#constraints.Constraints.GenericConstraints.print" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
@@ -834,10 +926,8 @@ Simplified Example:</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">constraints Package</a><ul>
-<li><a class="reference internal" href="#description">Description</a></li>
 <li><a class="reference internal" href="#module-constraints.BracketedConstraint"><tt class="docutils literal"><span class="pre">BracketedConstraint</span></tt> Module</a></li>
-<li><a class="reference internal" href="#cardinalityconstraint-module"><tt class="docutils literal"><span class="pre">CardinalityConstraint</span></tt> Module</a></li>
-<li><a class="reference internal" href="#constraint-module"><tt class="docutils literal"><span class="pre">Constraint</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-constraints.Constraints"><tt class="docutils literal"><span class="pre">Constraints</span></tt> Module</a></li>
 </ul>
 </li>
 </ul>

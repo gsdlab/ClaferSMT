@@ -48,10 +48,6 @@
             
   <div class="section" id="visitors-package">
 <h1>visitors Package<a class="headerlink" href="#visitors-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="description">
-<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>Visitors used to traverse the Clafer AST in order to ultimately generate a Z3Instance object.</p>
-</div>
 <div class="section" id="module-visitors.CreateBracketedConstraints">
 <span id="createbracketedconstraints-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">CreateBracketedConstraints</span></tt> Module<a class="headerlink" href="#module-visitors.CreateBracketedConstraints" title="Permalink to this headline">¶</a></h2>
 <p>Created on Mar 26, 2013</p>
@@ -138,9 +134,6 @@ field.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="createcardinalityconstraints-module">
-<h2><tt class="xref py py-mod docutils literal"><span class="pre">CreateCardinalityConstraints</span></tt> Module<a class="headerlink" href="#createcardinalityconstraints-module" title="Permalink to this headline">¶</a></h2>
-</div>
 <div class="section" id="module-visitors.CreateHierarchy">
 <span id="createhierarchy-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">CreateHierarchy</span></tt> Module<a class="headerlink" href="#module-visitors.CreateHierarchy" title="Permalink to this headline">¶</a></h2>
 <p>Created on May 1, 2013</p>
@@ -209,6 +202,9 @@ The fields will need to be changed to lists ASAP.</p>
 
 </dd></dl>
 
+</div>
+<div class="section" id="isomorphismconstraint-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">IsomorphismConstraint</span></tt> Module<a class="headerlink" href="#isomorphismconstraint-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-visitors.PrettyPrint">
 <span id="prettyprint-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">PrettyPrint</span></tt> Module<a class="headerlink" href="#module-visitors.PrettyPrint" title="Permalink to this headline">¶</a></h2>
@@ -320,6 +316,78 @@ The fields will need to be changed to lists ASAP.</p>
 <dt id="visitors.PrettyPrint.prettyPrint">
 <tt class="descclassname">visitors.PrettyPrint.</tt><tt class="descname">prettyPrint</tt><big>(</big><em>s</em><big>)</big><a class="headerlink" href="#visitors.PrettyPrint.prettyPrint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</div>
+<div class="section" id="module-visitors.PrintHierarchy">
+<span id="printhierarchy-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">PrintHierarchy</span></tt> Module<a class="headerlink" href="#module-visitors.PrintHierarchy" title="Permalink to this headline">¶</a></h2>
+<p>Created on May 31, 2013</p>
+<p>&#64;author: ezulkosk</p>
+<dl class="class">
+<dt id="visitors.PrintHierarchy.PrintHierarchy">
+<em class="property">class </em><tt class="descclassname">visitors.PrintHierarchy.</tt><tt class="descname">PrintHierarchy</tt><big>(</big><em>z3</em>, <em>model</em><big>)</big><a class="headerlink" href="#visitors.PrintHierarchy.PrintHierarchy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#visitors.VisitorTemplate.VisitorTemplate" title="visitors.VisitorTemplate.VisitorTemplate"><tt class="xref py py-class docutils literal"><span class="pre">visitors.VisitorTemplate.VisitorTemplate</span></tt></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>z3</strong> &#8211; (<a class="reference internal" href="common.html#module-common.Z3Instance" title="common.Z3Instance"><tt class="xref py py-class docutils literal"><span class="pre">Z3Instance</span></tt></a>) The Z3 solver.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>z3</strong> (<a class="reference internal" href="common.html#module-common.Z3Instance" title="common.Z3Instance"><tt class="xref py py-class docutils literal"><span class="pre">Z3Instance</span></tt></a>) &#8211; The Z3 solver.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="visitors.PrintHierarchy.PrintHierarchy.claferVisit">
+<tt class="descname">claferVisit</tt><big>(</big><em>element</em><big>)</big><a class="headerlink" href="#visitors.PrintHierarchy.PrintHierarchy.claferVisit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-visitors.ResolveClaferIds">
+<span id="resolveclaferids-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">ResolveClaferIds</span></tt> Module<a class="headerlink" href="#module-visitors.ResolveClaferIds" title="Permalink to this headline">¶</a></h2>
+<p>Created on May 31, 2013</p>
+<p>&#64;author: ezulkosk</p>
+<dl class="class">
+<dt id="visitors.ResolveClaferIds.ResolveClaferIds">
+<em class="property">class </em><tt class="descclassname">visitors.ResolveClaferIds.</tt><tt class="descname">ResolveClaferIds</tt><big>(</big><em>z3</em><big>)</big><a class="headerlink" href="#visitors.ResolveClaferIds.ResolveClaferIds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#visitors.VisitorTemplate.VisitorTemplate" title="visitors.VisitorTemplate.VisitorTemplate"><tt class="xref py py-class docutils literal"><span class="pre">visitors.VisitorTemplate.VisitorTemplate</span></tt></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>CreateBracketedConstraints.currentConstraint</strong> &#8211; (<a class="reference internal" href="constraints.html#module-constraints.BracketedConstraint" title="constraints.BracketedConstraint"><tt class="xref py py-mod docutils literal"><span class="pre">BracketedConstraint</span></tt></a>) Holds the constraint currently being traversed.</li>
+<li><strong>CreateBracketedConstraints.inConstraint</strong> &#8211; (bool) True if the traversal is currently within a constraint.</li>
+<li><strong>claferStack</strong> &#8211; ([<a class="reference internal" href="common.html#module-common.ClaferSort" title="common.ClaferSort"><tt class="xref py py-mod docutils literal"><span class="pre">ClaferSort</span></tt></a>]) Stack of clafers used primarily for debugging.</li>
+<li><strong>z3</strong> &#8211; (<a class="reference internal" href="common.html#module-common.Z3Instance" title="common.Z3Instance"><tt class="xref py py-class docutils literal"><span class="pre">Z3Instance</span></tt></a>) The Z3 solver.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Converts Clafer constraints to z3 syntax,
+adds constraints to z3.z3_constraints
+field.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>z3</strong> (<a class="reference internal" href="common.html#module-common.Z3Instance" title="common.Z3Instance"><tt class="xref py py-class docutils literal"><span class="pre">Z3Instance</span></tt></a>) &#8211; The Z3 solver.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="visitors.ResolveClaferIds.ResolveClaferIds.claferVisit">
+<tt class="descname">claferVisit</tt><big>(</big><em>element</em><big>)</big><a class="headerlink" href="#visitors.ResolveClaferIds.ResolveClaferIds.claferVisit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="visitors.ResolveClaferIds.ResolveClaferIds.claferidVisit">
+<tt class="descname">claferidVisit</tt><big>(</big><em>element</em><big>)</big><a class="headerlink" href="#visitors.ResolveClaferIds.ResolveClaferIds.claferidVisit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
 
 </div>
 <div class="section" id="module-visitors.Visitor">
@@ -567,12 +635,13 @@ used as a superclass for other visitors</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">visitors Package</a><ul>
-<li><a class="reference internal" href="#description">Description</a></li>
 <li><a class="reference internal" href="#module-visitors.CreateBracketedConstraints"><tt class="docutils literal"><span class="pre">CreateBracketedConstraints</span></tt> Module</a></li>
-<li><a class="reference internal" href="#createcardinalityconstraints-module"><tt class="docutils literal"><span class="pre">CreateCardinalityConstraints</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-visitors.CreateHierarchy"><tt class="docutils literal"><span class="pre">CreateHierarchy</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-visitors.CreateSorts"><tt class="docutils literal"><span class="pre">CreateSorts</span></tt> Module</a></li>
+<li><a class="reference internal" href="#isomorphismconstraint-module"><tt class="docutils literal"><span class="pre">IsomorphismConstraint</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-visitors.PrettyPrint"><tt class="docutils literal"><span class="pre">PrettyPrint</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-visitors.PrintHierarchy"><tt class="docutils literal"><span class="pre">PrintHierarchy</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-visitors.ResolveClaferIds"><tt class="docutils literal"><span class="pre">ResolveClaferIds</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-visitors.Visitor"><tt class="docutils literal"><span class="pre">Visitor</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-visitors.VisitorTemplate"><tt class="docutils literal"><span class="pre">VisitorTemplate</span></tt> Module</a></li>
 </ul>

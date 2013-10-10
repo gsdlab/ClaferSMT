@@ -27,6 +27,13 @@ class Clafer(object):
         self.elements.append(element)
        
     def nonUniqueID(self):
+        """
+        :returns: string
+        
+        Obtains the simple name of the clafer
+        
+        >>> nonUniqueID(c1_A) => "A"
+        """
         return self.uid.split("_")[1]
         
     def __str__(self):
