@@ -39,6 +39,13 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.z3 = z3
     
     def isomorphismVisit(self, element):
+        '''
+        :param element: The isomorphism constraint to be added to the solver. 
+        :type element: :class:`~ast.FunExp`
+        
+        Mild hack. Only used when generating isomorphism constraints. Used to circumvent 
+        fully creating a proper clafer constraint.
+        '''
         self.inConstraint = True
         self.currentConstraint = BracketedConstraint.BracketedConstraint(self.z3, [])
         self.funexpVisit(element)
@@ -55,12 +62,14 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     
     def claferidVisit(self, element):
         if(self.inConstraint):
+            #XXX
             if element.id == "this":
                 instances = element.claferSort.maskForThis()
                 self.currentConstraint.addArg(ExprArg([element.claferSort], [element.claferSort], instances))
                 self.currentConstraint.this = element.claferSort
             elif element.id == "ref":
                 self.currentConstraint.addArg(ExprArg(["ref"], ["ref"], ["ref"]))
+            #XXX
             elif element.id == "parent":
                 self.currentConstraint.addArg(ExprArg(["parent"], ["parent"], ["parent"]))
             elif element.claferSort:  
@@ -139,7 +148,6 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.currentConstraint.addQuantifier(element.quantifier, num_args,num_quantifiers, ifconstraints)
     
     def localdeclarationVisit(self, element):
-        a = 0
         pass
     
     def integerliteralVisit(self, element):

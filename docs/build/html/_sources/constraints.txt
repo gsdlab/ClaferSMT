@@ -17,3 +17,11 @@ constraints Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`IsomorphismConstraint` Module
+-----------------------------------
+
+.. automodule:: constraints.IsomorphismConstraint
+    :members:
+    :undoc-members:
+    :show-inheritance:
+

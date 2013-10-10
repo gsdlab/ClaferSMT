@@ -8,5 +8,4 @@ src
    common
    constraints
    front
-   test
    visitors

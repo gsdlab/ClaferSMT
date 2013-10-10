@@ -12,7 +12,42 @@ from z3 import IntVector, Function, IntSort, If, BoolSort, Implies, And, Bool
 
 class  ClaferSort(object):
     '''
-    Conversion of clafer to z3 constraints.
+    :var element: The IR clafer.
+    :var z3: The Z3Instance.
+    :var parentStack: Used to determine the parent of the clafer, and if the clafer is top level.
+    :var isTopLevel: True if the clafer is at the top level of indentation.
+    :var fields: The direct subclafer ClaferSorts.
+    :var constraints: The set of Z3 constraints associated with this clafer.
+    :var summs: List containing useful information for processing cardinality constraints.
+    :var numInstances: The number of Z3-Int instances used to represent this Clafer.
+    :var instances: List of Z3-Ints representing the clafer. 
+        An instance is *on* if it is not equal to the number of parentInstances.
+    :var refs: List of Z3-ints representing the reference clafers that instances of this clafer point.
+    :var subs: The list of ClaferSorts that directly inherit from this clafer.
+    :var indexInSuper: Used to map a subinstance to the correct instances in the super. 
+    
+    Class representing a clafer in Z3 constraints. Clafers are represented as a list of 
+    Z3-Int with a length equal to its global cardinality (for now). 
+    The integers in the list represent which parent instance the corresponding instance
+    points to. The range of the integers in the list is in [0,parentInstances]. An instance in this 
+    list is considered *on* (that is, will appear in the outputted model), if it is not equal
+    to parentInstances. If a clafer is top level, then an instance is on if it equals 0, else it is
+    off. For example:
+    
+    >>> A 1..2 //A has global cardinality of 2
+    >>>    B 1..3 //B has global cardinality 6
+    >>> 
+    >>> Instances for A: [0, 1]
+    >>> Instances for B: [0, 0, 2, 2, 2, 2]
+    >>> 
+    >>> Corresponding output:
+    >>>   A0
+    >>>     B0
+    >>>     B1
+    
+    Instance A0 is on because the first instance of A is 0. Instances B0 and B1 fall under
+    A0 because the first and second instances are 0, that is, their parent pointers are 0.
+    Instances B2-B5 are off because parentInstances for B is 2 (since there are 2 A's).
     '''
     def __init__(self, element, z3, stack):
         self.element = element
@@ -30,7 +65,6 @@ class  ClaferSort(object):
             self.numInstances = Options.GLOBAL_SCOPE
         self.instances = IntVector(self.element.uid.split("_",1)[1],self.numInstances)
         self.refs = []
-        self.isReffed = False
         self.subs = []
         self.indexInSuper = 0
         self.currentSubIndex = 0
@@ -156,9 +190,6 @@ class  ClaferSort(object):
                     self.refSort = ref_id
                 else:
                     self.refSort = self.z3.getSort(ref_id)
-                    #only used to create alloy isomorphism constraint
-                    self.refSort.instanceIsReffed = [0 for _ in range(self.refSort.numInstances)]
-                    self.refSort.isReffed = True
                 self.superSort = None
             else:
                 self.refSort = None

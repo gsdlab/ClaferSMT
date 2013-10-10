@@ -54,7 +54,7 @@
 <p>&#64;author: ezulkosk</p>
 <dl class="class">
 <dt id="visitors.CreateBracketedConstraints.CreateBracketedConstraints">
-<em class="property">class </em><tt class="descclassname">visitors.CreateBracketedConstraints.</tt><tt class="descname">CreateBracketedConstraints</tt><big>(</big><em>z3</em><big>)</big><a class="headerlink" href="#visitors.CreateBracketedConstraints.CreateBracketedConstraints" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">visitors.CreateBracketedConstraints.</tt><tt class="descname">CreateBracketedConstraints</tt><big>(</big><em>z3</em>, <em>inConstraint=False</em><big>)</big><a class="headerlink" href="#visitors.CreateBracketedConstraints.CreateBracketedConstraints" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#visitors.VisitorTemplate.VisitorTemplate" title="visitors.VisitorTemplate.VisitorTemplate"><tt class="xref py py-class docutils literal"><span class="pre">visitors.VisitorTemplate.VisitorTemplate</span></tt></a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -120,6 +120,21 @@ field.</p>
 <dt id="visitors.CreateBracketedConstraints.CreateBracketedConstraints.integerliteralVisit">
 <tt class="descname">integerliteralVisit</tt><big>(</big><em>element</em><big>)</big><a class="headerlink" href="#visitors.CreateBracketedConstraints.CreateBracketedConstraints.integerliteralVisit" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="visitors.CreateBracketedConstraints.CreateBracketedConstraints.isomorphismVisit">
+<tt class="descname">isomorphismVisit</tt><big>(</big><em>element</em><big>)</big><a class="headerlink" href="#visitors.CreateBracketedConstraints.CreateBracketedConstraints.isomorphismVisit" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>element</strong> (<a class="reference internal" href="ast.html#module-ast.FunExp" title="ast.FunExp"><tt class="xref py py-class docutils literal"><span class="pre">FunExp</span></tt></a>) &#8211; The isomorphism constraint to be added to the solver.</td>
+</tr>
+</tbody>
+</table>
+<p>Mild hack. Only used when generating isomorphism constraints. Used to circumvent 
+fully creating a proper clafer constraint.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="visitors.CreateBracketedConstraints.CreateBracketedConstraints.localdeclarationVisit">
@@ -202,9 +217,6 @@ The fields will need to be changed to lists ASAP.</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="isomorphismconstraint-module">
-<h2><tt class="xref py py-mod docutils literal"><span class="pre">IsomorphismConstraint</span></tt> Module<a class="headerlink" href="#isomorphismconstraint-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-visitors.PrettyPrint">
 <span id="prettyprint-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">PrettyPrint</span></tt> Module<a class="headerlink" href="#module-visitors.PrettyPrint" title="Permalink to this headline">¶</a></h2>
@@ -638,7 +650,6 @@ used as a superclass for other visitors</p>
 <li><a class="reference internal" href="#module-visitors.CreateBracketedConstraints"><tt class="docutils literal"><span class="pre">CreateBracketedConstraints</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-visitors.CreateHierarchy"><tt class="docutils literal"><span class="pre">CreateHierarchy</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-visitors.CreateSorts"><tt class="docutils literal"><span class="pre">CreateSorts</span></tt> Module</a></li>
-<li><a class="reference internal" href="#isomorphismconstraint-module"><tt class="docutils literal"><span class="pre">IsomorphismConstraint</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-visitors.PrettyPrint"><tt class="docutils literal"><span class="pre">PrettyPrint</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-visitors.PrintHierarchy"><tt class="docutils literal"><span class="pre">PrintHierarchy</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-visitors.ResolveClaferIds"><tt class="docutils literal"><span class="pre">ResolveClaferIds</span></tt> Module</a></li>

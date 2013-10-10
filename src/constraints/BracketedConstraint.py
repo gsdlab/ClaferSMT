@@ -124,6 +124,7 @@ def createJoinFunction(leftSort, rightSort, linstances, rinstances, zeroedVal):
 #can optimize this.parent
 #need to range newInstances over ALL sorts in instanceSorts (don't have a test case yet)
 #   for example, leftJoinPoint.parentInstances CHANGES if there are multiple sorts here
+#XXX
 def op_join(left,right):
     '''
     :param left:
@@ -480,6 +481,7 @@ def op_ifthenelse(cond, ifExpr, elseExpr):
     assert isinstance(elseExpr, ExprArg)
     return BoolArg([If(cond.instances[0], ifExpr.instances[0], elseExpr.instances[0])])
 
+#XXX
 def set_extend(left,right):
     '''
     :param left:

@@ -25,14 +25,6 @@ visitors Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`IsomorphismConstraint` Module
------------------------------------
-
-.. automodule:: visitors.IsomorphismConstraint
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`PrettyPrint` Module
 -------------------------
 

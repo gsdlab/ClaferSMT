@@ -9,6 +9,14 @@ common Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`Clock` Module
+-------------------
+
+.. automodule:: common.Clock
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`Common` Module
 --------------------
 
