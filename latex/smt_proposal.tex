@@ -47,9 +47,6 @@ Finally an unbounded number of SwApps are introduced by the clafer SwApps follow
 %
 We should note that SwApps refers to both the type SwApps as well as defines a set of objects of type SwApps.
 
-\emph{ClaferIG}  is a program that takes a clafer specification as input and produces a clafer model satisfying such an specification if it can find on. It uses either Alloy or Choco as backends. Given the specification in  \figref{fig:ClaferPhone}, \emph{ClaferIG}   will produce for example a model such as the one shown in \figref{fig:ClaferPhoneInstance}.
-
-
 \lstdefinelanguage{clafer}
 {morekeywords={abstract, xor, or, integer, min, max, sum},
 sensitive=true,
@@ -70,13 +67,37 @@ Phone 1 .. 2
 SwApps * 
 	UID : int
 	memory : int
-
-
-
   \end{lstlisting}
- \caption{An ilustrative model of a mobile phone and the apps it can have using clafer.}
+ \caption{An ilustrative specification of a mobile phone and the apps it can have using clafer.}
  \label{fig:ClaferPhone}
 \end{figure}
+
+
+\emph{ClaferIG}  is a program that takes a clafer specification as input and produces a clafer model satisfying such an specification if it can find on. It uses either Alloy or Choco as backends. Given the specification in  \figref{fig:ClaferPhone}, \emph{ClaferIG}   will produce for example a model such as the one shown in \figref{fig:ClaferPhoneInstance}.  This generated model has single mobile phone named "Phone0", has the optional attribute PasswordProtection present ("PasswordProtection0") and has two apps: SwApps0 and SwApps1, that have memory attribute of 15 and 26 respectively. Hence the mobile phone model respects the constraint that the sum of the memory attributes of its apps is less than 100. 
+
+
+
+\begin{figure}[!t]
+ \begin{lstlisting}[language=clafer]
+
+
+Phone0
+	PasswordProtection0
+	Apps0 ->  SwApps0
+	Apps1 ->  SwApps1
+	
+SwApps0 
+	UID0=5
+	memory1=15
+
+SwApps1 
+	UID1=6
+	memory1=26
+  \end{lstlisting}
+ \caption{A generated model of a mobile phone and its apps  that satisfies the specification in \figref{fig:ClaferPhone} }
+ \label{fig:ClaferPhoneInstance}
+\end{figure}
+
 
 \section{Solution Overview}
 The logic of Clafer can essentially be reduced to the following main components:
