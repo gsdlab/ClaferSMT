@@ -9,6 +9,7 @@
 \usepackage{url}
 \usepackage{enumitem}
 \setenumerate{listparindent=\parindent}
+\newcommand{\figref}[1]{Figure~\ref{#1}}
 \begin{document}
 
 
@@ -27,10 +28,18 @@
 We propose to develop a new backend solver for Clafer - a variability modeling language developed in the GSD Lab at the University of Waterloo - using the Z3 SMT solver. Z3 is well respected for its speed and has been shown to outperform other solvers in the domain of partial modeling -- one type of modeling within the scope of Clafer. The project will mostly involve a translation from Clafer constraints to Z3 constraints. Furthermore, by using Z3 we should be able to support language features not previously available in Clafer, including constraints over real numbers, and possibly string constraints. The other aspect of this project will involve a comparison of the new Z3 backend with the previously existing Alloy and Choco backends. If feasible, comparison to a bare-bones SAT backend of Clafer would also be useful. Optimistically, we wish to experimentally derive interesting hypotheses on the complexity of Clafer models through these comparisons. 
 \end{abstract}
 \section{Introduction}
-Clafer is a modeling language with first-class support for feature and meta-modeling \cite{Bak}. In its current state, Clafer is supported by two backend solvers 1) Alloy -- a bounded relational model checker, and 2) Choco -- a library for constraint satisfaction problems. Clafer input is translated to either of these two backends, which then determine the satisfiability of the Clafer model, and produce instances if the model is satisfiable. Depending on the type of constraints within the Clafer model, one backend may be more suitable than the other. For example, Alloy does not perform well on arithmetic constraints over large integers, however the Choco solver is much more capable on these types of constraints. Some desirable language features are not currently supported by either backend, due to restrictions of the solvers. For example, neither the Alloy nor Choco backends currently support real numbers; although it may be feasible in Choco, it is not currently implemented. The goal of this project is to therefore develop and explore a new backend for Clafer using Z3 - an SMT solver. \\
+Clafer is a modeling language with first-class support for feature and meta-modeling \cite{BakClaferSLE2010}. In its current state, Clafer is supported by two backend solvers 1) Alloy -- a bounded relational model checker, and 2) Choco -- a library for constraint satisfaction problems. Clafer input is translated to either of these two backends, which then determine the satisfiability of the Clafer model, and produce instances if the model is satisfiable. Depending on the type of constraints within the Clafer model, one backend may be more suitable than the other. For example, Alloy does not perform well on arithmetic constraints over large integers, however the Choco solver is much more capable on these types of constraints. Some desirable language features are not currently supported by either backend, due to restrictions of the solvers. For example, neither the Alloy nor Choco backends currently support real numbers; although it may be feasible in Choco, it is not currently implemented. The goal of this project is to therefore develop and explore a new backend for Clafer using Z3 - an SMT solver. \\
 \indent Z3 is well known to be a fast solver, motivating our desire to create a new backend using it. In an experiment by \cite{Saadatpanah2012}, randomly generated partial models were analyzed by four solvers: Alloy, a relational logic solver; Minizinc, a  \textit{constraint satisfaction problems} (CSP) solver; Clasp with GrinGo, an \textit{answer set programming} (ASP) solver; and Z3. Z3 was shown to be more efficient (based on solving time) in general, and also scaled better to harder problems.Z3 has also been shown to perform well relative to other SMT solvers, winning SMTCOMP 2012 competition in the theory categories of \texttt{QF\_UFLIA}, \texttt{QF\_UFLRA}, and \texttt{QF\_BV}, among others\footnote{Results can be found at \url{http://www.smtexec.org/exec/?jobs=1004} .}.
 
 \section{Clafer Overview}
+
+\emph{Clafer} is a structural modeling language which is designed for variability modelling. It unifies both feature models  and meta-models \cite{BakClaferSLE2010}.
+
+ In \figref{fig:ClaferPhone}  we show a model of a mobile phone in Clafer. The phone has an optional feature \emph{PasswordProtection}, its optionality is denoted by the question mark after it. It also has a mandatory feature \emph{Apps} that refers  to a set of software applications, this is denoted by the  -> symbol following  Apps.  The star following   \emph{SwApps} means that \emph{Apps} refers to a set of software applications of cardinality between zero and infinity. Constraints are introduced in   square brackets, in this case a constraint is specified that the sum of the memory attribute of each app must be lower to 100. Finally an unbounded number of SwApps are introduced by the clafer SwApps followed by a star. Each SwApps contain a uid and a memory attribute, both of which take integer values.  We should note that SwApps refers to both the type SwApps as well as defines a set of objects of type SwApps.
+
+
+\emph{ClaferIG}  is a program that takes a clafer model specification and produces a clafer instance satisfying such a specification if it can find such an instance, it uses either Alloy or Choco as backends. \emph{ClaferIG} given the specification in  \figref{fig:ClaferPhone}  would produce for example an instance such as the one shown in \figref{fig:ClaferPhoneInstance}.
+
 
 
 \lstdefinelanguage{clafer}
@@ -44,14 +53,17 @@ columns=fullflexible
 \begin{figure}[!t]
  \begin{lstlisting}[language=clafer]
 
-Phone 2
+
+Phone 1 .. 2
 	PasswordProtection 	 ?
 	Apps ->  SwApps *
-	[ Apps.memory <= 100 ]
-
-SwApps
+	[ Sum Apps.memory <= 100 ]
+	
+SwApps * 
 	UID : int
 	memory : int
+
+
 
   \end{lstlisting}
  \caption{An ilustrative model of a mobile phone and the apps it can have using clafer.}
