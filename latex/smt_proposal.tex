@@ -70,7 +70,7 @@ columns=fullflexible
 Phone 1 .. 2
 	PasswordProtection 	 ?
 	Apps ->  SwApps *
-	[ Sum Apps.memory <= 100 ]
+	[ Sum Apps.ref.memory <= 100 ]
 	
 SwApps * 
 	UID : int
