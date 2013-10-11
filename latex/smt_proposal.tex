@@ -34,13 +34,18 @@ Clafer is a modeling language with first-class support for feature and meta-mode
 \section{Clafer Overview}
 
 \emph{Clafer} is a structural modeling language which is designed for variability modelling. It unifies both feature models  and meta-models \cite{BakClaferSLE2010}.
-
- In \figref{fig:ClaferPhone}  we show a model of a mobile phone in Clafer. The phone has an optional feature \emph{PasswordProtection}, its optionality is denoted by the question mark after it. It also has a mandatory feature \emph{Apps} that refers  to a set of software applications, this is denoted by the  -> symbol following  Apps.  The star following   \emph{SwApps} means that \emph{Apps} refers to a set of software applications of cardinality between zero and infinity. Constraints are introduced in   square brackets, in this case a constraint is specified that the sum of the memory attribute of each app must be lower to 100. Finally an unbounded number of SwApps are introduced by the clafer SwApps followed by a star. Each SwApps contain a uid and a memory attribute, both of which take integer values.  We should note that SwApps refers to both the type SwApps as well as defines a set of objects of type SwApps.
-
-
-\emph{ClaferIG}  is a program that takes a clafer model specification and produces a clafer instance satisfying such a specification if it can find such an instance, it uses either Alloy or Choco as backends. \emph{ClaferIG} given the specification in  \figref{fig:ClaferPhone}  would produce for example an instance such as the one shown in \figref{fig:ClaferPhoneInstance}.
-
-
+%
+In \figref{fig:ClaferPhone}  we show a specification of a mobile phone in Clafer. 
+%
+The phone has an optional feature \emph{PasswordProtection}, its optionality is denoted by the question mark after it. It also has a mandatory feature \emph{Apps} that refers  to a set of software applications, this is denoted by the  -$>$ symbol following  Apps. 
+%
+The star following  \emph{SwApps} means that \emph{Apps} refers to a set of software applications of cardinality greater than zero. 
+%
+Constraints are introduced in  square brackets, in this case a constraint is specified that the sum of the memory attribute of each SwApp must be lower than 100. 
+%
+Finally an unbounded number of SwApps are introduced by the clafer SwApps followed by a star. Each SwApps contain a UID and a memory attribute, both of which take integer values.  
+%
+We should note that SwApps refers to both the type SwApps as well as defines a set of objects of type SwApps.
 
 \lstdefinelanguage{clafer}
 {morekeywords={abstract, xor, or, integer, min, max, sum},
@@ -62,13 +67,37 @@ Phone 1 .. 2
 SwApps * 
 	UID : int
 	memory : int
-
-
-
   \end{lstlisting}
- \caption{An ilustrative model of a mobile phone and the apps it can have using clafer.}
+ \caption{An ilustrative specification of a mobile phone and the apps it can have using clafer.}
  \label{fig:ClaferPhone}
 \end{figure}
+
+
+\emph{ClaferIG}  is a program that takes a clafer specification as input and produces a clafer model satisfying such an specification if it can find on. It uses either Alloy or Choco as backends. Given the specification in  \figref{fig:ClaferPhone}, \emph{ClaferIG}   will produce for example a model such as the one shown in \figref{fig:ClaferPhoneInstance}.  This generated model has single mobile phone named "Phone0", has the optional attribute PasswordProtection present ("PasswordProtection0") and has two apps: SwApps0 and SwApps1, that have memory attribute of 15 and 26 respectively. Hence the mobile phone model respects the constraint that the sum of the memory attributes of its apps is less than 100. 
+
+
+
+\begin{figure}[!t]
+ \begin{lstlisting}[language=clafer]
+
+
+Phone0
+	PasswordProtection0
+	Apps0 ->  SwApps0
+	Apps1 ->  SwApps1
+	
+SwApps0 
+	UID0=5
+	memory1=15
+
+SwApps1 
+	UID1=6
+	memory1=26
+  \end{lstlisting}
+ \caption{A generated model of a mobile phone and its apps  that satisfies the specification in \figref{fig:ClaferPhone} }
+ \label{fig:ClaferPhoneInstance}
+\end{figure}
+
 
 \section{Solution Overview}
 For consistency (and due to large amounts of overlapping terminology), we define the following terms and notations: 1) we call the Clafer input the \textit{specification}; 2) an output that conforms to the specification is a \textit{model}, and; 3) individual occurrences of a clafer in the model are \textit{instances}. We use capitalized \textit{Clafer} to denote the language Clafer itself, and lowercase \textit{clafer} to denote individual components of the specification (e.g. \texttt{Phone} in Fig. \ref{fig:ClaferPhone}).\\
