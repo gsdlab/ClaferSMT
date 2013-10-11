@@ -5,11 +5,13 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{listings}
 \usepackage{latexsym}
+\usepackage{subfigure}
 \usepackage{amsmath}
 \usepackage{url}
 \usepackage{enumitem}
 \setenumerate{listparindent=\parindent}
 \newcommand{\figref}[1]{Figure~\ref{#1}}
+\newcommand{\listref}[1]{Listing~\ref{#1}}
 \begin{document}
 
 
@@ -35,7 +37,7 @@ Clafer is a modeling language with first-class support for feature and meta-mode
 
 \emph{Clafer} is a structural modeling language which is designed for variability modelling. It unifies both feature models  and meta-models \cite{BakClaferSLE2010}.
 %
-In \figref{fig:ClaferPhone}  we show a specification of a mobile phone in Clafer. 
+In Listing \ref{fig:ClaferPhone}  we show a specification of a mobile phone in Clafer. 
 %
 The phone has an optional feature \emph{PasswordProtection}, its optionality is denoted by the question mark after it. It also has a mandatory feature \emph{Apps} that refers  to a set of software applications, this is denoted by the  -$>$ symbol following  Apps. 
 %
@@ -55,10 +57,28 @@ tabsize=2,
 columns=fullflexible
 }
 
-\begin{figure}[!t]
- \begin{lstlisting}[language=clafer]
+%\begin{figure}[!t]
+% \begin{lstlisting}[language=clafer]
+%
+%Phone 1 .. 2
+%	PasswordProtection 	 ?
+%	Apps ->  SwApps *
+%	[ Sum Apps.memory <= 100 ]
+%	
+%SwApps * 
+%	UID : int
+%	memory : int
+%  \end{lstlisting}
+% \caption{An ilustrative specification of a mobile phone and the apps it can have using clafer.}
+% \label{fig:ClaferPhone}
+%\end{figure}[]
 
 
+\emph{ClaferIG}  is a program that takes a clafer specification as input and produces a clafer model satisfying such an specification if it can find on. It uses either Alloy or Choco as backends. Given the specification in  \listref{listing:ClaferPhone}, \emph{ClaferIG}   will produce for example a model such as the one shown in \listref{listing:ClaferPhoneInstance}.  This generated model has single mobile phone named "Phone0", has the optional attribute PasswordProtection present ("PasswordProtection0") and has two apps: SwApps0 and SwApps1, that have memory attribute of 15 and 26 respectively. Hence the mobile phone model respects the constraint that the sum of the memory attributes of its apps is less than 100. 
+
+\par\noindent
+\begin{minipage}[t]{.32\textwidth}
+\begin{lstlisting}[language=clafer, caption=A specification of a mobile phone and its apps in clafer.]
 Phone 1 .. 2
 	PasswordProtection 	 ?
 	Apps ->  SwApps *
@@ -67,20 +87,12 @@ Phone 1 .. 2
 SwApps * 
 	UID : int
 	memory : int
-  \end{lstlisting}
- \caption{An ilustrative specification of a mobile phone and the apps it can have using clafer.}
- \label{fig:ClaferPhone}
-\end{figure}
-
-
-\emph{ClaferIG}  is a program that takes a clafer specification as input and produces a clafer model satisfying such an specification if it can find on. It uses either Alloy or Choco as backends. Given the specification in  \figref{fig:ClaferPhone}, \emph{ClaferIG}   will produce for example a model such as the one shown in \figref{fig:ClaferPhoneInstance}.  This generated model has single mobile phone named "Phone0", has the optional attribute PasswordProtection present ("PasswordProtection0") and has two apps: SwApps0 and SwApps1, that have memory attribute of 15 and 26 respectively. Hence the mobile phone model respects the constraint that the sum of the memory attributes of its apps is less than 100. 
-
-
-
-\begin{figure}[!t]
- \begin{lstlisting}[language=clafer]
-
-
+\end{lstlisting}%
+ \label{listing:ClaferPhone}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{.32\textwidth}
+\begin{lstlisting}[language=clafer, caption=A generated model of a mobile phone and its apps in clafer from specification in Listing 1]
 Phone0
 	PasswordProtection0
 	Apps0 ->  SwApps0
@@ -93,10 +105,84 @@ SwApps0
 SwApps1 
 	UID1=6
 	memory1=26
-  \end{lstlisting}
- \caption{A generated model of a mobile phone and its apps  that satisfies the specification in \figref{fig:ClaferPhone} }
- \label{fig:ClaferPhoneInstance}
-\end{figure}
+\end{lstlisting}%
+ \label{listing:ClaferPhoneInstance}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{.32\textwidth}
+\begin{lstlisting}[language=clafer]
+Phone0: [0, 1]
+PasswordProtection: [0, 2]
+Apps: [0, 0, 2, 2]
+Apps_ref: [0, 0, 1, 4, 4]
+SwApps: [0, 0, 1, 1]
+UID: [0, 1, 4, 4]
+UID_ref: [5, 6, 0, 0]
+memory: [0, 1, 4, 4]
+memory_ref: [15, 26, 0, 0]
+\end{lstlisting}%
+\end{minipage}%
+
+
+%\begin{figure}[!t]
+%\centering
+%	\subfigure{
+% \begin{lstlisting}[language=clafer]
+%Phone0
+%	PasswordProtection0
+%	Apps0 ->  SwApps0
+%	Apps1 ->  SwApps1
+%	
+%SwApps0 
+%	UID0=5
+%	memory1=15
+%
+%SwApps1 
+%	UID1=6
+%	memory1=26
+%  \end{lstlisting}
+%	}
+%	\subfigure{
+% \begin{lstlisting}[language=clafer]
+%Phone0
+%	PasswordProtection0
+%	Apps0 ->  SwApps0
+%	Apps1 ->  SwApps1
+%	
+%SwApps0 
+%	UID0=5
+%	memory1=15
+%
+%SwApps1 
+%	UID1=6
+%	memory1=26
+%  \end{lstlisting}	
+%}
+%\caption{A specification for a mobile phone and its apps  in Clafer (left), a  generated model that satisfies such specification (center) and  the computed scopes  of each entity in the specification (right).}
+%\label{fig:AllFiguresClafer}
+%\end{figure}
+
+%
+%\begin{figure}[]
+% \begin{lstlisting}[language=clafer]
+%
+%
+%Phone0
+%	PasswordProtection0
+%	Apps0 ->  SwApps0
+%	Apps1 ->  SwApps1
+%	
+%SwApps0 
+%	UID0=5
+%	memory1=15
+%
+%SwApps1 
+%	UID1=6
+%	memory1=26
+%  \end{lstlisting}
+% \caption{ \figref{fig:ClaferPhone} }
+% \label{fig:ClaferPhoneInstance}
+%\end{figure}
 
 
 \section{Solution Overview}
