@@ -3,8 +3,7 @@
 \usepackage{amstext}    % defines the \text command, needed here
 \usepackage{array} 
 \usepackage[margin=1in]{geometry}
-\usepackage{mathpartir}
-\usepackage{enumerate}
+\usepackage{listings}
 \usepackage{latexsym}
 \usepackage{amsmath}
 \usepackage{url}
@@ -33,6 +32,32 @@ Clafer is a modeling language with first-class support for feature and meta-mode
 
 \section{Clafer Overview}
 
+
+\lstdefinelanguage{clafer}
+{morekeywords={abstract, xor, or, integer, min, max, sum},
+sensitive=true,
+basicstyle={\sffamily\small},
+tabsize=2,
+columns=fullflexible
+}
+
+\begin{figure}[!t]
+ \begin{lstlisting}[language=clafer]
+
+Phone
+	PasswordProtection 	 ?
+	Apps ->  SwApps *
+	[ Apps.memory <= 100 ]
+
+abstract SwApps
+	UID : int
+	memory : int
+
+  \end{lstlisting}
+ \caption{An ilustrative model of a mobile phone and the apps it can have using clafer.}
+ \label{fig:ClaferPhone}
+\end{figure}
+
 \section{Solution Overview}
 
 
@@ -42,7 +67,7 @@ The work of Michel et. al. \cite{Michel2012} discusses how configuration problem
 
 \section{Planned Contributions}
 The main deliverables for this project will be the implementation of the translation from Clafer to Z3, as well as hypotheses as to \textit{why} certain solvers outperform other solvers, and which characteristics of Clafer models make solving difficult. The expected components of this project are: 
-\begin{myenumerate}
+\begin{enumerate}
 \item \textbf{A translation of all base-components of Clafer to Z3.} This includes hierarchical constraints, set constraints, arithmetic, and cross-tree constraints. 
 \item \textbf{Additional Clafer functionality not supported by other backends.} Two important constructs not currently supported by Clafer are real numbers and strings. We would like to support these with our project to expand the scope of models that can be evaluated with Clafer. 
 
@@ -51,7 +76,7 @@ The main deliverables for this project will be the implementation of the transla
 \item \textbf{Hypotheses regarding which Clafer components make solving difficult.} First, it will be necessary to somehow measure the complexity of a given Clafer model. One suggested approach would be to translate Clafer models to SAT formulas, and, using known metrics for the complexity of SAT formulas, approximate the complexity of the original Clafer model. However, no current translation from Clafer to SAT exists (aside from through Alloy), so this will require investigation. Then, we will need to determine which Clafer components add the most to the overall complexity of the model. It will be beneficial to generate random Clafer models to conduct this experiment, however this in itself is a difficult task, as Clafer has many components. \\
 \indent This experiment can have multiple implications. First (and most obviously), we can gain insight as to what makes Clafer models hard. However, since Clafer is general enough to support both feature and class modeling, we may gain insights on these domains as well.
 
-\end{myenumerate}
+\end{enumerate}
 
 
 \bibliographystyle{abbrv}
