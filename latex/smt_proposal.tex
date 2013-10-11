@@ -199,6 +199,7 @@ SwApps *
 	memory : int
 
 IPhoneApps -> SwApps *	
+	[ this.ref.memory < 15 ]
 AndroidApps -> SwApps *
 
 [ sum AndroidApps.ref.memory <= 100 ]	
