@@ -92,7 +92,7 @@ SwApps *
 \end{minipage}%
 \hfill
 \begin{minipage}[t]{.32\textwidth}
-\begin{lstlisting}[language=clafer, caption=A generated model of a mobile phone and its apps in clafer from specification in Listing 1]
+\begin{lstlisting}[language=clafer, caption=A generated model of a mobile phone and its apps in clafer from the specification in Listing 1.]
 Phone0
 	PasswordProtection0
 	Apps0 ->  SwApps0
@@ -110,17 +110,18 @@ SwApps1
 \end{minipage}%
 \hfill
 \begin{minipage}[t]{.32\textwidth}
-\begin{lstlisting}[language=clafer]
+\begin{lstlisting}[language=clafer, caption=The integer variables associated with each clafer in Z3 and corresponding to Listing 2.]
 Phone0: [0, 1]
 PasswordProtection: [0, 2]
 Apps: [0, 0, 2, 2]
-Apps_ref: [0, 0, 1, 4, 4]
+Apps_ref: [0, 1, 4, 4]
 SwApps: [0, 0, 1, 1]
 UID: [0, 1, 4, 4]
 UID_ref: [5, 6, 0, 0]
 memory: [0, 1, 4, 4]
 memory_ref: [15, 26, 0, 0]
 \end{lstlisting}%
+\label{listing:ClaferPhoneZ3}
 \end{minipage}%
 \end{figure}
 
@@ -186,7 +187,7 @@ memory_ref: [15, 26, 0, 0]
 
 
 \section{Solution Overview}
-For consistency (and due to large amounts of overlapping terminology), we define the following terms and notations: 1) we call the Clafer input the \textit{specification}; 2) an output that conforms to the specification is a \textit{model}, and; 3) individual occurrences of a clafer in the model are \textit{instances}. We use capitalized \textit{Clafer} to denote the language Clafer itself, and lowercase \textit{clafer} to denote individual components of the specification (e.g. \texttt{Phone} in Fig. \ref{fig:ClaferPhone}).\\
+For consistency (and due to large amounts of overlapping terminology), we define the following terms and notations: 1) we call the Clafer input the \textit{specification}; 2) an output that conforms to the specification is a \textit{model}, and; 3) individual occurrences of a clafer in the model are \textit{instances}. We use capitalized \textit{Clafer} to denote the language Clafer itself, and lowercase \textit{clafer} to denote individual components of the specification (e.g. \texttt{Phone} in Fig. \ref{listing:ClaferPhone}).\\
 \indent The logic of Clafer can essentially be reduced to the following main components:
 \begin{itemize}
 \item Finite sets, and operations over them (e.g. set union). For the translation to Z3, we use a finite list of bounded integer variables to represent a given clafer (bitvectors would be sufficient as well). Abstractly, each integer in the list corresponds to a \textit{potential} instance of that clafer in the outputted model. An instance is part of the model if Z3 returns a value for it not equal to a predefined \textit{sentinel} number for that clafer (more details are further described in the following section). We then need to add constraints over these sets, such that if a satisfying assignment is returned from Z3 for these variables, then it can be mapped back to a Clafer model conforming to the specification. For example, these constraints must ensure that the number of instances of a clafer are within the specified cardinality, and that all bracketed constraints are satisfied.
@@ -196,9 +197,9 @@ For consistency (and due to large amounts of overlapping terminology), we define
 Clearly the difficulty lies in creating constraints over the finite sets, such that the integer variables can be mapped to a model conformant to the input. We discuss some details of this next.
 
 \section{Detailed Solution Overview}
-We illustrate some components of our approach through the example Clafer specification and instance in Figure \ref{fig:ClaferPhone}. Note that there are many aspects of Clafer not present in this model, such as abstract clafers and inheritance; we reserve a description of these for the final report.
+We illustrate some components of our approach through the example Clafer specification and instance in Listings \ref{listing:ClaferPhone} and \ref{listing:ClaferPhoneInstance}, respectively. Note that there are many aspects of Clafer not present in this model, such as abstract clafers and inheritance; we reserve a description of these for the final report.
 \subsection{Representation of a clafer}
-As previously stated, a clafer is represented as a finite list of integers. Consider the \texttt{Phone} clafer in Figure \ref{fig:ClaferPhone}. Since our outputted Clafer model will have at most two \texttt{Phone} clafers, we can represent it with a list of two integer variables, for example $[phone0, phone1]$.  \\
+As previously stated, a clafer is represented as a finite list of integers. Consider the \texttt{Phone} clafer in Listing \ref{listing:ClaferPhone}. Since our outputted Clafer model will have at most two \texttt{Phone} clafers, we can represent it with a list of two integer variables, for example $[phone0, phone1]$.  \\
 \indent For star-cardinalities (as in the reference clafer \texttt{Apps}), we place a finite \textit{scope} $s$ on the clafer, indicating that only $s$ instances can occur in the model. For the sake of example, let us assume that the scope of all unbounded clafers is $4$. Then we can represent the clafer \texttt{Apps} with the list $[Apps0, Apps1, Apps2, Apps3]$.\\
 \indent Semantically, the values of these integer variables represent \textit{parent pointers}, indicating where the clafer should be placed in the outputted model. For example, if the variable $Apps0$ is set to $0$ by the solver, then it should fall directly beneath $Phone0$ in the hierarchy of the outputted model. Likewise, if $Apps0 = 1$, then $Apps0$ would be placed under $Phone1$.\\
 \indent A clafer instance is \textit{excluded} from the model if its integer variable is set to a pre-defined \textit{sentinel} value, which equals the total number of instance variables of the clafer's parent. For example, since the \texttt{Apps} clafer is directly underneath \texttt{Phone}, and \texttt{Phone} has two instances variables, any \texttt{Apps} instance set to 2 will not be included in the model. In Fig. 1c, since \textit{Apps2} and \textit{Apps3} both equal 2, they do not appear in the model in Fig. 1b. For \textit{top-level clafers} that do not have a parent, the instance is included if its corresponding variable is set to 0, and not included if set to 1. For simplicity in the remainder of the paper, given a clafer \texttt{x}, an instance \textit{$x_i$} is excluded if  $x_i = x_{sentinel}$ (e.g. $Apps2 = Apps_{sentinel}$ in our example). \\
