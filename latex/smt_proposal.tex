@@ -41,9 +41,9 @@ Clafer is a modeling language with first-class support for feature and meta-mode
 %
 In Listing \ref{listing:ClaferPhone}  we show a specification of a mobile phone in Clafer. 
 %
-The \emph{phone} refers to a concrete clafer of cardinality between 1 and 2 (\eg either 1 or 2 such phones must exist). The \emph{phone} has an optional feature \emph{PasswordProtection}, its optionality is denoted by the question mark after it. It also has a mandatory feature \emph{Apps} that refers  to a set of software applications, this is denoted by the  -$>$ symbol following  Apps. 
+The \emph{phone} refers to a concrete clafer of cardinality between 1 and 2 (\eg either 1 or 2 such phones must exist). The \emph{phone} has an optional feature \emph{PasswordProtection}, its optionality is denoted by the question mark after it. It also has  a feature \emph{Apps} that refers  to a set of software applications, this is denoted by the  -$>$ symbol following  Apps. 
 %
-The star following  \emph{SwApps} means that \emph{Apps} refers to a set of software applications of cardinality greater than zero. 
+The star following  \emph{SwApps} means that \emph{Apps} refers to a set of software applications of cardinality greater than or equal to zero. 
 %
 Constraints are introduced in  square brackets, in this case a constraint is specified that the sum of the memory attribute of each SwApp must be lower than 100. 
 %
