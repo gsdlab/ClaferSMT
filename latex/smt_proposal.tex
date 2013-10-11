@@ -34,6 +34,11 @@ Clafer is a modeling language with first-class support for feature and meta-mode
 \section{Clafer Overview}
 
 \section{Solution Overview}
+The logic of Clafer can essentially be reduced to the following main components:
+\begin{itemize}
+\item Finite sets, and operations over them (e.g. set union). For the translation to Z3, we use a finite list of bounded integer variables to represent a given clafer. We then need to add constraints over these sets, such that if a satisfying assignment is returned from Z3 for these variables, it can be mapped back to a Clafer instance conforming to the inputted model. We admit that representing clafers with bitvectors may be more efficient, however the integer representation is sufficient for now.
+\item Basic arithmetic constraints (e.g. addition, multiplication) and boolean constraints (e.g. \textit{and}, \textit{or}, \textit{not}), which have direct translations to Z3.
+\end{itemize} 
 
 
 \section{Related and Previous Work}
