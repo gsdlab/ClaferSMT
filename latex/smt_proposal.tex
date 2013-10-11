@@ -75,7 +75,7 @@ columns=fullflexible
 
 
 \emph{ClaferIG}  is a program that takes a clafer specification as input and produces a clafer model satisfying such an specification if it can find on. It uses either Alloy or Choco as backends. Given the specification in  \listref{listing:ClaferPhone}, \emph{ClaferIG}   will produce for example a model such as the one shown in \listref{listing:ClaferPhoneInstance}.  This generated model has single mobile phone named "Phone0", has the optional attribute PasswordProtection present ("PasswordProtection0") and has two apps: SwApps0 and SwApps1, that have memory attribute of 15 and 26 respectively. Hence the mobile phone model respects the constraint that the sum of the memory attributes of its apps is less than 100. 
-
+\begin{figure}[!t]
 \par\noindent
 \begin{minipage}[t]{.32\textwidth}
 \begin{lstlisting}[language=clafer, caption=A specification of a mobile phone and its apps in clafer.]
@@ -122,7 +122,7 @@ memory: [0, 1, 4, 4]
 memory_ref: [15, 26, 0, 0]
 \end{lstlisting}%
 \end{minipage}%
-
+\end{figure}
 
 %\begin{figure}[!t]
 %\centering
