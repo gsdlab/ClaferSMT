@@ -33,7 +33,7 @@ We propose to develop a new backend solver for Clafer - a variability modeling l
 \end{abstract}
 \section{Introduction}
 Clafer is a modeling language with first-class support for feature and meta-modeling \cite{BakClaferSLE2010}. In its current state, Clafer is supported by two backend solvers 1) Alloy -- a bounded relational model checker, and 2) Choco -- a library for constraint satisfaction problems. Clafer input is translated to either of these two backends, which then determine the satisfiability of the Clafer model, and produce instances if the model is satisfiable. Depending on the type of constraints within the Clafer model, one backend may be more suitable than the other. For example, Alloy does not perform well on arithmetic constraints over large integers as it deals with them by flattening and translating the theory of arithmetic into boolean formulas, however the Choco solver is much more capable on these types of constraints. Some desirable language features are not currently supported by either backend, due to restrictions of the solvers. For example, neither the Alloy nor Choco backends currently support real numbers; although it may be feasible in Choco, it is not currently implemented. The goal of this project is therefore to  develop and explore a new backend for Clafer using Z3 - an SMT solver. \\
-\indent Z3 is well known to be a fast solver, motivating our desire to create a new backend using it. In an experiment by \cite{Saadatpanah2012}, randomly generated partial models were analyzed by four solvers: Alloy, a relational logic solver; Minizinc, a  \textit{constraint satisfaction problems} (CSP) solver; Clasp with GrinGo, an \textit{answer set programming} (ASP) solver; and Z3. Z3 was shown to be more efficient (based on solving time) in general, and also scaled better to harder problems.Z3 has also been shown to perform well relative to other SMT solvers, winning SMTCOMP 2012 competition in the theory categories of \texttt{QF\_UFLIA}, \texttt{QF\_UFLRA}, and \texttt{QF\_BV}, among others\footnote{Results can be found at \url{http://www.smtexec.org/exec/?jobs=1004} .}.
+\indent Z3 is well known to be a fast solver, motivating our desire to create a new backend using it. In an experiment by \cite{Saadatpanah2012}, randomly generated partial models were analyzed by four solvers: Alloy, a relational logic solver; Minizinc, a  \textit{constraint satisfaction problems} (CSP) solver; Clasp with GrinGo, an \textit{answer set programming} (ASP) solver; and Z3. Z3 was shown to be more efficient (based on solving time) in general, and also scaled better to harder problems. Z3 has also been shown to perform well relative to other SMT solvers, winning the SMTCOMP 2012 competition in the theory categories of \texttt{QF\_UFLIA}, \texttt{QF\_UFLRA}, and \texttt{QF\_BV}, among others\footnote{Results can be found at \url{http://www.smtexec.org/exec/?jobs=1004} .}.
 
 \section{Clafer Overview}
 
@@ -41,17 +41,17 @@ Clafer is a modeling language with first-class support for feature and meta-mode
 %
 In Listing \ref{listing:ClaferPhone}  we show a specification of a mobile phone in Clafer. 
 %
-The \emph{phone} refers to a concrete clafer of cardinality between 1 and 2 (\eg either 1 or 2 such phones must exist). The \emph{phone} has an optional feature \emph{PasswordProtection}, its optionality is denoted by the question mark after it. It also has  a feature \emph{Apps} that refers  to a set of software applications, this is denoted by the  -$>$ symbol following  Apps. 
+\texttt{Phone} refers to a concrete clafer of cardinality between 1 and 2 (\eg either 1 or 2 of such phones must exist). \texttt{Phone} has an optional feature \emph{PasswordProtection}; its optionality is denoted by the question mark after it. It also has  a feature \texttt{Apps} that refers  to a set of software applications; this is denoted by the  -$>$ symbol following  \texttt{Apps}. 
 %
-The star following  \emph{SwApps} means that \emph{Apps} refers to a set of software applications of cardinality greater than or equal to zero. 
+The star following  \texttt{SwApps} means that \texttt{Apps} refers to a set of software applications of cardinality greater than or equal to zero. 
 %
-Constraints are introduced in  square brackets, in this case a constraint is specified that the sum of the memory attribute of each SwApp must be lower than 100.  This constraint is denoted by ``sum Apps.ref.memory $\le 100$''. 
+Constraints are introduced in  square brackets. The constraint denoted by [sum Apps.ref.memory $\le 100$], specifies that the sum of the memory attribute of all \texttt{SwApps} for a given \texttt{Phone} instance must be lower than 100. Note that this constraint must be true of \textit{all} \texttt{Phone} instances, due to its level of indentation.    
 %
-The dot character in ``Apps.ref''  in essence serves as a navigation operator, by performing a join between the set Apps and the automatically created set Apps\_ref. This operator is applied again to obtain a set of memory values. This values are then added by the sum operator, and it is enforced that such sum must be less than 100.
+The dot character in ``Apps.ref''  in essence serves as a navigation operator, by performing a join between the set \texttt{Apps} and the automatically created set \texttt{Apps\_ref}. This operator is applied again to obtain a set of \texttt{memory} values. These values are then added together by the sum operator, and it is enforced that such sum must be less than 100.
 %
-Finally an unbounded number of SwApps are introduced by the clafer SwApps followed by a star. Each SwApps contain a UID and a memory attribute, both of which take integer values.  
+Finally an unbounded number of \texttt{SwApps} are introduced by the clafer \texttt{SwApps} followed by a star. Each SwApps contain a \texttt{UID} and a \texttt{memory} attribute, both of which take integer values.  
 %
-We should note that SwApps refers to both the type SwApps as well as defines a set of objects of type SwApps.
+We should note that \texttt{SwApps} refers to both the type SwApps as well as defines a set of objects of type SwApps.
 
 \lstdefinelanguage{clafer}
 {morekeywords={abstract, xor, or, integer, min, max, sum},
@@ -64,7 +64,7 @@ columns=fullflexible
 
 
 
-\emph{ClaferIG}  is a program that takes a clafer specification as input and produces a clafer model satisfying such an specification if it can find on. It uses either Alloy or Choco as backends. Given the specification in  \listref{listing:ClaferPhone}, \emph{ClaferIG}   will produce for example a model such as the one shown in \listref{listing:ClaferPhoneInstance}.  This generated model has single mobile phone named ``Phone0'', has the optional attribute PasswordProtection present (``PasswordProtection0'') and has two apps: SwApps0 and SwApps1, that have memory attribute of 15 and 26 respectively. Hence the mobile phone model respects the constraint that the sum of the memory attributes of its apps is less than 100. 
+\emph{ClaferIG}  is a program that takes a clafer specification as input and produces a clafer model satisfying such an specification, if it exists. It uses either Alloy or Choco as backends. Given the specification in  \listref{listing:ClaferPhone}, \emph{ClaferIG}   will produce for example a model such as the one shown in \listref{listing:ClaferPhoneInstance}.  This generated model has single mobile phone named \textit{Phone0}, has the optional attribute PasswordProtection present (``PasswordProtection0'') and has two apps: \textit{SwApps0} and \textit{SwApps1}, that have memory attribute of 15 and 26 respectively. Hence the mobile phone model respects the constraint that the sum of the memory attributes of its \textit{Apps} is less than 100. 
 \begin{figure}[!t]
 \par\noindent
 \begin{minipage}[t]{.32\textwidth}
@@ -185,8 +185,8 @@ Most of the difficulty lies in creating constraints over the finite sets in such
 
 
 \begin{figure}[!t]
-\begin{center}
-\begin{lstlisting}[language=clafer, caption=A more complex mobile phone specification in clafer., label={listing:ClaferMoreComplexSpec},  xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
+\centering
+\begin{lstlisting}[language=clafer, caption=A more complex mobile phone specification in clafer., label={listing:ClaferMoreComplexSpec}]
 SwApps *
 	memory : int
 
@@ -195,8 +195,7 @@ IPhoneApps -> SwApps *
 AndroidApps -> SwApps *
 
 [ sum AndroidApps.ref.memory <= 100 ]	
-\end{lstlisting}
-\end{center}
+\end{lstlisting}%
 \end{figure}
 
 
