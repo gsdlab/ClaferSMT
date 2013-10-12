@@ -183,6 +183,22 @@ For consistency (and due to large amounts of overlapping terminology), we define
 
 Most of the difficulty lies in creating constraints over the finite sets in such a way that the integer variables can be mapped to a model conformant to the specification. We discuss some details of this next.
 
+
+\begin{figure}[!t]
+\centering
+\begin{lstlisting}[language=clafer, caption=A more complex mobile phone specification in clafer., label={listing:ClaferMoreComplexSpec}]
+SwApps *
+	memory : int
+
+IPhoneApps -> SwApps *	
+	[ this.ref.memory < 15 ]
+AndroidApps -> SwApps *
+
+[ sum AndroidApps.ref.memory <= 100 ]	
+\end{lstlisting}%
+\end{figure}
+
+
 \section{Detailed Solution Overview}
 We illustrate some components of our approach through the example Clafer specification and instance in Listings \ref{listing:ClaferPhone} and \ref{listing:ClaferPhoneInstance}, respectively. Note that there are many aspects of Clafer not present in this model, such as abstract clafers and inheritance; we reserve a description of these for the final report.
 \subsection{Representation of a clafer}
@@ -195,17 +211,6 @@ As previously stated, a clafer is represented as a finite list of integers. Cons
 \indent As a larger example, once again consider Listing \ref{listing:ClaferPhoneInstance}, along with the corresponding output of Z3 in Listing \ref{listing:ClaferPhoneZ3}. For space limitations, each line of Listing \ref{listing:ClaferPhoneZ3} corresponds to all instances of the specified clafer; the line ``Apps: [0,0,2,2]'' is shorthand for $Apps0 = 0, Apps1 = 0, Apps2 = 2, Apps3 = 2$. Since $Apps0 = Apps1 = 0$, they are both beneath $Phone0$, however $Apps2$ and $Apps3$ are not present in the model (since $Apps_{sentinel} = 2$). Since $Apps0\_ref = 0$, $Apps0$ must reference $SwApps0$. Furthermore, since $Apps2$ and $Apps3$ are not present in the model, $Apps2\_ref = Apps3\_ref = SwApps_{sentinel}$.
 
 \subsection{Bracketed Constraints}
-
-\begin{lstlisting}[language=clafer, caption=A more complex mobile phone specification in clafer., label={listing:ClaferMoreComplexSpec}]
-SwApps *
-	memory : int
-
-IPhoneApps -> SwApps *	
-	[ this.ref.memory < 15 ]
-AndroidApps -> SwApps *
-
-[ sum AndroidApps.ref.memory <= 100 ]	
-\end{lstlisting}%
 
 \section{Related and Previous Work}
 The work of Michel et. al. \cite{Michel2012} discusses how configuration problems can be encoded in SMT using TVL \cite{Classen2011} -- a text based feature modeling language similar to Clafer. TVL supports many of the components of feature modeling, including hierarchy, group cardinality, attributes, enums, and cross-tree constraints. However, several aspects of Clafer make the translation to an SMT solver much more difficult than that of TVL in \cite{Michel2012}. Most notably, Clafer supports many set constraints that make translation much more difficult. \\
