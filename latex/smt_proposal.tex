@@ -46,11 +46,11 @@ In Listing \ref{listing:ClaferPhone}  we show a specification of a mobile phone 
 %
 The star following  \texttt{SwApps} means that \texttt{Apps} refers to a set of software applications of cardinality greater than or equal to zero. 
 %
-Constraints are introduced in  square brackets. The constraint denoted by [sum Apps.ref.memory $\le 100$], specifies that the sum of the memory attribute of all \texttt{SwApps} for a given \texttt{Phone} instance must be lower than 100. Note that this constraint must be true of \textit{all} \texttt{Phone} instances, due to its level of indentation.    
+Constraints are introduced in  square brackets. The constraint denoted by [sum Apps.ref.memory $\le 100$], specifies that the sum of the \texttt{memory} attributes of all \texttt{SwApps} for a given \texttt{Phone} instance must be lower than 100. Note that this constraint must be true of \textit{all} \texttt{Phone} instances, due to its level of indentation.    
 %
 The dot character in ``Apps.ref''  in essence serves as a navigation operator, by performing a join between the set \texttt{Apps} and the automatically created set \texttt{Apps\_ref}. This operator is applied again to obtain a set of \texttt{memory} values. These values are then added together by the sum operator, and it is enforced that such sum must be less than 100.
 %
-Finally an unbounded number of \texttt{SwApps} are introduced by the clafer \texttt{SwApps} followed by a star. Each SwApps contain a \texttt{UID} and a \texttt{memory} attribute, both of which take integer values.  
+Finally an unbounded number of \texttt{SwApps} are introduced by the clafer \texttt{SwApps} followed by a star. Each SwApps contains a \texttt{UID} and a \texttt{memory} attribute, both of which take integer values.  
 %
 We should note that \texttt{SwApps} refers to both the type SwApps as well as defines a set of objects of type SwApps.
 
