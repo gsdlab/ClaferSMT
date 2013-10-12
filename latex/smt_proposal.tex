@@ -185,8 +185,8 @@ Most of the difficulty lies in creating constraints over the finite sets in such
 
 
 \begin{figure}[!t]
-\centering
-\begin{lstlisting}[language=clafer, caption=A more complex mobile phone specification in clafer., label={listing:ClaferMoreComplexSpec}]
+\begin{center}
+\begin{lstlisting}[language=clafer, caption=A more complex mobile phone specification in clafer., label={listing:ClaferMoreComplexSpec},  xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
 SwApps *
 	memory : int
 
@@ -195,7 +195,8 @@ IPhoneApps -> SwApps *
 AndroidApps -> SwApps *
 
 [ sum AndroidApps.ref.memory <= 100 ]	
-\end{lstlisting}%
+\end{lstlisting}
+\end{center}
 \end{figure}
 
 
