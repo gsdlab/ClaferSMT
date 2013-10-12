@@ -45,7 +45,9 @@ The \emph{phone} refers to a concrete clafer of cardinality between 1 and 2 (\eg
 %
 The star following  \emph{SwApps} means that \emph{Apps} refers to a set of software applications of cardinality greater than or equal to zero. 
 %
-Constraints are introduced in  square brackets, in this case a constraint is specified that the sum of the memory attribute of each SwApp must be lower than 100. 
+Constraints are introduced in  square brackets, in this case a constraint is specified that the sum of the memory attribute of each SwApp must be lower than 100.  This constraint is denoted by ``sum Apps.ref.memory $\le 100$''. 
+%
+The dot character in ``Apps.ref''  in essence serves as a navigation operator, by performing a join between the set Apps and the automatically created set Apps\_ref. This operator is applied again to obtain a set of memory values. This values are then added by the sum operator, and it is enforced that such sum must be less than 100.
 %
 Finally an unbounded number of SwApps are introduced by the clafer SwApps followed by a star. Each SwApps contain a UID and a memory attribute, both of which take integer values.  
 %
