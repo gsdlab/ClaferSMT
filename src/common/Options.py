@@ -23,7 +23,7 @@ from test.positive import books_tutorial, \
 
 GLOBAL_SCOPE = 5 #this obviously has to change
 
-MODE = Common.TEST # Common.[NORMAL | DEBUG | TEST]
+MODE = Common.NORMAL # Common.[NORMAL | DEBUG | TEST]
 NUM_INSTANCES = -1 # -1 to produce all instances
 PROFILING = False # True to output the translation time, and time to get first model
 GET_ISOMORPHISM_CONSTRAINT= False

@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -10,12 +8,12 @@
     
     <title>common Package &mdash; ClaferZ3 0.3.3 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '0.3.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -48,111 +46,8 @@
             
   <div class="section" id="common-package">
 <h1>common Package<a class="headerlink" href="#common-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-common.ClaferSort">
-<span id="clafersort-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">ClaferSort</span></tt> Module<a class="headerlink" href="#module-common.ClaferSort" title="Permalink to this headline">¶</a></h2>
-<p>Created on Apr 29, 2013</p>
-<p>&#64;author: ezulkosk</p>
-<dl class="class">
-<dt id="common.ClaferSort.ClaferSort">
-<em class="property">class </em><tt class="descclassname">common.ClaferSort.</tt><tt class="descname">ClaferSort</tt><big>(</big><em>element</em>, <em>z3</em>, <em>stack</em><big>)</big><a class="headerlink" href="#common.ClaferSort.ClaferSort" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
-<li><strong>element</strong> &#8211; The IR clafer.</li>
-<li><strong>z3</strong> &#8211; The Z3Instance.</li>
-<li><strong>parentStack</strong> &#8211; Used to determine the parent of the clafer, and if the clafer is top level.</li>
-<li><strong>isTopLevel</strong> &#8211; True if the clafer is at the top level of indentation.</li>
-<li><strong>fields</strong> &#8211; The direct subclafer ClaferSorts.</li>
-<li><strong>constraints</strong> &#8211; The set of Z3 constraints associated with this clafer.</li>
-<li><strong>summs</strong> &#8211; List containing useful information for processing cardinality constraints.</li>
-<li><strong>numInstances</strong> &#8211; The number of Z3-Int instances used to represent this Clafer.</li>
-<li><strong>instances</strong> &#8211; List of Z3-Ints representing the clafer. 
-An instance is <em>on</em> if it is not equal to the number of parentInstances.</li>
-<li><strong>refs</strong> &#8211; List of Z3-ints representing the reference clafers that instances of this clafer point.</li>
-<li><strong>subs</strong> &#8211; The list of ClaferSorts that directly inherit from this clafer.</li>
-<li><strong>indexInSuper</strong> &#8211; Used to map a subinstance to the correct instances in the super.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>Class representing a clafer in Z3 constraints. Clafers are represented as a list of 
-Z3-Int with a length equal to its global cardinality (for now). 
-The integers in the list represent which parent instance the corresponding instance
-points to. The range of the integers in the list is in [0,parentInstances]. An instance in this 
-list is considered <em>on</em> (that is, will appear in the outputted model), if it is not equal
-to parentInstances. If a clafer is top level, then an instance is on if it equals 0, else it is
-off. For example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">A</span> <span class="mf">1.</span><span class="o">.</span><span class="mi">2</span> <span class="o">//</span><span class="n">A</span> <span class="n">has</span> <span class="k">global</span> <span class="n">cardinality</span> <span class="n">of</span> <span class="mi">2</span>
-<span class="gp">&gt;&gt;&gt; </span>   <span class="n">B</span> <span class="mf">1.</span><span class="o">.</span><span class="mi">3</span> <span class="o">//</span><span class="n">B</span> <span class="n">has</span> <span class="k">global</span> <span class="n">cardinality</span> <span class="mi">6</span>
-<span class="gp">&gt;&gt;&gt; </span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Instances</span> <span class="k">for</span> <span class="n">A</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Instances</span> <span class="k">for</span> <span class="n">B</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Corresponding</span> <span class="n">output</span><span class="p">:</span>
-<span class="gp">&gt;&gt;&gt; </span>  <span class="n">A0</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">B0</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">B1</span>
-</pre></div>
-</div>
-<p>Instance A0 is on because the first instance of A is 0. Instances B0 and B1 fall under
-A0 because the first and second instances are 0, that is, their parent pointers are 0.
-Instances B2-B5 are off because parentInstances for B is 2 (since there are 2 A&#8217;s).</p>
-<dl class="method">
-<dt id="common.ClaferSort.ClaferSort.addField">
-<tt class="descname">addField</tt><big>(</big><em>claferSort</em><big>)</big><a class="headerlink" href="#common.ClaferSort.ClaferSort.addField" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.ClaferSort.ClaferSort.addGroupCardConstraints">
-<tt class="descname">addGroupCardConstraints</tt><big>(</big><big>)</big><a class="headerlink" href="#common.ClaferSort.ClaferSort.addGroupCardConstraints" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.ClaferSort.ClaferSort.addRef">
-<tt class="descname">addRef</tt><big>(</big><big>)</big><a class="headerlink" href="#common.ClaferSort.ClaferSort.addRef" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.ClaferSort.ClaferSort.addRefConstraints">
-<tt class="descname">addRefConstraints</tt><big>(</big><big>)</big><a class="headerlink" href="#common.ClaferSort.ClaferSort.addRefConstraints" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.ClaferSort.ClaferSort.addSubSort">
-<tt class="descname">addSubSort</tt><big>(</big><em>sub</em><big>)</big><a class="headerlink" href="#common.ClaferSort.ClaferSort.addSubSort" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.ClaferSort.ClaferSort.checkSuperAndRef">
-<tt class="descname">checkSuperAndRef</tt><big>(</big><big>)</big><a class="headerlink" href="#common.ClaferSort.ClaferSort.checkSuperAndRef" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.ClaferSort.ClaferSort.createCardinalityConstraints">
-<tt class="descname">createCardinalityConstraints</tt><big>(</big><big>)</big><a class="headerlink" href="#common.ClaferSort.ClaferSort.createCardinalityConstraints" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.ClaferSort.ClaferSort.createInstancesConstraintsAndFunctions">
-<tt class="descname">createInstancesConstraintsAndFunctions</tt><big>(</big><big>)</big><a class="headerlink" href="#common.ClaferSort.ClaferSort.createInstancesConstraintsAndFunctions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.ClaferSort.ClaferSort.maskForOne">
-<tt class="descname">maskForOne</tt><big>(</big><em>integer</em><big>)</big><a class="headerlink" href="#common.ClaferSort.ClaferSort.maskForOne" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.ClaferSort.ClaferSort.maskForThis">
-<tt class="descname">maskForThis</tt><big>(</big><big>)</big><a class="headerlink" href="#common.ClaferSort.ClaferSort.maskForThis" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<div class="section" id="clafersort-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">ClaferSort</span></tt> Module<a class="headerlink" href="#clafersort-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-common.Clock">
 <span id="clock-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Clock</span></tt> Module<a class="headerlink" href="#module-common.Clock" title="Permalink to this headline">¶</a></h2>
@@ -161,8 +56,7 @@ Instances B2-B5 are off because parentInstances for B is 2 (since there are 2 A&
 <dl class="class">
 <dt id="common.Clock.Clock">
 <em class="property">class </em><tt class="descclassname">common.Clock.</tt><tt class="descname">Clock</tt><a class="headerlink" href="#common.Clock.Clock" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -280,126 +174,8 @@ Instances B2-B5 are off because parentInstances for B is 2 (since there are 2 A&
 <p>Created on Oct 6, 2013</p>
 <p>&#64;author: ezulkosk</p>
 </div>
-<div class="section" id="module-common.Z3Instance">
-<span id="z3instance-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Z3Instance</span></tt> Module<a class="headerlink" href="#module-common.Z3Instance" title="Permalink to this headline">¶</a></h2>
-<p>Created on Apr 30, 2013</p>
-<p>&#64;author: ezulkosk</p>
-<dl class="class">
-<dt id="common.Z3Instance.Z3Instance">
-<em class="property">class </em><tt class="descclassname">common.Z3Instance.</tt><tt class="descname">Z3Instance</tt><big>(</big><em>module</em><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>module</strong> &#8211; The Clafer AST</td>
-</tr>
-</tbody>
-</table>
-<p>Stores and instantiates all necessary constraints for the ClaferZ3 model.</p>
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.addSort">
-<tt class="descname">addSort</tt><big>(</big><em>sortID</em>, <em>sort</em><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.addSort" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sortID</strong> (<em>str</em>) &#8211; The uid of the Clafer</li>
-<li><strong>sort</strong> (<a class="reference internal" href="#module-common.ClaferSort" title="common.ClaferSort"><tt class="xref py py-mod docutils literal"><span class="pre">common.ClaferSort</span></tt></a>) &#8211; A ClaferSort.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.assertConstraints">
-<tt class="descname">assertConstraints</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.assertConstraints" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.createCardinalityConstraints">
-<tt class="descname">createCardinalityConstraints</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.createCardinalityConstraints" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.createCommonFunctions">
-<tt class="descname">createCommonFunctions</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.createCommonFunctions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.createGroupCardConstraints">
-<tt class="descname">createGroupCardConstraints</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.createGroupCardConstraints" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.createRefConstraints">
-<tt class="descname">createRefConstraints</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.createRefConstraints" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.getSort">
-<tt class="descname">getSort</tt><big>(</big><em>uid</em><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.getSort" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.getSorts">
-<tt class="descname">getSorts</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.getSorts" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">z3_sorts</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.get_models">
-<tt class="descname">get_models</tt><big>(</big><em>desired_number_of_models</em><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.get_models" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.mapColonClafers">
-<tt class="descname">mapColonClafers</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.mapColonClafers" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.printConstraints">
-<tt class="descname">printConstraints</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.printConstraints" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.printVars">
-<tt class="descname">printVars</tt><big>(</big><em>model</em><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.printVars" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.run">
-<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.run" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>module</strong> (<em>Module</em>) &#8211; The Clafer AST</td>
-</tr>
-</tbody>
-</table>
-<p>Converts Clafer constraints to Z3 constraints and computes models.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="common.Z3Instance.Z3Instance.setOptions">
-<tt class="descname">setOptions</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Z3Instance.Z3Instance.setOptions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets basic options for the Z3 solver.
-Adds additional options for better pretty-printing, if debugging.</p>
-</dd></dl>
-
-</dd></dl>
-
+<div class="section" id="z3instance-module">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">Z3Instance</span></tt> Module<a class="headerlink" href="#z3instance-module" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -412,11 +188,11 @@ Adds additional options for better pretty-printing, if debugging.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">common Package</a><ul>
-<li><a class="reference internal" href="#module-common.ClaferSort"><tt class="docutils literal"><span class="pre">ClaferSort</span></tt> Module</a></li>
+<li><a class="reference internal" href="#clafersort-module"><tt class="docutils literal"><span class="pre">ClaferSort</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-common.Clock"><tt class="docutils literal"><span class="pre">Clock</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-common.Common"><tt class="docutils literal"><span class="pre">Common</span></tt> Module</a></li>
 <li><a class="reference internal" href="#module-common.Options"><tt class="docutils literal"><span class="pre">Options</span></tt> Module</a></li>
-<li><a class="reference internal" href="#module-common.Z3Instance"><tt class="docutils literal"><span class="pre">Z3Instance</span></tt> Module</a></li>
+<li><a class="reference internal" href="#z3instance-module"><tt class="docutils literal"><span class="pre">Z3Instance</span></tt> Module</a></li>
 </ul>
 </li>
 </ul>
@@ -457,7 +233,7 @@ Adds additional options for better pretty-printing, if debugging.</p>
     </div>
     <div class="footer">
         &copy; Copyright 2013, Ed Zulkoski.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
     </div>
   </body>
 </html>

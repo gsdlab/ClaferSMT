@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -10,12 +8,12 @@
     
     <title>ast Package &mdash; ClaferZ3 0.3.3 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '0.3.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -55,7 +53,7 @@
 <dl class="class">
 <dt id="ast.Clafer.Clafer">
 <em class="property">class </em><tt class="descclassname">ast.Clafer.</tt><tt class="descname">Clafer</tt><big>(</big><em>pos</em>, <em>isAbstract</em>, <em>gcard</em>, <em>ident</em>, <em>uid</em>, <em>my_supers</em>, <em>card</em>, <em>glCard</em><big>)</big><a class="headerlink" href="#ast.Clafer.Clafer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>All variables analogous to those described in IntClafer.hs</p>
 <dl class="method">
 <dt id="ast.Clafer.Clafer.addElement">
@@ -94,7 +92,7 @@
 <dl class="class">
 <dt id="ast.ClaferId.ClaferId">
 <em class="property">class </em><tt class="descclassname">ast.ClaferId.</tt><tt class="descname">ClaferId</tt><big>(</big><em>moduleName</em>, <em>my_id</em>, <em>isTop</em><big>)</big><a class="headerlink" href="#ast.ClaferId.ClaferId" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>All variables analogous to those described in IntClafer.hs</p>
 <p>claferSort points to its sort //Z3Clafer</p>
 <dl class="method">
@@ -112,7 +110,7 @@
 <dl class="class">
 <dt id="ast.DeclPExp.DeclPExp">
 <em class="property">class </em><tt class="descclassname">ast.DeclPExp.</tt><tt class="descname">DeclPExp</tt><big>(</big><em>quantifier</em>, <em>declaration</em>, <em>bodyParentExp</em><big>)</big><a class="headerlink" href="#ast.DeclPExp.DeclPExp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>All variables analogous to those described in IntClafer.hs</p>
 </dd></dl>
 
@@ -124,7 +122,7 @@
 <dl class="class">
 <dt id="ast.Declaration.Declaration">
 <em class="property">class </em><tt class="descclassname">ast.Declaration.</tt><tt class="descname">Declaration</tt><big>(</big><em>isDisjunct</em>, <em>localDeclarations</em>, <em>body</em><big>)</big><a class="headerlink" href="#ast.Declaration.Declaration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>All variables analogous to those described in IntClafer.hs</p>
 <dl class="method">
 <dt id="ast.Declaration.Declaration.toString">
@@ -141,7 +139,7 @@
 <dl class="class">
 <dt id="ast.DoubleLiteral.DoubleLiteral">
 <em class="property">class </em><tt class="descclassname">ast.DoubleLiteral.</tt><tt class="descname">DoubleLiteral</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#ast.DoubleLiteral.DoubleLiteral" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>All variables analogous to those described in IntClafer.hs</p>
 </dd></dl>
 
@@ -153,7 +151,7 @@
 <dl class="class">
 <dt id="ast.Exp.Exp">
 <em class="property">class </em><tt class="descclassname">ast.Exp.</tt><tt class="descname">Exp</tt><big>(</big><em>expType</em>, <em>my_type</em>, <em>parentId</em>, <em>pos</em>, <em>iExpType</em>, <em>iExp</em><big>)</big><a class="headerlink" href="#ast.Exp.Exp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>All variables analogous to those described in IntClafer.hs</p>
 <dl class="method">
 <dt id="ast.Exp.Exp.toString">
@@ -170,7 +168,7 @@
 <dl class="class">
 <dt id="ast.FunExp.FunExp">
 <em class="property">class </em><tt class="descclassname">ast.FunExp.</tt><tt class="descname">FunExp</tt><big>(</big><em>operation</em>, <em>elements</em><big>)</big><a class="headerlink" href="#ast.FunExp.FunExp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>All variables analogous to those described in IntClafer.hs</p>
 </dd></dl>
 
@@ -182,7 +180,7 @@
 <dl class="class">
 <dt id="ast.GCard.GCard">
 <em class="property">class </em><tt class="descclassname">ast.GCard.</tt><tt class="descname">GCard</tt><big>(</big><em>isKeyword</em>, <em>interval</em><big>)</big><a class="headerlink" href="#ast.GCard.GCard" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>All variables analogous to those described in IntClafer.hs</p>
 <dl class="method">
 <dt id="ast.GCard.GCard.toString">
@@ -199,7 +197,7 @@
 <dl class="class">
 <dt id="ast.Goal.Goal">
 <em class="property">class </em><tt class="descclassname">ast.Goal.</tt><tt class="descname">Goal</tt><big>(</big><em>isMaximize</em>, <em>exp</em><big>)</big><a class="headerlink" href="#ast.Goal.Goal" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>All variables analogous to those described in IntClafer.hs</p>
 <dl class="method">
 <dt id="ast.Goal.Goal.toString">
@@ -216,7 +214,7 @@
 <dl class="class">
 <dt id="ast.IRConstraint.IRConstraint">
 <em class="property">class </em><tt class="descclassname">ast.IRConstraint.</tt><tt class="descname">IRConstraint</tt><big>(</big><em>isHard</em>, <em>exp</em><big>)</big><a class="headerlink" href="#ast.IRConstraint.IRConstraint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>All variables analogous to those described in IntClafer.hs</p>
 </dd></dl>
 
@@ -228,7 +226,7 @@
 <dl class="class">
 <dt id="ast.IntegerLiteral.IntegerLiteral">
 <em class="property">class </em><tt class="descclassname">ast.IntegerLiteral.</tt><tt class="descname">IntegerLiteral</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#ast.IntegerLiteral.IntegerLiteral" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>All variables analogous to those described in IntClafer.hs</p>
 </dd></dl>
 
@@ -240,7 +238,7 @@
 <dl class="class">
 <dt id="ast.LocalDeclaration.LocalDeclaration">
 <em class="property">class </em><tt class="descclassname">ast.LocalDeclaration.</tt><tt class="descname">LocalDeclaration</tt><big>(</big><em>element</em><big>)</big><a class="headerlink" href="#ast.LocalDeclaration.LocalDeclaration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>All variables analogous to those described in IntClafer.hs</p>
 </dd></dl>
 
@@ -252,7 +250,7 @@
 <dl class="class">
 <dt id="ast.Module.Module">
 <em class="property">class </em><tt class="descclassname">ast.Module.</tt><tt class="descname">Module</tt><big>(</big><em>mName</em><big>)</big><a class="headerlink" href="#ast.Module.Module" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>elements([]): the top level clafers/constraints/goals
 mName(str): module name</p>
 <dl class="method">
@@ -280,7 +278,7 @@ mName(str): module name</p>
 <dl class="class">
 <dt id="ast.StringLiteral.StringLiteral">
 <em class="property">class </em><tt class="descclassname">ast.StringLiteral.</tt><tt class="descname">StringLiteral</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#ast.StringLiteral.StringLiteral" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>All variables analogous to those described in IntClafer.hs</p>
 </dd></dl>
 
@@ -292,7 +290,7 @@ mName(str): module name</p>
 <dl class="class">
 <dt id="ast.Supers.Supers">
 <em class="property">class </em><tt class="descclassname">ast.Supers.</tt><tt class="descname">Supers</tt><big>(</big><em>isOverlapping</em>, <em>elements</em><big>)</big><a class="headerlink" href="#ast.Supers.Supers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>All variables analogous to those described in IntClafer.hs</p>
 </dd></dl>
 
@@ -363,7 +361,7 @@ mName(str): module name</p>
     </div>
     <div class="footer">
         &copy; Copyright 2013, Ed Zulkoski.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
     </div>
   </body>
 </html>

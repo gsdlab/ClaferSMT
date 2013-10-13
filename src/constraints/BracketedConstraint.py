@@ -112,7 +112,7 @@ def createJoinFunction(leftSort, rightSort, linstances, rinstances, zeroedVal):
     joinFunction = Function("join" + str(Common.getFunctionUID()) + ":" + str(leftSort) , IntSort(), IntSort())
     joinHelperFunction = Function("joinhelper" + str(Common.getFunctionUID()) + ":" + str(leftSort) , IntSort(), IntSort())
     constraints = []
-    for i in range(len(linstances)):
+    for i in range( len(linstances)):
         constraints.append(joinHelperFunction(i) == linstances[i])
     constraints.append(joinHelperFunction(len(linstances)) == leftSort.parentInstances)
     for i in range(len(rinstances)):  #rinstance[i] in joinHelperFunction arg
