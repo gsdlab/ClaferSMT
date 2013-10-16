@@ -149,7 +149,7 @@ class Z3Instance(object):
             return
         for i in self.z3_sorts.values():
             i.constraints.print()
-        #self.join_constraints.print()
+        self.join_constraints.print()
         for i in self.z3_bracketed_constraints:
             i.print()
         

@@ -11,6 +11,7 @@ from test import TestClafers, bracketedconstraint_this, multiple_joins, \
     phone_feature_model, higher_inheritance, this_integer_relation, equal_references
 from z3 import get_version_string
 import sys
+import cProfile
 
 
 
@@ -32,7 +33,9 @@ def main(args):
         
         z3 = Z3Instance.Z3Instance(module)
         z3.run()
+        #z3.run()
+        
         
    
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    cProfile.run("main(sys.argv[1:])", sort=1)

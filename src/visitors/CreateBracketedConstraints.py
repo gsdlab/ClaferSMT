@@ -4,8 +4,9 @@ Created on Mar 26, 2013
 @author: ezulkosk
 '''
 
+from common.Common import mAnd
 from constraints import BracketedConstraint
-from constraints.BracketedConstraint import ExprArg, IntArg
+from constraints.BracketedConstraint import ExprArg, IntArg, BoolArg
 from visitors import VisitorTemplate
 from z3 import And
 import itertools
@@ -64,20 +65,24 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         if(self.inConstraint):
             #XXX
             if element.id == "this":
-                instances = element.claferSort.maskForThis()
-                self.currentConstraint.addArg(ExprArg([element.claferSort], [element.claferSort], instances))
-                self.currentConstraint.this = element.claferSort
+                exprArgList = []
+                for i in range(element.claferSort.numInstances):
+                    exprArgList.append(ExprArg([element.claferSort], 
+                                               [(element.claferSort, [True if j == i else False for j in range(element.claferSort.numInstances)])],
+                                               [element.claferSort.instances[i]]))
+                self.currentConstraint.addArg(exprArgList)
             elif element.id == "ref":
-                self.currentConstraint.addArg(ExprArg(["ref"], ["ref"], ["ref"]))
-            #XXX
+                self.currentConstraint.addArg([ExprArg(["ref"], ["ref"], ["ref"])])
             elif element.id == "parent":
-                self.currentConstraint.addArg(ExprArg(["parent"], ["parent"], ["parent"]))
+                self.currentConstraint.addArg([ExprArg(["parent"], ["parent"], ["parent"])])
             elif element.claferSort:  
-                self.currentConstraint.addArg(ExprArg([element.claferSort], [element.claferSort], [element.claferSort.instances[:]]))
+                self.currentConstraint.addArg([ExprArg([element.claferSort], 
+                                                      [(element.claferSort, [True for _ in range(element.claferSort.numInstances)])], 
+                                                      element.claferSort.instances[:])])
             else:
                 #localdecl case
                 expr = self.currentConstraint.locals[element.id]
-                expr = expr.modifyInstances(expr.instances[:])
+                expr = [expr[i].modifyInstances(expr[i].instances[:]) for i in range(len(expr))]
                 self.currentConstraint.addArg(expr)
    
     def constraintVisit(self, element):
@@ -94,65 +99,74 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         if(self.inConstraint):
             self.currentConstraint.addOperator(element.operation)
            
-    #assume their is only one sort at this time
-    def createAllLocalsCombinations(self, localDecls, sort, instances, isDisjunct):
-        ranges = [range(sort.numInstances) for i in localDecls]
-        newinstances = []
-        ifconstraints = []
-        for h in instances:
-            integer_combinations = itertools.product(*ranges)
-            innerinstances = []
-            innerIfConstraints = []
-            for i in integer_combinations: 
-                list_of_ints = list(i)
-                if(isDisjunct and (len(set(list_of_ints)) != len(list_of_ints))):
-                    continue
-                innerinstances.append([[h[j] if j == k  else sort.parentInstances for j in range(len(h))] for k in list_of_ints])
-                innerIfConstraints.append(And(*[h[k] != sort.parentInstances for k in list_of_ints]))
-            newinstances.append(innerinstances[:])
-            ifconstraints.append(innerIfConstraints)
-        return (newinstances, ifconstraints)
+    #assume their is only one sort at this time, which is true of my old version of clafer
+    def createAllLocalsCombinations(self, localDecls, exprArg, isDisjunct):
+        (sort, mask) = exprArg.instanceSorts[0]
+        ranges = [range(len(exprArg.instances)) for i in localDecls]
+        localInstances = []
+        ifConstraints = []
+        
+        integer_combinations = itertools.product(*ranges)
+        for i in integer_combinations: 
+            list_of_ints = list(i)
+            if isDisjunct and (len(set(list_of_ints)) != len(list_of_ints)):
+                continue
+            newMasks = []
+            for j in list_of_ints:
+                count = 0
+                index = 0
+                for k in mask:
+                    if k:
+                        if j == count:
+                            newMasks.append([True if l == index else False for l in range(len(mask))])
+                        count = count + 1
+                    index = index + 1
+            localInstances.append([ExprArg(exprArg.joinSorts[:], [(sort, newMasks[j])], [exprArg.instances[list_of_ints[j]]]) for j in range(len(list_of_ints))])
+            ifConstraints.append(mAnd(*[exprArg.instances[j] != sort.parentInstances for j in list_of_ints]))
+            
+        return (localInstances, ifConstraints)
      
     #handle local declarations (some, all, lone, one, no) 
     #not fully implemented
     def declpexpVisit(self, element):
-        #visitors.Visitor.visit(self, element.declaration)
-        #needs to be more robust, but need example programs.
         num_args = 0
         if element.declaration:
-            #sort = []#element.declaration.body.iExp[0].claferSort
             visitors.Visitor.visit(self, element.declaration.body.iExp[0])
-            #([sort], instances) = self.currentConstraint.stack.pop()
             arg = self.currentConstraint.stack.pop()
             isDisjunct = element.declaration.isDisjunct
+            #XXX
             (combinations, ifconstraints) = self.createAllLocalsCombinations(element.declaration.localDeclarations, 
-                                                                             arg.instanceSorts[0], 
-                                                                             arg.instances, 
+                                                                             arg[0],  
                                                                              isDisjunct)
+            if len(combinations) == 0:
+                if element.quantifier == "Some":
+                    self.currentConstraint.stack.append([BoolArg([False])])
+                elif element.quantifier == "All":
+                    self.currentConstraint.stack.append([BoolArg([True])])
+                return
             num_args = len(combinations[0])
-            num_quantifiers = len(combinations)
+            num_combinations = len(combinations)
+            num_quantifiers = 1#len(combinations)
             for i in combinations:
-                for j in i:
-                    for k in range(len(j)):
-                        self.currentConstraint.addLocal(element.declaration.localDeclarations[k].element
-                                                                        , ExprArg(arg.joinSorts[:]
-                                                                                  , arg.instanceSorts[:]
-                                                                                  , [j[k]]))
-                    visitors.Visitor.visit(self, element.bodyParentExp)
+                for j in range(num_args):
+                    self.currentConstraint.addLocal(element.declaration.localDeclarations[j].element, [i[j]])
+                visitors.Visitor.visit(self, element.bodyParentExp)
 
         else:
             visitors.Visitor.visit(self, element.bodyParentExp)
             num_args = 1
             num_quantifiers = 1
+            num_combinations = 1
             ifconstraints = []
-        self.currentConstraint.addQuantifier(element.quantifier, num_args,num_quantifiers, ifconstraints)
+        
+        self.currentConstraint.addQuantifier(element.quantifier, num_args,num_quantifiers, num_combinations, ifconstraints)
     
     def localdeclarationVisit(self, element):
         pass
     
     def integerliteralVisit(self, element):
         if(self.inConstraint):
-            self.currentConstraint.addArg(IntArg([[element.value]]))
+            self.currentConstraint.addArg([IntArg([element.value])])
         
     def doubleliteralVisit(self, element):
         return element

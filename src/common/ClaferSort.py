@@ -69,7 +69,6 @@ class  ClaferSort(object):
         self.indexInSuper = 0
         self.currentSubIndex = 0
         
-                
         #gets the upper card bound of the parent clafer
         if not self.parentStack:
             self.parent = None
@@ -90,6 +89,24 @@ class  ClaferSort(object):
         self.createInstancesConstraintsAndFunctions()
     
     
+    def getUnmaskedInstances(self, boolArray):
+        '''
+        Used in tandem with the new approach to splits and joins
+        no use yet
+        '''
+        pass
+    
+    def getUnmaskedCount(self, boolArray):
+        '''
+        Used in tandem with the new approach to splits and joins
+        '''
+        count = 0
+        for i in boolArray:
+            if i:
+                count = count + 1
+        return count        
+    
+     
     def addRefConstraints(self):
         self.checkSuperAndRef()
         if(self.refSort):

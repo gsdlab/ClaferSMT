@@ -3,7 +3,8 @@ Created on Apr 28, 2013
 
 @author: ezulkosk
 '''
-from z3 import If, Function, BoolSort, IntSort
+from z3 import If, Function, BoolSort, IntSort, And, Or
+import sys
 
 NORMAL = 0
 DEBUG = 1
@@ -12,6 +13,43 @@ MODE = NORMAL
 
 FUNCTION_ID = 0 
 CONSTRAINT_ID = 0
+
+def mAnd(*args):
+    '''
+    Helper Function to simplify formulas passed to Z3, but mostly to make debugging output more comprehensible.
+    '''
+    newArgs = []
+    for i in args:
+        if i:
+            newArgs.append(i)
+    if len(newArgs) == 0:
+        return True
+    elif len(newArgs) == 1:
+        return newArgs[0]
+    else:
+        return And(*newArgs)
+
+def mOr(*args):
+    '''
+    Similar to mAnd
+    '''
+    newArgs = []
+    for i in args:
+        if i:
+            newArgs.append(i)
+    if len(newArgs) == 0:
+        return False
+    elif len(newArgs) == 1:
+        return newArgs[0]
+    else:
+        return Or(*newArgs)
+
+def getInstancesFromMask(sort, mask, currInstances):
+    newInstances = []
+    for i in range(sort.numInstances):
+        if mask[i]:
+            newInstances.append(currInstances.pop(0))
+    return newInstances
 
 def debug_print(string):
     if(MODE == DEBUG):

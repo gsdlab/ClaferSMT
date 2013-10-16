@@ -86,11 +86,11 @@ class ClaferConstraints(Constraints):
     
     def print(self):
         constraints = [
-                       #self.instance_constraints,
-                       #self.card_constraints,
-                       #self.group_card_constraints,
-                       #self.inheritance_constraints,
-                       #self.ref_constraints
+                       self.instance_constraints,
+                       self.card_constraints,
+                       self.group_card_constraints,
+                       self.inheritance_constraints,
+                       self.ref_constraints
                        ]   
         for i in constraints:
             for j in i:
