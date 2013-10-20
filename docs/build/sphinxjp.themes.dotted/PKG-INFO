@@ -1,0 +1,73 @@
+Metadata-Version: 1.0
+Name: sphinxjp.themes.dotted
+Version: 0.1.1
+Summary: A sphinx theme for Dotted style.
+Home-page: https://github.com/shkumagai/sphinxjp.themes.dotted
+Author: Shoji KUMAGAI
+Author-email: take dot this dot 2 dot your dot grave at gmail dot com
+License: MIT
+Description: Dotted style theme for Sphinx.
+        
+        Features
+        ========
+        * provide ``dotted`` theme for render HTML document.
+        
+        
+        Set up
+        ======
+        Make environment with easy_install::
+        
+            $ easy_install sphinxjp.themes.dotted
+        
+        
+        Convert Usage
+        =============
+        setup conf.py with::
+        
+            extensions = ['sphinxjp.themecore']
+            html_theme = 'dotted'
+        
+        and run::
+        
+            $ make html
+        
+        
+        Requirement
+        ===========
+        * Python 2.4 or later (not support 3.x)
+        * Sphinx 1.0.x or later.
+        
+        
+        License
+        =======
+        Licensed under the `MIT license <http://www.opensource.org/licenses/mit-license.php>`_ .
+        See the LICENSE file for specific terms.
+        
+        AUTHORS
+        =======
+        
+        Sphinx template, css, packaging
+        -------------------------------
+        * Shoji KUMAGAI <take.this.2.your.grave at gmail.com> sphinx-users.jp
+        
+        History
+        =======
+        
+        0.1.1 (Nov 09, 2011)
+        ---------------------
+        * add new functionalities
+           * toggle to display sidebar or not
+           * toggle to put sidebar on right side or not
+        
+        0.1.0 (Oct 15, 2011)
+        ---------------------
+        * first release
+        
+Keywords: sphinx,reStructuredText,theme
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Documentation
+Classifier: Topic :: Text Processing :: Markup

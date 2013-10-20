@@ -1,0 +1,12 @@
+History
+=======
+
+0.1.1 (Nov 09, 2011)
+---------------------
+* add new functionalities
+   * toggle to display sidebar or not
+   * toggle to put sidebar on right side or not
+
+0.1.0 (Oct 15, 2011)
+---------------------
+* first release

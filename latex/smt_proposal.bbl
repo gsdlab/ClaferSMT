@@ -1,0 +1,33 @@
+\begin{thebibliography}{1}
+
+\bibitem{BakClaferSLE2010}
+K.~Bak, K.~Czarnecki, and A.~Wasowski.
+\newblock Feature and meta-models in clafer: Mixed, specialized, and coupled.
+\newblock In {\em 3rd International Conference on Software Language
+  Engineering}, Eindhoven, The Netherlands, October 2010.
+
+\bibitem{Classen2011}
+A.~Classen, Q.~Boucher, and P.~Heymans.
+\newblock {A text-based approach to feature modelling: Syntax and semantics of
+  TVL}.
+\newblock {\em Science of Computer Programming}, 76(12):1130--1143, Dec. 2011.
+
+\bibitem{Michel2012}
+R.~Michel, A.~Hubaux, V.~Ganesh, and P.~Heymans.
+\newblock {An SMT-based Approach to Automated Configuration}.
+\newblock {\em SMT Workshop 2012 10th \ldots}, pages 107--117, 2012.
+
+\bibitem{Olaechea2013}
+R.~Olaechea.
+\newblock {Comparison of Exact and Approximate Multi-Objective Optimization for
+  Software Product Lines}.
+\newblock Master's thesis, University of Waterloo, 2013.
+
+\bibitem{Saadatpanah2012}
+P.~Saadatpanah, M.~Famelis, J.~Gorzny, N.~Robinson, M.~Chechik, and R.~Salay.
+\newblock {Comparing the effectiveness of reasoning formalisms for partial
+  models}.
+\newblock {\em Proceedings of the Workshop on Model-Driven Engineering,
+  Verification and Validation - MoDeVVa '12}, 1(c):41--46, 2012.
+
+\end{thebibliography}

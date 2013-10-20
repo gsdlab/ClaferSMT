@@ -1,0 +1,100 @@
+Metadata-Version: 1.1
+Name: sphinxjp.themes.bizstyle
+Version: 0.1.5
+Summary: A sphinx theme for Business style Documentation.
+Home-page: https://bitbucket.org/shkumagai/sphinxjp.themes.bizstyle
+Author: Shoji KUMAGAI
+Author-email: take dot this dot 2 dot your dot grave at gmail dot com
+License: MIT
+Description: Business style documentation theme for Sphinx.
+        
+        Features
+        ========
+        * provide ``bizstyle`` theme for render HTML document.
+        
+        
+        Set up
+        ======
+        Make environment with easy_install::
+        
+            $ easy_install sphinxjp.themes.bizstyle
+        
+        
+        Convert Usage
+        =============
+        setup conf.py with::
+        
+            extensions = ['sphinxjp.themecore']
+            html_theme = 'bizstyle'
+        
+        and run::
+        
+            $ make html
+        
+        
+        Requirement
+        ===========
+        * Python 2.4 or later (not support 3.x)
+        * Sphinx 1.0.x or later.
+        
+        
+        License
+        =======
+        Licensed under the `MIT license <http://www.opensource.org/licenses/mit-license.php>`_ .
+        See the LICENSE file for specific terms.
+        
+        AUTHORS
+        =======
+        
+        Sphinx template, CSS, JavaScript and Packaging
+        ----------------------------------------------
+        * Shoji KUMAGAI <take.this.2.your.grave at gmail.com> sphinx-users.jp
+        
+        
+        Report bugs, typos and pull requests
+        ------------------------------------
+        * @shimizukawa
+        * @tokakushi
+        * @nanimosa
+        * @hokorobi
+        
+        Thanks to your contribution!
+        
+        History
+        =======
+        
+        0.1.5 (May 27, 2012)
+        ---------------------
+        * merge pull request.
+          thanks you hokorobi!
+        
+        0.1.4 (May 24, 2012)
+        ---------------------
+        * add support for mobile devices.
+        * fix typo, thank you nanimosa!
+        
+        0.1.3 (Aug 30, 2011)
+        ---------------------
+        * modify styles for 'Admonitions'.
+        
+        0.1.2 (Jul 26, 2011)
+        ---------------------
+        * add 2 background images to package.
+        
+        0.1.1 (Jul  6, 2011)
+        ---------------------
+        * with the modification of the 'sphinxjp.themecore' package, modify the relevant sections.
+          thank you shimizukawa, togakushi!!
+        
+        0.1.0 (Mar 27, 2011)
+        ---------------------
+        * first release
+        
+Keywords: sphinx,reStructuredText,theme
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Documentation
+Classifier: Topic :: Text Processing :: Markup
