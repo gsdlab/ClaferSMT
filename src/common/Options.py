@@ -26,13 +26,14 @@ GLOBAL_SCOPE = 5 #this obviously has to change
 MODE = Common.NORMAL   # Common.[NORMAL | DEBUG | TEST]
 NUM_INSTANCES = 3 # -1 to produce all instances
 PROFILING = True # True to output the translation time, and time to get first model
+CPROFILING = False #invokes the standard python profiling method (see Z3Run.py)
 GET_ISOMORPHISM_CONSTRAINT = False
 
 MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
 TEST_SET = MY_TESTS 
 
-#MODULE = bracketedconstraint_this.getModule()
+MODULE = bracketedconstraint_this.getModule()
 #MODULE = multiple_joins.getModule()
 #MODULE = this_dot_parent.getModule()
 #MODULE = arithmetic.getModule()
@@ -42,7 +43,7 @@ TEST_SET = MY_TESTS
 #MODULE = simple_abstract.getModule()
 #MODULE = some.getModule()
 #MODULE = simple_set.getModule()
-#MODULE = zoo.getModule()
+MODULE = zoo.getModule()
 #MODULE = simple_zoo.getModule()
 #MODULE = integer_refs.getModule()
 #MODULE = phone_feature_model.getModule()
@@ -50,7 +51,7 @@ TEST_SET = MY_TESTS
 #MODULE = this_integer_relation.getModule()
 #MODULE = equal_references.getModule()
 #MODULE = dag_test.getModule()
-MODULE = books_tutorial.getModule()
+#MODULE = books_tutorial.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),

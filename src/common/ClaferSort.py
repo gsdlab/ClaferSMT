@@ -6,7 +6,8 @@ Created on Apr 29, 2013
 from common import Common, Options
 from constraints import Constraints
 from lxml.builder import basestring
-from z3 import IntVector, Function, IntSort, If, BoolSort, Implies, And, Bool
+from z3 import IntVector, Function, IntSort, If, BoolSort, Implies, And, Bool, \
+    Or
 
 
 
@@ -64,6 +65,7 @@ class  ClaferSort(object):
         if(self.numInstances == -1):
             self.numInstances = Options.GLOBAL_SCOPE
         self.instances = IntVector(self.element.uid.split("_",1)[1],self.numInstances)
+        self.instanceRanges = []
         self.refs = []
         self.subs = []
         self.indexInSuper = 0
@@ -133,13 +135,48 @@ class  ClaferSort(object):
                 self.constraints.addRefConstraint(Implies(self.refs[i] != self.refSort.numInstances
                                                      , self.refSort.full(self.refs[i]) == True))
                 
+    def getInstanceRange(self, index):
+        '''
+        Restricts the bounds of each instance.
+        Returns (lower, upper, extraAbsenceConstraint), where 
+        lower and upper are the bounds, and extraAbsenceConstraint
+        is true if the instance may be absent from the model, AND is
+        not covered by the upper bound.
+        '''
+        if self.lowerCardConstraint == 0:
+                upper = len(self.instances)
+        else:
+            upper = index // self.lowerCardConstraint
+        upper = min(upper, self.parentInstances)
+        if self.upperCardConstraint == -1:
+            lower = 0
+        else:
+            lower = index // self.upperCardConstraint
+            
+        extraAbsenceConstraint = False
+        #look at parentStack lower bounds
+        if self.parentStack:
+            parentCardBound = 1
+            for i in self.parentStack:
+                parentCardBound = parentCardBound * i.lowerCardConstraint
+            if parentCardBound < upper + 1:
+                extraAbsenceConstraint = True
+        return (lower, upper, extraAbsenceConstraint)
     
     def createInstancesConstraintsAndFunctions(self):
+        self.instanceRanges = [self.getInstanceRange(i) for i in range(self.numInstances)]
         for i in range(self.numInstances):
-            #parent pointer is >= 0
-            self.constraints.addInstanceConstraint(self.instances[i] >= 0) 
-            #parent pointer is <= upper card of parent           
-            self.constraints.addInstanceConstraint(self.instances[i] <= self.parentInstances)
+            (lower, upper, extraAbsenceConstraint) = self.instanceRanges[i]
+            #parent pointer is >= lower
+            self.constraints.addInstanceConstraint(self.instances[i] >= lower) 
+            if not extraAbsenceConstraint:
+                #parent pointer is <= upper         
+                self.constraints.addInstanceConstraint(self.instances[i] <= upper)
+            else:
+                #parent pointer is <= upper, or equal to parentInstances
+                self.constraints.addInstanceConstraint(
+                    Or(self.instances[i] == self.parentInstances,
+                       self.instances[i] <= upper))
             #sorted parent pointers
             if(not self.element.isAbstract):
                 if i != self.numInstances - 1:
@@ -162,7 +199,7 @@ class  ClaferSort(object):
             for j in range(self.numInstances):
                 self.constraints.addInstanceConstraint(Implies(self.parent.instances[i] == self.parent.parentUpper, self.instances[j] != i))    
         
-        
+    
     def createCardinalityConstraints(self):
         for i in range(self.parentInstances):
             summ = 0;

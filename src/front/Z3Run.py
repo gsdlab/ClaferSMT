@@ -38,4 +38,7 @@ def main(args):
         
    
 if __name__ == '__main__':
-    cProfile.run("main(sys.argv[1:])", sort=1)
+    if Options.CPROFILING:
+        cProfile.run("main(sys.argv[1:])", sort=1)
+    else:
+        main(sys.argv[1:])

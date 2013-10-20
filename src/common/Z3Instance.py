@@ -158,17 +158,17 @@ class Z3Instance(object):
     def get_models(self, desired_number_of_models):
         result = []
         count = 0
-        
+        #print(self.solver.sexpr())
         self.clock.tick("first model")
         while True:
             self.clock.tick("unsat")
-           
             if (Common.MODE != Common.DEBUG and self.solver.check() == sat and count != desired_number_of_models) or \
                 (Common.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == sat and count != desired_number_of_models):
                 m = self.solver.model()
                 #if count ==0:
                 #    print(m)
                 result.append(m)
+                #print(self.solver.statistics())
                 # Create a new constraint the blocks the current model
                 block = []
                 for d in m:
