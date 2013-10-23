@@ -13,3 +13,9 @@ Once compiled, given a Clafer input file X.cfr, run:
 This will produce the file X.py within the same directory as X.cfr. For the current implementation, run:
   python Z3Run.py X.py
 which will produce the AST in python and print the tree.
+
+Required
+========
+
+pip install bintrees
+Remove the warning messages from bintrees imports.

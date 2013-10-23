@@ -3,102 +3,35 @@ Created on Apr 29, 2013
 
 @author: ezulkosk
 '''
+from bintrees.avltree import AVLTree
 from common import Common
 from common.Common import mOr, mAnd
 from constraints import Constraints
 from constraints.Constraints import GenericConstraints
 from lxml.builder import basestring
+from structures.ExprArg import ExprArg, IntArg, BoolArg, Mask
 from z3 import Function, IntSort, BoolSort, If, Not, Sum, Implies, Or, And, Xor
 import inspect
 import sys
 
 
-class ExprArg():
-    def __init__(self, joinSorts, instanceSorts, instances):
-        '''
-        :param joinSorts: The list of sorts used to determine which ClaferSorts to join.
-        :type joinSorts: [:class:`~common.ClaferSort`]
-        :param instanceSorts: The list of sorts that are actually in instances.
-        :type instancesSorts: [:class:`~common.ClaferSort`]
-        :param instances: The set of Z3-int expressions associated with the bracketed constraint up to this point.
-        :type instances: [Int()]
-        
-        Struct used to hold information as a bracketed constraint is traversed. 
-        '''
-        self.joinSorts = joinSorts
-        self.instanceSorts = instanceSorts
-        self.instances = instances
-        
-    def modifyInstances(self, newInstances):
-        '''
-        :param newInstances:
-        :type newInstances: [Int()]
-        :returns: :class:`~ExprArg`
-        
-        Returns the old ExprArg, with its instances changed to **newInstances**.
-        '''
-        return ExprArg(self.joinSorts[:], self.instanceSorts[:], newInstances)
-    
-    def getInstanceMask(self, sort):
-        for i in self.instanceSorts:
-            (curr_sort, mask) = i
-            if sort == curr_sort:
-                return mask
-    
-    def clone(self):
-        return ExprArg(self.joinSorts[:], self.instanceSorts[:], self.instances[:])
-      
-    def __str__(self):
-        return (str(self.instances)) 
-     
-    def __repr__(self):
-        return (str(self.instances)) 
-               
-class IntArg(ExprArg):
-    def __init__(self, instances):
-        '''
-        Convenience class that extends ExprArg and holds an integer instance.
-        '''
-        self.joinSorts = ["int"]
-        self.instanceSorts = ["int"]
-        self.instances = instances
-        
-class BoolArg(ExprArg):
-    def __init__(self, instances):
-        '''
-        Convenience class that extends ExprArg and holds a boolean instance.
-        '''
-        self.joinSorts = ["bool"]
-        self.instanceSorts = ["bool"]
-        self.instances = instances
-
 #FIX ME
-def joinWithSuper(sort, mask, instances):
+def joinWithSuper(sort, mask):
     '''
     :param sort:
     :type sort: :class:`~common.ClaferSort`
-    :param instances:
-    :type instances: [Int()]
     :returns: (:class:`~common.ClaferSort`, [Int()]) 
     
     Maps each instance of the subclafer **sort** to the corresponding super instance. Returns the super sort and its instances.
     '''
-    newInstances = []
-    newMask = []
-    for i in range(0, sort.indexInSuper):
-        newMask.append(False)
-    count = 0
-    for i in range(sort.numInstances):
-        if mask[i]:
-            newInstances.append(If(instances[count] != sort.parentInstances, 
-                                   sort.superSort.instances[i + sort.indexInSuper], sort.superSort.parentInstances))
-            count = count + 1
-            newMask.append(True)
-        else:
-            newMask.append(False)
-    for i in range(len(instances), sort.superSort.numInstances):
-        newMask.append(False)
-    return(sort.superSort, newMask, newInstances)
+    newMask = Mask()
+    for i in mask.keys():
+        #ClaferSort.addSubSort(self, sub), is somewhat related 
+        newMask.put(i + sort.indexInSuper,
+                    If(mask.get(i) != sort.parentInstances, 
+                       sort.superSort.instances[i + sort.indexInSuper], 
+                       sort.superSort.parentInstances))
+    return(sort.superSort, newMask)
 
 def joinHelper(left, right, zeroedVal):
     '''
@@ -134,31 +67,52 @@ def joinHelper(left, right, zeroedVal):
     
     #get the instanceSorts associated with the join point.
     for i in left.instanceSorts:
-        (sort, left_mask) = i
-        if sort == leftJoinPoint:
+        (left_sort, left_mask) = i
+        if isinstance(left_sort, basestring) or left_sort == leftJoinPoint:
             break
     for i in right.instanceSorts:
-        (sort, right_mask) = i
-        if sort == rightJoinPoint:
+        (right_sort, right_mask) = i #FIXME
+        if isinstance(right_sort, basestring) or right_sort == rightJoinPoint:
             break
         
     #create cond for join
     condList = []
     onInstancesList = []
     count = 0
+    '''
     for i in range(len(left_mask)):
         if left_mask[i]:
             condList.append(left.instances[count] != leftJoinPoint.parentInstances)
             onInstancesList.append(i) 
             count = count + 1
-    
-    g = lambda x: mOr(*[mAnd(x == i, j) for i,j in zip(onInstancesList, condList)])
-    newInstances = []
-    for i in range(len(right_mask)):
-        if right_mask[i]:
-            newInstances.append(If(g(rightJoinPoint.instances[i]), right.instances[i], zeroedVal))
-    return newInstances
     '''
+    newMaskList = []
+    condList = []
+    #should be very fine-grained for the solver, but might bog down translation, not sure yet
+    newMask = Mask()
+    for i in right_mask.keys():
+        (lower, upper, _) = rightJoinPoint.instanceRanges[i]
+        for j in range(lower, upper + 1):
+            #only possibly join with things that are in left
+            if left_mask.get(j):
+                prevClause = newMask.get(i)
+                newMask.put(i, mOr(prevClause, And(left_mask.get(j) != left_sort.parentInstances, 
+                                                right_mask.get(i) == j)))
+        #if leftJoinInstances:
+         #   newMaskList.append(i)
+         #   condList.append(mOr(*[And(left_mask.get(k) != leftJoinPoint.parentInstances, rightJoinPoint.instances[i] == k) for k in leftJoinInstances]))
+    for i in newMask.keys():
+        newMask.put(i, If(newMask.get(i), right_mask.get(i) , zeroedVal))
+    return newMask
+    '''
+    (sort, mask) = left.instanceSorts[0]
+    newMask = Mask()
+    for i in mask.keys():
+        (lower,upper,_) = sort.instanceRanges[i]
+        for j in range(lower, upper + 1):
+            prevClause = newMask.get(j)
+            newMask.put(j, mOr(prevClause, mask.get(i) == j))
+    
     funcID = str(Common.getFunctionUID())
     functionName = "f" + funcID + "_" + leftJoinPoint.element.nonUniqueID() + "." + rightJoinPoint.element.nonUniqueID()
     joinFunction = Function(functionName, IntSort(), IntSort())
@@ -198,33 +152,49 @@ def op_join(left,right):
     if isinstance(rightJoinPoint, basestring):
         if rightJoinPoint == "parent":
             joinSorts = left.joinSorts + [leftJoinPoint.parent] +  [right.joinSorts[i] for i in range(1, len(right.joinSorts))]
-            for i in range(leftJoinPoint.parent.numInstances):
-                clause = mOr(*[j == i for j in left.instances])
-                newInstances.append(If(clause, leftJoinPoint.parent.instances[i], leftJoinPoint.parent.parentInstances))
-            return(ExprArg(joinSorts, [(leftJoinPoint.parent, [True for _ in leftJoinPoint.parent.instances])], newInstances))
+            (sort, mask) = left.instanceSorts[0]
+            newMask = Mask()
+            for i in mask.keys():
+                (lower,upper,_) = sort.instanceRanges[i]
+                for j in range(lower, upper + 1):
+                    if j == leftJoinPoint.parentInstances:
+                        break
+                    prevClause = newMask.get(j)
+                    newMask.put(j, mOr(prevClause, mask.get(i) == j))
+                    #*[j == i for j in left.instances])
+                #newInstances.append(If(clause, leftJoinPoint.parent.instances[i], leftJoinPoint.parent.parentInstances))
+            for i in newMask.keys():
+                newMask.put(i, If(newMask.get(i), leftJoinPoint.parent.instances[i], leftJoinPoint.parent.parentInstances))
+            return ExprArg(joinSorts, [(leftJoinPoint.parent, newMask)])
         elif rightJoinPoint == "ref":
             if isinstance(leftJoinPoint.refSort, basestring):
                 if leftJoinPoint.refSort == "integer":
                     mask = left.getInstanceMask(leftJoinPoint)
                     newInstances = []
-                    count = 0
-                    for i in range(len(mask)):
-                        #the instance is on
-                        if(mask[i]):
-                            newInstances.append(If(left.instances[count] != leftJoinPoint.parentInstances, leftJoinPoint.refs[i], 0))
-                            count = count + 1
+                    newMask = Mask()
+                    for i in mask.keys():
+                        newMask.put(i, If(mask.get(i) != leftJoinPoint.parentInstances, leftJoinPoint.refs[i], 0))
                     return(ExprArg(left.joinSorts + ["int"], 
-                                   left.instanceSorts, 
-                                   newInstances))     
+                                   [("int", newMask)] ))   
                 else:
                     print("Error on: " + leftJoinPoint.refSort + "string refs other than int (e.g. double) unimplemented")
                     sys.exit()
             else: 
+                #join on ref sort
                 joinSorts = left.joinSorts + [leftJoinPoint.refSort] +  [right.joinSorts[i] for i in range(1, len(right.joinSorts))]
                 #needs to be more robust for multiple instanceSorts
                 (sort, mask) = left.instanceSorts[0]
-                count = 0
                 tempRefs = []
+                newMask = Mask()
+                for i in mask.keys():
+                    # **** the "else" used to be refSort.parentInstances, but i think this is right
+                    tempRefs.append(If(mask.get(i) != leftJoinPoint.parentInstances,
+                                       leftJoinPoint.refs[i], leftJoinPoint.refSort.numInstances))
+                for i in range(leftJoinPoint.refSort.numInstances):
+                    clause = mOr(*[j == i for j in tempRefs])
+                    newMask.put(i, If(clause, leftJoinPoint.refSort.instances[i], leftJoinPoint.refSort.parentInstances))
+                return(ExprArg(joinSorts, [(leftJoinPoint.refSort, newMask)]))
+                '''
                 for j in range(sort.numInstances):
                     if mask[j]:
                         tempRefs.append(If(left.instances[count] != leftJoinPoint.parentInstances
@@ -234,14 +204,14 @@ def op_join(left,right):
                     
                     clause = mOr(*[j == i for j in tempRefs])
                     newInstances.append(If(clause, leftJoinPoint.refSort.instances[i], leftJoinPoint.refSort.parentInstances))
-                return(ExprArg(joinSorts, [(leftJoinPoint.refSort, [True for _ in range(leftJoinPoint.refSort.numInstances)])], newInstances))
+                return(ExprArg(joinSorts, [(leftJoinPoint.refSort, newMask)]))
+                '''
     else:
         #Make more robust
-        leftInstances = left.instances
         instanceSort = left.instanceSorts[0]
         (leftJoinPoint, leftMask) = instanceSort
         while not(rightJoinPoint in leftJoinPoint.fields):
-            (leftJoinPoint, leftMask, leftInstances) = joinWithSuper(leftJoinPoint, leftMask, leftInstances)
+            (leftJoinPoint, leftMask) = joinWithSuper(leftJoinPoint, leftMask)
             #(leftJoinPoint, leftInstances) = joinWithSuper(leftJoinPoint, leftInstances)
         instanceSorts = right.instanceSorts
         (sort, mask) = instanceSorts[0]
@@ -251,10 +221,10 @@ def op_join(left,right):
             zeroedVal = sort.parentInstances
         newJoinSorts = left.joinSorts[:]
         newJoinSorts.append(leftJoinPoint)
-        newLeft = ExprArg(newJoinSorts, [(leftJoinPoint, leftMask)],leftInstances)
-        newInstances = joinHelper(newLeft, right, zeroedVal)
+        newLeft = ExprArg(newJoinSorts, [(leftJoinPoint, leftMask)])
+        newInstanceSorts = [(rightJoinPoint, joinHelper(newLeft, right, zeroedVal))]
         joinSorts = newLeft.joinSorts + right.joinSorts
-        return(ExprArg(joinSorts, instanceSorts, newInstances))
+        return(ExprArg(joinSorts, newInstanceSorts))
 
 def op_card(arg):
     '''
@@ -267,28 +237,34 @@ def op_card(arg):
     Returns the number of instances that are *on* in arg.
     '''
     assert isinstance(arg, ExprArg)
-    index = 0
-    newInstances = []
+    instances = []
     for i in arg.instanceSorts:
         (sort, mask) = i
-        for j in range(sort.getUnmaskedCount(mask)):
+        '''
+        for j in range(ExprArg.getUnmaskedCount(mask)):
             newInstances.append(If(arg.instances[j] != sort.parentInstances, 1, 0))
-    return IntArg([Sum(newInstances)])
+        '''
+        for j in mask.values():
+            instances.append(If(j != sort.parentInstances, 1, 0))  
+    return IntArg([Sum(instances)])
 
 def op_add(left,right):
     '''
     :param left:
-    :type left: :class:`~ExprArg`
+    :type left: :class:`~IntArg`
     :param right:
-    :type right: :class:`~ExprArg`
+    :type right: :class:`~IntArg`
     :returns: :class:`~IntArg` 
     
     Returns left + right.
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return IntArg([sum(left.instances) + sum(right.instances)])
-    #return IntArg(left.instances + right.instances)
+    (_, left_mask) = left.instanceSorts[0]
+    (_, right_mask) = right.instanceSorts[0]
+    lval = left_mask.pop_value()
+    rval = right_mask.pop_value()
+    return IntArg([lval + rval])
 
 def op_sub(left,right):
     '''
@@ -302,7 +278,11 @@ def op_sub(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return IntArg([sum(left.instances) - sum(right.instances)])
+    (_, left_mask) = left.instanceSorts[0]
+    (_, right_mask) = right.instanceSorts[0]
+    lval = left_mask.pop_value()
+    rval = right_mask.pop_value()
+    return IntArg([lval - rval])
 
 def op_mul(left,right):
     '''
@@ -316,7 +296,11 @@ def op_mul(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return IntArg([sum(left.instances) * sum(right.instances)])
+    (_, left_mask) = left.instanceSorts[0]
+    (_, right_mask) = right.instanceSorts[0]
+    lval = left_mask.pop_value()
+    rval = right_mask.pop_value()
+    return IntArg([lval * rval])
 
 #integer division
 def op_div(left,right):
@@ -331,11 +315,14 @@ def op_div(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    lsum = sum(left.instances)
-    rsum = sum(right.instances)
-    return IntArg([lsum / rsum]
-                   if((not isinstance(lsum, int)) or (not isinstance(rsum, int)))
-                             else [lsum // rsum])
+    (_, left_mask) = left.instanceSorts[0]
+    (_, right_mask) = right.instanceSorts[0]
+    lval = left_mask.pop_value()
+    rval = right_mask.pop_value()
+    return IntArg([lval / rval]
+                   if((not isinstance(lval, int)) or (not isinstance(rval, int)))
+                             else [lval // rval])
+    
     
 def op_un_minus(arg):
     '''
@@ -346,7 +333,9 @@ def op_un_minus(arg):
     Negates arg.
     '''
     assert isinstance(arg, ExprArg)
-    return IntArg([-(sum(arg.instances))])
+    (_, mask) = arg.instanceSorts[0]
+    val = mask.pop_value()
+    return IntArg([-(val)])
     
 
 def op_not(arg):
@@ -358,7 +347,9 @@ def op_not(arg):
     Boolean negation of arg.
     '''
     assert isinstance(arg, ExprArg)
-    return BoolArg([Not(arg.instances[0])])
+    (_, mask) = arg.instanceSorts[0]
+    val = mask.pop_value()
+    return BoolArg([Not(val)])
     
 #need to iterate over all instancesorts, maybe not
 def op_eq(left,right):
@@ -373,13 +364,44 @@ def op_eq(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
+    sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.instanceSorts])
+    sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.instanceSorts])
     
     #integer equality case
-    if isinstance(left.instanceSorts[0], basestring) and left.instanceSorts[0] == "int":
-        return BoolArg([sum(left.instances) == sum(right.instances)])
+    (sort, left_mask) = left.instanceSorts[0]
+    if isinstance(sort, basestring) and sort == "int":
+        (_, right_mask) = right.instanceSorts[0]
+        return BoolArg([sum(left_mask.values()) == sum(right_mask.values())])
     #clafer-set equality case
     else:
-        return BoolArg([mAnd(*[i == j for i,j in zip(left.instances, right.instances)])])
+        cond = []
+        while True:
+            nextSorts = getNextInstanceSort(sortedL, sortedR)
+            if not nextSorts:
+                break
+            if len(nextSorts) == 1:
+                (_, (sort, l)) = nextSorts[0]
+                #if only one side of the equation has elements a sort,
+                #make sure none are on.
+                for i in l.values():
+                    cond.append(i == sort.parentInstances)
+                    
+            else:
+                (_, (sort, l)) = nextSorts[0]
+                (_, (_, r)) = nextSorts[1]
+                newMask = Mask()
+                
+                for i in l.difference(r.getTree()):
+                    cond.append(l.get(i) == sort.parentInstances)
+                for i in r.difference(l.getTree()):
+                    cond.append(r.get(i) == sort.parentInstances)
+                for i in l.intersection(r.getTree()):
+                    cond.append(mAnd(Implies(l.get(i) != sort.parentInstances,
+                                              r.get(i) != sort.parentInstances),
+                                          Implies(l.get(i) == sort.parentInstances,
+                                              r.get(i) == sort.parentInstances)))
+        return BoolArg([And(*cond)])
+        #return BoolArg([mAnd(*[i == j for i,j in zip(left.instances, right.instances)])])
     '''
     if(isinstance(left.instances, list) and isinstance(right.instances, list)):
         #ref case
@@ -407,7 +429,10 @@ def op_ne(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     expr = op_eq(left, right)
-    expr.instances = [Not(i) for i in expr.instances]
+    for i in expr.instanceSorts:
+        (_, mask) = i
+        for j in mask.keys():
+            mask.put(j, Not(mask.get(j)))
     return expr
     
 def op_lt(left,right):
@@ -422,7 +447,11 @@ def op_lt(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return BoolArg([sum(left.instances) < sum(right.instances)])  
+    (_, left_mask) = left.instanceSorts[0]
+    (_, right_mask) = right.instanceSorts[0]
+    lval = left_mask.pop_value()
+    rval = right_mask.pop_value()
+    return BoolArg([lval < rval])  
         
 def op_le(left,right):
     '''
@@ -436,7 +465,11 @@ def op_le(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return BoolArg([sum(left.instances) <= sum(right.instances)])  
+    (_, left_mask) = left.instanceSorts[0]
+    (_, right_mask) = right.instanceSorts[0]
+    lval = left_mask.pop_value()
+    rval = right_mask.pop_value()
+    return BoolArg([lval <= rval])  
 
 def op_gt(left,right):
     '''
@@ -478,7 +511,11 @@ def op_and(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return BoolArg([mAnd(left.instances[0], right.instances[0])])  
+    (_, left_mask) = left.instanceSorts[0]
+    (_, right_mask) = right.instanceSorts[0]
+    lval = left_mask.pop_value()
+    rval = right_mask.pop_value()
+    return BoolArg([mAnd(lval, rval)])  
 
 def op_or(left,right):
     '''
@@ -492,7 +529,11 @@ def op_or(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return BoolArg([mOr(left.instances[0], right.instances[0])]) 
+    (_, left_mask) = left.instanceSorts[0]
+    (_, right_mask) = right.instanceSorts[0]
+    lval = left_mask.pop_value()
+    rval = right_mask.pop_value()
+    return BoolArg([mOr(lval, rval)])  
 
 def op_xor(left,right):
     '''
@@ -506,7 +547,11 @@ def op_xor(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return BoolArg([Xor(left.instances[0], right.instances[0])]) 
+    (_, left_mask) = left.instanceSorts[0]
+    (_, right_mask) = right.instanceSorts[0]
+    lval = left_mask.pop_value()
+    rval = right_mask.pop_value()
+    return BoolArg([Xor(lval, rval)])  
 
 def op_implies(left,right):
     '''
@@ -535,9 +580,7 @@ def op_equivalence(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return BoolArg([mAnd(*[mAnd(Implies(i,j), Implies(j,i)) for i,j in zip(left.instances, right.instances)])])
-    #return BoolArg(And(Implies(left.instances, right.instances),
-    #                   Implies(right.instances, left.instances))) 
-
+    
 def op_ifthenelse(cond, ifExpr, elseExpr):
     '''
     :param cond:
@@ -555,7 +598,7 @@ def op_ifthenelse(cond, ifExpr, elseExpr):
     assert isinstance(elseExpr, ExprArg)
     return BoolArg([If(cond.instances[0], ifExpr.instances[0], elseExpr.instances[0])])
 
-#XXX
+#THIS IS NO LONGER USED
 def set_extend(left,right):
     '''
     :param left:
@@ -634,6 +677,23 @@ def set_extend(left,right):
     return(ExprArg(finalJoinSorts, finalSorts, finalLinstances), 
            ExprArg(finalJoinSorts, finalSorts, finalRinstances))
 
+def getNextInstanceSort(left, right):
+    if left or right:
+        if left and right:
+            if left[0][0] < right[0][0]:
+                return [("l", left.pop(0))]
+            elif left[0][0] > right[0][0]:
+                return [("r", right.pop(0))]
+            else:
+                return [("l", left.pop(0)), ("r", right.pop(0))]
+        elif left:
+            return [("l", left.pop(0))]
+        else:
+            return [("r", right.pop(0))]
+    else: #end outer
+        return []
+        
+
 def op_union(left,right):
     '''
     :param left:
@@ -646,15 +706,30 @@ def op_union(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    (extendedL, extendedR) = set_extend(left,right)
-    finalInstances = []
-    for i in extendedL.instanceSorts:
-        (sort, mask) = i
-        for j in range(sort.numInstances):
-            if mask[j]:
-                finalInstances.append(Common.min2(extendedL.instances.pop(0), extendedR.instances.pop(0)))
-    return ExprArg(extendedR.joinSorts, extendedR.instanceSorts, finalInstances)
-
+    sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.instanceSorts])
+    sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.instanceSorts])
+    newInstanceSorts = []
+    while True:
+        nextSorts = getNextInstanceSort(sortedL, sortedR)
+        if not nextSorts:
+            break
+        if len(nextSorts) == 1:
+            (_, nextInstanceSort) = nextSorts[0]
+            newInstanceSorts.append(nextInstanceSort)
+        else:
+            (_, (sort, l)) = nextSorts[0]
+            (_, (_, r)) = nextSorts[1]
+            newMask = Mask()
+            for i in l.difference(r.getTree()):
+                newMask.put(i, l.get(i))
+            for i in r.difference(l.getTree()):
+                newMask.put(i, r.get(i))
+            for i in l.intersection(r.keys()):
+                newMask.put(i, Common.min2(l.get(0), r.get(0)))
+            newInstanceSorts.append((sort, newMask))
+    return ExprArg(left.joinSorts, newInstanceSorts)
+                
+  
 def op_intersection(left,right):
     '''
     :param left:
@@ -665,6 +740,26 @@ def op_intersection(left,right):
     
     Computes the set intersection (left & right)
     '''
+    sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.instanceSorts])
+    sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.instanceSorts])
+    newInstanceSorts = []
+    while True:
+        nextSorts = getNextInstanceSort(sortedL, sortedR)
+        if not nextSorts:
+            break
+        if len(nextSorts) == 1:
+            continue
+        else:
+            (_, (sort, l)) = nextSorts[0]
+            (_, (_, r)) = nextSorts[1]
+            newMask = Mask()
+            for i in l.intersection(r.keys()):
+                newMask.put(i, Common.max2(l.get(0), r.get(0)))
+            newInstanceSorts.append((sort, newMask))
+    return ExprArg(left.joinSorts, newInstanceSorts)
+    
+    
+    '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     (extendedL, extendedR) = set_extend(left,right)
@@ -673,6 +768,7 @@ def op_intersection(left,right):
         for _ in range(i.numInstances):
             finalInstances.append(Common.max2(extendedL.instances.pop(0), extendedR.instances.pop(0)))
     return ExprArg(extendedR.joinSorts, extendedR.instanceSorts, finalInstances)
+    '''
 
 def op_difference(left,right):
     '''
@@ -687,6 +783,31 @@ def op_difference(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     (extendedL, extendedR) = set_extend(left,right)
+    sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.instanceSorts])
+    sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.instanceSorts])
+    newInstanceSorts = []
+    while True:
+        nextSorts = getNextInstanceSort(sortedL, sortedR)
+        if not nextSorts:
+            break
+        if len(nextSorts) == 1:
+            (side, nextInstanceSort) = nextSorts[0]
+            if(side == "l"):
+                newInstanceSorts.append(nextInstanceSort)
+        else:
+            (_, (sort, l)) = nextSorts[0]
+            (_, (_, r)) = nextSorts[1]
+            newMask = Mask()
+            for i in l.difference(r.getTree()):
+                newMask.put(i, l.get(i))
+            for i in l.intersection(r.keys()):
+                newMask.put(i, If(r.get(i) != sort.parentInstances
+                                     , l.get(i)
+                                     , sort.parentInstances))
+            newInstanceSorts.append((sort, newMask))
+    return ExprArg(left.joinSorts, newInstanceSorts)
+    
+    '''
     finalInstances = []
     for i in extendedL.instanceSorts:
         for _ in range(i.numInstances):
@@ -696,6 +817,7 @@ def op_difference(left,right):
                                      , linstance
                                      , i.parentInstances))
     return ExprArg(extendedR.joinSorts, extendedR.instanceSorts, finalInstances)
+    '''
 
 def op_in(left,right):
     '''
@@ -706,6 +828,31 @@ def op_in(left,right):
     :returns: :class:`~BoolArg` 
     
     Ensures that left is a subset of right.
+    '''
+    sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.instanceSorts])
+    sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.instanceSorts])
+    cond = []
+    while True:
+        nextSorts = getNextInstanceSort(sortedL, sortedR)
+        if not nextSorts:
+            break
+        if len(nextSorts) == 1:
+            (side, (sort, l)) = nextSorts[0]
+            if side == "l":
+                #make sure nothing on the left is on, since it cant be in the right
+                for i in l.values():
+                    cond.append(i == sort.parentInstances)
+                
+        else:
+            (_, (sort, l)) = nextSorts[0]
+            (_, (_, r)) = nextSorts[1]
+            for i in l.difference(r.getTree()):
+                cond.append(l.get(i) == sort.parentInstances)
+            for i in l.intersection(r.getTree()):
+                cond.append(Implies(l.get(i) != sort.parentInstances,
+                                          r.get(i) != sort.parentInstances))
+    return BoolArg([And(*cond)])
+    
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
@@ -718,7 +865,7 @@ def op_in(left,right):
                 finalExpr = mAnd(finalExpr, Implies(extendedL.instances.pop(0) != sort.parentInstances, 
                                                    extendedR.instances.pop(0) != sort.parentInstances))
     return BoolArg([finalExpr])
-
+    '''
 def op_nin(left,right):
     '''
     :param left:
@@ -732,7 +879,7 @@ def op_nin(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     expr = op_in(left,right)
-    return expr.modifyInstances(Not(expr.instances))
+    return BoolArg([expr.pop_value()])
 
 def op_domain_restriction(l,r):
     '''
@@ -767,7 +914,12 @@ def op_sum(arg):
     Computes the sum of all integer instances in arg. May not match the semantics of the Alloy backend.
     '''
     assert isinstance(arg, ExprArg)
-    return IntArg([Sum(arg.instances)])
+    instances = []
+    for i in arg.instanceSorts:
+        (_, mask) = i
+        for j in mask.values():
+            instances.append(j)
+    return IntArg([Sum(instances)])
 
 '''
     Map used to convert Clafer operations to Z3 operations
@@ -844,7 +996,8 @@ class BracketedConstraint(Constraints.GenericConstraints):
     
     def addArg(self, arg):
         self.stack.append(arg)
-            
+       
+    #clean     
     def addQuantifier(self, quantifier, num_args, num_quantifiers, num_combinations, ifconstraints):
         localStack = []
         ifConstraints = []
@@ -857,6 +1010,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
                 ifConstraints = []
         localStack.reverse()
         ifConstraints.reverse()
+        condList = []
         for q in range(num_combinations):
             instances = []
             instanceSorts = []
@@ -868,10 +1022,20 @@ class BracketedConstraint(Constraints.GenericConstraints):
                 currIfConstraint = ifConstraints.pop(0)
             else:
                 currIfConstraint = None
+            '''
             for i in currExpr:
                 instances = instances + i.instances
                 instanceSorts = instanceSorts + i.instanceSorts
+            '''
             if quantifier == "Some":
+                cond = False
+                for i in currExpr:
+                    for j in i.instanceSorts:
+                        (sort, mask) = j
+                        for k in mask.keys():
+                            cond = mOr(cond, mask.get(k) != sort.parentInstances)
+                condList.append(cond)
+                '''
                 for i in instances:
                     innerExpr = False
                     if instanceSorts and not isinstance(instanceSorts[0], basestring):
@@ -888,14 +1052,28 @@ class BracketedConstraint(Constraints.GenericConstraints):
                                                mOr(*[k for k in  newInstances]))
                     #finalInnerInstances.append(innerExpr)
                 finalInstances = mOr(finalInstances, innerExpr)
+                '''
             elif quantifier == "All":
+                cond = []
+                for i in currExpr:
+                    for j in i.instanceSorts:
+                        (sort, mask) = j
+                        for k in mask.keys():
+                            if isinstance(sort,basestring) and sort == "bool":
+                                cond.append(mask.get(k))
+                            else:
+                                cond.append(mask.get(k) != sort.parentInstances)
+                cond = And(*cond)
+                if currIfConstraint:
+                    cond = Implies(currIfConstraint, cond)
+                condList.append(cond)
                 #for i in instances:
                     #finalInstances.append([And(*[Implies(currIfConstraints[j], i[j][0]) for j in range(len(i))])])
-                finalInstances = mAnd(finalInstances, Implies(currIfConstraint, mAnd(*[i for i in instances])))
+                #cond = mAnd(cond, Implies(currIfConstraint, mAnd(*[i for i in instances])))
             else:
                 print("lone, no, and one still unimplemented")
                 sys.exit()
-        self.stack.append([BoolArg([finalInstances])])
+        self.stack.append([BoolArg([And(*condList)])])
            
     def extend(self, args):
         maxInstances = 0
@@ -931,13 +1109,15 @@ class BracketedConstraint(Constraints.GenericConstraints):
             thisClafer = self.claferStack[-1]
             for i in range(thisClafer.numInstances):
                 if thisClafer.numInstances == len(expr):
-                    self.addConstraint(Implies(thisClafer.instances[i] != thisClafer.parentInstances, expr[i].instances[0]))
+                    self.addConstraint(Implies(thisClafer.instances[i] != thisClafer.parentInstances, expr[i].finish()))
                 #hack for now
                 else:
-                    self.addConstraint(Implies(thisClafer.instances[i] != thisClafer.parentInstances, expr[0].instances[0]))
+                    self.addConstraint(Implies(thisClafer.instances[i] != thisClafer.parentInstances, expr[0].finish()))
         else:
             for i in expr:
-               self.addConstraint(i.instances[0])
+                for j in i.instanceSorts:
+                    (_, mask) = j
+                    self.addConstraint(mask.pop_value())
         self.z3.z3_bracketed_constraints.append(self)
     
     def __str__(self):

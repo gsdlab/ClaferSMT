@@ -7,6 +7,7 @@ Created on Mar 26, 2013
 from common.Common import mAnd
 from constraints import BracketedConstraint
 from constraints.BracketedConstraint import ExprArg, IntArg, BoolArg
+from structures.ExprArg import Mask
 from visitors import VisitorTemplate
 from z3 import And
 import itertools
@@ -68,21 +69,20 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
                 exprArgList = []
                 for i in range(element.claferSort.numInstances):
                     exprArgList.append(ExprArg([element.claferSort], 
-                                               [(element.claferSort, [True if j == i else False for j in range(element.claferSort.numInstances)])],
-                                               [element.claferSort.instances[i]]))
+                                               [(element.claferSort, Mask(element.claferSort, [i]))]))
                 self.currentConstraint.addArg(exprArgList)
             elif element.id == "ref":
-                self.currentConstraint.addArg([ExprArg(["ref"], ["ref"], ["ref"])])
+                self.currentConstraint.addArg([ExprArg(["ref"], ["ref"])])
             elif element.id == "parent":
-                self.currentConstraint.addArg([ExprArg(["parent"], ["parent"], ["parent"])])
+                self.currentConstraint.addArg([ExprArg(["parent"], ["parent"])])
             elif element.claferSort:  
                 self.currentConstraint.addArg([ExprArg([element.claferSort], 
-                                                      [(element.claferSort, [True for _ in range(element.claferSort.numInstances)])], 
-                                                      element.claferSort.instances[:])])
+                                                      [(element.claferSort, 
+                                                        Mask(element.claferSort, [i for i in range(element.claferSort.numInstances)]))])])
             else:
                 #localdecl case
                 expr = self.currentConstraint.locals[element.id]
-                expr = [expr[i].modifyInstances(expr[i].instances[:]) for i in range(len(expr))]
+                expr = [expr[i].clone() for i in range(len(expr))]
                 self.currentConstraint.addArg(expr)
    
     def constraintVisit(self, element):
@@ -102,16 +102,18 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     #assume their is only one sort at this time, which is true of my old version of clafer
     def createAllLocalsCombinations(self, localDecls, exprArg, isDisjunct):
         (sort, mask) = exprArg.instanceSorts[0]
-        ranges = [range(len(exprArg.instances)) for i in localDecls]
+        ranges = [range(mask.size()) for i in localDecls]
         localInstances = []
         ifConstraints = []
         
         integer_combinations = itertools.product(*ranges)
         for i in integer_combinations: 
             list_of_ints = list(i)
-            if isDisjunct and (len(set(list_of_ints)) != len(list_of_ints)):
+            set_of_ints = set(list_of_ints)
+            if isDisjunct and (len(set_of_ints) != len(list_of_ints)):
                 continue
-            newMasks = []
+            
+            '''
             for j in list_of_ints:
                 count = 0
                 index = 0
@@ -121,8 +123,12 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
                             newMasks.append([True if l == index else False for l in range(len(mask))])
                         count = count + 1
                     index = index + 1
-            localInstances.append([ExprArg(exprArg.joinSorts[:], [(sort, newMasks[j])], [exprArg.instances[list_of_ints[j]]]) for j in range(len(list_of_ints))])
-            ifConstraints.append(mAnd(*[exprArg.instances[j] != sort.parentInstances for j in list_of_ints]))
+            '''
+            '''[exprArg.instances[list_of_ints[j]]]'''
+            localInstances.append([ExprArg(exprArg.joinSorts[:], 
+                                           [(sort, Mask(sort, [list_of_ints[j]]))]
+                                           ) for j in range(len(list_of_ints))])
+            ifConstraints.append(mAnd(*[mask.get(j) != sort.parentInstances for j in list_of_ints]))
             
         return (localInstances, ifConstraints)
      

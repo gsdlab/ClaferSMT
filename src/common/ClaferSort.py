@@ -89,25 +89,6 @@ class  ClaferSort(object):
         if(self.upperCardConstraint == -1):
             self.upperCardConstraint = Options.GLOBAL_SCOPE
         self.createInstancesConstraintsAndFunctions()
-    
-    
-    def getUnmaskedInstances(self, boolArray):
-        '''
-        Used in tandem with the new approach to splits and joins
-        no use yet
-        '''
-        pass
-    
-    def getUnmaskedCount(self, boolArray):
-        '''
-        Used in tandem with the new approach to splits and joins
-        '''
-        count = 0
-        for i in boolArray:
-            if i:
-                count = count + 1
-        return count        
-    
      
     def addRefConstraints(self):
         self.checkSuperAndRef()
@@ -159,7 +140,7 @@ class  ClaferSort(object):
             parentCardBound = 1
             for i in self.parentStack:
                 parentCardBound = parentCardBound * i.lowerCardConstraint
-            if parentCardBound < upper + 1:
+            if parentCardBound < upper + 1: #THIS IS OFF BY 1 SOMEHOW (GET RID OF + 1?)
                 extraAbsenceConstraint = True
         return (lower, upper, extraAbsenceConstraint)
     
@@ -285,6 +266,9 @@ class  ClaferSort(object):
     
     def __repr__(self):
         return self.__str__()
+    
+    def __lt__(self, other):
+        return self.element.uid <  other.element.uid
     
     def __eq__(self, other):
         return self.element.uid == other.element.uid

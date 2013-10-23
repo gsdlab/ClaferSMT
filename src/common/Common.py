@@ -16,7 +16,9 @@ CONSTRAINT_ID = 0
 
 def mAnd(*args):
     '''
+    Short for MaybeAnd.
     Helper Function to simplify formulas passed to Z3, but mostly to make debugging output more comprehensible.
+    Only applies the And function if there are actually multiple arguments.
     '''
     newArgs = []
     for i in args:
@@ -43,6 +45,7 @@ def mOr(*args):
         return newArgs[0]
     else:
         return Or(*newArgs)
+    
 
 def getInstancesFromMask(sort, mask, currInstances):
     newInstances = []
