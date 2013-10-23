@@ -268,7 +268,7 @@ class  ClaferSort(object):
         return self.__str__()
     
     def __lt__(self, other):
-        return self.element.uid <  other.element.uid
+        return str(self) <  str(other)
     
     def __eq__(self, other):
         return self.element.uid == other.element.uid

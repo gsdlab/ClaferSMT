@@ -23,7 +23,7 @@ from test.positive import books_tutorial, \
 
 GLOBAL_SCOPE = 5 #this obviously has to change
 
-MODE = Common.NORMAL   # Common.[NORMAL | DEBUG | TEST]
+MODE = Common.TEST   # Common.[NORMAL | DEBUG | TEST]
 NUM_INSTANCES = -1 # -1 to produce all instances
 PROFILING = True # True to output the translation time, and time to get first model
 CPROFILING = False #invokes the standard python profiling method (see Z3Run.py)
@@ -43,11 +43,11 @@ TEST_SET = MY_TESTS
 #MODULE = simple_abstract.getModule()
 #MODULE = some.getModule()
 #MODULE = simple_set.getModule()
-#MODULE = zoo.getModule()
+MODULE = zoo.getModule()
 #MODULE = simple_zoo.getModule()
 #MODULE = integer_refs.getModule()
 #MODULE = phone_feature_model.getModule()
-MODULE = higher_inheritance.getModule()
+#MODULE = higher_inheritance.getModule()
 #MODULE = this_integer_relation.getModule()
 #MODULE = equal_references.getModule()
 #MODULE = dag_test.getModule()

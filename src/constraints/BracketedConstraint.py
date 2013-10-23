@@ -97,7 +97,7 @@ def joinHelper(left, right, zeroedVal):
             if left_mask.get(j):
                 prevClause = newMask.get(i)
                 newMask.put(i, mOr(prevClause, And(left_mask.get(j) != left_sort.parentInstances, 
-                                                right_mask.get(i) == j)))
+                                                rightJoinPoint.instances[i] == j)))#right_mask.get(i) == j)))
         #if leftJoinInstances:
          #   newMaskList.append(i)
          #   condList.append(mOr(*[And(left_mask.get(k) != leftJoinPoint.parentInstances, rightJoinPoint.instances[i] == k) for k in leftJoinInstances]))
@@ -368,9 +368,11 @@ def op_eq(left,right):
     sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.instanceSorts])
     
     #integer equality case
-    (sort, left_mask) = left.instanceSorts[0]
-    if isinstance(sort, basestring) and sort == "int":
-        (_, right_mask) = right.instanceSorts[0]
+    (left_sort, left_mask) = left.instanceSorts[0]
+    (right_sort, right_mask) = right.instanceSorts[0]
+    if (isinstance(left_sort, basestring) and left_sort == "int") or \
+        (isinstance(right_sort, basestring) and right_sort == "int"):
+        
         return BoolArg([sum(left_mask.values()) == sum(right_mask.values())])
     #clafer-set equality case
     else:
