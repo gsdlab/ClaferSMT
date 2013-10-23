@@ -7,7 +7,7 @@ Created on Apr 30, 2013
 from common import Common, Options, Clock
 from common.Common import debug_print, standard_print
 from constraints import Constraints, IsomorphismConstraint
-from gi.overrides.keysyms import m
+
 from lxml.builder import basestring
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy
@@ -32,6 +32,7 @@ class Z3Instance(object):
         self.setOptions()
         self.clock = Clock.Clock()
         #print(self.solver.help())
+        #print(get_version_string())
         
         """ Create simple objects used to store Z3 constraints. """
         self.join_constraints = Constraints.GenericConstraints()

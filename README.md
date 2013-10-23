@@ -17,5 +17,12 @@ which will produce the AST in python and print the tree.
 Required
 ========
 
-pip install bintrees
+Python 3
+
+Z3 4.2.3
+
+pip install bintrees (make sure it is installed for the correct version of python).
+
 Remove the warning messages from bintrees imports.
+
+Depending on your version of python, you may need to install lxml for "basestring" to work.
