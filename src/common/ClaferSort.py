@@ -4,10 +4,11 @@ Created on Apr 29, 2013
 @author: ezulkosk
 '''
 from common import Common, Options
+from common.Common import mOr
 from constraints import Constraints
 from lxml.builder import basestring
 from z3 import IntVector, Function, IntSort, If, BoolSort, Implies, And, Bool, \
-    Or
+    Or, Sum
 
 
 
@@ -144,6 +145,7 @@ class  ClaferSort(object):
                 extraAbsenceConstraint = True
         return (lower, upper, extraAbsenceConstraint)
     
+    #should get rid of mask and full...
     def createInstancesConstraintsAndFunctions(self):
         self.instanceRanges = [self.getInstanceRange(i) for i in range(self.numInstances)]
         for i in range(self.numInstances):
@@ -165,14 +167,16 @@ class  ClaferSort(object):
         #masks the instances that do not have the current parent 
         #mask(i,j): i == the parent number, j == the value of the child
         #outputs 1 if equal to parent, 0 otherwise
-        self.mask = Function(self.element.uid + "_mask", IntSort(), IntSort(), IntSort())
-        for i in range(self.parentInstances):    
-            for j in range(self.numInstances):
-                self.constraints.addInstanceConstraint(self.mask(i, j) == If(i == self.instances[j], 1, 0))           
+        #self.mask = Function(self.element.uid + "_mask", IntSort(), IntSort(), IntSort())
+        #self.mask = lambda x, y:mOr(*[And(x == i, self.instances[i] != self.parentInstances) for i in range(self.numInstances)])   
+        #for i in range(self.parentInstances):    
+        #    for j in range(self.numInstances):
+        #        self.constraints.addInstanceConstraint(self.mask(i, j) == If(i == self.instances[j], 1, 0))           
         #function that returns True for all instances that are on
-        self.full = Function(self.element.uid + "_full", IntSort(), BoolSort())
-        for i in range(self.numInstances):    
-            self.constraints.addInstanceConstraint(self.full(i) == If(self.instances[i] != self.parentInstances, True, False)) 
+        #self.full = Function(self.element.uid + "_full", IntSort(), BoolSort())
+        #for i in range(self.numInstances):    
+        #    self.constraints.addInstanceConstraint(self.full(i) == If(self.instances[i] != self.parentInstances, True, False)) 
+        self.full = lambda x:mOr(*[And(x == i, self.instances[i] != self.parentInstances) for i in range(self.numInstances)])   
         if not self.parent:
             return 
         #if the parent is not live, then no child can point to it  
@@ -182,19 +186,25 @@ class  ClaferSort(object):
         
     
     def createCardinalityConstraints(self):
-        for i in range(self.parentInstances):
-            summ = 0;
-            for j in range(self.numInstances):
-                summ = summ +  self.mask(i, j)
-            if self.parent:
-                self.constraints.addCardConstraint(Implies(self.parent.instances[i] != self.parent.parentUpper,summ >= self.lowerCardConstraint))
-                if self.upperCardConstraint != -1:
-                    self.constraints.addCardConstraint(Implies(self.parent.instances[i] != self.parent.parentUpper,summ <= self.upperCardConstraint))
+        summs = [[] for i in range(self.numInstances + 1)]
+        for i in range(self.numInstances):
+            (lower, upper, _) = self.getInstanceRange(i)
+            for j in range(lower, upper + 1):
+                summs[j].append(If(self.instances[i] == j, 1, 0))
+        for i in range(len(summs)):
+            if summs[i]:
+                summs[i] = Sum(*[summs[i]])
             else:
-                self.constraints.addCardConstraint(summ >= self.lowerCardConstraint)
+                summs[i] = 0
+        for i in range(self.parentInstances):
+            if self.parent:
+                self.constraints.addCardConstraint(Implies(self.parent.instances[i] != self.parent.parentUpper,summs[i] >= self.lowerCardConstraint))
                 if self.upperCardConstraint != -1:
-                    self.constraints.addCardConstraint(summ <= self.upperCardConstraint)
-            self.summs.append(summ)
+                    self.constraints.addCardConstraint(Implies(self.parent.instances[i] != self.parent.parentUpper,summs[i] <= self.upperCardConstraint))
+            else:
+                self.constraints.addCardConstraint(summs[i] >= self.lowerCardConstraint)
+                if self.upperCardConstraint != -1:
+                    self.constraints.addCardConstraint(summs[i] <= self.upperCardConstraint)
         
     def addGroupCardConstraints(self):
         if(len(self.fields) == 0 and ((not self.superSort) or self.superSort.fields == 0)):
@@ -202,7 +212,10 @@ class  ClaferSort(object):
         #lower bounds
         upperGCard = self.element.gcard.interval[1].value
         lowerGCard = self.element.gcard.interval[0].value
+        if lowerGCard == 0 and upperGCard == -1:
+            return
         for i in range(self.numInstances):
+            
             bigSumm = 0
             for j in self.fields:
                 bigSumm = bigSumm +  j.summs[i]
@@ -210,7 +223,8 @@ class  ClaferSort(object):
             #if self.superSort:
             #    for j in self.superSort.fields:
             #        bigSumm = bigSumm +  j.summs[i + self.indexInSuper]
-            self.constraints.addGroupCardConstraint(bigSumm >= lowerGCard)
+            if lowerGCard != 0:
+                self.constraints.addGroupCardConstraint(bigSumm >= lowerGCard)
             if upperGCard != -1:
                 self.constraints.addGroupCardConstraint(bigSumm <= upperGCard)
         

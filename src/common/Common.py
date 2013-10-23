@@ -45,14 +45,6 @@ def mOr(*args):
         return newArgs[0]
     else:
         return Or(*newArgs)
-    
-
-def getInstancesFromMask(sort, mask, currInstances):
-    newInstances = []
-    for i in range(sort.numInstances):
-        if mask[i]:
-            newInstances.append(currInstances.pop(0))
-    return newInstances
 
 def debug_print(string):
     if(MODE == DEBUG):

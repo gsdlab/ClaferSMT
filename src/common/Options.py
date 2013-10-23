@@ -23,9 +23,9 @@ from test.positive import books_tutorial, \
 
 GLOBAL_SCOPE = 5 #this obviously has to change
 
-MODE = Common.TEST   # Common.[NORMAL | DEBUG | TEST]
+MODE = Common.NORMAL   # Common.[NORMAL | DEBUG | TEST]
 NUM_INSTANCES = -1 # -1 to produce all instances
-PROFILING = True # True to output the translation time, and time to get first model
+PROFILING = False # True to output the translation time, and time to get first model
 CPROFILING = False #invokes the standard python profiling method (see Z3Run.py)
 GET_ISOMORPHISM_CONSTRAINT = False
 
@@ -35,7 +35,7 @@ TEST_SET = MY_TESTS
 
 #MODULE = bracketedconstraint_this.getModule()
 #MODULE = multiple_joins.getModule()
-#MODULE = this_dot_parent.getModule()
+MODULE = this_dot_parent.getModule()
 #MODULE = arithmetic.getModule()
 #MODULE = relations.getModule()
 #MODULE = boolean_connectives.getModule()
@@ -43,7 +43,7 @@ TEST_SET = MY_TESTS
 #MODULE = simple_abstract.getModule()
 #MODULE = some.getModule()
 #MODULE = simple_set.getModule()
-MODULE = zoo.getModule()
+#MODULE = zoo.getModule()
 #MODULE = simple_zoo.getModule()
 #MODULE = integer_refs.getModule()
 #MODULE = phone_feature_model.getModule()

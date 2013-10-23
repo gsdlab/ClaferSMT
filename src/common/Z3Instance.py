@@ -31,6 +31,7 @@ class Z3Instance(object):
         self.solver = Solver()
         self.setOptions()
         self.clock = Clock.Clock()
+        #print(self.solver.help())
         
         """ Create simple objects used to store Z3 constraints. """
         self.join_constraints = Constraints.GenericConstraints()
@@ -166,7 +167,7 @@ class Z3Instance(object):
                 (Common.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == sat and count != desired_number_of_models):
                 m = self.solver.model()
                 #if count ==0:
-                #    print(m)
+                #print(m)
                 result.append(m)
                 #print(self.solver.statistics())
                 # Create a new constraint the blocks the current model
@@ -177,6 +178,8 @@ class Z3Instance(object):
                         continue #raise Z3Exception("uninterpreted functions are not supported")
                     # create a constant from declaration
                     c = d()
+                    if (str(c)).startswith("z3name!"):
+                        continue
                     if is_array(c) or c.sort().kind() == Z3_UNINTERPRETED_SORT:
                         raise Z3Exception("arrays and uninterpreted sorts are not supported")
                     block.append(c != m[d])

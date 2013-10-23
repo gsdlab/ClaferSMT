@@ -14,7 +14,7 @@ import itertools
 import visitors.Visitor
 
 claferStack = [] #used to determine where the constraint is in the clafer hierarchy
-inConstraint = False #true if beneath a constraint node
+inConstraint = False #true if within a constraint
 currentConstraint = None #holds the constraint currently being traversed
 
 
@@ -112,19 +112,6 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             set_of_ints = set(list_of_ints)
             if isDisjunct and (len(set_of_ints) != len(list_of_ints)):
                 continue
-            
-            '''
-            for j in list_of_ints:
-                count = 0
-                index = 0
-                for k in mask:
-                    if k:
-                        if j == count:
-                            newMasks.append([True if l == index else False for l in range(len(mask))])
-                        count = count + 1
-                    index = index + 1
-            '''
-            '''[exprArg.instances[list_of_ints[j]]]'''
             localInstances.append([ExprArg(exprArg.joinSorts[:], 
                                            [(sort, Mask(sort, [list_of_ints[j]]))]
                                            ) for j in range(len(list_of_ints))])
@@ -152,7 +139,6 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
                 return
             num_args = len(combinations[0])
             num_combinations = len(combinations)
-            num_quantifiers = 1#len(combinations)
             for i in combinations:
                 for j in range(num_args):
                     self.currentConstraint.addLocal(element.declaration.localDeclarations[j].element, [i[j]])
@@ -161,11 +147,10 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         else:
             visitors.Visitor.visit(self, element.bodyParentExp)
             num_args = 1
-            num_quantifiers = 1
             num_combinations = 1
             ifconstraints = []
         
-        self.currentConstraint.addQuantifier(element.quantifier, num_args,num_quantifiers, num_combinations, ifconstraints)
+        self.currentConstraint.addQuantifier(element.quantifier, num_args, num_combinations, ifconstraints)
     
     def localdeclarationVisit(self, element):
         pass

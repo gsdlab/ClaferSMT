@@ -34,25 +34,7 @@ class ExprArg():
         for i in self.instanceSorts:
             (curr_sort, mask) = i
             if sort == curr_sort:
-                return mask
-    
-    def getUnmaskedInstances(self, boolArray):
-        '''
-        Used in tandem with the new approach to splits and joins
-        no use yet
-        '''
-        pass
-    
-    @staticmethod
-    def getUnmaskedCount(boolArray):
-        '''
-        Used in tandem with the new approach to splits and joins
-        '''
-        count = 0
-        for i in boolArray:
-            if i:
-                count = count + 1
-        return count        
+                return mask 
     
     def finish(self):
         return self.instanceSorts[0][1].get(0)
