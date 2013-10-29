@@ -43,7 +43,7 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                 if not sort.refs and not element.isAbstract:
                     standard_print(str(indent) + str(sort.instances[j]))
                 elif not element.isAbstract:
-                    if isinstance(sort.refSort, basestring) and sort.refSort == "integer":
+                    if isinstance(sort.refSort, basestring) and (sort.refSort == "integer" or sort.refSort == "string"):
                         standard_print(str(indent) + str(sort.instances[j]) + " = " + str(self.model.eval(sort.refs[j])))
                     else:
                         standard_print(str(indent) + str(sort.instances[j]) + " = " + 

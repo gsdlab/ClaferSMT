@@ -23,7 +23,7 @@ from test.positive import books_tutorial, \
 
 GLOBAL_SCOPE = 2 #this obviously has to change
 
-MODE = Common.TEST   # Common.[NORMAL | DEBUG | TEST]
+MODE = Common.DEBUG   # Common.[NORMAL | DEBUG | TEST]
 PRINT_CONSTRAINTS = False
 NUM_INSTANCES = -1 # -1 to produce all instances
 INFINITE = -1 #best variable name.
@@ -45,7 +45,7 @@ TEST_SET = MY_TESTS
 #MODULE = simple_abstract.getModule()
 #MODULE = some.getModule()
 #MODULE = simple_set.getModule()
-MODULE = zoo.getModule()
+#MODULE = zoo.getModule()
 #MODULE = simple_zoo.getModule()
 #MODULE = integer_refs.getModule()
 #MODULE = phone_feature_model.getModule()
@@ -53,7 +53,7 @@ MODULE = zoo.getModule()
 #MODULE = this_integer_relation.getModule()
 #MODULE = equal_references.getModule()
 #MODULE = dag_test.getModule()
-#MODULE = books_tutorial.getModule()
+MODULE = books_tutorial.getModule()
 #MODULE = subbooks.getModule()
 
 my_tests = [ 
