@@ -19,15 +19,21 @@ def run():
         tests = Options.positive_tests
     
     count = 0
+    temp_model_count = Options.NUM_INSTANCES
     for t in tests:
         count = count+1
         (file, expected_model_count) = t
+        if expected_model_count == Options.INFINITE:
+            #will change it back after the test runs
+            Options.NUM_INSTANCES = 3
         module = file.getModule()
         print("Attempting: " + str(file))
         z3 = Z3Instance.Z3Instance(module)
         actual_model_count = z3.run()
         
-        if(expected_model_count == actual_model_count):
+        if(expected_model_count == actual_model_count or 
+           (expected_model_count == Options.INFINITE and actual_model_count == Options.NUM_INSTANCES)):
             print("PASSED: " + str(file))
         else:
             print("FAILED: " + str(file) + " " + str(expected_model_count) + " " + str(actual_model_count))
+        Options.NUM_INSTANCES = temp_model_count

@@ -7,7 +7,7 @@ from common import Common
 from test import bracketedconstraint_this, multiple_joins, this_dot_parent, \
     arithmetic, relations, boolean_connectives, union, simple_abstract, some, \
     simple_set, zoo, simple_zoo, integer_refs, phone_feature_model, \
-    higher_inheritance, this_integer_relation, equal_references, dag_test
+    higher_inheritance, this_integer_relation, equal_references, dag_test, subbooks
 from test.positive import books_tutorial, \
     check_unique_ref_names_with_inheritance, constraints, enforcingInverseReferences, \
     i101, i10, i137_parsing, i14, i17, i18, i19, i23, \
@@ -21,11 +21,13 @@ from test.positive import books_tutorial, \
     i84referencespointingtothesameobject, i98_toplevelreferences, \
     referencesshouldbeunique, subtypingprimitivetypes, i205refdisambiguationII
 
-GLOBAL_SCOPE = 5 #this obviously has to change
+GLOBAL_SCOPE = 2 #this obviously has to change
 
 MODE = Common.TEST   # Common.[NORMAL | DEBUG | TEST]
+PRINT_CONSTRAINTS = False
 NUM_INSTANCES = -1 # -1 to produce all instances
-PROFILING = False # True to output the translation time, and time to get first model
+INFINITE = -1 #best variable name.
+PROFILING = True # True to output the translation time, and time to get first model
 CPROFILING = False #invokes the standard python profiling method (see Z3Run.py)
 GET_ISOMORPHISM_CONSTRAINT = False
 
@@ -52,6 +54,7 @@ MODULE = zoo.getModule()
 #MODULE = equal_references.getModule()
 #MODULE = dag_test.getModule()
 #MODULE = books_tutorial.getModule()
+#MODULE = subbooks.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),
@@ -67,7 +70,8 @@ my_tests = [
           (integer_refs, 1),
           (higher_inheritance, 1),
           (this_integer_relation, 2),
-          (equal_references, 2)
+          (equal_references, 2),
+          (zoo, INFINITE)
          ]
 
 positive_tests = [

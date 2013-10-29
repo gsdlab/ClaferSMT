@@ -4,6 +4,7 @@ Created on Mar 26, 2013
 @author: ezulkosk
 '''
 
+from common import Common
 from common.Common import mAnd
 from constraints import BracketedConstraint
 from constraints.BracketedConstraint import ExprArg, IntArg, BoolArg
@@ -68,16 +69,14 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             if element.id == "this":
                 exprArgList = []
                 for i in range(element.claferSort.numInstances):
-                    exprArgList.append(ExprArg([element.claferSort], 
-                                               [(element.claferSort, Mask(element.claferSort, [i]))]))
+                    exprArgList.append(ExprArg([(element.claferSort, Mask(element.claferSort, [i]))]))
                 self.currentConstraint.addArg(exprArgList)
             elif element.id == "ref":
-                self.currentConstraint.addArg([ExprArg(["ref"], ["ref"])])
+                self.currentConstraint.addArg([ExprArg(["ref"])])
             elif element.id == "parent":
-                self.currentConstraint.addArg([ExprArg(["parent"], ["parent"])])
+                self.currentConstraint.addArg([ExprArg(["parent"])])
             elif element.claferSort:  
-                self.currentConstraint.addArg([ExprArg([element.claferSort], 
-                                                      [(element.claferSort, 
+                self.currentConstraint.addArg([ExprArg([(element.claferSort, 
                                                         Mask(element.claferSort, [i for i in range(element.claferSort.numInstances)]))])])
             else:
                 #localdecl case
@@ -94,14 +93,18 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.inConstraint = False
     
     def funexpVisit(self, element):
+        if element.operation =="in":
+            Common.BREAK = True
         for i in element.elements:
             visitors.Visitor.visit(self, i)
         if(self.inConstraint):
             self.currentConstraint.addOperator(element.operation)
+        if element.operation =="in":
+            Common.BREAK = False    
            
-    #assume their is only one sort at this time, which is true of my old version of clafer
+    #assume their is only one sort in the decl at this time, which is true of my old version of clafer
     def createAllLocalsCombinations(self, localDecls, exprArg, isDisjunct):
-        (sort, mask) = exprArg.instanceSorts[0]
+        (sort, mask) = exprArg.getInstanceSort(0)
         ranges = [range(mask.size()) for i in localDecls]
         localInstances = []
         ifConstraints = []
@@ -112,8 +115,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             set_of_ints = set(list_of_ints)
             if isDisjunct and (len(set_of_ints) != len(list_of_ints)):
                 continue
-            localInstances.append([ExprArg(exprArg.joinSorts[:], 
-                                           [(sort, Mask(sort, [list_of_ints[j]]))]
+            localInstances.append([ExprArg([(sort, Mask(sort, [list_of_ints[j]]))]
                                            ) for j in range(len(list_of_ints))])
             ifConstraints.append(mAnd(*[mask.get(j) != sort.parentInstances for j in list_of_ints]))
             
@@ -163,5 +165,6 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         return element
         
     def stringliteralVisit(self, element):
-        return element
+        #TODO stubbed
+        self.currentConstraint.addArg([IntArg([0])])#element.value])])
     

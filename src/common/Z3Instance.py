@@ -7,13 +7,13 @@ Created on Apr 30, 2013
 from common import Common, Options, Clock
 from common.Common import debug_print, standard_print
 from constraints import Constraints, IsomorphismConstraint
-
 from lxml.builder import basestring
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy
 from z3 import *
 import common
 import time
+
 
 class Z3Instance(object):
     ''' 
@@ -35,7 +35,7 @@ class Z3Instance(object):
         #print(get_version_string())
         
         """ Create simple objects used to store Z3 constraints. """
-        self.join_constraints = Constraints.GenericConstraints()
+        self.join_constraints = Constraints.GenericConstraints("Z3Instance")
         
         """ 
         Used to map constraints in the UNSAT core to Boolean variables.
@@ -65,7 +65,7 @@ class Z3Instance(object):
                 i.indexInSuper = i.superSort.addSubSort(i)     
          
     def createCommonFunctions(self):
-        self.common_function_constraints = Constraints.GenericConstraints()
+        self.common_function_constraints = Constraints.GenericConstraints("Common")
         #self.common_function_constraints.addConstraint(Common.bool2Int(True) == 1)
         #self.common_function_constraints.addConstraint(Common.bool2Int(False) == 0)               
     
@@ -147,7 +147,7 @@ class Z3Instance(object):
             i.assertConstraints(self)
     
     def printConstraints(self):
-        if not Common.MODE == Common.DEBUG:
+        if not (Common.MODE == Common.DEBUG and Options.PRINT_CONSTRAINTS):
             return
         for i in self.z3_sorts.values():
             i.constraints.print()
@@ -202,7 +202,7 @@ class Z3Instance(object):
                     core = self.solver.unsat_core()
                     debug_print(len(core))
                     for i in core:
-                        print(self.unsat_map[str(i)])
+                        print(str(i) + " ==> " + str(self.unsat_map[str(i)]))
                         print()
                     return result
                 if count == 0:

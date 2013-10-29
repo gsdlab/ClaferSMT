@@ -18,14 +18,15 @@ class Constraints():
         if Common.MODE != Common.DEBUG: 
             z3.solver.add(constraint)
         if Common.MODE == Common.DEBUG:
-            p = Bool("p" + str(Common.getConstraintUID()))
+            p = Bool(str(self.assertID) + "_" + str(Common.getConstraintUID()))
             z3.unsat_core_trackers.append(p)
             z3.unsat_map[str(p)] = constraint
             z3.solver.add(Implies(p, constraint))
 
 class GenericConstraints(Constraints): 
-    def __init__(self):
+    def __init__(self, ident):
         self.constraints = []
+        self.assertID = ident
         
     def addConstraint(self, c):
         self.constraints.append(c)
@@ -41,6 +42,9 @@ class GenericConstraints(Constraints):
         for i in self.constraints:
             self.assertConstraint(i,z3)
             
+    def __str__(self):
+        return str(self.ident)
+            
     def print(self):
         for i in self.constraints:
             debug_print(i)
@@ -49,6 +53,7 @@ class GenericConstraints(Constraints):
 class ClaferConstraints(Constraints):
     def __init__(self, claferSort):
         self.claferSort = claferSort
+        self.assertID = str(self.claferSort.element.uid)
         self.instance_constraints = []
         self.card_constraints = []
         self.group_card_constraints = []
@@ -69,6 +74,9 @@ class ClaferConstraints(Constraints):
         
     def addRefConstraint(self,c):
         self.ref_constraints.append(c)
+    
+    def __str__(self):
+        return str(self.claferSort.element.uid)
     
     def assertConstraints(self, z3):
         '''
