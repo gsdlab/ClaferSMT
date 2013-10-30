@@ -31,7 +31,7 @@ class Z3Instance(object):
         self.solver = Solver()
         self.setOptions()
         self.clock = Clock.Clock()
-        #print(self.solver.help())
+        print(self.solver.help())
         #print(get_version_string())
         
         """ Create simple objects used to store Z3 constraints. """
@@ -75,7 +75,8 @@ class Z3Instance(object):
         Adds additional options for better pretty-printing, if debugging.
         """
         self.solver.set(unsat_core=True)
-        
+        set_option(auto_config=False)
+        set_option(candidate_models=True)
         if Common.MODE == Common.DEBUG:
             #set_option(max_width=2)
             set_option(max_depth=1000)

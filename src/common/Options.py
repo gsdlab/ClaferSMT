@@ -28,7 +28,6 @@ from test.positive import books_tutorial, \
 ========
 * Fix any ops left in BracketedConstraint
 * Int refs... possible solution: Int ClaferSort (hopefully there is an easier way...) 
-* Improve PrintHierarchy Efficiency...
 * Documentation
 * Scopes
 * Real Numbers
@@ -36,7 +35,6 @@ from test.positive import books_tutorial, \
 * Refactor (especially join in BracketedConstraint)
 * Implement isomorphism
 * Find the complete-model option in Z3 (to generate arbitrary numbers for unconstrained variables)
-* Clean PrintHierarchy
 '''
 
 

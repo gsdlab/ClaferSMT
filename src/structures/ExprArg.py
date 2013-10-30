@@ -13,12 +13,8 @@ import sys
 class ExprArg():
     def __init__(self, instanceSorts):
         '''
-        :param joinSorts: The list of sorts used to determine which ClaferSorts to join.
-        :type joinSorts: [:class:`~common.ClaferSort`]
         :param instanceSorts: The list of sorts that are actually in instances.
         :type instancesSorts: [:class:`~common.ClaferSort`]
-        :param instances: The set of Z3-int expressions associated with the bracketed constraint up to this point.
-        :type instances: [Int()]
         
         Struct used to hold information as a bracketed constraint is traversed. 
         '''
