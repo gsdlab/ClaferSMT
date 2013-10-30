@@ -126,7 +126,7 @@ class JoinArg(ExprArg):
         for i in mask.keys():
             #ClaferSort.addSubSort(self, sub), is somewhat related 
             newMask.put(i + sort.indexInSuper,
-                        If(mask.get(i) != sort.parentInstances, 
+                        If(sort.isOn(mask.get(i)), 
                            sort.superSort.instances[i + sort.indexInSuper], 
                            sort.superSort.parentInstances))
         return(sort.superSort, newMask)
@@ -151,8 +151,6 @@ class JoinArg(ExprArg):
             (sort, mask) = i
             for j in mask.keys():
                 mask.put(j, If(mask.get(j), sort.instances[j], sort.parentInstances))
-        #for i in newMask.keys():
-        #    newMask.put(i, If(newMask.get(i), sort.parent.instances[i], sort.parent.parentInstances))
         return ExprArg(newInstanceSorts)
     
     @staticmethod
@@ -163,7 +161,7 @@ class JoinArg(ExprArg):
             if sort.refSort == "integer" or sort.refSort == "string": #change for string soon
                 newMask = Mask()
                 for i in mask.keys():
-                    newMask.put(i, If(mask.get(i) != sort.parentInstances, sort.refs[i], 0))
+                    newMask.put(i, If(sort.isOn(mask.get(i)), sort.refs[i], 0))
                 newInstanceSorts.append(("int", newMask)) #should change the "int", but not sure how yet
             else:
                 print("Error on: " + sort.refSort + ", refs other than int (e.g. double) unimplemented")
@@ -175,16 +173,27 @@ class JoinArg(ExprArg):
         newInstanceSorts = []
         for i in arg.getInstanceSorts():
             (sort, mask) = i
+            while not sort.refs:
+                (sort, mask) = JoinArg.joinWithSuper(sort, mask)
             tempRefs = []
             newMask = JoinArg.alreadyExists(sort.refSort, newInstanceSorts)
             if not newMask:
                 newMask = Mask()
             for j in mask.keys():
-                tempRefs.append(If(mask.get(j) != sort.parentInstances,
-                                   sort.refs[j], sort.refSort.numInstances))
-            for j in range(sort.refSort.numInstances):
-                clause = mOr(*[k == j for k in tempRefs])
-                newMask.put(j, mOr(newMask.get(j), clause))
+                if isinstance(sort.refSort, basestring):
+                    tempRefs.append(If(sort.isOn(mask.get(j)),
+                                       sort.refs[j], 0))
+                else:
+                    tempRefs.append(If(sort.isOn(mask.get(j)),
+                                       sort.refs[j], sort.refSort.numInstances))
+            if isinstance(sort.refSort, basestring):
+                for j in range(sort.numInstances):
+                    clause = mOr(*[k == j for k in tempRefs])
+                    newMask.put(j, mOr(newMask.get(j), clause))
+            else:
+                for j in range(sort.refSort.numInstances):
+                    clause = mOr(*[k == j for k in tempRefs])
+                    newMask.put(j, mOr(newMask.get(j), clause))
             newInstanceSorts.append((sort.refSort, newMask))
         for i in newInstanceSorts:
             (sort, mask) = i
@@ -227,7 +236,7 @@ class JoinArg(ExprArg):
                         #only possibly join with things that are in left
                         if left_mask.get(j):
                             prevClause = newMask.get(i)
-                            newMask.put(i, mOr(prevClause, And(left_mask.get(j) != left_sort.parentInstances, 
+                            newMask.put(i, mOr(prevClause, And(left_sort.isOn(left_mask.get(j)), 
                                                             right_sort.instances[i] == j)))
                 newInstanceSorts.append((right_sort, newMask))
         for i in newInstanceSorts:

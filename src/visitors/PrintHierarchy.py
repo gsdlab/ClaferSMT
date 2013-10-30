@@ -26,12 +26,17 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
         self.parentStack = [0] #used to determine the parent of each clafer
     
     def claferVisit(self, element):
+        sort = self.z3.z3_sorts[element.uid]
         if element.isAbstract and self.parentStack == [0]:
-            return
+            for i in sort.subs:
+                for j in range(i.numInstances):
+                    isOn = str(self.model.eval(i.instances[j])) != str(i.parentInstances)
+                    if isOn:
+                        standard_print(element.getNonUniqueID() + "__" + str(i.indexInSuper + j)
+                            + " = " + str(i.instances[j]))
         if not element.isAbstract:
             self.indentCount = self.indentCount + 1 
         indent = "  " * (self.indentCount)
-        sort = self.z3.z3_sorts[element.uid]
         
         for j in range(sort.numInstances):
             if not element.isAbstract:
@@ -47,19 +52,16 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                         standard_print(str(indent) + str(sort.instances[j]) + " = " + str(self.model.eval(sort.refs[j])))
                     else:
                         standard_print(str(indent) + str(sort.instances[j]) + " = " + 
-                                       str(sort.refSort.element.uid.split("_",1)[1]) + 
+                                       str(sort.refSort.element.getNonUniqueID()) + 
                                        "__"+ str(self.model.eval(sort.refs[j])))
                 self.parentStack.append(j)
                 for i in element.elements:
                     visitors.Visitor.visit(self, i)
                 if sort.superSort:
                     self.parentStack.append(j + sort.indexInSuper)
-                    #for i in sort.superSort.element.elements:
-                    #    visitors.Visitor.visit(self, i)
                     visitors.Visitor.visit(self, sort.superSort.element)
                     self.parentStack.pop()
                 self.parentStack.pop()
         if not element.isAbstract:
             self.indentCount = self.indentCount - 1   
-    
     

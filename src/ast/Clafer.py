@@ -20,13 +20,14 @@ class Clafer(object):
         self.supers = my_supers
         self.card = card
         self.glCard = glCard
+        self.nonUniqueID = self.uid.split("_")[1]
         self.elements = []
         
     def addElement(self, element):
         #print(self.elements)
         self.elements.append(element)
        
-    def nonUniqueID(self):
+    def getNonUniqueID(self):
         """
         :returns: string
         
@@ -34,7 +35,7 @@ class Clafer(object):
         
         >>> nonUniqueID(c1_A) => "A"
         """
-        return self.uid.split("_")[1]
+        return self.nonUniqueID
         
     def __str__(self):
         return self.uid

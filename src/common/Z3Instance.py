@@ -131,12 +131,14 @@ class Z3Instance(object):
         return len(models)
         
     def printVars(self, model):
+        self.clock.tick("printing")
         self.model_count = self.model_count + 1
         standard_print("###########################")
         standard_print("# Model: " + str(self.model_count))    
         standard_print("###########################")
         Visitor.visit(PrintHierarchy.PrintHierarchy(self, model), self.module)
         standard_print("")
+        self.clock.tack("printing")
     
     def assertConstraints(self):
         for i in self.z3_sorts.values():
@@ -166,6 +168,8 @@ class Z3Instance(object):
             self.clock.tick("unsat")
             if (Common.MODE != Common.DEBUG and self.solver.check() == sat and count != desired_number_of_models) or \
                 (Common.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == sat and count != desired_number_of_models):
+                if count == 0:
+                    self.clock.tock("first model")
                 m = self.solver.model()
                 #if count ==0:
                 #print(m)
@@ -186,14 +190,12 @@ class Z3Instance(object):
                     block.append(c != m[d])
                     #print(str(d) + " = " + str(m[d]))
                 self.solver.add(Or(block))
-                self.printVars(m)
+                if not Common.MODE == Common.TEST:
+                    self.printVars(m)
                 if Options.GET_ISOMORPHISM_CONSTRAINT:
                     IsomorphismConstraint.IsomorphismConstraint(self, m).createIsomorphicConstraint()
                     self.printConstraints()
                     self.z3_bracketed_constraints.pop().assertConstraints(self)
-                    
-                if count == 0:
-                    self.clock.tock("first model")
                 count += 1
             else:
                 self.clock.tock("unsat")
@@ -208,11 +210,6 @@ class Z3Instance(object):
                 if count == 0:
                     standard_print("UNSAT")
                 return result
-   
-        
-    ###############################
-    # accessors                   #
-    ###############################
     
     def getSort(self, uid):
         return self.z3_sorts.get(uid)
@@ -222,14 +219,6 @@ class Z3Instance(object):
         :returns: z3_sorts
         '''
         return self.z3_sorts.values()
-    
-    ###############################
-    # end accessors               # 
-    ###############################
-    
-    ###############################
-    # adders                      #
-    ###############################
         
     def addSort(self, sortID, sort):
         '''
@@ -239,11 +228,6 @@ class Z3Instance(object):
         :type sort: :mod:`common.ClaferSort`
         '''
         self.z3_sorts[sortID] = sort
-        
-
-    ###############################
-    # end adders                  #
-    ###############################
     
     def __str__(self):
         return (str(self.getSorts())) + "\n" +\

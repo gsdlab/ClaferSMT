@@ -28,6 +28,8 @@ def main(args):
     
     if Common.MODE == Common.TEST:
         TestClafers.run()
+    elif Common.MODE == Common.ONE:
+        TestClafers.runForOne()
     else:
         module = Options.MODULE
         

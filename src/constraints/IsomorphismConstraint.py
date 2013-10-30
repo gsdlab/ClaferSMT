@@ -35,9 +35,6 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
         self.topSome = None
         self.currSome = None
     
-    def isOn(self, inst, sort):
-        return int(str(inst)) != sort.parentInstances
-    
     def createIsomorphicConstraint(self):
         assert isinstance(self.model, ModelRef)
         sorts = self.z3.getSorts()

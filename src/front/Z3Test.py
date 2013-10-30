@@ -33,6 +33,15 @@ def BitVecVector(prefix, sz, N):
   return [ BitVec('%s_%s' % (prefix, i), sz) for i in range(N) ]
 
 def main(args):
+    A = Bool("A")
+    B = Bool("B")
+    C = Bool("C")
+    D = Bool("D")
+    s = Solver()
+    s.add(Xor(A,B,C,D))
+    s.check()
+    print(s.model());
+    
     f = Function('f', IntSort(), IntSort(), IntSort())
     A = Array("A", IntSort(), IntSort())
     B = Array("B", IntSort(), IntSort())

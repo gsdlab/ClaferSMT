@@ -40,16 +40,32 @@ class Clock():
         :param event: ID of the event that was already mapped. If it does not exist, error.
         :type event: string
         """
+        endTime = time.clock()
         if self.isBroken:
             return
         if not event in self.event_map.keys():
             print("Tock with no matching tick: " + event)
             sys.exit(1)
         startTime = self.event_map[event]
-        endTime = time.clock()
         self.event_map.pop(event)
         self.completed_event_map[event] = endTime - startTime        
             
+    
+    def tack(self, event):
+        """
+        :param event: ID of the event that may occur many times. Output will be the sum of these times.
+        :type event: string
+        """
+        endTime = time.clock()
+        if self.isBroken:
+            return
+        if not event in self.event_map.keys():
+            print("Tack with no matching tick: " + event)
+            sys.exit(1)
+        startTime = self.event_map[event]
+        self.event_map.pop(event)
+        self.completed_event_map[event] = self.completed_event_map.get(event, 0) + endTime - startTime      
+    
     def printEvent(self, event):
         """
         :param event: ID of the event that we want to print. If it does not exist, error.

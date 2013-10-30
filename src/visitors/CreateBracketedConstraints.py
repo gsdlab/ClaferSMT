@@ -117,7 +117,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
                 continue
             localInstances.append([ExprArg([(sort, Mask(sort, [list_of_ints[j]]))]
                                            ) for j in range(len(list_of_ints))])
-            ifConstraints.append(mAnd(*[mask.get(j) != sort.parentInstances for j in list_of_ints]))
+            ifConstraints.append(mAnd(*[sort.isOn(mask.get(j)) for j in list_of_ints]))
             
         return (localInstances, ifConstraints)
      

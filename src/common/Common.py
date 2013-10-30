@@ -9,6 +9,7 @@ import sys
 NORMAL = 0
 DEBUG = 1
 TEST = 2
+ONE = 3
 MODE = NORMAL
 BREAK = False
 FUNCTION_ID = 0 
