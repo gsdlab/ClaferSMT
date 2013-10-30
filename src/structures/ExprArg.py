@@ -306,7 +306,7 @@ class Mask():
     @staticmethod
     def createIntMask(instances):
         return Mask([(i, instances[i]) for i in range(len(instances))])
-
+    
     @staticmethod
     def createBoolMask(instances):
         return Mask([(i, instances[i]) for i in range(len(instances))])

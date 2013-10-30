@@ -284,6 +284,7 @@ class  ClaferSort(object):
     def addSubSort(self, sub):
         self.subs.append(sub)
         oldSubIndex = self.currentSubIndex
+        sub.indexInSuper = oldSubIndex
         self.currentSubIndex = self.currentSubIndex + sub.numInstances
         #the super cannot exist without the sub, and vice-versa
         for i in range(sub.numInstances):

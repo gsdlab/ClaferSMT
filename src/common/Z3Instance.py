@@ -136,7 +136,9 @@ class Z3Instance(object):
         standard_print("###########################")
         standard_print("# Model: " + str(self.model_count))    
         standard_print("###########################")
-        Visitor.visit(PrintHierarchy.PrintHierarchy(self, model), self.module)
+        ph = PrintHierarchy.PrintHierarchy(self, model)
+        Visitor.visit(ph, self.module)
+        ph.printTree()
         standard_print("")
         self.clock.tack("printing")
     

@@ -52,6 +52,6 @@ def runForOne():
     for t in Options.my_tests:
         (file, _) = t
         module = file.getModule()
-        print_separate("| Attempting: " + str(file.__name__))
+        print_separate("Attempting: " + str(file.__name__))
         z3 = Z3Instance.Z3Instance(module)
         z3.run()

@@ -42,7 +42,7 @@ from test.positive import books_tutorial, \
 
 GLOBAL_SCOPE = 2 #this obviously has to change
 
-MODE = Common.TEST   # Common.[NORMAL | DEBUG | TEST | ONE], where ONE outputs one model from each test
+MODE = Common.NORMAL   # Common.[NORMAL | DEBUG | TEST | ONE], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
 NUM_INSTANCES = 6 # -1 to produce all instances
 INFINITE = -1 #best variable name.
