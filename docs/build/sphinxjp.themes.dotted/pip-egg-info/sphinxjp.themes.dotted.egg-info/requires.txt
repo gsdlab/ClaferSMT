@@ -1,4 +1,0 @@
-setuptools
-docutils
-sphinx
-sphinxjp.themecore

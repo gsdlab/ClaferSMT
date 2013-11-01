@@ -8,4 +8,5 @@ src
    common
    constraints
    front
+   structures
    visitors

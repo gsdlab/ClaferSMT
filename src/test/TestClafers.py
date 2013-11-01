@@ -8,7 +8,8 @@ from front.Z3Instance import Z3Instance
 
 
 SEPARATOR = "========================================================" 
-print_separate = lambda x : print("\n" + SEPARATOR + "\n| " + x + "\n" +  SEPARATOR + "\n")
+def print_separate(x):
+    print("\n" + SEPARATOR + "\n| " + x + "\n" +  SEPARATOR + "\n")
 
 def getTestSet():
     if Options.TEST_SET == Options.MY_TESTS:

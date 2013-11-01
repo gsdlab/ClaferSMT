@@ -1,27 +1,46 @@
-constraints Package
+constraints package
 ===================
 
-:mod:`BracketedConstraint` Module
----------------------------------
+Submodules
+----------
+
+constraints.BracketedConstraint module
+--------------------------------------
 
 .. automodule:: constraints.BracketedConstraint
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`Constraints` Module
--------------------------
+constraints.Constraints module
+------------------------------
 
 .. automodule:: constraints.Constraints
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`IsomorphismConstraint` Module
------------------------------------
+constraints.IsomorphismConstraint module
+----------------------------------------
 
 .. automodule:: constraints.IsomorphismConstraint
     :members:
     :undoc-members:
     :show-inheritance:
 
+constraints.Operations module
+-----------------------------
+
+.. automodule:: constraints.Operations
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: constraints
+    :members:
+    :undoc-members:
+    :show-inheritance:

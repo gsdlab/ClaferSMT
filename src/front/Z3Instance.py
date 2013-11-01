@@ -152,10 +152,10 @@ class Z3Instance(object):
         if not (Common.MODE == Common.DEBUG and Options.PRINT_CONSTRAINTS):
             return
         for i in self.z3_sorts.values():
-            i.constraints.print()
-        self.join_constraints.print()
+            i.constraints.debug_print()
+        self.join_constraints.debug_print()
         for i in self.z3_bracketed_constraints:
-            i.print()
+            i.debug_print()
         
     #this is not my method, some stackoverflow or z3.codeplex.com method. Can't remember, should find it.
     # i no longer need this method, if i implement the isomorphism detection

@@ -48,7 +48,7 @@ class GenericConstraints(Constraints):
     def __str__(self):
         return str(self.ident)
             
-    def print(self):
+    def debug_print(self):
         for i in self.constraints:
             debug_print(i)
             debug_print("")
@@ -95,7 +95,7 @@ class ClaferConstraints(Constraints):
                        ]   
         [self.assertConstraint(j,z3) for i in constraints for j in i]
     
-    def print(self):
+    def debug_print(self):
         constraints = [
                        self.instance_constraints,
                        self.card_constraints,

@@ -1,5 +1,5 @@
 .. ClaferZ3 documentation master file, created by
-   sphinx-quickstart on Thu May  2 13:28:38 2013.
+   sphinx-quickstart on Fri Nov  1 09:45:44 2013.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 

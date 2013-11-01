@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>common Package &mdash; ClaferZ3 0.3.3 documentation</title>
+    <title>common package &mdash; ClaferZ3 0 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.3.3',
+        VERSION:     '0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ClaferZ3 0.3.3 documentation" href="index.html" /> 
+    <link rel="top" title="ClaferZ3 0 documentation" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">ClaferZ3 0.3.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">ClaferZ3 0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -45,17 +45,17 @@
           <div class="body">
             
   <div class="section" id="common-package">
-<h1>common Package<a class="headerlink" href="#common-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="clafersort-module">
-<h2><tt class="xref py py-mod docutils literal"><span class="pre">ClaferSort</span></tt> Module<a class="headerlink" href="#clafersort-module" title="Permalink to this headline">¶</a></h2>
+<h1>common package<a class="headerlink" href="#common-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-common.Clock">
-<span id="clock-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Clock</span></tt> Module<a class="headerlink" href="#module-common.Clock" title="Permalink to this headline">¶</a></h2>
+<span id="common-clock-module"></span><h2>common.Clock module<a class="headerlink" href="#module-common.Clock" title="Permalink to this headline">¶</a></h2>
 <p>Created on Oct 10, 2013</p>
 <p>&#64;author: ezulkosk</p>
 <dl class="class">
 <dt id="common.Clock.Clock">
-<em class="property">class </em><tt class="descclassname">common.Clock.</tt><tt class="descname">Clock</tt><a class="headerlink" href="#common.Clock.Clock" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">common.Clock.</tt><tt class="descname">Clock</tt><a class="reference internal" href="_modules/common/Clock.html#Clock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.Clock.Clock" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -68,7 +68,6 @@
 </tr>
 </tbody>
 </table>
-<p>The profiler. Tick...tock...tick...tock...</p>
 <dl class="attribute">
 <dt id="common.Clock.Clock.event_map">
 <tt class="descname">event_map</tt><em class="property"> = {}</em><a class="headerlink" href="#common.Clock.Clock.event_map" title="Permalink to this definition">¶</a></dt>
@@ -81,7 +80,7 @@
 
 <dl class="method">
 <dt id="common.Clock.Clock.printEvent">
-<tt class="descname">printEvent</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#common.Clock.Clock.printEvent" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">printEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/common/Clock.html#Clock.printEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.Clock.Clock.printEvent" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -94,13 +93,26 @@
 
 <dl class="method">
 <dt id="common.Clock.Clock.printEvents">
-<tt class="descname">printEvents</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Clock.Clock.printEvents" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">printEvents</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/common/Clock.html#Clock.printEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.Clock.Clock.printEvents" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints out all completed events.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="common.Clock.Clock.tack">
+<tt class="descname">tack</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/common/Clock.html#Clock.tack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.Clock.Clock.tack" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> (<em>string</em>) &#8211; ID of the event that may occur many times. Output will be the sum of these times.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="common.Clock.Clock.tick">
-<tt class="descname">tick</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#common.Clock.Clock.tick" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">tick</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/common/Clock.html#Clock.tick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.Clock.Clock.tick" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -113,7 +125,7 @@
 
 <dl class="method">
 <dt id="common.Clock.Clock.tock">
-<tt class="descname">tock</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#common.Clock.Clock.tock" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">tock</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/common/Clock.html#Clock.tock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.Clock.Clock.tock" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -128,27 +140,24 @@
 
 </div>
 <div class="section" id="module-common.Common">
-<span id="common-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Common</span></tt> Module<a class="headerlink" href="#module-common.Common" title="Permalink to this headline">¶</a></h2>
+<span id="common-common-module"></span><h2>common.Common module<a class="headerlink" href="#module-common.Common" title="Permalink to this headline">¶</a></h2>
 <p>Created on Apr 28, 2013</p>
 <p>&#64;author: ezulkosk</p>
 <dl class="function">
 <dt id="common.Common.debug_print">
-<tt class="descclassname">common.Common.</tt><tt class="descname">debug_print</tt><big>(</big><em>string</em><big>)</big><a class="headerlink" href="#common.Common.debug_print" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<tt class="descclassname">common.Common.</tt><tt class="descname">debug_print</tt><big>(</big><em>string</em><big>)</big><a class="reference internal" href="_modules/common/Common.html#debug_print"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.Common.debug_print" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only prints the string if in DEBUG mode.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="common.Common.getConstraintUID">
-<tt class="descclassname">common.Common.</tt><tt class="descname">getConstraintUID</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Common.getConstraintUID" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="common.Common.getFunctionUID">
-<tt class="descclassname">common.Common.</tt><tt class="descname">getFunctionUID</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Common.getFunctionUID" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<tt class="descclassname">common.Common.</tt><tt class="descname">getConstraintUID</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/common/Common.html#getConstraintUID"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.Common.getConstraintUID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to generate unique booleans for UNSAT core</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="common.Common.mAnd">
-<tt class="descclassname">common.Common.</tt><tt class="descname">mAnd</tt><big>(</big><em>*args</em><big>)</big><a class="headerlink" href="#common.Common.mAnd" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">common.Common.</tt><tt class="descname">mAnd</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="_modules/common/Common.html#mAnd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.Common.mAnd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Short for MaybeAnd.
 Helper Function to simplify formulas passed to Z3, but mostly to make debugging output more comprehensible.
 Only applies the And function if there are actually multiple arguments.</p>
@@ -156,40 +165,42 @@ Only applies the And function if there are actually multiple arguments.</p>
 
 <dl class="function">
 <dt id="common.Common.mOr">
-<tt class="descclassname">common.Common.</tt><tt class="descname">mOr</tt><big>(</big><em>*args</em><big>)</big><a class="headerlink" href="#common.Common.mOr" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">common.Common.</tt><tt class="descname">mOr</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="_modules/common/Common.html#mOr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.Common.mOr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Similar to mAnd</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="common.Common.max2">
-<tt class="descclassname">common.Common.</tt><tt class="descname">max2</tt><big>(</big><em>l</em>, <em>r</em><big>)</big><a class="headerlink" href="#common.Common.max2" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">common.Common.</tt><tt class="descname">max2</tt><big>(</big><em>l</em>, <em>r</em><big>)</big><a class="reference internal" href="_modules/common/Common.html#max2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.Common.max2" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns the min of two integers</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="common.Common.min2">
-<tt class="descclassname">common.Common.</tt><tt class="descname">min2</tt><big>(</big><em>l</em>, <em>r</em><big>)</big><a class="headerlink" href="#common.Common.min2" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">common.Common.</tt><tt class="descname">min2</tt><big>(</big><em>l</em>, <em>r</em><big>)</big><a class="reference internal" href="_modules/common/Common.html#min2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.Common.min2" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns the min of two integers</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="common.Common.reset">
-<tt class="descclassname">common.Common.</tt><tt class="descname">reset</tt><big>(</big><big>)</big><a class="headerlink" href="#common.Common.reset" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<tt class="descclassname">common.Common.</tt><tt class="descname">reset</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/common/Common.html#reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.Common.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only needed for running test suites.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="common.Common.standard_print">
-<tt class="descclassname">common.Common.</tt><tt class="descname">standard_print</tt><big>(</big><em>string</em><big>)</big><a class="headerlink" href="#common.Common.standard_print" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<tt class="descclassname">common.Common.</tt><tt class="descname">standard_print</tt><big>(</big><em>string</em><big>)</big><a class="reference internal" href="_modules/common/Common.html#standard_print"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#common.Common.standard_print" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints the string if <strong>not</strong> in TEST mode.</p>
+</dd></dl>
 
 </div>
 <div class="section" id="module-common.Options">
-<span id="options-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Options</span></tt> Module<a class="headerlink" href="#module-common.Options" title="Permalink to this headline">¶</a></h2>
+<span id="common-options-module"></span><h2>common.Options module<a class="headerlink" href="#module-common.Options" title="Permalink to this headline">¶</a></h2>
 <p>Created on Oct 6, 2013</p>
 <p>&#64;author: ezulkosk</p>
 </div>
-<div class="section" id="z3instance-module">
-<h2><tt class="xref py py-mod docutils literal"><span class="pre">Z3Instance</span></tt> Module<a class="headerlink" href="#z3instance-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-common">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-common" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -201,12 +212,12 @@ Only applies the And function if there are actually multiple arguments.</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">common Package</a><ul>
-<li><a class="reference internal" href="#clafersort-module"><tt class="docutils literal"><span class="pre">ClaferSort</span></tt> Module</a></li>
-<li><a class="reference internal" href="#module-common.Clock"><tt class="docutils literal"><span class="pre">Clock</span></tt> Module</a></li>
-<li><a class="reference internal" href="#module-common.Common"><tt class="docutils literal"><span class="pre">Common</span></tt> Module</a></li>
-<li><a class="reference internal" href="#module-common.Options"><tt class="docutils literal"><span class="pre">Options</span></tt> Module</a></li>
-<li><a class="reference internal" href="#z3instance-module"><tt class="docutils literal"><span class="pre">Z3Instance</span></tt> Module</a></li>
+<li><a class="reference internal" href="#">common package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-common.Clock">common.Clock module</a></li>
+<li><a class="reference internal" href="#module-common.Common">common.Common module</a></li>
+<li><a class="reference internal" href="#module-common.Options">common.Options module</a></li>
+<li><a class="reference internal" href="#module-common">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -242,11 +253,11 @@ Only applies the And function if there are actually multiple arguments.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">ClaferZ3 0.3.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">ClaferZ3 0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2013, Ed Zulkoski.
+        &copy; Copyright 2013, Ed Zulkoski, Rafael Olaechea.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
     </div>
   </body>

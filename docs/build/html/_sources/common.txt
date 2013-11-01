@@ -1,15 +1,10 @@
-common Package
+common package
 ==============
 
-:mod:`ClaferSort` Module
-------------------------
+Submodules
+----------
 
-.. automodule:: common.ClaferSort
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`Clock` Module
+common.Clock module
 -------------------
 
 .. automodule:: common.Clock
@@ -17,7 +12,7 @@ common Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`Common` Module
+common.Common module
 --------------------
 
 .. automodule:: common.Common
@@ -25,7 +20,7 @@ common Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`Options` Module
+common.Options module
 ---------------------
 
 .. automodule:: common.Options
@@ -33,11 +28,11 @@ common Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`Z3Instance` Module
-------------------------
 
-.. automodule:: common.Z3Instance
+Module contents
+---------------
+
+.. automodule:: common
     :members:
     :undoc-members:
     :show-inheritance:
-

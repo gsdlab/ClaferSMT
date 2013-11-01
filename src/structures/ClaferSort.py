@@ -195,19 +195,6 @@ class  ClaferSort(object):
             if(not self.element.isAbstract):
                 if i != self.numInstances - 1:
                     self.constraints.addInstanceConstraint(self.instances[i] <= self.instances[i+1])    
-        #masks the instances that do not have the current parent 
-        #mask(i,j): i == the parent number, j == the value of the child
-        #outputs 1 if equal to parent, 0 otherwise
-        #self.mask = Function(self.element.uid + "_mask", IntSort(), IntSort(), IntSort())
-        #self.mask = lambda x, y:mOr(*[And(x == i, self.instances[i] != self.parentInstances) for i in range(self.numInstances)])   
-        #for i in range(self.parentInstances):    
-        #    for j in range(self.numInstances):
-        #        self.constraints.addInstanceConstraint(self.mask(i, j) == If(i == self.instances[j], 1, 0))           
-        #function that returns True for all instances that are on
-        #self.full = Function(self.element.uid + "_full", IntSort(), BoolSort())
-        #for i in range(self.numInstances):    
-        #    self.constraints.addInstanceConstraint(self.full(i) == If(self.instances[i] != self.parentInstances, True, False)) 
-        #self.full = lambda x:mOr(*[And(x == i, self.instances[i] != self.parentInstances) for i in range(self.numInstances)])   
         if not self.parent:
             return 
         #if the parent is not live, then no child can point to it  
@@ -250,7 +237,8 @@ class  ClaferSort(object):
             bigSumm = 0
             for j in self.fields:
                 bigSumm = bigSumm +  j.summs[i]
-            #don't include inherited fields for now
+            #**** LEAVE THIS CODE ****
+            #don't include inherited fields for now 
             #if self.superSort:
             #    for j in self.superSort.fields:
             #        bigSumm = bigSumm +  j.summs[i + self.indexInSuper]

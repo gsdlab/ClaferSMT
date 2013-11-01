@@ -1,67 +1,78 @@
-visitors Package
+visitors package
 ================
 
-:mod:`CreateBracketedConstraints` Module
-----------------------------------------
+Submodules
+----------
+
+visitors.CreateBracketedConstraints module
+------------------------------------------
 
 .. automodule:: visitors.CreateBracketedConstraints
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`CreateHierarchy` Module
------------------------------
+visitors.CreateHierarchy module
+-------------------------------
 
 .. automodule:: visitors.CreateHierarchy
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`CreateSorts` Module
--------------------------
+visitors.CreateSorts module
+---------------------------
 
 .. automodule:: visitors.CreateSorts
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`PrettyPrint` Module
--------------------------
+visitors.PrettyPrint module
+---------------------------
 
 .. automodule:: visitors.PrettyPrint
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`PrintHierarchy` Module
-----------------------------
+visitors.PrintHierarchy module
+------------------------------
 
 .. automodule:: visitors.PrintHierarchy
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`ResolveClaferIds` Module
-------------------------------
+visitors.ResolveClaferIds module
+--------------------------------
 
 .. automodule:: visitors.ResolveClaferIds
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`Visitor` Module
----------------------
+visitors.Visitor module
+-----------------------
 
 .. automodule:: visitors.Visitor
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`VisitorTemplate` Module
------------------------------
+visitors.VisitorTemplate module
+-------------------------------
 
 .. automodule:: visitors.VisitorTemplate
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: visitors
+    :members:
+    :undoc-members:
+    :show-inheritance:
