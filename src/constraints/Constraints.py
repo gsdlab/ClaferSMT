@@ -5,7 +5,7 @@ Created on Oct 3, 2013
 '''
 from common import Common
 from common.Common import debug_print
-from z3 import Bool, Implies
+from z3 import Bool, Implies, simplify, And, Not
 
 
 
@@ -15,6 +15,9 @@ class Constraints():
     If in debug mode, add a Boolean tracker for the constraint, to obtain possible UNSAT cores.
     """
     def assertConstraint(self, constraint, z3):
+        if Common.FLAG:
+            #z3.solver.add(And(constraint, Not(constraint)))
+            print(simplify(constraint))
         if Common.MODE != Common.DEBUG: 
             z3.solver.add(constraint)
         if Common.MODE == Common.DEBUG:
@@ -94,11 +97,11 @@ class ClaferConstraints(Constraints):
     
     def print(self):
         constraints = [
-                       #self.instance_constraints,
-                       #self.card_constraints,
-                       #self.group_card_constraints,
-                       #self.inheritance_constraints,
-                       #self.ref_constraints
+                       self.instance_constraints,
+                       self.card_constraints,
+                       self.group_card_constraints,
+                       self.inheritance_constraints,
+                       self.ref_constraints
                        ]   
         for i in constraints:
             for j in i:

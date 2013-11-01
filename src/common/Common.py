@@ -14,6 +14,7 @@ MODE = NORMAL
 BREAK = False
 FUNCTION_ID = 0 
 CONSTRAINT_ID = 0
+FLAG = False
 
 def mAnd(*args):
     '''

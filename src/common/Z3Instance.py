@@ -25,13 +25,12 @@ class Z3Instance(object):
         if(Common.MODE == Common.TEST):
             Common.reset()
         self.module = module
-        self.model_count = 0
         self.z3_bracketed_constraints = []
         self.z3_sorts = {}
         self.solver = Solver()
         self.setOptions()
         self.clock = Clock.Clock()
-        print(self.solver.help())
+        #print(self.solver.help())
         #print(get_version_string())
         
         """ Create simple objects used to store Z3 constraints. """
@@ -75,8 +74,8 @@ class Z3Instance(object):
         Adds additional options for better pretty-printing, if debugging.
         """
         self.solver.set(unsat_core=True)
-        set_option(auto_config=False)
-        set_option(candidate_models=True)
+        #set_option(auto_config=False)
+        #set_option(candidate_models=True)
         if Common.MODE == Common.DEBUG:
             #set_option(max_width=2)
             set_option(max_depth=1000)
@@ -131,11 +130,10 @@ class Z3Instance(object):
         
         return len(models)
         
-    def printVars(self, model):
+    def printVars(self, model, count):
         self.clock.tick("printing")
-        self.model_count = self.model_count + 1
         standard_print("###########################")
-        standard_print("# Model: " + str(self.model_count))    
+        standard_print("# Model: " + str(count+1))    
         standard_print("###########################")
         ph = PrintHierarchy.PrintHierarchy(self, model)
         Visitor.visit(ph, self.module)
@@ -194,11 +192,14 @@ class Z3Instance(object):
                     #print(str(d) + " = " + str(m[d]))
                 self.solver.add(Or(block))
                 if not Common.MODE == Common.TEST:
-                    self.printVars(m)
+                    self.printVars(m, count)
                 if Options.GET_ISOMORPHISM_CONSTRAINT:
+                    Common.FLAG = True
                     IsomorphismConstraint.IsomorphismConstraint(self, m).createIsomorphicConstraint()
                     self.printConstraints()
-                    self.z3_bracketed_constraints.pop().assertConstraints(self)
+                    isoConstraint = self.z3_bracketed_constraints.pop()
+                    isoConstraint.assertConstraints(self)
+                    Common.FLAG = False
                 count += 1
             else:
                 self.clock.tock("unsat")

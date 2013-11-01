@@ -35,6 +35,9 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
         self.topSome = None
         self.currSome = None
     
+    def isOn(self, inst, sort):
+        return int(str(inst)) != sort.parentInstances
+    
     def createIsomorphicConstraint(self):
         assert isinstance(self.model, ModelRef)
         sorts = self.z3.getSorts()
@@ -54,7 +57,7 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
             instsMap[i.element.uid] = insts
             for j in range(len(insts) - 1):
                 currSome = currSome + insts[j] + " ; "
-            currSome = currSome + insts[-1] + " : " + i.element.nonUniqueID() + " | "
+            currSome = currSome + insts[-1] + " : " + i.element.getNonUniqueID() + " | "
             localDeclList = []
             for j in insts:
                 localDeclList.append(self.createLocalDecl(j))
@@ -65,7 +68,7 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
         for i in sorts:
             if i.isTopLevel:
                 insts = instsMap[i.element.uid]
-                topCardStrings.append("#" + i.element.nonUniqueID() + " = " + str(len(insts)))
+                topCardStrings.append("#" + i.element.getNonUniqueID() + " = " + str(len(insts)))
                 if not self.topCardsConstraint:
                     self.topCardsConstraint = self.createEquals(self.createCard(self.createArg(i.element.uid)), self.createInteger(str(len(insts))))
                 else:
@@ -83,9 +86,9 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
                                 currChildren.append(child)
                                 otherConstraints.append(child \
                                       + " in " + str(i) + "_" + str(j) + "." \
-                                      + k.element.nonUniqueID())
+                                      + k.element.getNonUniqueID())
                                 self.addConstraint(self.createIn(self.createArg(child), self.createJoin(self.createArg(str(i) + "_" + str(j)), self.createArg(k.element.uid))))
-                        otherConstraints.append("#" + str(i) + "_" + str(j) + "." + k.element.nonUniqueID()\
+                        otherConstraints.append("#" + str(i) + "_" + str(j) + "." + k.element.getNonUniqueID()\
                               + " = " + str(len(currChildren)))
                         self.addConstraint(self.createEquals(self.createCard(self.createJoin(self.createArg(str(i) + "_" + str(j)), self.createArg(k.element.uid))), self.createInteger(str(len(currChildren)))))
                         for l in currChildren:

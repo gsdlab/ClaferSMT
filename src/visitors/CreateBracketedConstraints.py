@@ -105,7 +105,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     #assume their is only one sort in the decl at this time, which is true of my old version of clafer
     def createAllLocalsCombinations(self, localDecls, exprArg, isDisjunct):
         (sort, mask) = exprArg.getInstanceSort(0)
-        ranges = [range(mask.size()) for i in localDecls]
+        ranges = [mask.keys() for i in localDecls]
         localInstances = []
         ifConstraints = []
         
