@@ -4,7 +4,8 @@ Created on Apr 28, 2013
 @author: ezulkosk
 '''
 
-from common import ClaferSort
+
+from structures.ClaferSort import ClaferSort
 from visitors import VisitorTemplate
 import common.Common
 import visitors.Visitor
@@ -31,7 +32,7 @@ class CreateSorts(VisitorTemplate.VisitorTemplate):
         *see* :mod:`common.ClaferSort`
         '''
         visitors.Visitor.visit(self,element.supers)
-        sort = ClaferSort.ClaferSort(element, self.z3, self.stack)
+        sort = ClaferSort(element, self.z3, self.stack)
         self.z3.addSort(element.uid, sort)  
         self.stack.append(sort)
         for i in element.elements:

@@ -8,7 +8,7 @@ from test import bracketedconstraint_this, multiple_joins, this_dot_parent, \
     arithmetic, relations, boolean_connectives, union, simple_abstract, some, \
     simple_set, zoo, simple_zoo, integer_refs, phone_feature_model, \
     higher_inheritance, this_integer_relation, equal_references, dag_test, subbooks, \
-    int_ref_set, iso, isowithcons, all_alls
+    int_ref_set, iso, isowithcons, all_alls, some_somes
 from test.positive import books_tutorial, \
     check_unique_ref_names_with_inheritance, constraints, enforcingInverseReferences, \
     i101, i10, i137_parsing, i14, i17, i18, i19, i23, \
@@ -35,12 +35,13 @@ from test.positive import books_tutorial, \
 * Refactor (especially join in BracketedConstraint)
 * Implement isomorphism
 * Find the complete-model option in Z3 (to generate arbitrary numbers for unconstrained variables)
+* Can optimize quantified expressions with symmetric operators
 '''
 
 
 GLOBAL_SCOPE = 2 #this obviously has to change
 
-MODE = Common.NORMAL   # Common.[NORMAL | DEBUG | TEST | ONE], where ONE outputs one model from each test
+MODE = Common.TEST   # Common.[NORMAL | DEBUG | TEST | ONE], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = True
 NUM_INSTANCES = 6 # -1 to produce all instances
 INFINITE = -1 #best variable name.
@@ -77,7 +78,8 @@ TEST_SET = MY_TESTS
 #MODULE = int_ref_set.getModule()
 #MODULE = iso.getModule()
 #MODULE = isowithcons.getModule()
-MODULE = all_alls.getModule()
+#MODULE = all_alls.getModule()
+MODULE = some_somes.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),

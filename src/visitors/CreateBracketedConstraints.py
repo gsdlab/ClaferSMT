@@ -7,12 +7,11 @@ Created on Mar 26, 2013
 from common import Common
 from common.Common import mAnd
 from constraints import BracketedConstraint
-from constraints.BracketedConstraint import ExprArg, IntArg, BoolArg
-from structures.ExprArg import Mask
+from structures.ExprArg import ExprArg, Mask, BoolArg, IntArg
 from visitors import VisitorTemplate
-from z3 import And
 import itertools
 import visitors.Visitor
+
 
 claferStack = [] #used to determine where the constraint is in the clafer hierarchy
 inConstraint = False #true if within a constraint
@@ -65,7 +64,6 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     
     def claferidVisit(self, element):
         if(self.inConstraint):
-            #XXX
             if element.id == "this":
                 exprArgList = []
                 for i in range(element.claferSort.numInstances):

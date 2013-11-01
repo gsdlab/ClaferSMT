@@ -4,14 +4,11 @@ Created on April 27, 2013
 @author: ezulkosk
 
 '''
-from common import Z3Instance, Common, Options
-from test import TestClafers, bracketedconstraint_this, multiple_joins, \
-    this_dot_parent, arithmetic, relations, boolean_connectives, union, \
-    simple_abstract, some, simple_set, zoo, integer_refs, simple_zoo, \
-    phone_feature_model, higher_inheritance, this_integer_relation, equal_references
-from z3 import get_version_string
-import sys
+from common import Common, Options
+from front.Z3Instance import Z3Instance
+from test import TestClafers
 import cProfile
+import sys
 
 
 
@@ -33,7 +30,7 @@ def main(args):
     else:
         module = Options.MODULE
         
-        z3 = Z3Instance.Z3Instance(module)
+        z3 = Z3Instance(module)
         z3.run()
         #z3.run()
         

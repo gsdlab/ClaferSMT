@@ -3,7 +3,8 @@ Created on Sep 15, 2013
 
 @author: ezulkosk
 '''
-from common import Z3Instance, Options, Common
+from common import Options
+from front.Z3Instance import Z3Instance
 
 
 SEPARATOR = "========================================================" 
@@ -30,7 +31,7 @@ def run():
             Options.NUM_INSTANCES = 3
         module = file.getModule()
         print_separate("Attempting: " + str(file.__name__))
-        z3 = Z3Instance.Z3Instance(module)
+        z3 = Z3Instance(module)
         actual_model_count = z3.run()
         
         if(expected_model_count == actual_model_count or 
@@ -53,5 +54,5 @@ def runForOne():
         (file, _) = t
         module = file.getModule()
         print_separate("Attempting: " + str(file.__name__))
-        z3 = Z3Instance.Z3Instance(module)
+        z3 = Z3Instance(module)
         z3.run()

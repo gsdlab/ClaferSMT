@@ -5,12 +5,12 @@ Created on April 27, 2013
 
 testing method for the Z3 backend of Clafer
 '''
-from common import Z3Instance
-from visitors import Visitor, PrettyPrint, CreateSorts, \
-    CreateBracketedConstraints, CreateHierarchy
-from z3 import *
-import common.Common
-import imp
+from z3 import BitVec, Bool, Solver, Xor, Function, IntSort, Array, Int, sat, \
+    is_array, Or
+from z3consts import Z3_UNINTERPRETED_SORT
+from z3types import Z3Exception
+import sys
+
 
 #abstract x 4
 #  c 1..3

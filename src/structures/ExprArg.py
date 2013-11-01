@@ -4,11 +4,8 @@ Created on Oct 21, 2013
 @author: ezulkosk
 '''
 from bintrees.avltree import AVLTree
-from common.Common import mOr
-from common import Common
 from lxml.builder import basestring
-from z3 import And, If
-import sys
+
 
 class ExprArg():
     def __init__(self, instanceSorts):
@@ -81,187 +78,24 @@ class JoinArg(ExprArg):
         self.right = right
         self.instanceSorts = []
     
-    def getInstanceSorts(self):
+    def checkIfJoinIsComputed(self):
+        import constraints.Operations as Ops
         if not self.instanceSorts:
-            self.computeJoin()
+            joinList = self.flattenJoin()
+            self.instanceSorts = Ops.computeJoin(joinList)
+    
+    def getInstanceSorts(self):
+        self.checkIfJoinIsComputed()
         return self.instanceSorts
     
     def getInstanceSort(self, index):
-        if not self.instanceSorts:
-            self.computeJoin()
+        self.checkIfJoinIsComputed()
         return self.instanceSorts[index]
        
-    def flattenJoin(self, joinList):
+    def flattenJoin(self, joinList=[]):
         return self.left.flattenJoin([]) + joinList + self.right.flattenJoin([])
     
     
-    ''' 
-    #######################################################################
-    # JOIN COMPUTATIONS   
-    #######################################################################
-    '''
-    
-    @staticmethod
-    def alreadyExists(key, instanceSorts):
-        for i in instanceSorts:
-            (sort, mask) = i
-            if key == sort:
-                return mask
-        return None
-    
-    @staticmethod
-    def joinWithSuper(sort, mask):
-        '''
-        :param sort:
-        :type sort: :class:`~common.ClaferSort`
-        :returns: (:class:`~common.ClaferSort`, [Int()]) 
-        
-        Maps each instance of the subclafer **sort** to the corresponding super instance. Returns the super sort and its instances.
-        '''
-        newMask = Mask()
-        for i in mask.keys():
-            #ClaferSort.addSubSort(self, sub), is somewhat related 
-            newMask.put(i + sort.indexInSuper,
-                        If(sort.isOn(mask.get(i)), 
-                           sort.superSort.instances[i + sort.indexInSuper], 
-                           sort.superSort.parentInstances))
-        return(sort.superSort, newMask)
-
-    @staticmethod
-    def joinWithParent(arg):
-        newInstanceSorts = []
-        for i in arg.instanceSorts:
-            (sort, mask) = i
-            newMask = JoinArg.alreadyExists(sort.parent, newInstanceSorts)
-            if not newMask:
-                newMask = Mask()
-            for j in mask.keys():
-                (lower,upper,_) = sort.instanceRanges[j]
-                for k in range(lower, upper + 1):
-                    if k == sort.parentInstances:
-                        break
-                    prevClause = newMask.get(k)
-                    newMask.put(k, mOr(prevClause, mask.get(j) == k))
-            newInstanceSorts.append((sort.parent, newMask))
-        for i in newInstanceSorts:
-            (sort, mask) = i
-            for j in mask.keys():
-                mask.put(j, If(mask.get(j), sort.instances[j], sort.parentInstances))
-        return ExprArg(newInstanceSorts)
-    
-    @staticmethod
-    def joinWithPrimitive(arg):
-        newInstanceSorts = []
-        for i in arg.getInstanceSorts():
-            (sort, mask) = i
-            if sort.refSort == "integer" or sort.refSort == "string": #change for string soon
-                newMask = Mask()
-                for i in mask.keys():
-                    newMask.put(i, If(sort.isOn(mask.get(i)), sort.refs[i], 0))
-                newInstanceSorts.append(("int", newMask)) #should change the "int", but not sure how yet
-            else:
-                print("Error on: " + sort.refSort + ", refs other than int (e.g. double) unimplemented")
-                sys.exit()
-        return ExprArg(newInstanceSorts)
-        
-    @staticmethod
-    def joinWithClaferRef(arg):
-        newInstanceSorts = []
-        for i in arg.getInstanceSorts():
-            (sort, mask) = i
-            while not sort.refs:
-                (sort, mask) = JoinArg.joinWithSuper(sort, mask)
-            tempRefs = []
-            newMask = JoinArg.alreadyExists(sort.refSort, newInstanceSorts)
-            if not newMask:
-                newMask = Mask()
-            for j in mask.keys():
-                if isinstance(sort.refSort, basestring):
-                    tempRefs.append(If(sort.isOn(mask.get(j)),
-                                       sort.refs[j], 0))
-                else:
-                    tempRefs.append(If(sort.isOn(mask.get(j)),
-                                       sort.refs[j], sort.refSort.numInstances))
-            if isinstance(sort.refSort, basestring):
-                for j in range(sort.numInstances):
-                    clause = mOr(*[k == j for k in tempRefs])
-                    newMask.put(j, mOr(newMask.get(j), clause))
-            else:
-                for j in range(sort.refSort.numInstances):
-                    clause = mOr(*[k == j for k in tempRefs])
-                    newMask.put(j, mOr(newMask.get(j), clause))
-            newInstanceSorts.append((sort.refSort, newMask))
-        for i in newInstanceSorts:
-            (sort, mask) = i
-            for j in mask.keys():
-                mask.put(j, If(mask.get(j), sort.instances[j], sort.parentInstances))
-        return ExprArg(newInstanceSorts)
-        
-    @staticmethod
-    def joinWithRef(arg): 
-        (sort, _) = arg.instanceSorts[0]
-        if isinstance(sort.refSort, basestring):
-            return JoinArg.joinWithPrimitive(arg)
-        else: 
-            #join on ref sort
-            #needs to be more robust for multiple instanceSorts
-            return JoinArg.joinWithClaferRef(arg)
-    
-    @staticmethod
-    def joinWithClafer(left, right):
-        newInstanceSorts = []
-        for l in left.getInstanceSorts():
-            (left_sort, left_mask) = l
-            for r in right.getInstanceSorts():
-                (right_sort, right_mask) = r
-                noMatch = False
-                while not(right_sort in left_sort.fields):
-                    if not left_sort.superSort:
-                        noMatch = True
-                        break
-                    (left_sort, left_mask) = JoinArg.joinWithSuper(left_sort, left_mask)
-                if noMatch:
-                    break
-                zeroedVal = right_sort.parentInstances
-                newMask = JoinArg.alreadyExists(right_sort, newInstanceSorts)
-                if not newMask:
-                    newMask = Mask()
-                for i in right_mask.keys():
-                    (lower, upper, _) = right_sort.instanceRanges[i]
-                    for j in range(lower, upper + 1): 
-                        #only possibly join with things that are in left
-                        if left_mask.get(j):
-                            prevClause = newMask.get(i)
-                            newMask.put(i, mOr(prevClause, And(left_sort.isOn(left_mask.get(j)), 
-                                                            right_sort.instances[i] == j)))
-                newInstanceSorts.append((right_sort, newMask))
-        for i in newInstanceSorts:
-            (sort, mask) = i
-            for j in mask.keys():
-                mask.put(j, If(mask.get(j), sort.instances[j], sort.parentInstances))
-        return ExprArg(newInstanceSorts)
-    
-    def computeJoin(self):
-        #can be optimized... a lot...
-        joinList = self.flattenJoin([])
-        left = joinList.pop(0) 
-        while joinList:
-            right = joinList.pop(0)
-            rightJoinPoint = right.getInstanceSort(0)
-            if isinstance(rightJoinPoint, basestring):
-                if rightJoinPoint == "parent":
-                    left = JoinArg.joinWithParent(left)
-                elif rightJoinPoint == "ref":
-                    left = JoinArg.joinWithRef(left)
-            else:
-                left = self.joinWithClafer(left, right)
-        self.instanceSorts = left.getInstanceSorts()
-      
-    ''' 
-    #######################################################################
-    # END JOINS   
-    #######################################################################
-    '''        
     def clone(self):
         if not self.instanceSorts:
             return JoinArg(self.left.clone(), self.right.clone())
