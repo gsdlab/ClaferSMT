@@ -49,9 +49,9 @@ Symmetric_Functions = [
                            "&",
                            #"<:" NOT IMPLEMENTED
                            #":>" NOT IMPLEMENTED
-                           "." #NOT SYMMETRIC, but we need to keep this one...I think it's ok from what I've seen, since joins are restricted in Clafer
+                           #"." #NOT SYMMETRIC
                            #Ternary Ops
-                           #"ifthenelse" NOT SURE
+                           #"ifthenelse" NOT SYMMETRIC
                            ]
 
 class CheckFunctionSymmetry(VisitorTemplate.VisitorTemplate):
@@ -75,19 +75,14 @@ class CheckFunctionSymmetry(VisitorTemplate.VisitorTemplate):
         self.z3 = z3
 
 
-        
+    def localdeclarationVisit(self, element):
+        pass
 
 
+    #look at all locals returned from left and right and compare
     def funexpVisit(self, element):
-        #FIX ME
-        flag = False
-        if not element.operation in Symmetric_Functions:
-            self.watchLocals = True
-            flag = True
         for i in element.elements:
             visitors.Visitor.visit(self, i)
-        if flag and self.visitedLocalDecl:
-            self.watchLocals = False
-            
+        
         
            

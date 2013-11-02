@@ -28,22 +28,19 @@ from test.positive import books_tutorial, \
 ========
 * Fix any ops left in BracketedConstraint
 * Int refs... possible solution: Int ClaferSort (hopefully there is an easier way...) 
-* Documentation
-* Scopes
 * Real Numbers
-* Change DoubleLiteral to RealLiteral, since that is most likely the Z3 construct that will be used.
-* Refactor (especially join in BracketedConstraint)
-* Implement isomorphism
-* Find the complete-model option in Z3 (to generate arbitrary numbers for unconstrained variables)
 * Can optimize quantified expressions with symmetric operators
 * Improve support for debugging constraints
 * Fix quantifier symmetry breaker, if two locals FROM THE SAME QUANTIFIER are on the left and right of a func, not symmetric
+* Documentation
+* Scopes
+* Change DoubleLiteral to RealLiteral, since that is most likely the Z3 construct that will be used.
 '''
 
 
 GLOBAL_SCOPE = 2 #this obviously has to change
 
-MODE = Common.ALL   # Common.[NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
+MODE = Common.ONE   # Common.[NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = True
 NUM_INSTANCES = 10 # -1 to produce all instances
 INFINITE = -1 #best variable name.
@@ -57,7 +54,7 @@ MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
 TEST_SET = MY_TESTS 
 
-#MODULE = bracketedconstraint_this.getModule()
+MODULE = bracketedconstraint_this.getModule()
 #MODULE = multiple_joins.getModule()
 #MODULE = this_dot_parent.getModule()
 #MODULE = arithmetic.getModule()
@@ -77,7 +74,7 @@ TEST_SET = MY_TESTS
 #MODULE = dag_test.getModule()
 #MODULE = books_tutorial.getModule()
 #MODULE = subbooks.getModule()
-MODULE = int_ref_set.getModule()
+#MODULE = int_ref_set.getModule()
 #MODULE = iso.getModule()
 #MODULE = isowithcons.getModule()
 #MODULE = all_alls.getModule()

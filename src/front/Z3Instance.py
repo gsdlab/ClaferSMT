@@ -73,6 +73,7 @@ class Z3Instance(object):
         Adds additional options for better pretty-printing, if debugging.
         """
         self.solver.set(unsat_core=True)
+        self.solver.set(model_completion=True)
         #set_option(auto_config=False)
         #set_option(candidate_models=True)
         if Common.MODE == Common.DEBUG:
