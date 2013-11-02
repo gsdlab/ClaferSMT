@@ -5,10 +5,11 @@ Created on April 27, 2013
 
 '''
 from common import Common, Options
+from front import TestClafers
 from front.Z3Instance import Z3Instance
-from test import TestClafers
 import cProfile
 import sys
+
 
 
 
@@ -27,6 +28,8 @@ def main(args):
         TestClafers.run()
     elif Common.MODE == Common.ONE:
         TestClafers.runForOne()
+    elif Common.MODE == Common.ALL:
+        TestClafers.runForAll()
     else:
         module = Options.MODULE
         

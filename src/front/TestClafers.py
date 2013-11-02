@@ -4,6 +4,7 @@ Created on Sep 15, 2013
 @author: ezulkosk
 '''
 from common import Options
+from common.Clock import Clock
 from front.Z3Instance import Z3Instance
 
 
@@ -22,6 +23,7 @@ def run():
     Runs the Z3-translator on each pair (file, numInstances) in tests, 
     and ensures that the number of generated models equals numInstances.
     '''
+    clock = Clock()
     tests = getTestSet()
     num_passed = 0
     temp_model_count = Options.NUM_INSTANCES
@@ -32,9 +34,11 @@ def run():
             Options.NUM_INSTANCES = 3
         module = file.getModule()
         print_separate("Attempting: " + str(file.__name__))
+        clock.tick("Total Z3 Run Time")
         z3 = Z3Instance(module)
         actual_model_count = z3.run()
-        
+        clock.tack("Total Z3 Run Time")
+        clock = clock.combineClocks(z3.clock)
         if(expected_model_count == actual_model_count or 
            (expected_model_count == Options.INFINITE and actual_model_count == Options.NUM_INSTANCES)):
             print("PASSED: " + str(file))
@@ -42,7 +46,24 @@ def run():
         else:
             print("FAILED: " + str(file) + " " + str(expected_model_count) + " " + str(actual_model_count))
         Options.NUM_INSTANCES = temp_model_count
-    print_separate("Results: " + str(num_passed) + "/" + str(len(tests)))    
+    print_separate("Results: " + str(num_passed) + "/" + str(len(tests)))   
+    clock.printEvents()
+       
+       
+def runAndOutputModels():
+    clock = Clock()
+    tests = getTestSet()
+    for t in tests:
+        (file, _) = t
+        module = file.getModule()
+        print_separate("Attempting: " + str(file.__name__))
+        clock.tick("Total Z3 Run Time")
+        z3 = Z3Instance(module)
+        z3.run()
+        clock.tack("Total Z3 Run Time")
+        clock = clock.combineClocks(z3.clock)
+    print_separate("Results: ")  
+    clock.printEvents()
         
 def runForOne():  
     '''
@@ -50,10 +71,11 @@ def runForOne():
     and outputs one model for each, if satisfiable.
     '''  
     Options.NUM_INSTANCES = 1
-    tests = getTestSet()
-    for t in Options.my_tests:
-        (file, _) = t
-        module = file.getModule()
-        print_separate("Attempting: " + str(file.__name__))
-        z3 = Z3Instance(module)
-        z3.run()
+    runAndOutputModels()
+    
+def runForAll():
+    '''
+    Runs the Z3-translator on each pair file in tests, 
+    and outputs all model for each, if satisfiable (limited if infinite models).
+    '''
+    runAndOutputModels()

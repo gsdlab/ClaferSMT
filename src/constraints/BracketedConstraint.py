@@ -6,7 +6,7 @@ Created on Apr 29, 2013
 from constraints import Constraints
 from constraints.Constraints import GenericConstraints
 from structures.ExprArg import BoolArg
-from z3 import Implies, And
+from z3 import Implies, And, Or
 import constraints.Operations as Ops
 
 
@@ -119,7 +119,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
                 ifConstraints = []
         localStack.reverse()
         ifConstraints.reverse()
-        condList = []
+        '''
         for _ in range(num_combinations):
             currExpr = localStack.pop(0)
             if ifConstraints:
@@ -134,7 +134,15 @@ class BracketedConstraint(Constraints.GenericConstraints):
                 cond = Implies(currIfConstraint, cond)
             condList.append(cond)
         self.stack.append([BoolArg([And(*condList)])])
-           
+        '''
+        #for _ in range(num_combinations):
+        #    currExpr = localStack.pop(0)
+        #    condList.append(currExpr)
+        quantFunction = getQuantifier(quantifier)
+        cond = quantFunction(localStack, ifConstraints)
+        self.stack.append([BoolArg([cond])])
+        
+        
     def extend(self, args):
         maxInstances = 0
         extendedArgs = []

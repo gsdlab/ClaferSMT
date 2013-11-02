@@ -4,11 +4,12 @@ Created on Mar 26, 2013
 @author: ezulkosk
 '''
 
-from common import Common
+from common import Common, Options
 from common.Common import mAnd
 from constraints import BracketedConstraint
 from structures.ExprArg import ExprArg, Mask, BoolArg, IntArg
 from visitors import VisitorTemplate
+from visitors.CheckFunctionSymmetry import CheckFunctionSymmetry
 import itertools
 import visitors.Visitor
 
@@ -91,23 +92,32 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.inConstraint = False
     
     def funexpVisit(self, element):
-        if element.operation =="in":
-            Common.BREAK = True
         for i in element.elements:
             visitors.Visitor.visit(self, i)
         if(self.inConstraint):
-            self.currentConstraint.addOperator(element.operation)
-        if element.operation =="in":
-            Common.BREAK = False    
+            self.currentConstraint.addOperator(element.operation)   
            
     #assume their is only one sort in the decl at this time, which is true of my old version of clafer
-    def createAllLocalsCombinations(self, localDecls, exprArg, isDisjunct):
+    def createAllLocalsCombinations(self, localDecls, exprArg, isDisjunct, isSymmetric):
         (sort, mask) = exprArg.getInstanceSort(0)
-        ranges = [mask.keys() for i in localDecls]
+        my_range = list(mask.keys())
+        if isSymmetric and Options.BREAK_QUANTIFIER_SYMMETRY:
+            if isDisjunct:
+                integer_combinations = itertools.combinations(my_range, len(localDecls))
+            else:
+                integer_combinations = itertools.combinations(my_range, len(localDecls))
+        else:
+            if isDisjunct:
+                integer_combinations = itertools.permutations(my_range, len(localDecls))
+            else:
+                integer_combinations = list(itertools.permutations(my_range, len(localDecls))) + \
+                                            [(i, i) for i in my_range]
+            
+        
         localInstances = []
         ifConstraints = []
         
-        integer_combinations = itertools.product(*ranges)
+        
         for i in integer_combinations: 
             list_of_ints = list(i)
             set_of_ints = set(list_of_ints)
@@ -122,6 +132,17 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     #handle local declarations (some, all, lone, one, no) 
     #not fully implemented
     def declpexpVisit(self, element):
+        '''
+        new SHOULD MARK ALL THE WAY DOWN, REDUNDANT WORK FOR NESTED QUANTIFIERS
+        '''
+        if Options.BREAK_QUANTIFIER_SYMMETRY:
+            symmetryChecker = CheckFunctionSymmetry(self.z3)
+            visitors.Visitor.visit(symmetryChecker, element.bodyParentExp)
+            isSymmetric = symmetryChecker.isSymmetric
+            #print(symmetryChecker.isSymmetric)
+        else:
+            isSymmetric = False
+        #end new
         num_args = 0
         if element.declaration:
             visitors.Visitor.visit(self, element.declaration.body.iExp[0])
@@ -130,7 +151,8 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             #XXX
             (combinations, ifconstraints) = self.createAllLocalsCombinations(element.declaration.localDeclarations, 
                                                                              arg[0],  
-                                                                             isDisjunct)
+                                                                             isDisjunct,
+                                                                             isSymmetric)
             if len(combinations) == 0:
                 if element.quantifier == "Some":
                     self.currentConstraint.stack.append([BoolArg([False])])

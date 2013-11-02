@@ -156,7 +156,7 @@ class Mask():
     
     def getTree(self):
         return self.tree
-    
+        
     def size(self):
         return self.tree.count
     

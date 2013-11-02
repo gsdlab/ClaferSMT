@@ -109,7 +109,7 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
                             refConstraints.append(str(i) + "_" + str(j) + ".ref = " + str(i.refSort) + "_" + str(self.model.eval(i.refs[j])))
                             self.addConstraint(self.createEquals(self.createJoin(self.createArg(str(i) + "_" + str(j)), self.createArg("ref")), \
                                                                     self.createArg(str(str(i.refSort) + "_" + str(self.model.eval(i.refs[j]))))))
-        
+        '''
         print("[ !(")
         for i in topCardStrings:
             print(i + " &&")
@@ -118,7 +118,7 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
         print(" &&\n".join(otherConstraints + refConstraints))
         print(")"*(len(someStrings) + 1))
         print("]")
-        
+        '''
         self.currSome.bodyParentExp = self.constraint
         bigConstraint = self.createAnd(self.topSome, self.topCardsConstraint)
         bigConstraint = self.createNot(bigConstraint)

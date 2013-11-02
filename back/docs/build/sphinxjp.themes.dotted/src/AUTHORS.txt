@@ -1,0 +1,6 @@
+AUTHORS
+=======
+
+Sphinx template, css, packaging
+-------------------------------
+* Shoji KUMAGAI <take.this.2.your.grave at gmail.com> sphinx-users.jp

@@ -1,0 +1,5 @@
+
+        [sphinx_themes]
+        path = sphinxjp.themes.dotted:template_path
+
+    

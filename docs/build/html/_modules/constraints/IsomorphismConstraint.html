@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>constraints.IsomorphismConstraint &mdash; ClaferZ3 0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="ClaferZ3 0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for constraints.IsomorphismConstraint</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on Oct 7, 2013</span>
+
+<span class="sd">@author: ezulkosk</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">IntegerLiteral</span><span class="p">,</span> <span class="n">FunExp</span><span class="p">,</span> <span class="n">Exp</span><span class="p">,</span> <span class="n">ClaferId</span><span class="p">,</span> <span class="n">DeclPExp</span><span class="p">,</span> \
+    <span class="n">LocalDeclaration</span><span class="p">,</span> <span class="n">Declaration</span>
+<span class="kn">from</span> <span class="nn">common.Common</span> <span class="kn">import</span> <span class="n">standard_print</span>
+<span class="kn">from</span> <span class="nn">lxml.builder</span> <span class="kn">import</span> <span class="nb">basestring</span>
+<span class="kn">from</span> <span class="nn">visitors</span> <span class="kn">import</span> <span class="n">VisitorTemplate</span><span class="p">,</span> <span class="n">Visitor</span><span class="p">,</span> <span class="n">CreateBracketedConstraints</span><span class="p">,</span> \
+    <span class="n">ResolveClaferIds</span>
+<span class="kn">from</span> <span class="nn">z3</span> <span class="kn">import</span> <span class="n">ModelRef</span>
+<span class="kn">import</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">visitors</span>
+
+<div class="viewcode-block" id="IsomorphismConstraint"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint">[docs]</a><span class="k">class</span> <span class="nc">IsomorphismConstraint</span><span class="p">(</span><span class="n">VisitorTemplate</span><span class="o">.</span><span class="n">VisitorTemplate</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="n">zero_pos</span> <span class="o">=</span> <span class="p">((</span><span class="n">IntegerLiteral</span><span class="o">.</span><span class="n">IntegerLiteral</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="n">IntegerLiteral</span><span class="o">.</span><span class="n">IntegerLiteral</span><span class="p">(</span><span class="mi">0</span><span class="p">)),</span> <span class="p">(</span><span class="n">IntegerLiteral</span><span class="o">.</span><span class="n">IntegerLiteral</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="n">IntegerLiteral</span><span class="o">.</span><span class="n">IntegerLiteral</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z3</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param z3: The Z3 instance.</span>
+<span class="sd">        :type z3: :class:`~common.Z3Instance`</span>
+<span class="sd">        :param model: The Z3 model produced, which we can use to get the values of each variable in the instance.</span>
+<span class="sd">        :type model: :class: ModelRef</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z3</span> <span class="o">=</span> <span class="n">z3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraint</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topCardsConstraint</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topSome</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currSome</span> <span class="o">=</span> <span class="bp">None</span>
+    
+<div class="viewcode-block" id="IsomorphismConstraint.isOn"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.isOn">[docs]</a>    <span class="k">def</span> <span class="nf">isOn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inst</span><span class="p">,</span> <span class="n">sort</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">inst</span><span class="p">))</span> <span class="o">!=</span> <span class="n">sort</span><span class="o">.</span><span class="n">parentInstances</span>
+    </div>
+<div class="viewcode-block" id="IsomorphismConstraint.createIsomorphicConstraint"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.createIsomorphicConstraint">[docs]</a>    <span class="k">def</span> <span class="nf">createIsomorphicConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">ModelRef</span><span class="p">)</span>
+        <span class="n">sorts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z3</span><span class="o">.</span><span class="n">getSorts</span><span class="p">()</span>
+        <span class="n">instsMap</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">someStrings</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">topCardStrings</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">otherConstraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">refConstraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c">#create the (some&#39;s</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sorts</span><span class="p">:</span>
+            <span class="n">insts</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">instances</span><span class="p">)):</span>
+                <span class="n">ev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isOn</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+                    <span class="n">insts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+            <span class="n">currSome</span> <span class="o">=</span> <span class="s">&quot;(some &quot;</span>
+            <span class="n">instsMap</span><span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">insts</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">insts</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">currSome</span> <span class="o">=</span> <span class="n">currSome</span> <span class="o">+</span> <span class="n">insts</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot; ; &quot;</span>
+            <span class="n">currSome</span> <span class="o">=</span> <span class="n">currSome</span> <span class="o">+</span> <span class="n">insts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot; : &quot;</span> <span class="o">+</span> <span class="n">i</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">getNonUniqueID</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot; | &quot;</span>
+            <span class="n">localDeclList</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">insts</span><span class="p">:</span>
+                <span class="n">localDeclList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createLocalDecl</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+            <span class="n">decl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createDeclaration</span><span class="p">(</span><span class="n">localDeclList</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createSome</span><span class="p">(</span><span class="n">decl</span><span class="p">)</span>
+            <span class="n">someStrings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">currSome</span><span class="p">)</span>
+        <span class="c">#handle top-level clafer cardinalities</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sorts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">isTopLevel</span><span class="p">:</span>
+                <span class="n">insts</span> <span class="o">=</span> <span class="n">instsMap</span><span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span>
+                <span class="n">topCardStrings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;#&quot;</span> <span class="o">+</span> <span class="n">i</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">getNonUniqueID</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot; = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">insts</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">topCardsConstraint</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">topCardsConstraint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createEquals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createCard</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createArg</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">createInteger</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">insts</span><span class="p">))))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">topCardsConstraint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createAnd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topCardsConstraint</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">createEquals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createCard</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createArg</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">createInteger</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">insts</span><span class="p">)))))</span>
+        <span class="c">#handle non-top level clafer cardinalities</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sorts</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">instances</span><span class="p">)):</span>
+                <span class="n">ev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isOn</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">i</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                        <span class="n">currChildren</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">instances</span><span class="p">)):</span>
+                            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">l</span><span class="p">]))</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                                <span class="n">child</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> 
+                                <span class="n">currChildren</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+                                <span class="n">otherConstraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span> \
+                                      <span class="o">+</span> <span class="s">&quot; in &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;.&quot;</span> \
+                                      <span class="o">+</span> <span class="n">k</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">getNonUniqueID</span><span class="p">())</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">addConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createIn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createArg</span><span class="p">(</span><span class="n">child</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">createJoin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createArg</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">createArg</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span><span class="p">))))</span>
+                        <span class="n">otherConstraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;#&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;.&quot;</span> <span class="o">+</span> <span class="n">k</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">getNonUniqueID</span><span class="p">()</span>\
+                              <span class="o">+</span> <span class="s">&quot; = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">currChildren</span><span class="p">)))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">addConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createEquals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createCard</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createJoin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createArg</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">createArg</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span><span class="p">))),</span> <span class="bp">self</span><span class="o">.</span><span class="n">createInteger</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">currChildren</span><span class="p">)))))</span>
+                        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">currChildren</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">currChildren</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">l</span> <span class="o">!=</span> <span class="n">m</span><span class="p">:</span>
+                                    <span class="n">otherConstraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span> <span class="o">+</span> <span class="s">&quot; != &quot;</span> <span class="o">+</span> <span class="n">m</span><span class="p">)</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">addConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createNotEquals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createArg</span><span class="p">(</span><span class="n">l</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">createArg</span><span class="p">(</span><span class="n">m</span><span class="p">)))</span>
+        <span class="c">#handle ref constraints</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sorts</span><span class="p">:</span> 
+            <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">refSort</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">instances</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isOn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span> <span class="n">i</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">refSort</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">)</span> <span class="ow">and</span> <span class="n">i</span><span class="o">.</span><span class="n">refSort</span> <span class="o">==</span> <span class="s">&quot;integer&quot;</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">addConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createEquals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createJoin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createArg</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">createArg</span><span class="p">(</span><span class="s">&quot;ref&quot;</span><span class="p">)),</span> \
+                                                                    <span class="bp">self</span><span class="o">.</span><span class="n">createInteger</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">j</span><span class="p">])))))</span>
+                            <span class="n">refConstraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;.ref = &quot;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">j</span><span class="p">])))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">refConstraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;.ref = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">refSort</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">j</span><span class="p">])))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">addConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createEquals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createJoin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createArg</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">createArg</span><span class="p">(</span><span class="s">&quot;ref&quot;</span><span class="p">)),</span> \
+                                                                    <span class="bp">self</span><span class="o">.</span><span class="n">createArg</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">refSort</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">j</span><span class="p">]))))))</span>
+        
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;[ !(&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">topCardStrings</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="s">&quot; &amp;&amp;&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">someStrings</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot; &amp;&amp;</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">otherConstraints</span> <span class="o">+</span> <span class="n">refConstraints</span><span class="p">))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;)&quot;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">someStrings</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;]&quot;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">currSome</span><span class="o">.</span><span class="n">bodyParentExp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint</span>
+        <span class="n">bigConstraint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createAnd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topSome</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">topCardsConstraint</span><span class="p">)</span>
+        <span class="n">bigConstraint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createNot</span><span class="p">(</span><span class="n">bigConstraint</span><span class="p">)</span>
+        <span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ResolveClaferIds</span><span class="o">.</span><span class="n">ResolveClaferIds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z3</span><span class="p">),</span> <span class="n">bigConstraint</span><span class="p">)</span>
+        <span class="n">createBracketed</span> <span class="o">=</span> <span class="n">CreateBracketedConstraints</span><span class="o">.</span><span class="n">CreateBracketedConstraints</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z3</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="c">#print(bigConstraint)</span>
+        <span class="n">createBracketed</span><span class="o">.</span><span class="n">isomorphismVisit</span><span class="p">(</span><span class="n">bigConstraint</span><span class="p">)</span>
+        
+        
+        <span class="c">#self.createConstraint(topCardStrings, someStrings, otherConstraints)</span>
+        </div>
+<div class="viewcode-block" id="IsomorphismConstraint.createArg"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.createArg">[docs]</a>    <span class="k">def</span> <span class="nf">createArg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg_id</span><span class="p">):</span>
+        <span class="c">#Exp.Exp()), ( iExpType=&quot;IClaferId&quot;, iExp=[ClaferId.ClaferId(moduleName=&quot;&quot;, my_id=&quot;c14_F_sort_0&quot;, isTop=True)]</span>
+        <span class="k">return</span> <span class="n">Exp</span><span class="o">.</span><span class="n">Exp</span><span class="p">(</span><span class="n">expType</span><span class="o">=</span><span class="s">&quot;Argument&quot;</span><span class="p">,</span> <span class="n">my_type</span><span class="o">=</span><span class="s">&quot;Set&quot;</span><span class="p">,</span> <span class="n">parentId</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">zero_pos</span><span class="p">,</span> \
+                       <span class="n">iExpType</span><span class="o">=</span><span class="s">&quot;IClaferId&quot;</span><span class="p">,</span> <span class="n">iExp</span><span class="o">=</span><span class="p">[</span><span class="n">ClaferId</span><span class="o">.</span><span class="n">ClaferId</span><span class="p">(</span><span class="n">moduleName</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">my_id</span><span class="o">=</span><span class="n">arg_id</span><span class="p">,</span> <span class="n">isTop</span><span class="o">=</span><span class="bp">False</span><span class="p">)])</span> 
+    </div>
+<div class="viewcode-block" id="IsomorphismConstraint.createLocalDecl"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.createLocalDecl">[docs]</a>    <span class="k">def</span> <span class="nf">createLocalDecl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">LocalDeclaration</span><span class="o">.</span><span class="n">LocalDeclaration</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="IsomorphismConstraint.createInteger"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.createInteger">[docs]</a>    <span class="k">def</span> <span class="nf">createInteger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">IntegerLiteral</span><span class="o">.</span><span class="n">IntegerLiteral</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">arg</span><span class="p">))</span>
+    </div>
+<div class="viewcode-block" id="IsomorphismConstraint.createDeclaration"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.createDeclaration">[docs]</a>    <span class="k">def</span> <span class="nf">createDeclaration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">locals</span><span class="p">,</span> <span class="n">sort</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Declaration</span><span class="o">.</span><span class="n">Declaration</span><span class="p">(</span><span class="n">isDisjunct</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">localDeclarations</span><span class="o">=</span><span class="nb">locals</span><span class="p">,</span>  <span class="n">body</span><span class="o">=</span>
+        <span class="n">Exp</span><span class="o">.</span><span class="n">Exp</span><span class="p">(</span><span class="n">expType</span><span class="o">=</span><span class="s">&quot;Body&quot;</span><span class="p">,</span> <span class="n">my_type</span><span class="o">=</span><span class="s">&quot;Set&quot;</span><span class="p">,</span> <span class="n">parentId</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">zero_pos</span><span class="p">,</span> <span class="n">iExpType</span><span class="o">=</span><span class="s">&quot;IClaferId&quot;</span><span class="p">,</span> \
+                <span class="n">iExp</span><span class="o">=</span><span class="p">[</span><span class="n">ClaferId</span><span class="o">.</span><span class="n">ClaferId</span><span class="p">(</span><span class="n">moduleName</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">my_id</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span> <span class="n">isTop</span><span class="o">=</span><span class="bp">True</span><span class="p">)]))</span>
+    </div>
+<div class="viewcode-block" id="IsomorphismConstraint.createFunExpr"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.createFunExpr">[docs]</a>    <span class="k">def</span> <span class="nf">createFunExpr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">elems</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">FunExp</span><span class="o">.</span><span class="n">FunExp</span><span class="p">(</span><span class="n">operation</span> <span class="o">=</span> <span class="n">op</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="n">elems</span><span class="p">)</span> 
+    </div>
+<div class="viewcode-block" id="IsomorphismConstraint.createJoin"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.createJoin">[docs]</a>    <span class="k">def</span> <span class="nf">createJoin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createFunExpr</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">])</span>
+     </div>
+<div class="viewcode-block" id="IsomorphismConstraint.createCard"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.createCard">[docs]</a>    <span class="k">def</span> <span class="nf">createCard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createFunExpr</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">arg</span><span class="p">])</span>  
+    </div>
+<div class="viewcode-block" id="IsomorphismConstraint.createEquals"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.createEquals">[docs]</a>    <span class="k">def</span> <span class="nf">createEquals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createFunExpr</span><span class="p">(</span><span class="s">&quot;=&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">])</span>  
+    </div>
+<div class="viewcode-block" id="IsomorphismConstraint.createIn"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.createIn">[docs]</a>    <span class="k">def</span> <span class="nf">createIn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createFunExpr</span><span class="p">(</span><span class="s">&quot;in&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">])</span>   
+    </div>
+<div class="viewcode-block" id="IsomorphismConstraint.createNotEquals"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.createNotEquals">[docs]</a>    <span class="k">def</span> <span class="nf">createNotEquals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createFunExpr</span><span class="p">(</span><span class="s">&quot;!=&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">])</span>   
+    </div>
+<div class="viewcode-block" id="IsomorphismConstraint.createAnd"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.createAnd">[docs]</a>    <span class="k">def</span> <span class="nf">createAnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createFunExpr</span><span class="p">(</span><span class="s">&quot;&amp;&amp;&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">])</span>   
+    </div>
+<div class="viewcode-block" id="IsomorphismConstraint.createNot"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.createNot">[docs]</a>    <span class="k">def</span> <span class="nf">createNot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createFunExpr</span><span class="p">(</span><span class="s">&quot;!&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">arg</span><span class="p">])</span>  
+    </div>
+<div class="viewcode-block" id="IsomorphismConstraint.createSome"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.createSome">[docs]</a>    <span class="k">def</span> <span class="nf">createSome</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decl</span><span class="p">):</span>
+        <span class="n">some</span> <span class="o">=</span>  <span class="n">DeclPExp</span><span class="o">.</span><span class="n">DeclPExp</span><span class="p">(</span><span class="n">quantifier</span><span class="o">=</span><span class="s">&quot;Some&quot;</span><span class="p">,</span> <span class="n">declaration</span><span class="o">=</span><span class="n">decl</span><span class="p">,</span> <span class="n">bodyParentExp</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">topSome</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">topSome</span> <span class="o">=</span> <span class="n">some</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currSome</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currSome</span><span class="o">.</span><span class="n">bodyParentExp</span> <span class="o">=</span> <span class="n">some</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currSome</span> <span class="o">=</span> <span class="n">some</span>
+    </div>
+<div class="viewcode-block" id="IsomorphismConstraint.addConstraint"><a class="viewcode-back" href="../../constraints.html#constraints.IsomorphismConstraint.IsomorphismConstraint.addConstraint">[docs]</a>    <span class="k">def</span> <span class="nf">addConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">constraint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createAnd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraint</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">constraint</span> <span class="o">=</span> <span class="n">other</span>
+        <span class="c">#bottom up</span>
+        <span class="c">#for i in otherConstraints</span>
+        </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ed Zulkoski, Rafael Olaechea.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

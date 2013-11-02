@@ -9,7 +9,7 @@ from common.Common import debug_print, standard_print
 from constraints import Constraints, IsomorphismConstraint
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy
-from z3 import Solver, set_option, sat, is_array, Or
+from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real
 from z3consts import Z3_UNINTERPRETED_SORT
 from z3types import Z3Exception
 
@@ -76,7 +76,7 @@ class Z3Instance(object):
         #set_option(auto_config=False)
         #set_option(candidate_models=True)
         if Common.MODE == Common.DEBUG:
-            #set_option(max_width=2)
+            set_option(max_width=2)
             set_option(max_depth=1000)
             set_option(max_args=1000)
             set_option(auto_config=False)
@@ -176,29 +176,32 @@ class Z3Instance(object):
                 result.append(m)
                 #print(self.solver.statistics())
                 # Create a new constraint the blocks the current model
-                block = []
-                for d in m:
-                    # d is a declaration
-                    if d.arity() > 0:
-                        continue #raise Z3Exception("uninterpreted functions are not supported")
-                    # create a constant from declaration
-                    c = d()
-                    if (str(c)).startswith("z3name!"):
-                        continue
-                    if is_array(c) or c.sort().kind() == Z3_UNINTERPRETED_SORT:
-                        raise Z3Exception("arrays and uninterpreted sorts are not supported")
-                    block.append(c != m[d])
-                    #print(str(d) + " = " + str(m[d]))
-                self.solver.add(Or(block))
+                
                 if not Common.MODE == Common.TEST:
                     self.printVars(m, count)
                 if Options.GET_ISOMORPHISM_CONSTRAINT:
-                    Common.FLAG = True
+                    #Common.FLAG = True
                     IsomorphismConstraint.IsomorphismConstraint(self, m).createIsomorphicConstraint()
-                    self.printConstraints()
+                    #self.printConstraints()
+                    print("AFTER")
                     isoConstraint = self.z3_bracketed_constraints.pop()
                     isoConstraint.assertConstraints(self)
-                    Common.FLAG = False
+                    #Common.FLAG = False
+                else:
+                    block = []
+                    for d in m:
+                        # d is a declaration
+                        if d.arity() > 0:
+                            continue #raise Z3Exception("uninterpreted functions are not supported")
+                        # create a constant from declaration
+                        c = d()
+                        if (str(c)).startswith("z3name!") or is_real(c):
+                            continue
+                        if is_array(c) or c.sort().kind() == Z3_UNINTERPRETED_SORT:
+                            raise Z3Exception("arrays and uninterpreted sorts are not supported")
+                        block.append(c != m[d])
+                        #print(str(d) + " = " + str(m[d]))
+                    self.solver.add(Or(block))
                 count += 1
             else:
                 self.clock.tock("unsat")

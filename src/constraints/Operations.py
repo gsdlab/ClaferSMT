@@ -865,48 +865,59 @@ def op_sum(arg):
 #######################################################################
 ''' 
 
-def getQuantifierConditionList(expr):
+def getQuantifierConditionList(exprs):
     '''
     Iterates over all values in all masks, 
     and returns a list of Booleans, indicating whether
     each instance is on (or true), or not. 
     '''
-    condList = []
-    for i in expr:
-        for j in i.getInstanceSorts():
-            (sort, mask) = j
-            for k in mask.keys():
-                if isinstance(sort,basestring) and sort == "bool":
-                    condList.append(mask.get(k))
-                else:
-                    condList.append(sort.isOn(mask.get(k)))
-    return condList
+    finalList = []
+    for i in exprs:
+        for expr in i:
+            condList = []
+            for k in expr.getInstanceSorts():
+                (sort, mask) = k
+                for l in mask.keys():
+                    if isinstance(sort,basestring) and sort == "bool":
+                        condList.append(mask.get(l))
+                    else:
+                        condList.append(sort.isOn(mask.get(l)))
+            finalList.append(mOr(*condList))
+    return finalList
 
-def quant_some(expr):
-    condList = getQuantifierConditionList(expr)
+def quant_some(exprs, ifConstraints):
+    condList = getQuantifierConditionList(exprs)
+    if ifConstraints:
+        condList = [And(i, j) for i,j in zip(ifConstraints, condList)]
     return Or(*condList)
 
-def quant_all(expr):
-    condList = getQuantifierConditionList(expr)
+def quant_all(exprs, ifConstraints):
+    condList = getQuantifierConditionList(exprs)
+    if ifConstraints:
+        condList = [Implies(i, j) for i,j in zip(ifConstraints, condList)]
     return And(*condList)
 
-def quant_no(expr):
-    condList = getQuantifierConditionList(expr)
+def quant_no(exprs, ifConstraints):
+    condList = getQuantifierConditionList(exprs)
+    if ifConstraints:
+        condList = [And(i, j) for i,j in zip(ifConstraints, condList)]
     return Not(Or(*condList))
 
-def quant_one(expr):
+def quant_one(exprs, ifConstraints):
     '''
     There's probably a better way to do this.
     '''
-    condList = getQuantifierConditionList(expr)
-    indicatorVars = IntVector("one_" + str(Common.getFunctionUID()),len(condList))
+    condList = getQuantifierConditionList(exprs)
+    if ifConstraints:
+        condList = [And(i, j) for i,j in zip(ifConstraints, condList)]
+    indicatorVars = IntVector("one_" + str(Common.getConstraintUID()),len(condList))
     exprList = []
     for i in range(len(condList)):
         exprList.append(If(condList[i], indicatorVars[i] == 1, indicatorVars[i] == 0))
     return Sum(*exprList) == 1
     
-def quant_lone(expr):
-    return Or(quant_no(expr), quant_one(expr))
+def quant_lone(exprs, ifConstraints):
+    return Or(quant_no(exprs, ifConstraints), quant_one(exprs, ifConstraints))
 
 ''' 
 #######################################################################

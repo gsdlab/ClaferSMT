@@ -1,0 +1,182 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>common.Common &mdash; ClaferZ3 0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="ClaferZ3 0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for common.Common</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on Apr 28, 2013</span>
+
+<span class="sd">@author: ezulkosk</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">z3</span> <span class="kn">import</span> <span class="n">If</span><span class="p">,</span> <span class="n">And</span><span class="p">,</span> <span class="n">Or</span>
+
+<span class="n">NORMAL</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">DEBUG</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">TEST</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">ONE</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">MODE</span> <span class="o">=</span> <span class="n">NORMAL</span>
+<span class="n">BREAK</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">FUNCTION_ID</span> <span class="o">=</span> <span class="mi">0</span> 
+<span class="n">CONSTRAINT_ID</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">FLAG</span> <span class="o">=</span> <span class="bp">False</span>
+
+<div class="viewcode-block" id="mAnd"><a class="viewcode-back" href="../../common.html#common.Common.mAnd">[docs]</a><span class="k">def</span> <span class="nf">mAnd</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Short for MaybeAnd.</span>
+<span class="sd">    Helper Function to simplify formulas passed to Z3, but mostly to make debugging output more comprehensible.</span>
+<span class="sd">    Only applies the And function if there are actually multiple arguments.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">newArgs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">newArgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">newArgs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">newArgs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">newArgs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">And</span><span class="p">(</span><span class="o">*</span><span class="n">newArgs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="mOr"><a class="viewcode-back" href="../../common.html#common.Common.mOr">[docs]</a><span class="k">def</span> <span class="nf">mOr</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Similar to mAnd</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">newArgs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">newArgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">newArgs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">newArgs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">newArgs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Or</span><span class="p">(</span><span class="o">*</span><span class="n">newArgs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="debug_print"><a class="viewcode-back" href="../../common.html#common.Common.debug_print">[docs]</a><span class="k">def</span> <span class="nf">debug_print</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Only prints the string if in DEBUG mode.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">MODE</span> <span class="o">==</span> <span class="n">DEBUG</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="standard_print"><a class="viewcode-back" href="../../common.html#common.Common.standard_print">[docs]</a><span class="k">def</span> <span class="nf">standard_print</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Prints the string if **not** in TEST mode.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">MODE</span> <span class="o">!=</span> <span class="n">TEST</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="getConstraintUID"><a class="viewcode-back" href="../../common.html#common.Common.getConstraintUID">[docs]</a><span class="k">def</span> <span class="nf">getConstraintUID</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Used to generate unique booleans for UNSAT core</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">CONSTRAINT_ID</span>
+    <span class="n">CONSTRAINT_ID</span> <span class="o">=</span> <span class="n">CONSTRAINT_ID</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">CONSTRAINT_ID</span>
+</div>
+<div class="viewcode-block" id="reset"><a class="viewcode-back" href="../../common.html#common.Common.reset">[docs]</a><span class="k">def</span> <span class="nf">reset</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Only needed for running test suites.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">CONSTRAINT_ID</span> <span class="o">=</span> <span class="mi">0</span>
+
+</div>
+<div class="viewcode-block" id="min2"><a class="viewcode-back" href="../../common.html#common.Common.min2">[docs]</a><span class="k">def</span> <span class="nf">min2</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">r</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    returns the min of two integers</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">If</span><span class="p">(</span><span class="n">l</span> <span class="o">&lt;=</span> <span class="n">r</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="max2"><a class="viewcode-back" href="../../common.html#common.Common.max2">[docs]</a><span class="k">def</span> <span class="nf">max2</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">r</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    returns the min of two integers</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">If</span><span class="p">(</span><span class="n">l</span> <span class="o">&lt;=</span> <span class="n">r</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
+    </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ed Zulkoski, Rafael Olaechea.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

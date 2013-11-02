@@ -78,6 +78,20 @@ class Clock():
         eventTime = self.completed_event_map[event]
         print("Time for " + event + ": " + str(eventTime))
         
+    def combineClocks(self, other):
+        assert isinstance(other, Clock)
+        clock = Clock()
+        for i in self.completed_event_map.keys():
+            if other.completed_event_map.get(i):
+                clock.completed_event_map[i] = self.completed_event_map[i] + other.completed_event_map[i] 
+            else:
+                clock.completed_event_map[i] = self.completed_event_map[i] 
+        for i in other.completed_event_map.keys():
+            if not self.completed_event_map.get(i):
+                clock.completed_event_map[i] = other.completed_event_map[i]      
+             
+        return clock
+    
     def printEvents(self):
         """
         Prints out all completed events.

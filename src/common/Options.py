@@ -36,19 +36,21 @@ from test.positive import books_tutorial, \
 * Implement isomorphism
 * Find the complete-model option in Z3 (to generate arbitrary numbers for unconstrained variables)
 * Can optimize quantified expressions with symmetric operators
+* Improve support for debugging constraints
+* Fix quantifier symmetry breaker, if two locals FROM THE SAME QUANTIFIER are on the left and right of a func, not symmetric
 '''
 
 
 GLOBAL_SCOPE = 2 #this obviously has to change
 
-MODE = Common.TEST   # Common.[NORMAL | DEBUG | TEST | ONE], where ONE outputs one model from each test
+MODE = Common.ALL   # Common.[NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = True
-NUM_INSTANCES = 6 # -1 to produce all instances
+NUM_INSTANCES = 10 # -1 to produce all instances
 INFINITE = -1 #best variable name.
 PROFILING = True # True to output the translation time, and time to get first model
 CPROFILING = False #invokes the standard python profiling method (see Z3Run.py)
 GET_ISOMORPHISM_CONSTRAINT = False
-
+BREAK_QUANTIFIER_SYMMETRY = False
 
 
 MY_TESTS = 1 # my tests from debugging
@@ -75,11 +77,11 @@ TEST_SET = MY_TESTS
 #MODULE = dag_test.getModule()
 #MODULE = books_tutorial.getModule()
 #MODULE = subbooks.getModule()
-#MODULE = int_ref_set.getModule()
+MODULE = int_ref_set.getModule()
 #MODULE = iso.getModule()
 #MODULE = isowithcons.getModule()
 #MODULE = all_alls.getModule()
-MODULE = some_somes.getModule()
+#MODULE = some_somes.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),
