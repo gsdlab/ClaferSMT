@@ -26,27 +26,36 @@ def run():
     clock = Clock()
     tests = getTestSet()
     num_passed = 0
+    exceptions = 0
+    exception_list = []
     temp_model_count = Options.NUM_INSTANCES
     for t in tests:
         (file, expected_model_count) = t
-        if expected_model_count == Options.INFINITE and Options.NUM_INSTANCES < 0:
-            #will change it back after the test runs
-            Options.NUM_INSTANCES = 3
-        module = file.getModule()
-        print_separate("Attempting: " + str(file.__name__))
-        clock.tick("Total Z3 Run Time")
-        z3 = Z3Instance(module)
-        actual_model_count = z3.run()
-        clock.tack("Total Z3 Run Time")
-        clock = clock.combineClocks(z3.clock)
-        if(expected_model_count == actual_model_count or 
-           (expected_model_count == Options.INFINITE and actual_model_count == Options.NUM_INSTANCES)):
-            print("PASSED: " + str(file))
-            num_passed = num_passed + 1
-        else:
-            print("FAILED: " + str(file) + " " + str(expected_model_count) + " " + str(actual_model_count))
-        Options.NUM_INSTANCES = temp_model_count
-    print_separate("Results: " + str(num_passed) + "/" + str(len(tests)))   
+        try:
+            if expected_model_count == Options.INFINITE and Options.NUM_INSTANCES < 0:
+                #will change it back after the test runs
+                Options.NUM_INSTANCES = 3
+            module = file.getModule()
+            print_separate("Attempting: " + str(file.__name__))
+            clock.tick("Total Z3 Run Time")
+            z3 = Z3Instance(module)
+            actual_model_count = z3.run()
+            clock.tack("Total Z3 Run Time")
+            clock = clock.combineClocks(z3.clock)
+            if(expected_model_count == actual_model_count or 
+               (expected_model_count == Options.INFINITE and actual_model_count == Options.NUM_INSTANCES)):
+                print("PASSED: " + str(file.__name__))
+                num_passed = num_passed + 1
+            else:
+                print("FAILED: " + str(file.__name__) + " " + str(expected_model_count) + " " + str(actual_model_count))
+        except:
+            print("FAILED: " + str(file.__name__) + " " + "\nException raised.")
+            exception_list.append(str(file.__name__))
+            exceptions = exceptions + 1
+        Options.NUM_INSTANCES = temp_model_count    
+    print_separate("Results: " + str(num_passed) + "/" + str(len(tests)) + "\n| " + 
+                   "Exceptions: " + str(exceptions) + "/" + str(len(tests)) + "\n| " +
+                   "Exception List: " + str(exception_list))
     clock.printEvents()
        
        
@@ -58,8 +67,11 @@ def runAndOutputModels():
         module = file.getModule()
         print_separate("Attempting: " + str(file.__name__))
         clock.tick("Total Z3 Run Time")
-        z3 = Z3Instance(module)
-        z3.run()
+        try:
+            z3 = Z3Instance(module)
+            z3.run()
+        except:
+            print("BUG IN TEST")
         clock.tack("Total Z3 Run Time")
         clock = clock.combineClocks(z3.clock)
     print_separate("Results: ")  

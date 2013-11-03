@@ -68,7 +68,6 @@ class BoolArg(ExprArg):
         '''
         Convenience class that extends ExprArg and holds a boolean instance.
         '''
-        self.joinSorts = ["bool"]
         self.instanceSorts = [("bool", Mask.createBoolMask(instances))]
  
 

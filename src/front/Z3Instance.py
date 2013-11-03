@@ -41,9 +41,6 @@ class Z3Instance(object):
         """
         self.unsat_core_trackers = []
         self.unsat_map = {}
-        
-        """ Create simple functions and constraints, that may be used in many places. """
-        self.createCommonFunctions()
     
     def createGroupCardConstraints(self):
         for i in self.z3_sorts.values():
@@ -61,11 +58,6 @@ class Z3Instance(object):
         for i in self.z3_sorts.values():
             if i.superSort:
                 i.indexInSuper = i.superSort.addSubSort(i)     
-         
-    def createCommonFunctions(self):
-        self.common_function_constraints = Constraints.GenericConstraints("Common")
-        #self.common_function_constraints.addConstraint(Common.bool2Int(True) == 1)
-        #self.common_function_constraints.addConstraint(Common.bool2Int(False) == 0)               
     
     def setOptions(self):
         """
@@ -144,7 +136,6 @@ class Z3Instance(object):
     def assertConstraints(self):
         for i in self.z3_sorts.values():
             i.constraints.assertConstraints(self)
-        self.common_function_constraints.assertConstraints(self)
         self.join_constraints.assertConstraints(self)
         for i in self.z3_bracketed_constraints:
             i.assertConstraints(self)

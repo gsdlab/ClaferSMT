@@ -276,6 +276,8 @@ class  ClaferSort(object):
         self.currentSubIndex = self.currentSubIndex + sub.numInstances
         #the super cannot exist without the sub, and vice-versa
         for i in range(sub.numInstances):
+            cons = And(Implies(self.isOn(i + oldSubIndex), sub.isOn(i)),
+                                         Implies(sub.isOn(i),self.isOn(i + oldSubIndex)))
             self.constraints.addInheritanceConstraint(And(Implies(self.isOn(i + oldSubIndex), sub.isOn(i)),
                                          Implies(sub.isOn(i),self.isOn(i + oldSubIndex))))
         return oldSubIndex

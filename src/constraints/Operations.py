@@ -6,6 +6,7 @@ Created on Nov 1, 2013
 from common import Common
 from common.Common import mOr, mAnd
 from lxml.builder import basestring
+
 from structures.ExprArg import Mask, ExprArg, JoinArg, IntArg, BoolArg
 from z3 import If, And, Sum, Not, Implies, Xor, Or, IntVector
 import sys
@@ -85,6 +86,8 @@ def joinWithClaferRef(arg):
         newMask = alreadyExists(sort.refSort, newInstanceSorts)
         if not newMask:
             newMask = Mask()
+        if isinstance(sort.refSort, basestring):
+            return joinWithPrimitive(ExprArg([(sort, mask)]))
         for j in mask.keys():
             if isinstance(sort.refSort, basestring):
                 tempRefs.append(If(sort.isOn(mask.get(j)),
@@ -401,8 +404,7 @@ def op_implies(left,right):
     (left_sort, left_mask) = left.getInstanceSort(0)
     (right_sort, right_mask) = right.getInstanceSort(0)
     if (isinstance(left_sort, basestring) and left_sort == "bool") or \
-        (isinstance(right_sort, basestring) and right_sort == "bool"):
-        
+       (isinstance(right_sort, basestring) and right_sort == "bool"):
         return BoolArg([Implies(left_mask.pop_value(), right_mask.pop_value())])
     #clafer-set equality case
     else:
@@ -513,7 +515,7 @@ def op_join(left,right):
     
     and we are currently processing (B . C), we do no processing. Once we have the *full* join (A . B . C), we 
     use the associativity of well-formed joins to make processing much easier. All joins *should* be well-formed;
-    bad joins should be caught by the Clafer core.
+    bad joins should be caught by the Clafer front-end.
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
@@ -642,7 +644,7 @@ def op_difference(left,right):
             newMask = Mask()
             for i in l.difference(r.getTree()):
                 newMask.put(i, l.get(i))
-            for i in l.intersection(r.keys()):
+            for i in l.intersection(r.getTree()):
                 newMask.put(i, If(sort.isOn(r.get(i))
                                      , l.get(i)
                                      , sort.parentInstances))
@@ -882,6 +884,7 @@ def getQuantifierConditionList(exprs):
                         condList.append(mask.get(l))
                     else:
                         condList.append(sort.isOn(mask.get(l)))
+
             finalList.append(mOr(*condList))
     return finalList
 

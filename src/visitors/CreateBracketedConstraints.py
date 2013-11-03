@@ -11,6 +11,7 @@ from structures.ExprArg import ExprArg, Mask, BoolArg, IntArg
 from visitors import VisitorTemplate
 from visitors.CheckFunctionSymmetry import CheckFunctionSymmetry
 import itertools
+import sys
 import visitors.Visitor
 
 
@@ -80,7 +81,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             else:
                 #localdecl case
                 expr = self.currentConstraint.locals[element.id]
-                expr = [expr[i].clone() for i in range(len(expr))]
+                #expr = [expr[i].clone() for i in range(len(expr))]
                 self.currentConstraint.addArg(expr)
    
     def constraintVisit(self, element):
@@ -132,10 +133,8 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     #handle local declarations (some, all, lone, one, no) 
     #not fully implemented
     def declpexpVisit(self, element):
-        '''
-        new SHOULD MARK ALL THE WAY DOWN, REDUNDANT WORK FOR NESTED QUANTIFIERS
-        '''
         if Options.BREAK_QUANTIFIER_SYMMETRY:
+            sys.exit("BREAK_QUANTIFIER_SYMMETRY still unimplemented.")
             symmetryChecker = CheckFunctionSymmetry(self.z3)
             visitors.Visitor.visit(symmetryChecker, element.bodyParentExp)
             isSymmetric = symmetryChecker.isSymmetric
