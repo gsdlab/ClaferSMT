@@ -8,7 +8,7 @@ from test import bracketedconstraint_this, multiple_joins, this_dot_parent, \
     arithmetic, relations, boolean_connectives, union, simple_abstract, some, \
     simple_set, zoo, simple_zoo, integer_refs, phone_feature_model, \
     higher_inheritance, this_integer_relation, equal_references, dag_test, subbooks, \
-    int_ref_set, iso, isowithcons, all_alls, some_somes
+    int_ref_set, iso, isowithcons, all_alls, some_somes, AADL_simplified_with_lists
 from test.positive import books_tutorial, \
     check_unique_ref_names_with_inheritance, constraints, enforcingInverseReferences, \
     i101, i10, i137_parsing, i14, i17, i18, i19, i23, \
@@ -20,12 +20,14 @@ from test.positive import books_tutorial, \
     i147refdisambiguation, i188sumquantifier, i40textequality, i57navParent, \
     i61cardinalities, i72sharedreference, i78_transitiveclosure, i83individualscope, \
     i84referencespointingtothesameobject, i98_toplevelreferences, \
-    referencesshouldbeunique, subtypingprimitivetypes, i205refdisambiguationII
+    referencesshouldbeunique, subtypingprimitivetypes, i205refdisambiguationII, \
+    constraintswithbounds
 
 '''
 ========
 | TODO |
 ========
+* Scopes
 * Fix any ops left in BracketedConstraint
 * Int refs... possible solution: Int ClaferSort (hopefully there is an easier way...) 
 * Real Numbers
@@ -33,7 +35,6 @@ from test.positive import books_tutorial, \
 * Improve support for debugging constraints
 * Fix quantifier symmetry breaker, if two locals FROM THE SAME QUANTIFIER are on the left and right of a func, not symmetric
 * Documentation
-* Scopes
 * Change DoubleLiteral to RealLiteral, since that is most likely the Z3 construct that will be used.
 '''
 
@@ -52,12 +53,12 @@ EXTEND_ABSTRACT_SCOPES = True
 
 MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
-TEST_SET = POSITIVE_TESTS 
+TEST_SET = MY_TESTS 
 
 #MODULE = bracketedconstraint_this.getModule()
 #MODULE = multiple_joins.getModule()
 #MODULE = this_dot_parent.getModule()
-#MODULE = arithmetic.getModule()
+MODULE = arithmetic.getModule()
 #MODULE = relations.getModule()
 #MODULE = boolean_connectives.getModule()
 #MODULE = union.getModule()
@@ -79,7 +80,9 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = isowithcons.getModule()
 #MODULE = all_alls.getModule()
 #MODULE = some_somes.getModule()
-MODULE = constraints.getModule()
+#MODULE = constraints.getModule()
+#MODULE = constraintswithbounds.getModule()
+#MODULE = AADL_simplified_with_lists.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),

@@ -30,6 +30,5 @@ class CreateHierarchy(VisitorTemplate.VisitorTemplate):
         for i in element.elements:
             if isinstance(i, ast.Clafer.Clafer):
                 self.z3.z3_sorts[element.uid].addField(self.z3.z3_sorts[i.uid])
-         
     
     

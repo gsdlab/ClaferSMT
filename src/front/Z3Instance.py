@@ -69,7 +69,7 @@ class Z3Instance(object):
         #set_option(auto_config=False)
         #set_option(candidate_models=True)
         if Common.MODE == Common.DEBUG:
-            set_option(max_width=2)
+            #set_option(max_width=2)
             set_option(max_depth=1000)
             set_option(max_args=1000)
             set_option(auto_config=False)

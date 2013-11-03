@@ -6,10 +6,11 @@ Created on Nov 1, 2013
 from common import Common
 from common.Common import mOr, mAnd
 from lxml.builder import basestring
-
+from structures.ClaferSort import BoolSort
 from structures.ExprArg import Mask, ExprArg, JoinArg, IntArg, BoolArg
 from z3 import If, And, Sum, Not, Implies, Xor, Or, IntVector
 import sys
+
 
 ''' 
 #######################################################################
@@ -403,8 +404,7 @@ def op_implies(left,right):
     #integer equality case
     (left_sort, left_mask) = left.getInstanceSort(0)
     (right_sort, right_mask) = right.getInstanceSort(0)
-    if (isinstance(left_sort, basestring) and left_sort == "bool") or \
-       (isinstance(right_sort, basestring) and right_sort == "bool"):
+    if isinstance(left_sort, BoolSort) or isinstance(right_sort, BoolSort):
         return BoolArg([Implies(left_mask.pop_value(), right_mask.pop_value())])
     #clafer-set equality case
     else:
@@ -880,10 +880,7 @@ def getQuantifierConditionList(exprs):
             for k in expr.getInstanceSorts():
                 (sort, mask) = k
                 for l in mask.keys():
-                    if isinstance(sort,basestring) and sort == "bool":
-                        condList.append(mask.get(l))
-                    else:
-                        condList.append(sort.isOn(mask.get(l)))
+                    condList.append(sort.isOn(mask.get(l)))
 
             finalList.append(mOr(*condList))
     return finalList

@@ -28,6 +28,7 @@ def run():
     num_passed = 0
     exceptions = 0
     exception_list = []
+    failed_list = []
     temp_model_count = Options.NUM_INSTANCES
     for t in tests:
         (file, expected_model_count) = t
@@ -47,6 +48,7 @@ def run():
                 print("PASSED: " + str(file.__name__))
                 num_passed = num_passed + 1
             else:
+                failed_list.append(str(file.__name__))
                 print("FAILED: " + str(file.__name__) + " " + str(expected_model_count) + " " + str(actual_model_count))
         except:
             print("FAILED: " + str(file.__name__) + " " + "\nException raised.")
@@ -54,6 +56,7 @@ def run():
             exceptions = exceptions + 1
         Options.NUM_INSTANCES = temp_model_count    
     print_separate("Results: " + str(num_passed) + "/" + str(len(tests)) + "\n| " + 
+                   "Failed List: " + str(failed_list) + "\n| " +
                    "Exceptions: " + str(exceptions) + "/" + str(len(tests)) + "\n| " +
                    "Exception List: " + str(exception_list))
     clock.printEvents()

@@ -7,7 +7,7 @@ from common import Common, Options
 from common.Common import mOr
 from constraints import Constraints
 from lxml.builder import basestring
-from z3 import IntVector, If, Implies, And, Or, Sum
+from z3 import IntVector, If, Implies, And, Or, Sum, Not
 import sys
 
 
@@ -143,6 +143,7 @@ class  ClaferSort(object):
             return self.instances[index] == self.parentInstances
         except:
             return index == self.parentInstances
+        
        
     def getInstanceRange(self, index):
         '''
@@ -300,3 +301,24 @@ class  ClaferSort(object):
     def __hash__(self):
         return hash(self.id)
     
+    
+class BoolSort():
+    
+    def isOn(self, arg):
+        '''
+        Returns a Boolean Constraint stating whether or not the instance at the given arg is *on*.
+        '''
+        return arg
+    
+    def isOff(self, arg):
+        '''
+        Returns a Boolean Constraint stating whether or not the instance at the given index is *off*.
+        '''
+        return not self.isOn(arg)
+    
+    def __lt__(self, other):
+        return not isinstance(other, BoolSort())
+        
+    
+    def __eq__(self, other):
+        return isinstance(other, BoolSort())

@@ -5,6 +5,8 @@ Created on Oct 21, 2013
 '''
 from bintrees.avltree import AVLTree
 from lxml.builder import basestring
+from structures.ClaferSort import BoolSort
+
 
 
 class ExprArg():
@@ -68,7 +70,7 @@ class BoolArg(ExprArg):
         '''
         Convenience class that extends ExprArg and holds a boolean instance.
         '''
-        self.instanceSorts = [("bool", Mask.createBoolMask(instances))]
+        self.instanceSorts = [(BoolSort(), Mask.createBoolMask(instances))]
  
 
 class JoinArg(ExprArg):
