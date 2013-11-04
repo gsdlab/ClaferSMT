@@ -1,0 +1,6 @@
+#!/bin/bash
+
+SRC_DIR=./src
+
+cd $SRC_DIR
+python3.2mu front/Z3Run.py
