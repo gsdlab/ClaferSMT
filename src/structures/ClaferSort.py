@@ -7,6 +7,7 @@ from common import Common, Options
 from common.Common import mOr
 from constraints import Constraints
 from lxml.builder import basestring
+
 from z3 import IntVector, If, Implies, And, Or, Sum, Not
 import sys
 
@@ -255,6 +256,8 @@ class  ClaferSort(object):
         if(supers.elements[0].iExp[0].id != "clafer"):
             if(supers.elements[0].type == "Ref"):
                 ref_id = supers.elements[0].iExp[0].id
+                if ref_id == "int":
+                    ref_id = "integer"
                 if ref_id == "integer" or ref_id == "string":
                     self.refSort = ref_id
                 else:
@@ -322,3 +325,51 @@ class BoolSort():
     
     def __eq__(self, other):
         return isinstance(other, BoolSort())
+    
+    def __str__(self):
+        return "BoolSort"
+    
+    def __repr__(self):
+        return self.__str__()
+    
+    
+    
+class IntSort():
+    
+    def __init__(self):
+        from structures.ExprArg import Mask
+        self.cardinalityMask = Mask()
+        self.index = 0
+        
+    def isOn(self, arg):
+        '''
+        Returns a Boolean Constraint stating whether or not the instance at the given arg is *on*.
+        '''
+        return self.cardinalityMask.get(arg)
+    
+    def isOff(self, arg):
+        '''
+        Returns a Boolean Constraint stating whether or not the instance at the given index is *off*.
+        '''
+        return not self.isOn(arg)
+    
+    def getNextIndex(self):
+        self.index = self.index + 1
+        return self.index - 1
+    
+    def getCardinalityMask(self):
+        return self.cardinalityMask
+    
+    def __lt__(self, other):
+        return not (isinstance(other, IntSort) or isinstance(other, BoolSort))
+        
+    
+    def __eq__(self, other):
+        return isinstance(other, IntSort)
+    
+    def __str__(self):
+        return "IntSort"
+    
+    def __repr__(self):
+        return self.__str__()
+    

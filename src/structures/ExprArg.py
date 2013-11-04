@@ -5,7 +5,7 @@ Created on Oct 21, 2013
 '''
 from bintrees.avltree import AVLTree
 from lxml.builder import basestring
-from structures.ClaferSort import BoolSort
+from structures.ClaferSort import BoolSort, IntSort
 
 
 
@@ -63,7 +63,7 @@ class IntArg(ExprArg):
         '''
         Convenience class that extends ExprArg and holds an integer instance.
         '''
-        self.instanceSorts = [("int", Mask.createIntMask(instances))]
+        self.instanceSorts = [(IntSort(), Mask.createIntMask(instances))]
         
 class BoolArg(ExprArg):
     def __init__(self, instances):

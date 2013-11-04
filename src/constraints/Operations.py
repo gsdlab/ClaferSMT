@@ -6,7 +6,7 @@ Created on Nov 1, 2013
 from common import Common
 from common.Common import mOr, mAnd
 from lxml.builder import basestring
-from structures.ClaferSort import BoolSort
+from structures.ClaferSort import BoolSort, IntSort
 from structures.ExprArg import Mask, ExprArg, JoinArg, IntArg, BoolArg
 from z3 import If, And, Sum, Not, Implies, Xor, Or, IntVector
 import sys
@@ -19,11 +19,14 @@ import sys
 '''
 
 def alreadyExists(key, instanceSorts):
+    '''
+    Determines if the sort is already in the list of instanceSorts
+    '''
     for i in instanceSorts:
         (sort, mask) = i
         if key == sort:
             return mask
-    return None
+    return Mask()
 
 def joinWithSuper(sort, mask):
     '''
@@ -47,8 +50,6 @@ def joinWithParent(arg):
     for i in arg.instanceSorts:
         (sort, mask) = i
         newMask = alreadyExists(sort.parent, newInstanceSorts)
-        if not newMask:
-            newMask = Mask()
         for j in mask.keys():
             (lower,upper,_) = sort.instanceRanges[j]
             for k in range(lower, upper + 1):
@@ -63,15 +64,25 @@ def joinWithParent(arg):
             mask.put(j, If(mask.get(j), sort.instances[j], sort.parentInstances))
     return ExprArg(newInstanceSorts)
 
+
+def addPrimitive(newSort, newMask, oldSort, oldMask, index):
+    newIndex = newSort.getNextIndex()
+    cardinalityMask = newSort.getCardinalityMask()
+    constraint = And(oldSort.isOn(oldMask.get(index)), mAnd(*[oldSort.refs[index] != i for i in newMask.values()]))
+    cardinalityMask.put(newIndex, If(constraint, 1, 0))
+    newMask.put(newIndex, If(constraint, oldSort.refs[index], 0))
+
+
 def joinWithPrimitive(arg):
-    newInstanceSorts = []
+    newInstanceSorts = []    
     for i in arg.getInstanceSorts():
         (sort, mask) = i
         if sort.refSort == "integer" or sort.refSort == "string": #change for string soon
-            newMask = Mask()
+            newMask = alreadyExists(IntSort(), newInstanceSorts) #check that this works!!!
+            newSort = IntSort()
             for i in mask.keys():
-                newMask.put(i, If(sort.isOn(mask.get(i)), sort.refs[i], 0))
-            newInstanceSorts.append(("int", newMask)) #should change the "int", but not sure how yet
+                addPrimitive(newSort, newMask, sort, mask, i)         
+            newInstanceSorts.append((newSort, newMask)) #should change the "int", but not sure how yet
         else:
             print("Error on: " + sort.refSort + ", refs other than int (e.g. double) unimplemented")
             sys.exit()
@@ -85,8 +96,6 @@ def joinWithClaferRef(arg):
             (sort, mask) = joinWithSuper(sort, mask)
         tempRefs = []
         newMask = alreadyExists(sort.refSort, newInstanceSorts)
-        if not newMask:
-            newMask = Mask()
         if isinstance(sort.refSort, basestring):
             return joinWithPrimitive(ExprArg([(sort, mask)]))
         for j in mask.keys():
@@ -136,8 +145,6 @@ def joinWithClafer(left, right):
             if noMatch:
                 break
             newMask = alreadyExists(right_sort, newInstanceSorts)
-            if not newMask:
-                newMask = Mask()
             for i in right_mask.keys():
                 (lower, upper, _) = right_sort.instanceRanges[i]
                 for j in range(lower, upper + 1): 
@@ -216,9 +223,7 @@ def op_eq(left,right):
     #integer equality case
     (left_sort, left_mask) = left.getInstanceSort(0)
     (right_sort, right_mask) = right.getInstanceSort(0)
-    if (isinstance(left_sort, basestring) and left_sort == "int") or \
-        (isinstance(right_sort, basestring) and right_sort == "int"):
-        
+    if isinstance(left_sort, IntSort) or isinstance(right_sort, IntSort):
         return BoolArg([sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]) 
                         == sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()])])
     #clafer-set equality case
@@ -535,8 +540,12 @@ def op_card(arg):
     instances = []
     for i in arg.getInstanceSorts():
         (sort, mask) = i
-        for j in mask.values():
-            instances.append(If(sort.isOn(j), 1, 0))  
+        #refactor
+        if isinstance(sort, IntSort):
+            instances = [i for i in sort.cardinalityMask.values()]
+        else:
+            for j in mask.values():
+                instances.append(If(sort.isOn(j), 1, 0))  
     return IntArg([Sum(instances)])
 
 def op_union(left,right):
