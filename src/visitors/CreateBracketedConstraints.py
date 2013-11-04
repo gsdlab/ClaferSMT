@@ -7,6 +7,7 @@ Created on Mar 26, 2013
 from common import Common, Options
 from common.Common import mAnd
 from constraints import BracketedConstraint
+from structures.ClaferSort import PrimitiveType
 from structures.ExprArg import ExprArg, Mask, BoolArg, IntArg
 from visitors import VisitorTemplate
 from visitors.CheckFunctionSymmetry import CheckFunctionSymmetry
@@ -72,9 +73,9 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
                     exprArgList.append(ExprArg([(element.claferSort, Mask(element.claferSort, [i]))]))
                 self.currentConstraint.addArg(exprArgList)
             elif element.id == "ref":
-                self.currentConstraint.addArg([ExprArg(["ref"])])
+                self.currentConstraint.addArg([ExprArg([PrimitiveType("ref")])])
             elif element.id == "parent":
-                self.currentConstraint.addArg([ExprArg(["parent"])])
+                self.currentConstraint.addArg([ExprArg([PrimitiveType("parent")])])
             elif element.claferSort:  
                 self.currentConstraint.addArg([ExprArg([(element.claferSort, 
                                                         Mask(element.claferSort, [i for i in range(element.claferSort.numInstances)]))])])

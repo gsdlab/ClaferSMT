@@ -3,11 +3,10 @@ Created on May 31, 2013
 
 @author: ezulkosk
 '''
-from common.Common import standard_print
-from lxml.builder import basestring
+
+from structures.ClaferSort import PrimitiveType
 from structures.SimpleTree import SimpleTree
 from visitors import VisitorTemplate
-import ast
 import visitors
 
 
@@ -62,7 +61,7 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                 if not sort.refs:
                         self.tree.addNode(str(sort.instances[j]), parentInstance)
                 else:
-                    if isinstance(sort.refSort, basestring) and (sort.refSort == "integer" or sort.refSort == "string"):
+                    if isinstance(sort.refSort, PrimitiveType) and (sort.refSort == "integer" or sort.refSort == "string"):
                         self.tree.addNode(str(sort.instances[j]), parentInstance)
                         self.tree.addRef(str(sort.instances[j]), str(self.model.eval(sort.refs[j])))
                     else:

@@ -30,7 +30,7 @@ from test.positive import books_tutorial, \
 ========
 * Scopes
 * Fix any ops left in BracketedConstraint
-* Int refs... possible solution: Int ClaferSort (hopefully there is an easier way...) 
+* Int refs.
 * Real Numbers
 * Traversal of quantified formulas is exponential...
 * Improve support for debugging constraints
@@ -102,6 +102,7 @@ my_tests = [
           (this_integer_relation, 2),
           (equal_references, 2),
           (all_alls, 1),
+          (all_threes, 1),
           (zoo, INFINITE)
          ]
 

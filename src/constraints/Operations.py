@@ -5,8 +5,7 @@ Created on Nov 1, 2013
 '''
 from common import Common
 from common.Common import mOr, mAnd
-from lxml.builder import basestring
-from structures.ClaferSort import BoolSort, IntSort
+from structures.ClaferSort import BoolSort, IntSort, PrimitiveType
 from structures.ExprArg import Mask, ExprArg, JoinArg, IntArg, BoolArg
 from z3 import If, And, Sum, Not, Implies, Xor, Or, IntVector
 import sys
@@ -96,16 +95,16 @@ def joinWithClaferRef(arg):
             (sort, mask) = joinWithSuper(sort, mask)
         tempRefs = []
         newMask = alreadyExists(sort.refSort, newInstanceSorts)
-        if isinstance(sort.refSort, basestring):
+        if isinstance(sort.refSort, PrimitiveType):
             return joinWithPrimitive(ExprArg([(sort, mask)]))
         for j in mask.keys():
-            if isinstance(sort.refSort, basestring):
+            if isinstance(sort.refSort, PrimitiveType):
                 tempRefs.append(If(sort.isOn(mask.get(j)),
                                    sort.refs[j], 0))
             else:
                 tempRefs.append(If(sort.isOn(mask.get(j)),
                                    sort.refs[j], sort.refSort.numInstances))
-        if isinstance(sort.refSort, basestring):
+        if isinstance(sort.refSort, PrimitiveType):
             for j in range(sort.numInstances):
                 clause = mOr(*[k == j for k in tempRefs])
                 newMask.put(j, mOr(newMask.get(j), clause))
@@ -122,7 +121,7 @@ def joinWithClaferRef(arg):
     
 def joinWithRef(arg): 
     (sort, _) = arg.instanceSorts[0]
-    if isinstance(sort.refSort, basestring):
+    if isinstance(sort.refSort, PrimitiveType):
         return joinWithPrimitive(arg)
     else: 
         #join on ref sort
@@ -166,7 +165,7 @@ def computeJoin(joinList):
     while joinList:
         right = joinList.pop(0)
         rightJoinPoint = right.getInstanceSort(0)
-        if isinstance(rightJoinPoint, basestring):
+        if isinstance(rightJoinPoint, PrimitiveType):
             if rightJoinPoint == "parent":
                 left = joinWithParent(left)
             elif rightJoinPoint == "ref":
@@ -624,6 +623,16 @@ def op_intersection(left,right):
     return ExprArg(extendedR.joinSorts, extendedR.instanceSorts, finalInstances)
     '''
 
+
+def int_set_difference(left, right):
+    newMask = Mask()
+    sort = IntSort()
+    for i in left.keys():
+        constraint = And(*[left.get(i) != j for j in right.values()])
+        sort.cardinalityMask.put(i, If(constraint, 1, 0))
+        newMask.put(i, If(constraint, left.get(i), 0))
+    return (sort, newMask)
+
 def op_difference(left,right):
     '''
     :param left:
@@ -650,15 +659,19 @@ def op_difference(left,right):
         else:
             (_, (sort, l)) = nextSorts[0]
             (_, (_, r)) = nextSorts[1]
-            newMask = Mask()
-            for i in l.difference(r.getTree()):
-                newMask.put(i, l.get(i))
-            for i in l.intersection(r.getTree()):
-                newMask.put(i, If(sort.isOn(r.get(i))
-                                     , l.get(i)
-                                     , sort.parentInstances))
+            
+            if isinstance(sort, IntSort):
+                (sort, newMask) = int_set_difference(l,r)
+            else:
+                newMask = Mask()
+                for i in l.difference(r.getTree()):
+                    newMask.put(i, l.get(i))
+                for i in l.intersection(r.getTree()):
+                    newMask.put(i, If(sort.isOn(r.get(i))
+                                         , l.get(i)
+                                         , sort.parentInstances))
             newInstanceSorts.append((sort, newMask))
-    return ExprArg(left.joinSorts, newInstanceSorts)
+    return ExprArg(newInstanceSorts)
     
 def getMatch(key, my_list):
     '''

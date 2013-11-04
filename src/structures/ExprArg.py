@@ -4,8 +4,7 @@ Created on Oct 21, 2013
 @author: ezulkosk
 '''
 from bintrees.avltree import AVLTree
-from lxml.builder import basestring
-from structures.ClaferSort import BoolSort, IntSort
+from structures.ClaferSort import BoolSort, IntSort, PrimitiveType
 
 
 
@@ -45,7 +44,7 @@ class ExprArg():
     def clone(self):
         newInstanceSorts = []
         for i in self.instanceSorts:
-            if isinstance(i, basestring):
+            if isinstance(i, PrimitiveType):
                 newInstanceSorts.append(i)
             else:    
                 (sort, mask) = i
@@ -102,7 +101,7 @@ class JoinArg(ExprArg):
             return JoinArg(self.left.clone(), self.right.clone())
         newInstanceSorts = []
         for i in self.instanceSorts:
-            if isinstance(i, basestring):
+            if isinstance(i, PrimitiveType):
                 newInstanceSorts.append(i)
             else:    
                 (sort, mask) = i

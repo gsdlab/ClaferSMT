@@ -6,10 +6,9 @@ Created on Apr 29, 2013
 from common import Common, Options
 from common.Common import mOr
 from constraints import Constraints
-from lxml.builder import basestring
-
 from z3 import IntVector, If, Implies, And, Or, Sum, Not
 import sys
+
 
 
 
@@ -95,7 +94,7 @@ class  ClaferSort(object):
             self.refs = IntVector(self.element.uid.split("_",1)[1] + "_ref",self.numInstances)
         if not self.refSort:
             return  
-        if not isinstance(self.refSort, basestring):
+        if not isinstance(self.refSort, PrimitiveType):
             for i in range(self.numInstances):
                 #refs pointer is >= 0
                 self.constraints.addRefConstraint(self.refs[i] >= 0) 
@@ -104,7 +103,7 @@ class  ClaferSort(object):
         #if integer refs, zero out refs that do not have live parents,
         #if clafer refs, set equal to ref.parentInstances if not live   
         for i in range(self.numInstances):
-            if isinstance(self.refSort, basestring):
+            if isinstance(self.refSort, PrimitiveType):
                 if self.refSort == "integer":
                     self.constraints.addRefConstraint(Implies(self.isOff(i), self.refs[i] == 0))    
                 elif self.refSort == "string":
@@ -259,7 +258,7 @@ class  ClaferSort(object):
                 if ref_id == "int":
                     ref_id = "integer"
                 if ref_id == "integer" or ref_id == "string":
-                    self.refSort = ref_id
+                    self.refSort = PrimitiveType(ref_id)
                 else:
                     self.refSort = self.z3.getSort(ref_id)
                 self.superSort = None
@@ -372,4 +371,11 @@ class IntSort():
     
     def __repr__(self):
         return self.__str__()
+    
+class PrimitiveType():
+    def __init__(self, type):
+        self.type = type
+        
+    def __eq__(self, other):
+        return self.type == other
     

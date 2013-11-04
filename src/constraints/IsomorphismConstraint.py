@@ -7,7 +7,7 @@ Created on Oct 7, 2013
 from ast import IntegerLiteral, FunExp, Exp, ClaferId, DeclPExp, \
     LocalDeclaration, Declaration
 from common.Common import standard_print
-from lxml.builder import basestring
+from structures.ClaferSort import PrimitiveType
 from visitors import VisitorTemplate, Visitor, CreateBracketedConstraints, \
     ResolveClaferIds
 from z3 import ModelRef
@@ -101,7 +101,7 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
             if i.refSort:
                 for j in range(len(i.instances)):
                     if self.isOn(self.model.eval(i.instances[j]), i):
-                        if isinstance(i.refSort, basestring) and i.refSort == "integer":
+                        if isinstance(i.refSort, PrimitiveType) and i.refSort == "integer":
                             self.addConstraint(self.createEquals(self.createJoin(self.createArg(str(i) + "_" + str(j)), self.createArg("ref")), \
                                                                     self.createInteger(str(self.model.eval(i.refs[j])))))
                             refConstraints.append(str(i) + "_" + str(j) + ".ref = " +  str(self.model.eval(i.refs[j])))
