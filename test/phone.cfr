@@ -1,0 +1,8 @@
+Phone
+	PasswordProtection ?
+	Apps ->  SwApps *
+	[ Apps.memory <= 100 ]
+
+SwApps
+	UID : int
+	memory : int

@@ -1,0 +1,425 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>structures package &mdash; ClaferZ3 0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ClaferZ3 0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">ClaferZ3 0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="structures-package">
+<h1>structures package<a class="headerlink" href="#structures-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-structures.ClaferSort">
+<span id="structures-clafersort-module"></span><h2>structures.ClaferSort module<a class="headerlink" href="#module-structures.ClaferSort" title="Permalink to this headline">¶</a></h2>
+<p>Created on Apr 29, 2013</p>
+<p>&#64;author: ezulkosk</p>
+<dl class="class">
+<dt id="structures.ClaferSort.ClaferSort">
+<em class="property">class </em><tt class="descclassname">structures.ClaferSort.</tt><tt class="descname">ClaferSort</tt><big>(</big><em>element</em>, <em>z3</em>, <em>stack</em><big>)</big><a class="reference internal" href="_modules/structures/ClaferSort.html#ClaferSort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ClaferSort.ClaferSort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>element</strong> &#8211; The IR clafer.</li>
+<li><strong>z3</strong> &#8211; The Z3Instance.</li>
+<li><strong>parentStack</strong> &#8211; Used to determine the parent of the clafer, and if the clafer is top level.</li>
+<li><strong>isTopLevel</strong> &#8211; True if the clafer is at the top level of indentation.</li>
+<li><strong>fields</strong> &#8211; The direct subclafer ClaferSorts.</li>
+<li><a class="reference internal" href="constraints.html#module-constraints" title="constraints"><strong>constraints</strong></a> &#8211; The set of Z3 constraints associated with this clafer.</li>
+<li><strong>summs</strong> &#8211; List containing useful information for processing cardinality constraints.</li>
+<li><strong>numInstances</strong> &#8211; The number of Z3-Int instances used to represent this Clafer.</li>
+<li><strong>instances</strong> &#8211; List of Z3-Ints representing the clafer. 
+An instance is <em>on</em> if it is not equal to the number of parentInstances.</li>
+<li><strong>refs</strong> &#8211; List of Z3-ints representing the reference clafers that instances of this clafer point.</li>
+<li><strong>subs</strong> &#8211; The list of ClaferSorts that directly inherit from this clafer.</li>
+<li><strong>indexInSuper</strong> &#8211; Used to map a subinstance to the correct instances in the super.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Class representing a clafer in Z3 constraints. Clafers are represented as a list of 
+Z3-Int with a length equal to its global cardinality (for now). 
+The integers in the list represent which parent instance the corresponding instance
+points to. The range of the integers in the list is in [0,parentInstances]. An instance in this 
+list is considered <em>on</em> (that is, will appear in the outputted model), if it is not equal
+to parentInstances. If a clafer is top level, then an instance is on if it equals 0, else it is
+off. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">A</span> <span class="mf">1.</span><span class="o">.</span><span class="mi">2</span> <span class="o">//</span><span class="n">A</span> <span class="n">has</span> <span class="k">global</span> <span class="n">cardinality</span> <span class="n">of</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">B</span> <span class="mf">1.</span><span class="o">.</span><span class="mi">3</span> <span class="o">//</span><span class="n">B</span> <span class="n">has</span> <span class="k">global</span> <span class="n">cardinality</span> <span class="mi">6</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Instances</span> <span class="k">for</span> <span class="n">A</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Instances</span> <span class="k">for</span> <span class="n">B</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Corresponding</span> <span class="n">output</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="n">A0</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">B0</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">B1</span>
+</pre></div>
+</div>
+<p>Instance A0 is on because the first instance of A is 0. Instances B0 and B1 fall under
+A0 because the first and second instances are 0, that is, their parent pointers are 0.
+Instances B2-B5 are off because parentInstances for B is 2 (since there are 2 A&#8217;s).</p>
+<dl class="method">
+<dt id="structures.ClaferSort.ClaferSort.addField">
+<tt class="descname">addField</tt><big>(</big><em>claferSort</em><big>)</big><a class="reference internal" href="_modules/structures/ClaferSort.html#ClaferSort.addField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ClaferSort.ClaferSort.addField" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ClaferSort.ClaferSort.addGroupCardConstraints">
+<tt class="descname">addGroupCardConstraints</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ClaferSort.html#ClaferSort.addGroupCardConstraints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ClaferSort.ClaferSort.addGroupCardConstraints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ClaferSort.ClaferSort.addRef">
+<tt class="descname">addRef</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ClaferSort.html#ClaferSort.addRef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ClaferSort.ClaferSort.addRef" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ClaferSort.ClaferSort.addRefConstraints">
+<tt class="descname">addRefConstraints</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ClaferSort.html#ClaferSort.addRefConstraints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ClaferSort.ClaferSort.addRefConstraints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ClaferSort.ClaferSort.addSubSort">
+<tt class="descname">addSubSort</tt><big>(</big><em>sub</em><big>)</big><a class="reference internal" href="_modules/structures/ClaferSort.html#ClaferSort.addSubSort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ClaferSort.ClaferSort.addSubSort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ClaferSort.ClaferSort.checkSuperAndRef">
+<tt class="descname">checkSuperAndRef</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ClaferSort.html#ClaferSort.checkSuperAndRef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ClaferSort.ClaferSort.checkSuperAndRef" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ClaferSort.ClaferSort.createCardinalityConstraints">
+<tt class="descname">createCardinalityConstraints</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ClaferSort.html#ClaferSort.createCardinalityConstraints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ClaferSort.ClaferSort.createCardinalityConstraints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ClaferSort.ClaferSort.createInstancesConstraintsAndFunctions">
+<tt class="descname">createInstancesConstraintsAndFunctions</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ClaferSort.html#ClaferSort.createInstancesConstraintsAndFunctions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ClaferSort.ClaferSort.createInstancesConstraintsAndFunctions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ClaferSort.ClaferSort.getInstanceRange">
+<tt class="descname">getInstanceRange</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/structures/ClaferSort.html#ClaferSort.getInstanceRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ClaferSort.ClaferSort.getInstanceRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restricts the bounds of each instance.
+Returns (lower, upper, extraAbsenceConstraint), where 
+lower and upper are the bounds, and extraAbsenceConstraint
+is true if the instance may be absent from the model, AND is
+not covered by the upper bound.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="structures.ClaferSort.ClaferSort.isOff">
+<tt class="descname">isOff</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/structures/ClaferSort.html#ClaferSort.isOff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ClaferSort.ClaferSort.isOff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a Boolean Constraint stating whether or not the instance at the given index is <em>on</em>.
+An instance is off if it is set to self.parentInstances.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="structures.ClaferSort.ClaferSort.isOn">
+<tt class="descname">isOn</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/structures/ClaferSort.html#ClaferSort.isOn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ClaferSort.ClaferSort.isOn" title="Permalink to this definition">¶</a></dt>
+<dd><p>index is either an int or Z3-Int
+Returns a Boolean Constraint stating whether or not the instance at the given index is <em>on</em>.
+An instance is on if it is not set to self.parentInstances.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-structures.ExprArg">
+<span id="structures-exprarg-module"></span><h2>structures.ExprArg module<a class="headerlink" href="#module-structures.ExprArg" title="Permalink to this headline">¶</a></h2>
+<p>Created on Oct 21, 2013</p>
+<p>&#64;author: ezulkosk</p>
+<dl class="class">
+<dt id="structures.ExprArg.BoolArg">
+<em class="property">class </em><tt class="descclassname">structures.ExprArg.</tt><tt class="descname">BoolArg</tt><big>(</big><em>instances</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#BoolArg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.BoolArg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#structures.ExprArg.ExprArg" title="structures.ExprArg.ExprArg"><tt class="xref py py-class docutils literal"><span class="pre">structures.ExprArg.ExprArg</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="structures.ExprArg.ExprArg">
+<em class="property">class </em><tt class="descclassname">structures.ExprArg.</tt><tt class="descname">ExprArg</tt><big>(</big><em>instanceSorts</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#ExprArg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.ExprArg" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="structures.ExprArg.ExprArg.clone">
+<tt class="descname">clone</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#ExprArg.clone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.ExprArg.clone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.ExprArg.finish">
+<tt class="descname">finish</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#ExprArg.finish"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.ExprArg.finish" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.ExprArg.flattenJoin">
+<tt class="descname">flattenJoin</tt><big>(</big><em>joinList</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#ExprArg.flattenJoin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.ExprArg.flattenJoin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.ExprArg.getInstanceSort">
+<tt class="descname">getInstanceSort</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#ExprArg.getInstanceSort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.ExprArg.getInstanceSort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.ExprArg.getInstanceSorts">
+<tt class="descname">getInstanceSorts</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#ExprArg.getInstanceSorts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.ExprArg.getInstanceSorts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.ExprArg.modifyInstances">
+<tt class="descname">modifyInstances</tt><big>(</big><em>newInstances</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#ExprArg.modifyInstances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.ExprArg.modifyInstances" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>newInstances</strong> (<em>[Int()]</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#structures.ExprArg.ExprArg" title="structures.ExprArg.ExprArg"><tt class="xref py py-class docutils literal"><span class="pre">ExprArg</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+<p>Returns the old ExprArg, with its instances changed to <strong>newInstances</strong>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="structures.ExprArg.IntArg">
+<em class="property">class </em><tt class="descclassname">structures.ExprArg.</tt><tt class="descname">IntArg</tt><big>(</big><em>instances</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#IntArg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.IntArg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#structures.ExprArg.ExprArg" title="structures.ExprArg.ExprArg"><tt class="xref py py-class docutils literal"><span class="pre">structures.ExprArg.ExprArg</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="structures.ExprArg.JoinArg">
+<em class="property">class </em><tt class="descclassname">structures.ExprArg.</tt><tt class="descname">JoinArg</tt><big>(</big><em>left</em>, <em>right</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#JoinArg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.JoinArg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#structures.ExprArg.ExprArg" title="structures.ExprArg.ExprArg"><tt class="xref py py-class docutils literal"><span class="pre">structures.ExprArg.ExprArg</span></tt></a></p>
+<dl class="method">
+<dt id="structures.ExprArg.JoinArg.checkIfJoinIsComputed">
+<tt class="descname">checkIfJoinIsComputed</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#JoinArg.checkIfJoinIsComputed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.JoinArg.checkIfJoinIsComputed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.JoinArg.clone">
+<tt class="descname">clone</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#JoinArg.clone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.JoinArg.clone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.JoinArg.flattenJoin">
+<tt class="descname">flattenJoin</tt><big>(</big><em>joinList=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#JoinArg.flattenJoin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.JoinArg.flattenJoin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.JoinArg.getInstanceSort">
+<tt class="descname">getInstanceSort</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#JoinArg.getInstanceSort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.JoinArg.getInstanceSort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.JoinArg.getInstanceSorts">
+<tt class="descname">getInstanceSorts</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#JoinArg.getInstanceSorts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.JoinArg.getInstanceSorts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="structures.ExprArg.Mask">
+<em class="property">class </em><tt class="descclassname">structures.ExprArg.</tt><tt class="descname">Mask</tt><big>(</big><em>sort=None</em>, <em>instances=</em><span class="optional">[</span><span class="optional">]</span>, <em>copy=False</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#Mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.Mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for AVLTree to keep track of which instances are <em>on</em>.</p>
+<dl class="method">
+<dt id="structures.ExprArg.Mask.copy">
+<tt class="descname">copy</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#Mask.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.Mask.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="structures.ExprArg.Mask.createBoolMask">
+<em class="property">static </em><tt class="descname">createBoolMask</tt><big>(</big><em>instances</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#Mask.createBoolMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.Mask.createBoolMask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="structures.ExprArg.Mask.createIntMask">
+<em class="property">static </em><tt class="descname">createIntMask</tt><big>(</big><em>instances</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#Mask.createIntMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.Mask.createIntMask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.Mask.difference">
+<tt class="descname">difference</tt><big>(</big><em>keyset</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#Mask.difference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.Mask.difference" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.Mask.get">
+<tt class="descname">get</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#Mask.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.Mask.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.Mask.getTree">
+<tt class="descname">getTree</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#Mask.getTree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.Mask.getTree" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.Mask.intersection">
+<tt class="descname">intersection</tt><big>(</big><em>keyset</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#Mask.intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.Mask.intersection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.Mask.keys">
+<tt class="descname">keys</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#Mask.keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.Mask.keys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.Mask.pop_value">
+<tt class="descname">pop_value</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#Mask.pop_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.Mask.pop_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.Mask.put">
+<tt class="descname">put</tt><big>(</big><em>key</em>, <em>value</em><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#Mask.put"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.Mask.put" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.Mask.size">
+<tt class="descname">size</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#Mask.size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.Mask.size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.ExprArg.Mask.values">
+<tt class="descname">values</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/structures/ExprArg.html#Mask.values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.ExprArg.Mask.values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-structures.SimpleTree">
+<span id="structures-simpletree-module"></span><h2>structures.SimpleTree module<a class="headerlink" href="#module-structures.SimpleTree" title="Permalink to this headline">¶</a></h2>
+<p>Created on Oct 30, 2013</p>
+<p>&#64;author: ezulkosk</p>
+<dl class="class">
+<dt id="structures.SimpleTree.SimpleTree">
+<em class="property">class </em><tt class="descclassname">structures.SimpleTree.</tt><tt class="descname">SimpleTree</tt><a class="reference internal" href="_modules/structures/SimpleTree.html#SimpleTree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.SimpleTree.SimpleTree" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="structures.SimpleTree.SimpleTree.addChild">
+<tt class="descname">addChild</tt><big>(</big><em>node</em>, <em>child</em><big>)</big><a class="reference internal" href="_modules/structures/SimpleTree.html#SimpleTree.addChild"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.SimpleTree.SimpleTree.addChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.SimpleTree.SimpleTree.addNode">
+<tt class="descname">addNode</tt><big>(</big><em>node</em>, <em>parent</em><big>)</big><a class="reference internal" href="_modules/structures/SimpleTree.html#SimpleTree.addNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.SimpleTree.SimpleTree.addNode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.SimpleTree.SimpleTree.addRef">
+<tt class="descname">addRef</tt><big>(</big><em>node</em>, <em>ref</em><big>)</big><a class="reference internal" href="_modules/structures/SimpleTree.html#SimpleTree.addRef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.SimpleTree.SimpleTree.addRef" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="structures.SimpleTree.SimpleTree.addRoot">
+<tt class="descname">addRoot</tt><big>(</big><em>root</em><big>)</big><a class="reference internal" href="_modules/structures/SimpleTree.html#SimpleTree.addRoot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#structures.SimpleTree.SimpleTree.addRoot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-structures">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-structures" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">structures package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-structures.ClaferSort">structures.ClaferSort module</a></li>
+<li><a class="reference internal" href="#module-structures.ExprArg">structures.ExprArg module</a></li>
+<li><a class="reference internal" href="#module-structures.SimpleTree">structures.SimpleTree module</a></li>
+<li><a class="reference internal" href="#module-structures">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/structures.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">ClaferZ3 0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ed Zulkoski, Rafael Olaechea.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

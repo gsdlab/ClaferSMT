@@ -1,0 +1,7 @@
+A 2
+  B -> integer 3
+    [this > 0]
+  [sum(this.B) = 6]
+
+[ some a1; a2 : A | a1  ]
+[#A = 2]

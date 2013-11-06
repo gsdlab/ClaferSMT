@@ -1,0 +1,12 @@
+abstract D : integer 3
+A : D
+B : D
+C : D
+[A.ref = 1]
+[B.ref = 2]
+[C.ref = 3]
+
+E : integer
+[E.ref = 1]
+
+[D.ref -- A.ref -- E.ref = 5]

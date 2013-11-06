@@ -1,0 +1,12 @@
+0 .. * c1_R : clafer 1 .. 2 {
+  }
+0 .. * c2_A ->> c1_R 1 .. 1 {
+  }
+[all disj x ;
+y : c2_A | x . ref != y . ref]0 .. * c12_B ->> c1_R 1 .. 1 {
+  }
+[all disj x ;
+y : c12_B | x . ref != y . ref]0 .. * c22_C ->> c1_R 1 .. 1 {
+  }
+[all disj x ;
+y : c22_C | x . ref != y . ref][c2_A . ref = c12_B . ref][c2_A . ref != c22_C . ref]

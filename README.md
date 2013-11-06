@@ -17,5 +17,11 @@ which will produce the AST in python and print the tree.
 Required
 ========
 
-pip install bintrees
-Remove the warning messages from bintrees imports.
+Python 3
+
+Z3 4.2.3
+
+pip install bintrees (make sure it is installed for the correct version of python).
+
+Optional: Remove the warning messages from bintrees imports.
+

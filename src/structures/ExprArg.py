@@ -4,22 +4,30 @@ Created on Oct 21, 2013
 @author: ezulkosk
 '''
 from bintrees.avltree import AVLTree
-from lxml.builder import basestring
+from structures.ClaferSort import BoolSort, IntSort, PrimitiveType
+
+
+
 class ExprArg():
-    def __init__(self, joinSorts, instanceSorts):
+    def __init__(self, instanceSorts):
         '''
-        :param joinSorts: The list of sorts used to determine which ClaferSorts to join.
-        :type joinSorts: [:class:`~common.ClaferSort`]
         :param instanceSorts: The list of sorts that are actually in instances.
         :type instancesSorts: [:class:`~common.ClaferSort`]
-        :param instances: The set of Z3-int expressions associated with the bracketed constraint up to this point.
-        :type instances: [Int()]
         
         Struct used to hold information as a bracketed constraint is traversed. 
         '''
-        self.joinSorts = joinSorts
         self.instanceSorts = instanceSorts
+    
+    def flattenJoin(self, joinList):
+        #only used when reifying joins
+        return [self]
         
+    def getInstanceSorts(self):
+        return self.instanceSorts
+    
+    def getInstanceSort(self, index):
+        return self.instanceSorts[index]
+    
     def modifyInstances(self, newInstances):
         '''
         :param newInstances:
@@ -28,13 +36,7 @@ class ExprArg():
         
         Returns the old ExprArg, with its instances changed to **newInstances**.
         '''
-        return ExprArg(self.joinSorts[:], self.instanceSorts[:], newInstances)
-    
-    def getInstanceMask(self, sort):
-        for i in self.instanceSorts:
-            (curr_sort, mask) = i
-            if sort == curr_sort:
-                return mask 
+        return ExprArg(self.instanceSorts[:])
     
     def finish(self):
         return self.instanceSorts[0][1].get(0)
@@ -42,35 +44,76 @@ class ExprArg():
     def clone(self):
         newInstanceSorts = []
         for i in self.instanceSorts:
-            if isinstance(i, basestring):
+            if isinstance(i, PrimitiveType):
                 newInstanceSorts.append(i)
             else:    
                 (sort, mask) = i
                 newInstanceSorts.append((sort, mask.copy()))
-        return ExprArg(self.joinSorts[:], newInstanceSorts)
+        return ExprArg(newInstanceSorts)
       
     def __str__(self):
-        return (str(self.instanceSorts)) 
+        return (str(self.getInstanceSorts())) 
      
     def __repr__(self):
-        return (str(self.instanceSorts)) 
+        return (str(self.getInstanceSorts())) 
                
 class IntArg(ExprArg):
     def __init__(self, instances):
         '''
         Convenience class that extends ExprArg and holds an integer instance.
         '''
-        self.joinSorts = ["int"]
-        self.instanceSorts = [("int", Mask.createIntMask(instances))]
+        self.instanceSorts = [(IntSort(), Mask.createIntMask(instances))]
         
 class BoolArg(ExprArg):
     def __init__(self, instances):
         '''
         Convenience class that extends ExprArg and holds a boolean instance.
         '''
-        self.joinSorts = ["bool"]
-        self.instanceSorts = [("bool", Mask.createBoolMask(instances))]
-        
+        self.instanceSorts = [(BoolSort(), Mask.createBoolMask(instances))]
+ 
+
+class JoinArg(ExprArg):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+        self.instanceSorts = []
+    
+    def checkIfJoinIsComputed(self):
+        import constraints.Operations as Ops
+        if not self.instanceSorts:
+            joinList = self.flattenJoin()
+            self.instanceSorts = Ops.computeJoin(joinList)
+    
+    def getInstanceSorts(self):
+        self.checkIfJoinIsComputed()
+        return self.instanceSorts
+    
+    def getInstanceSort(self, index):
+        self.checkIfJoinIsComputed()
+        return self.instanceSorts[index]
+       
+    def flattenJoin(self, joinList=[]):
+        return self.left.flattenJoin([]) + joinList + self.right.flattenJoin([])
+    
+    
+    def clone(self):
+        if not self.instanceSorts:
+            return JoinArg(self.left.clone(), self.right.clone())
+        newInstanceSorts = []
+        for i in self.instanceSorts:
+            if isinstance(i, PrimitiveType):
+                newInstanceSorts.append(i)
+            else:    
+                (sort, mask) = i
+                newInstanceSorts.append((sort, mask.copy()))
+        return ExprArg([], newInstanceSorts)
+      
+    def __str__(self):
+        return ("join: " + str(self.left.getInstanceSorts())+ str(self.right.getInstanceSorts()))
+    
+    def __repr__(self):
+        return ("join: " + str(self.getInstanceSorts())+ str(self.getInstanceSorts()))
+    
 class Mask():
     '''
     Wrapper for AVLTree to keep track of which instances are *on*.
@@ -93,7 +136,7 @@ class Mask():
     @staticmethod
     def createIntMask(instances):
         return Mask([(i, instances[i]) for i in range(len(instances))])
-
+    
     @staticmethod
     def createBoolMask(instances):
         return Mask([(i, instances[i]) for i in range(len(instances))])
@@ -113,7 +156,7 @@ class Mask():
     
     def getTree(self):
         return self.tree
-    
+        
     def size(self):
         return self.tree.count
     

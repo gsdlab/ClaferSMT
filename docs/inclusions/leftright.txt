@@ -1,5 +1,0 @@
-:param left:
-:type left: :class:`~ExprArg`
-:param right:
-:type right: :class:`~ExprArg`
-:returns: :class:`~ExprArg`

@@ -1,0 +1,9 @@
+0 .. * c1_B : clafer 0 .. 1 {
+  0 .. * c2_D : clafer 0 .. 1 {
+    }
+  }
+0 .. * c3_C : clafer 0 .. 1 {
+  }
+0 .. * c4_A : clafer 1 .. 1 {
+  [some c1_B . c2_D && some c3_C]
+}

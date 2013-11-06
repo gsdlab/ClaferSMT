@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>constraints.Constraints &mdash; ClaferZ3 0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="ClaferZ3 0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for constraints.Constraints</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on Oct 3, 2013</span>
+
+<span class="sd">@author: ezulkosk</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">common</span> <span class="kn">import</span> <span class="n">Common</span>
+<span class="kn">from</span> <span class="nn">common.Common</span> <span class="kn">import</span> <span class="n">debug_print</span>
+<span class="kn">from</span> <span class="nn">z3</span> <span class="kn">import</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">Implies</span><span class="p">,</span> <span class="n">simplify</span><span class="p">,</span> <span class="n">And</span><span class="p">,</span> <span class="n">Not</span>
+
+
+
+<div class="viewcode-block" id="Constraints"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.Constraints">[docs]</a><span class="k">class</span> <span class="nc">Constraints</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a generated constraint to the solver.</span>
+<span class="sd">    If in debug mode, add a Boolean tracker for the constraint, to obtain possible UNSAT cores.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Constraints.assertConstraint"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.Constraints.assertConstraint">[docs]</a>    <span class="k">def</span> <span class="nf">assertConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraint</span><span class="p">,</span> <span class="n">z3</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">Common</span><span class="o">.</span><span class="n">FLAG</span><span class="p">:</span>
+            <span class="c">#z3.solver.add(And(constraint, Not(constraint)))</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">simplify</span><span class="p">(</span><span class="n">constraint</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">Common</span><span class="o">.</span><span class="n">MODE</span> <span class="o">!=</span> <span class="n">Common</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span> 
+            <span class="n">z3</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">constraint</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">Common</span><span class="o">.</span><span class="n">MODE</span> <span class="o">==</span> <span class="n">Common</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assertID</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Common</span><span class="o">.</span><span class="n">getConstraintUID</span><span class="p">()))</span>
+            <span class="n">z3</span><span class="o">.</span><span class="n">unsat_core_trackers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            <span class="n">z3</span><span class="o">.</span><span class="n">unsat_map</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)]</span> <span class="o">=</span> <span class="n">constraint</span>
+            <span class="n">z3</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Implies</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">constraint</span><span class="p">))</span>
+</div></div>
+<div class="viewcode-block" id="GenericConstraints"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.GenericConstraints">[docs]</a><span class="k">class</span> <span class="nc">GenericConstraints</span><span class="p">(</span><span class="n">Constraints</span><span class="p">):</span> 
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ident</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertID</span> <span class="o">=</span> <span class="n">ident</span>
+        
+<div class="viewcode-block" id="GenericConstraints.addConstraint"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.GenericConstraints.addConstraint">[docs]</a>    <span class="k">def</span> <span class="nf">addConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="GenericConstraints.addAll"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.GenericConstraints.addAll">[docs]</a>    <span class="k">def</span> <span class="nf">addAll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>    
+    </div>
+<div class="viewcode-block" id="GenericConstraints.assertConstraints"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.GenericConstraints.assertConstraints">[docs]</a>    <span class="k">def</span> <span class="nf">assertConstraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z3</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Used to add all constraints to the solver.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertConstraint</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">z3</span><span class="p">)</span>
+            </div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ident</span><span class="p">)</span>
+            
+<div class="viewcode-block" id="GenericConstraints.debug_print"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.GenericConstraints.debug_print">[docs]</a>    <span class="k">def</span> <span class="nf">debug_print</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+            <span class="n">debug_print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">debug_print</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="ClaferConstraints"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.ClaferConstraints">[docs]</a><span class="k">class</span> <span class="nc">ClaferConstraints</span><span class="p">(</span><span class="n">Constraints</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">claferSort</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">claferSort</span> <span class="o">=</span> <span class="n">claferSort</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertID</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">claferSort</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_constraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_constraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group_card_constraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inheritance_constraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref_constraints</span> <span class="o">=</span> <span class="p">[]</span>
+    
+<div class="viewcode-block" id="ClaferConstraints.addInstanceConstraint"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.ClaferConstraints.addInstanceConstraint">[docs]</a>    <span class="k">def</span> <span class="nf">addInstanceConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="ClaferConstraints.addCardConstraint"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.ClaferConstraints.addCardConstraint">[docs]</a>    <span class="k">def</span> <span class="nf">addCardConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="ClaferConstraints.addGroupCardConstraint"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.ClaferConstraints.addGroupCardConstraint">[docs]</a>    <span class="k">def</span> <span class="nf">addGroupCardConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group_card_constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="ClaferConstraints.addInheritanceConstraint"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.ClaferConstraints.addInheritanceConstraint">[docs]</a>    <span class="k">def</span> <span class="nf">addInheritanceConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inheritance_constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="ClaferConstraints.addRefConstraint"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.ClaferConstraints.addRefConstraint">[docs]</a>    <span class="k">def</span> <span class="nf">addRefConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref_constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    </div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">claferSort</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="ClaferConstraints.assertConstraints"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.ClaferConstraints.assertConstraints">[docs]</a>    <span class="k">def</span> <span class="nf">assertConstraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z3</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Used to add all constraints associated with this clafer to the solver.</span>
+<span class="sd">        Can turn off different lists for debugging purposes.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">instance_constraints</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">card_constraints</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">group_card_constraints</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">inheritance_constraints</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">ref_constraints</span>
+                       <span class="p">]</span>   
+        <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">assertConstraint</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">z3</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">constraints</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">i</span><span class="p">]</span>
+    </div>
+<div class="viewcode-block" id="ClaferConstraints.debug_print"><a class="viewcode-back" href="../../constraints.html#constraints.Constraints.ClaferConstraints.debug_print">[docs]</a>    <span class="k">def</span> <span class="nf">debug_print</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">instance_constraints</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">card_constraints</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">group_card_constraints</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">inheritance_constraints</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">ref_constraints</span>
+                       <span class="p">]</span>   
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">constraints</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">i</span><span class="p">:</span>
+                <span class="n">debug_print</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                <span class="n">debug_print</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ed Zulkoski, Rafael Olaechea.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

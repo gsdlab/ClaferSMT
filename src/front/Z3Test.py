@@ -5,12 +5,12 @@ Created on April 27, 2013
 
 testing method for the Z3 backend of Clafer
 '''
-from common import Z3Instance
-from visitors import Visitor, PrettyPrint, CreateSorts, \
-    CreateBracketedConstraints, CreateHierarchy
-from z3 import *
-import common.Common
-import imp
+from z3 import BitVec, Bool, Solver, Xor, Function, IntSort, Array, Int, sat, \
+    is_array, Or
+from z3consts import Z3_UNINTERPRETED_SORT
+from z3types import Z3Exception
+import sys
+
 
 #abstract x 4
 #  c 1..3
@@ -33,6 +33,15 @@ def BitVecVector(prefix, sz, N):
   return [ BitVec('%s_%s' % (prefix, i), sz) for i in range(N) ]
 
 def main(args):
+    A = Bool("A")
+    B = Bool("B")
+    C = Bool("C")
+    D = Bool("D")
+    s = Solver()
+    s.add(Xor(A,B,C,D))
+    s.check()
+    print(s.model());
+    
     f = Function('f', IntSort(), IntSort(), IntSort())
     A = Array("A", IntSort(), IntSort())
     B = Array("B", IntSort(), IntSort())

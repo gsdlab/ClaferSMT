@@ -7,7 +7,7 @@ Created on Oct 7, 2013
 from ast import IntegerLiteral, FunExp, Exp, ClaferId, DeclPExp, \
     LocalDeclaration, Declaration
 from common.Common import standard_print
-from lxml.builder import basestring
+from structures.ClaferSort import PrimitiveType
 from visitors import VisitorTemplate, Visitor, CreateBracketedConstraints, \
     ResolveClaferIds
 from z3 import ModelRef
@@ -57,7 +57,7 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
             instsMap[i.element.uid] = insts
             for j in range(len(insts) - 1):
                 currSome = currSome + insts[j] + " ; "
-            currSome = currSome + insts[-1] + " : " + i.element.nonUniqueID() + " | "
+            currSome = currSome + insts[-1] + " : " + i.element.getNonUniqueID() + " | "
             localDeclList = []
             for j in insts:
                 localDeclList.append(self.createLocalDecl(j))
@@ -68,7 +68,7 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
         for i in sorts:
             if i.isTopLevel:
                 insts = instsMap[i.element.uid]
-                topCardStrings.append("#" + i.element.nonUniqueID() + " = " + str(len(insts)))
+                topCardStrings.append("#" + i.element.getNonUniqueID() + " = " + str(len(insts)))
                 if not self.topCardsConstraint:
                     self.topCardsConstraint = self.createEquals(self.createCard(self.createArg(i.element.uid)), self.createInteger(str(len(insts))))
                 else:
@@ -86,9 +86,9 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
                                 currChildren.append(child)
                                 otherConstraints.append(child \
                                       + " in " + str(i) + "_" + str(j) + "." \
-                                      + k.element.nonUniqueID())
+                                      + k.element.getNonUniqueID())
                                 self.addConstraint(self.createIn(self.createArg(child), self.createJoin(self.createArg(str(i) + "_" + str(j)), self.createArg(k.element.uid))))
-                        otherConstraints.append("#" + str(i) + "_" + str(j) + "." + k.element.nonUniqueID()\
+                        otherConstraints.append("#" + str(i) + "_" + str(j) + "." + k.element.getNonUniqueID()\
                               + " = " + str(len(currChildren)))
                         self.addConstraint(self.createEquals(self.createCard(self.createJoin(self.createArg(str(i) + "_" + str(j)), self.createArg(k.element.uid))), self.createInteger(str(len(currChildren)))))
                         for l in currChildren:
@@ -101,7 +101,7 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
             if i.refSort:
                 for j in range(len(i.instances)):
                     if self.isOn(self.model.eval(i.instances[j]), i):
-                        if isinstance(i.refSort, basestring) and i.refSort == "integer":
+                        if isinstance(i.refSort, PrimitiveType) and i.refSort == "integer":
                             self.addConstraint(self.createEquals(self.createJoin(self.createArg(str(i) + "_" + str(j)), self.createArg("ref")), \
                                                                     self.createInteger(str(self.model.eval(i.refs[j])))))
                             refConstraints.append(str(i) + "_" + str(j) + ".ref = " +  str(self.model.eval(i.refs[j])))
@@ -122,11 +122,13 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
         self.currSome.bodyParentExp = self.constraint
         bigConstraint = self.createAnd(self.topSome, self.topCardsConstraint)
         bigConstraint = self.createNot(bigConstraint)
+        self.z3.clock.tick("isomorphism visiting")
         Visitor.visit(ResolveClaferIds.ResolveClaferIds(self.z3), bigConstraint)
+        
         createBracketed = CreateBracketedConstraints.CreateBracketedConstraints(self.z3, True)
         #print(bigConstraint)
         createBracketed.isomorphismVisit(bigConstraint)
-        
+        self.z3.clock.tock("isomorphism visiting")
         
         #self.createConstraint(topCardStrings, someStrings, otherConstraints)
         

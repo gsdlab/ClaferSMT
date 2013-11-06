@@ -1,0 +1,365 @@
+abstract 0 .. * c1_AADLMember : clafer 0 .. * {
+  }
+abstract 0 .. * c2_Component : c1_AADLMember 0 .. * {
+  0 .. * c3_Cflows ->> c193_Flow 0 .. * {
+    }
+  [all disj x ;
+  y : this . c3_Cflows | x . ref != y . ref]0 .. * c13_Cfeatures ->> c129_Feature 0 .. * {
+    }
+  [all disj x ;
+  y : this . c13_Cfeatures | x . ref != y . ref]0 .. * c23_Cproperties ->> c99_Property 0 .. * {
+    }
+  [all disj x ;
+  y : this . c23_Cproperties | x . ref != y . ref]
+}
+abstract 0 .. * c33_ComponentImpl : c1_AADLMember 0 .. * {
+  0 .. * c34_Iflows ->> c193_Flow 0 .. * {
+    }
+  [all disj x ;
+  y : this . c34_Iflows | x . ref != y . ref]0 .. * c44_Ifeatures ->> c129_Feature 0 .. * {
+    }
+  [all disj x ;
+  y : this . c44_Ifeatures | x . ref != y . ref]0 .. * c54_Iproperties ->> c99_Property 0 .. * {
+    }
+  [all disj x ;
+  y : this . c54_Iproperties | x . ref != y . ref]0 .. * c64_interface ->> c2_Component 1 .. 1 {
+    }
+  [all disj x ;
+  y : this . c64_interface | x . ref != y . ref]
+}
+abstract 0 .. * c75_System : c2_Component 0 .. * {
+  }
+abstract 0 .. * c76_SystemImpl : c33_ComponentImpl 0 .. * {
+  0 .. * c77_Iconnections ->> c172_Connection 0 .. * {
+    }
+  [all disj x ;
+  y : this . c77_Iconnections | x . ref != y . ref]0 .. * c87_Isubcomponents ->> c1_AADLMember 0 .. * {
+    }
+  [all disj x ;
+  y : this . c87_Isubcomponents | x . ref != y . ref]
+}
+abstract 0 .. * c101_DataType : clafer 0 .. * {
+  0 .. * c102_properties ->> c117_ValueUnit 1 .. 1 {
+    }
+  [all disj x ;
+  y : this . c102_properties | x . ref != y . ref]
+}
+abstract 0 .. * c112_Unit : clafer 0 .. * {
+  }
+0 .. * c113_Bits : c112_Unit 1 .. 1 {
+  }
+0 .. * c114_V : c112_Unit 1 .. 1 {
+  }
+0 .. * c115_mV : c112_Unit 1 .. 1 {
+  }
+0 .. * c116_Ms : c112_Unit 1 .. 1 {
+  }
+abstract 0 .. * c117_ValueUnit : clafer 0 .. * {
+  0 .. * c118_value : integer 1 .. 1 {
+    }
+  0 .. * c119_unit ->> c112_Unit 1 .. 1 {
+    }
+  [all disj x ;
+  y : this . c119_unit | x . ref != y . ref]
+}
+abstract 0 .. * c129_Feature : c1_AADLMember 0 .. * {
+  0 .. * c130_Fproperties ->> c99_Property 0 .. * {
+    }
+  [all disj x ;
+  y : this . c130_Fproperties | x . ref != y . ref]
+}
+abstract 0 .. * c140_PortDirection : clafer 0 .. * {
+  }
+0 .. * c141_In : c140_PortDirection 1 .. 1 {
+  }
+0 .. * c142_Out : c140_PortDirection 1 .. 1 {
+  }
+abstract 0 .. * c143_Port : c129_Feature 0 .. * {
+  0 .. * c144_Pdirection ->> c140_PortDirection 1 .. 1 {
+    }
+  [all disj x ;
+  y : this . c144_Pdirection | x . ref != y . ref]
+}
+abstract 0 .. * c154_DataPort : c143_Port 0 .. * {
+  0 .. * c155_Ptype ->> c101_DataType 0 .. 1 {
+    }
+  [all disj x ;
+  y : this . c155_Ptype | x . ref != y . ref]
+}
+abstract 0 .. * c167_FlowType : clafer 0 .. * {
+  }
+0 .. * c168_Path : c167_FlowType 1 .. 1 {
+  }
+0 .. * c169_Source : c167_FlowType 1 .. 1 {
+  }
+0 .. * c170_Sink : c167_FlowType 1 .. 1 {
+  }
+0 .. * c171_EndToEnd : c167_FlowType 1 .. 1 {
+  }
+abstract 0 .. * c172_Connection : c1_AADLMember 0 .. * {
+  0 .. * c173_start ->> c154_DataPort 1 .. 1 {
+    }
+  [all disj x ;
+  y : this . c173_start | x . ref != y . ref]0 .. * c183_end ->> c154_DataPort 1 .. 1 {
+    }
+  [all disj x ;
+  y : this . c183_end | x . ref != y . ref]
+}
+abstract 0 .. * c193_Flow : c1_AADLMember 0 .. * {
+  0 .. * c194_flowType ->> c167_FlowType 1 .. 1 {
+    }
+  [all disj x ;
+  y : this . c194_flowType | x . ref != y . ref]0 .. * c204_flowElements ->> c224_FlowElement 1 .. * {
+    }
+  [all disj x ;
+  y : this . c204_flowElements | x . ref != y . ref]0 .. * c214_latency ->> c117_ValueUnit 0 .. 1 {
+    }
+  [all disj x ;
+  y : this . c214_latency | x . ref != y . ref]
+}
+abstract 0 .. * c224_FlowElement : clafer 0 .. * {
+  0 .. * c225_member ->> c1_AADLMember 1 .. 1 {
+    }
+  [all disj x ;
+  y : this . c225_member | x . ref != y . ref]1 .. 1 c235_type : clafer 1 .. 1 {
+    0 .. * c236_FET_Connection : clafer 0 .. 1 {
+      }
+    0 .. * c237_FET_Flow : clafer 0 .. 1 {
+      }
+    0 .. * c238_FET_DataPort : clafer 0 .. 1 {
+      }
+    }
+  }
+abstract 0 .. * c239_bool_type : c101_DataType 0 .. * {
+  0 .. * c240_Source_Data_Size_Bool : c117_ValueUnit 1 .. 1 {
+    [this . (c118_value . ref)= 1][this . (c119_unit . ref)= c113_Bits]
+  }
+  [this . (c102_properties . ref)= this . c240_Source_Data_Size_Bool]
+}
+0 .. * c250_BOOL : c239_bool_type 1 .. 1 {
+  }
+abstract 0 .. * c251_float_type : c101_DataType 0 .. * {
+  0 .. * c252_Source_Data_Size_Float : c117_ValueUnit 1 .. 1 {
+    [this . (c118_value . ref)= 2][this . (c119_unit . ref)= c113_Bits]
+  }
+  [this . (c102_properties . ref)= this . c252_Source_Data_Size_Float]
+}
+0 .. * c262_FLOAT : c251_float_type 1 .. 1 {
+  }
+abstract 0 .. * c590_compute_desired_speed : c75_System 0 .. * {
+  0 .. * c591_ok_to_run_compute_desired_speed : c154_DataPort 1 .. 1 {
+    [this . (c144_Pdirection . ref)= c141_In][no this . c155_Ptype][no this . c130_Fproperties]
+  }
+  0 .. * c599_desired_speed_compute_desired_speed : c154_DataPort 1 .. 1 {
+    [this . (c144_Pdirection . ref)= c142_Out][no this . c155_Ptype][no this . c130_Fproperties]
+  }
+  0 .. * c607_instantaneous_velocity_compute_desired_speed : c154_DataPort 1 .. 1 {
+    [this . (c144_Pdirection . ref)= c141_In][no this . c155_Ptype][no this . c130_Fproperties]
+  }
+  0 .. * c615_cds_features ->> c129_Feature 0 .. * {
+    }
+  [all disj x ;
+  y : this . c615_cds_features | x . ref != y . ref][this . c591_ok_to_run_compute_desired_speed in this . (c615_cds_features . ref)] [this . c607_instantaneous_velocity_compute_desired_speed in this . (c615_cds_features . ref)] [this . c599_desired_speed_compute_desired_speed in this . (c615_cds_features . ref)] [# this . c615_cds_features = 3]0 .. * c638_default_cds_features : clafer 0 .. 1 {
+    }
+  [some this . c638_default_cds_features => this . (c13_Cfeatures . ref)= this . (c615_cds_features . ref)] 0 .. * c645_compute_desired_speed_flow ->> c193_Flow 1 .. 1 {
+    }
+  [all disj x ;
+  y : this . c645_compute_desired_speed_flow | x . ref != y . ref]0 .. * c655_default_compute_desired_speed_flow : c193_Flow 0 .. 1 {
+    [this . parent . (c645_compute_desired_speed_flow . ref)= this]0 .. * c659_compute_desired_speed_flow_fel1 : c224_FlowElement 1 .. 1 {
+      [some this . c235_type . c238_FET_DataPort][this . (c225_member . ref)= this . parent . parent . c607_instantaneous_velocity_compute_desired_speed]
+    }
+    0 .. * c665_compute_desired_speed_flow_fel2 : c224_FlowElement 1 .. 1 {
+      [some this . c235_type . c238_FET_DataPort][this . (c225_member . ref)= this . parent . parent . c599_desired_speed_compute_desired_speed]
+    }
+    [this . (c194_flowType . ref)= c168_Path]0 .. * c674_compute_desired_speed_flow_lat : c117_ValueUnit 1 .. 1 {
+      [this . (c118_value . ref)= 4][this . (c119_unit . ref)= c116_Ms]
+    }
+    [this . (c214_latency . ref)= this . c674_compute_desired_speed_flow_lat][this . (c204_flowElements . ref)= this . c659_compute_desired_speed_flow_fel1 ++ this . c665_compute_desired_speed_flow_fel2]
+  }
+  0 .. * c689_cds_flows ->> c193_Flow 0 .. * {
+    }
+  [all disj x ;
+  y : this . c689_cds_flows | x . ref != y . ref][this . (c689_cds_flows . ref)= this . (c645_compute_desired_speed_flow . ref)] 0 .. * c702_default_cds_flows : clafer 0 .. 1 {
+    }
+  [some this . c702_default_cds_flows => this . (c3_Cflows . ref)= this . (c689_cds_flows . ref)] [no this . c23_Cproperties]
+}
+abstract 0 .. * c711_compute_desired_speed_impl : c76_SystemImpl 0 .. * {
+  [this . (c64_interface . ref)in c590_compute_desired_speed]0 .. * c715_default_interface_cds : c590_compute_desired_speed 0 .. 1 {
+    [this . parent . (c64_interface . ref)= this][some this . c638_default_cds_features][some this . c702_default_cds_flows]
+  }
+  [no this . c34_Iflows][no this . c44_Ifeatures][no this . c54_Iproperties][no this . c77_Iconnections][no this . c87_Isubcomponents]
+}
+abstract 0 .. * c733_ccmain : c75_System 0 .. * {
+  0 .. * c734_cc_system_on_off_ccmain : c154_DataPort 1 .. 1 {
+    [this . (c144_Pdirection . ref)= c141_In][no this . c155_Ptype][no this . c130_Fproperties]
+  }
+  0 .. * c742_brake_status_ccmain : c154_DataPort 1 .. 1 {
+    [this . (c144_Pdirection . ref)= c141_In][this . (c155_Ptype . ref)= c250_BOOL][no this . c130_Fproperties]
+  }
+  0 .. * c751_engine_status_ccmain : c154_DataPort 1 .. 1 {
+    [this . (c144_Pdirection . ref)= c141_In][no this . c155_Ptype][no this . c130_Fproperties]
+  }
+  0 .. * c759_ok_to_run_ccmain : c154_DataPort 1 .. 1 {
+    [this . (c144_Pdirection . ref)= c142_Out][no this . c155_Ptype][no this . c130_Fproperties]
+  }
+  [this . (c13_Cfeatures . ref)= this . c734_cc_system_on_off_ccmain ++ this . c742_brake_status_ccmain ++ this . c751_engine_status_ccmain ++ this . c759_ok_to_run_ccmain]0 .. * c776_ccmain_flow : c193_Flow 1 .. 1 {
+    0 .. * c777_ccmain_flow_fel1 : c224_FlowElement 1 .. 1 {
+      [some this . c235_type . c238_FET_DataPort][this . (c225_member . ref)= this . parent . parent . c742_brake_status_ccmain]
+    }
+    0 .. * c787_ccmain_flow_fel2 : c224_FlowElement 1 .. 1 {
+      [some this . c235_type . c238_FET_DataPort][this . (c225_member . ref)= this . parent . parent . c759_ok_to_run_ccmain]
+    }
+    [this . (c194_flowType . ref)= c168_Path]0 .. * c800_ccmain_flow_lat : c117_ValueUnit 1 .. 1 {
+      [this . (c118_value . ref)= 3][this . (c119_unit . ref)= c116_Ms]
+    }
+    [this . (c214_latency . ref)= this . c800_ccmain_flow_lat][this . (c204_flowElements . ref)= this . c777_ccmain_flow_fel1 ++ this . c787_ccmain_flow_fel2]
+  }
+  [this . (c3_Cflows . ref)= this . c776_ccmain_flow][no this . c23_Cproperties]
+}
+abstract 0 .. * c820_ccmain_impl : c76_SystemImpl 0 .. * {
+  [this . (c64_interface . ref)in c733_ccmain]0 .. * c826_default_interface_ccmain : c733_ccmain 0 .. 1 {
+    [this . parent . (c64_interface . ref)= this]
+  }
+  [no this . c34_Iflows][no this . c44_Ifeatures][no this . c54_Iproperties][no this . c77_Iconnections][no this . c87_Isubcomponents]
+}
+abstract 0 .. * c842_cruise_control : c75_System 0 .. * {
+  0 .. * c843_cc_system_on_off : c154_DataPort 1 .. 1 {
+    [this . (c144_Pdirection . ref)= c141_In][no this . c155_Ptype][no this . c130_Fproperties]
+  }
+  0 .. * c851_brake_status : c154_DataPort 1 .. 1 {
+    [this . (c144_Pdirection . ref)= c141_In][this . (c155_Ptype . ref)= c250_BOOL][no this . c130_Fproperties]
+  }
+  0 .. * c860_engine_status : c154_DataPort 1 .. 1 {
+    [this . (c144_Pdirection . ref)= c141_In][no this . c155_Ptype][no this . c130_Fproperties]
+  }
+  0 .. * c868_throttle_setting : c154_DataPort 1 .. 1 {
+    [this . (c144_Pdirection . ref)= c142_Out][no this . c155_Ptype][no this . c130_Fproperties]
+  }
+  0 .. * c876_wheel_pulse : c154_DataPort 1 .. 1 {
+    [this . (c144_Pdirection . ref)= c141_In][no this . c155_Ptype][no this . c130_Fproperties]
+  }
+  0 .. * c884_cc_features ->> c129_Feature 0 .. * {
+    }
+  [all disj x ;
+  y : this . c884_cc_features | x . ref != y . ref][this . (c884_cc_features . ref)= this . c843_cc_system_on_off ++ this . c860_engine_status ++ this . c851_brake_status ++ this . c876_wheel_pulse ++ this . c868_throttle_setting]0 .. * c905_default_cc_features : clafer 0 .. 1 {
+    }
+  [some this . c905_default_cc_features => this . (c13_Cfeatures . ref)= this . (c884_cc_features . ref)] 0 .. * c912_cruise_control_flow : c193_Flow 1 .. 1 {
+    0 .. * c913_cruise_control_flow_fel1 : c224_FlowElement 1 .. 1 {
+      [some this . c235_type . c238_FET_DataPort][this . (c225_member . ref)= this . parent . parent . c851_brake_status]
+    }
+    0 .. * c923_cruise_control_flow_fel2 : c224_FlowElement 1 .. 1 {
+      [some this . c235_type . c238_FET_DataPort][this . (c225_member . ref)= this . parent . parent . c868_throttle_setting]
+    }
+    [this . (c194_flowType . ref)= c168_Path][no this . c214_latency][this . (c204_flowElements . ref)= this . c913_cruise_control_flow_fel1 ++ this . c923_cruise_control_flow_fel2]
+  }
+  [this . (c3_Cflows . ref)= this . c912_cruise_control_flow][no this . c23_Cproperties]
+}
+abstract 0 .. * c948_cruise_control_impl : c76_SystemImpl 0 .. * {
+  [this . (c64_interface . ref)in c842_cruise_control]0 .. * c952_default_interface_cc : c842_cruise_control 0 .. 1 {
+    [this . parent . (c64_interface . ref)= this]
+  }
+  0 .. * c958_CC_M ->> c820_ccmain_impl 1 .. 1 {
+    [this . (ref . (c64_interface . ref)) in c733_ccmain]
+  }
+  [all disj x ;
+  y : this . c958_CC_M | x . ref != y . ref]0 .. * c973_C_D_S ->> c711_compute_desired_speed_impl 1 .. 1 {
+    [this . (ref . (c64_interface . ref)) in c590_compute_desired_speed]
+  }
+  [all disj x ;
+  y : this . c973_C_D_S | x . ref != y . ref]0 .. * c988_default_CC_M : c820_ccmain_impl 0 .. 1 {
+    [this . parent . (c958_CC_M . ref)= this]0 .. * c992_default_CC_M_Int : c733_ccmain 1 .. 1 {
+      [this . parent . parent . c958_CC_M . (ref . (c64_interface . ref)) = this]
+    }
+    }
+  0 .. * c998_default_C_D_S : c711_compute_desired_speed_impl 0 .. 1 {
+    [this . parent . (c973_C_D_S . ref)= this][some this . c715_default_interface_cds]
+  }
+  0 .. * c1004_ccsubcomponents ->> c1_AADLMember 0 .. * {
+    }
+  [all disj x ;
+  y : this . c1004_ccsubcomponents | x . ref != y . ref][this . (c958_CC_M . ref)in this . (c1004_ccsubcomponents . ref)] [this . (c973_C_D_S . ref)in this . (c1004_ccsubcomponents . ref)] [# this . c1004_ccsubcomponents = 2]0 .. * c1024_default_cc_subcomponents : clafer 0 .. 1 {
+    }
+  [some this . c1024_default_cc_subcomponents => this . (c87_Isubcomponents . ref)= this . (c1004_ccsubcomponents . ref)] 0 .. * c1031_typecasted_interface ->> c842_cruise_control 1 .. 1 {
+    }
+  [all disj x ;
+  y : this . c1031_typecasted_interface | x . ref != y . ref][this . (c1031_typecasted_interface . ref)= this . (c64_interface . ref)] 0 .. * c1046_typecasted_CC_M_interface ->> c733_ccmain 1 .. 1 {
+    }
+  [all disj x ;
+  y : this . c1046_typecasted_CC_M_interface | x . ref != y . ref][this . (c1046_typecasted_CC_M_interface . ref)= this . c958_CC_M . (ref . (c64_interface . ref))]0 .. * c1061_typecasted_C_D_S_interface ->> c590_compute_desired_speed 1 .. 1 {
+    }
+  [all disj x ;
+  y : this . c1061_typecasted_C_D_S_interface | x . ref != y . ref][this . (c1061_typecasted_C_D_S_interface . ref)= this . c973_C_D_S . (ref . (c64_interface . ref))]0 .. * c1076_cruise_control_impl_C1 : c172_Connection 1 .. 1 {
+    [this . (c173_start . ref)= this . parent . c1031_typecasted_interface . (ref . c843_cc_system_on_off)] [this . (c183_end . ref)= this . parent . c1046_typecasted_CC_M_interface . (ref . c734_cc_system_on_off_ccmain)] 
+  }
+  0 .. * c1087_cruise_control_impl_C2 : c172_Connection 1 .. 1 {
+    [this . (c173_start . ref)= this . parent . c1031_typecasted_interface . (ref . c851_brake_status)] [this . (c183_end . ref)= this . parent . c1046_typecasted_CC_M_interface . (ref . c742_brake_status_ccmain)] 
+  }
+  0 .. * c1098_cruise_control_impl_C3 : c172_Connection 1 .. 1 {
+    [this . (c173_start . ref)= this . parent . c1031_typecasted_interface . (ref . c860_engine_status)] [this . (c183_end . ref)= this . parent . c1046_typecasted_CC_M_interface . (ref . c751_engine_status_ccmain)] 
+  }
+  0 .. * c1109_cruise_control_impl_C5 : c172_Connection 1 .. 1 {
+    [this . (c173_start . ref)= this . parent . c1046_typecasted_CC_M_interface . (ref . c759_ok_to_run_ccmain)] [this . (c183_end . ref)= this . parent . c1061_typecasted_C_D_S_interface . (ref . c591_ok_to_run_compute_desired_speed)] 
+  }
+  0 .. * c1120_cc_connections ->> c172_Connection 0 .. * {
+    }
+  [all disj x ;
+  y : this . c1120_cc_connections | x . ref != y . ref][this . (c1120_cc_connections . ref)= this . c1076_cruise_control_impl_C1 ++ this . c1087_cruise_control_impl_C2 ++ this . c1098_cruise_control_impl_C3 ++ this . c1109_cruise_control_impl_C5]0 .. * c1139_default_cc_connections : clafer 0 .. 1 {
+    }
+  [some this . c1139_default_cc_connections => this . (c77_Iconnections . ref)= this . (c1120_cc_connections . ref)] 0 .. * c1146_cruise_control_impl_flow : c193_Flow 1 .. 1 {
+    0 .. * c1147_cruise_control_impl_flow_fel1 : c224_FlowElement 1 .. 1 {
+      [some this . c235_type . c238_FET_DataPort][this . (c225_member . ref)= this . parent . parent . c1031_typecasted_interface . (ref . c851_brake_status)] 
+    }
+    0 .. * c1155_cruise_control_impl_flow_fel2 : c224_FlowElement 1 .. 1 {
+      [some this . c235_type . c236_FET_Connection][this . (c225_member . ref)= this . parent . parent . c1087_cruise_control_impl_C2]
+    }
+    0 .. * c1161_cruise_control_impl_flow_fel3 : c224_FlowElement 1 .. 1 {
+      [some this . c235_type . c237_FET_Flow][this . (c225_member . ref)= this . parent . parent . c1046_typecasted_CC_M_interface . (ref . c776_ccmain_flow)] 
+    }
+    0 .. * c1169_cruise_control_impl_flow_fel4 : c224_FlowElement 1 .. 1 {
+      [some this . c235_type . c236_FET_Connection][this . (c225_member . ref)= this . parent . parent . c1109_cruise_control_impl_C5]
+    }
+    [this . (c194_flowType . ref)= c168_Path][no this . c214_latency][this . (c204_flowElements . ref)= this . c1147_cruise_control_impl_flow_fel1 ++ this . c1155_cruise_control_impl_flow_fel2 ++ this . c1161_cruise_control_impl_flow_fel3 ++ this . c1169_cruise_control_impl_flow_fel4]
+  }
+  [this . (c34_Iflows . ref)= this . c1146_cruise_control_impl_flow][no this . c44_Ifeatures][no this . c54_Iproperties]
+}
+abstract 0 .. * c1196_compute_desired_speed_acc : c590_compute_desired_speed 0 .. * {
+  0 .. * c1197_lead_value_compute_desired_speed : c154_DataPort 1 .. 1 {
+    [this . (c144_Pdirection . ref)= c141_In][this . (c155_Ptype . ref)= c262_FLOAT][no this . c130_Fproperties]
+  }
+  [some this . c638_default_cds_features][some this . c702_default_cds_flows][some this . c655_default_compute_desired_speed_flow][no this . c23_Cproperties]
+}
+abstract 0 .. * c1214_compute_desired_speed_acc_impl : c711_compute_desired_speed_impl 0 .. * {
+  [this . (c64_interface . ref)in c1196_compute_desired_speed_acc]0 .. * c1218_default_interface_cds_acc : c1196_compute_desired_speed_acc 0 .. 1 {
+    [this . parent . (c64_interface . ref)= this][no this . parent . c34_Iflows][no this . parent . c44_Ifeatures][no this . parent . c54_Iproperties][no this . parent . c77_Iconnections][no this . parent . c87_Isubcomponents]
+  }
+  }
+abstract 0 .. * c1232_adaptive_cruise_control : c842_cruise_control 0 .. * {
+  0 .. * c1233_lead_value : c154_DataPort 1 .. 1 {
+    [this . (c144_Pdirection . ref)= c141_In][no this . c155_Ptype][no this . c130_Fproperties]
+  }
+  0 .. * c1241_acc_features ->> c129_Feature 0 .. * {
+    }
+  [all disj x ;
+  y : this . c1241_acc_features | x . ref != y . ref][this . c1233_lead_value in this . (c1241_acc_features . ref)] [# this . c1241_acc_features = 1][no this . c905_default_cc_features][this . (c13_Cfeatures . ref)= this . c884_cc_features . ref ++ this . c1241_acc_features . ref]
+}
+abstract 0 .. * c1269_adaptive_cruise_control_impl : c948_cruise_control_impl 0 .. * {
+  [this . (c64_interface . ref)in c1232_adaptive_cruise_control]0 .. * c1273_default_interface_acc : c1232_adaptive_cruise_control 0 .. 1 {
+    [this . parent . (c64_interface . ref)= this]
+  }
+  [this . (c973_C_D_S . ref)in c1214_compute_desired_speed_acc_impl]0 .. * c1282_default_C_D_S_acc : c1214_compute_desired_speed_acc_impl 0 .. 1 {
+    [this . parent . (c973_C_D_S . ref)= this][no this . parent . c998_default_C_D_S]0 .. * c1288_default_C_D_S_acc_Int : c1196_compute_desired_speed_acc 1 .. 1 {
+      [this . parent . parent . c973_C_D_S . (ref . (c64_interface . ref)) = this]
+    }
+    }
+  }
+0 .. * c1294_INSTANCE_INTERFACE_CC : c842_cruise_control 1 .. 1 {
+  [some this . c905_default_cc_features]
+}
+0 .. * c1297_INSTANCE_IMPLEMENTATION_CC : c948_cruise_control_impl 1 .. 1 {
+  [this . (c64_interface . ref)= c1294_INSTANCE_INTERFACE_CC][no this . c952_default_interface_cc][some this . c988_default_CC_M][some this . c998_default_C_D_S][some this . c1024_default_cc_subcomponents][some this . c1139_default_cc_connections]
+}
+0 .. * c1311_INSTANCE_INTERFACE_ACC : c1232_adaptive_cruise_control 1 .. 1 {
+  }
+0 .. * c1312_INSTANCE_IMPLEMENTATION_ACC : c1269_adaptive_cruise_control_impl 1 .. 1 {
+  [this . (c64_interface . ref)= c1311_INSTANCE_INTERFACE_ACC][no this . c1273_default_interface_acc][no this . c952_default_interface_cc][some this . c988_default_CC_M][some this . c1282_default_C_D_S_acc][some this . c1024_default_cc_subcomponents][some this . c1139_default_cc_connections]
+}

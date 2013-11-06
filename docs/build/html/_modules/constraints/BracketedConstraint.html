@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>constraints.BracketedConstraint &mdash; ClaferZ3 0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="ClaferZ3 0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for constraints.BracketedConstraint</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on Apr 29, 2013</span>
+
+<span class="sd">@author: ezulkosk</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">constraints</span> <span class="kn">import</span> <span class="n">Constraints</span>
+<span class="kn">from</span> <span class="nn">constraints.Constraints</span> <span class="kn">import</span> <span class="n">GenericConstraints</span>
+<span class="kn">from</span> <span class="nn">structures.ExprArg</span> <span class="kn">import</span> <span class="n">BoolArg</span>
+<span class="kn">from</span> <span class="nn">z3</span> <span class="kn">import</span> <span class="n">Implies</span><span class="p">,</span> <span class="n">And</span>
+<span class="kn">import</span> <span class="nn">constraints.Operations</span> <span class="kn">as</span> <span class="nn">Ops</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Map used to convert Clafer operations to Z3 operations</span>
+<span class="sd">    keys: operation(str) returned by Clafer Python generator</span>
+<span class="sd">    values: pairs:</span>
+<span class="sd">        1. arity</span>
+<span class="sd">        2. function associated with the operator</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="n">ClaferToZ3OperationsMap</span> <span class="o">=</span> <span class="p">{</span>
+                           <span class="c">#Unary Ops</span>
+                           <span class="s">&quot;!&quot;</span>           <span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_not</span><span class="p">),</span>
+                           <span class="s">&quot;UNARY_MINUS&quot;</span> <span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_un_minus</span><span class="p">),</span>
+                           <span class="s">&quot;#&quot;</span>           <span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_card</span><span class="p">),</span>
+                           <span class="s">&quot;max&quot;</span>         <span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;TODO&quot;</span><span class="p">),</span>
+                           <span class="s">&quot;min&quot;</span>         <span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;TODO&quot;</span><span class="p">),</span>
+                           <span class="s">&quot;sum&quot;</span>         <span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_sum</span><span class="p">),</span>    
+                           <span class="c">#Binary Ops</span>
+                           <span class="s">&quot;&lt;=&gt;&quot;</span>         <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_equivalence</span><span class="p">),</span>
+                           <span class="s">&quot;=&gt;&quot;</span>          <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_implies</span><span class="p">),</span>
+                           <span class="s">&quot;||&quot;</span>          <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_or</span><span class="p">),</span>
+                           <span class="s">&quot;xor&quot;</span>         <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_xor</span><span class="p">),</span>
+                           <span class="s">&quot;&amp;&amp;&quot;</span>          <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_and</span><span class="p">),</span>
+                           <span class="s">&quot;&lt;&quot;</span>           <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_lt</span><span class="p">),</span>
+                           <span class="s">&quot;&gt;&quot;</span>           <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_gt</span><span class="p">),</span>
+                           <span class="s">&quot;&lt;=&quot;</span>          <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_le</span><span class="p">),</span>
+                           <span class="s">&quot;&gt;=&quot;</span>          <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_ge</span><span class="p">),</span>
+                           <span class="s">&quot;=&quot;</span>           <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_eq</span><span class="p">),</span>
+                           <span class="s">&quot;!=&quot;</span>          <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_ne</span><span class="p">),</span>
+                           <span class="s">&quot;in&quot;</span>          <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_in</span><span class="p">),</span>
+                           <span class="s">&quot;nin&quot;</span>         <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_nin</span><span class="p">),</span>
+                           <span class="s">&quot;+&quot;</span>           <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_add</span><span class="p">),</span>
+                           <span class="s">&quot;-&quot;</span>           <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_sub</span><span class="p">),</span>
+                           <span class="s">&quot;*&quot;</span>           <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_mul</span><span class="p">),</span>
+                           <span class="s">&quot;/&quot;</span>           <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_div</span><span class="p">),</span>
+                           <span class="s">&quot;++&quot;</span>          <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_union</span><span class="p">),</span>
+                           <span class="s">&quot;--&quot;</span>          <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_difference</span><span class="p">),</span>
+                           <span class="s">&quot;&amp;&quot;</span>           <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_intersection</span><span class="p">),</span>
+                           <span class="s">&quot;&lt;:&quot;</span>          <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_domain_restriction</span><span class="p">),</span>
+                           <span class="s">&quot;:&gt;&quot;</span>          <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_range_restriction</span><span class="p">),</span>
+                           <span class="s">&quot;.&quot;</span>           <span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_join</span><span class="p">),</span>
+                           <span class="c">#Ternary Ops</span>
+                           <span class="s">&quot;ifthenelse&quot;</span>  <span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">Ops</span><span class="o">.</span><span class="n">op_ifthenelse</span><span class="p">)</span>       
+                           <span class="p">}</span>
+
+<span class="n">QuantifierMap</span> <span class="o">=</span> <span class="p">{</span>
+               <span class="s">&quot;All&quot;</span>           <span class="p">:</span> <span class="n">Ops</span><span class="o">.</span><span class="n">quant_all</span><span class="p">,</span>
+               <span class="s">&quot;Lone&quot;</span>          <span class="p">:</span> <span class="n">Ops</span><span class="o">.</span><span class="n">quant_lone</span><span class="p">,</span>
+               <span class="s">&quot;One&quot;</span>           <span class="p">:</span> <span class="n">Ops</span><span class="o">.</span><span class="n">quant_one</span><span class="p">,</span>
+               <span class="s">&quot;No&quot;</span>            <span class="p">:</span> <span class="n">Ops</span><span class="o">.</span><span class="n">quant_no</span><span class="p">,</span> 
+               <span class="s">&quot;Some&quot;</span>          <span class="p">:</span> <span class="n">Ops</span><span class="o">.</span><span class="n">quant_some</span><span class="p">,</span> 
+               <span class="p">}</span>
+
+
+<div class="viewcode-block" id="getOperationConversion"><a class="viewcode-back" href="../../constraints.html#constraints.BracketedConstraint.getOperationConversion">[docs]</a><span class="k">def</span> <span class="nf">getOperationConversion</span><span class="p">(</span><span class="n">op</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param op: String representation of Clafer operation.</span>
+<span class="sd">    :type op: str</span>
+<span class="sd">    :returns: 2-tuple from ClaferToZ3OperationsMap with the fields:</span>
+<span class="sd">    </span>
+<span class="sd">    The 2-tuple has the fields:</span>
+<span class="sd">        1. arity of the function</span>
+<span class="sd">        2. function associated with the operator</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">ClaferToZ3OperationsMap</span><span class="p">[</span><span class="n">op</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="getQuantifier"><a class="viewcode-back" href="../../constraints.html#constraints.BracketedConstraint.getQuantifier">[docs]</a><span class="k">def</span> <span class="nf">getQuantifier</span><span class="p">(</span><span class="n">quant</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param op: String representation of Clafer operation.</span>
+<span class="sd">    :type op: str</span>
+<span class="sd">    :returns: 2-tuple from ClaferToZ3OperationsMap with the fields:</span>
+<span class="sd">    </span>
+<span class="sd">    The 2-tuple has the fields:</span>
+<span class="sd">        1. arity of the function</span>
+<span class="sd">        2. function associated with the operator</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">QuantifierMap</span><span class="p">[</span><span class="n">quant</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="BracketedConstraint"><a class="viewcode-back" href="../../constraints.html#constraints.BracketedConstraint.BracketedConstraint">[docs]</a><span class="k">class</span> <span class="nc">BracketedConstraint</span><span class="p">(</span><span class="n">Constraints</span><span class="o">.</span><span class="n">GenericConstraints</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :var stack: ([]) Used to process a tree of expressions.</span>
+<span class="sd">    Class for creating bracketed Clafer constraints in Z3.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z3</span><span class="p">,</span> <span class="n">claferStack</span><span class="p">):</span>
+        <span class="n">ident</span> <span class="o">=</span> <span class="s">&quot;BC:&quot;</span> <span class="o">+</span> <span class="s">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">claferStack</span><span class="p">])</span>
+        <span class="n">GenericConstraints</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ident</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z3</span> <span class="o">=</span> <span class="n">z3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">claferStack</span> <span class="o">=</span> <span class="n">claferStack</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locals</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>
+        
+<div class="viewcode-block" id="BracketedConstraint.addLocal"><a class="viewcode-back" href="../../constraints.html#constraints.BracketedConstraint.BracketedConstraint.addLocal">[docs]</a>    <span class="k">def</span> <span class="nf">addLocal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locals</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">expr</span>
+    </div>
+<div class="viewcode-block" id="BracketedConstraint.addArg"><a class="viewcode-back" href="../../constraints.html#constraints.BracketedConstraint.BracketedConstraint.addArg">[docs]</a>    <span class="k">def</span> <span class="nf">addArg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+       
+    <span class="c">#clean     </span></div>
+<div class="viewcode-block" id="BracketedConstraint.addQuantifier"><a class="viewcode-back" href="../../constraints.html#constraints.BracketedConstraint.BracketedConstraint.addQuantifier">[docs]</a>    <span class="k">def</span> <span class="nf">addQuantifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantifier</span><span class="p">,</span> <span class="n">num_args</span><span class="p">,</span> <span class="n">num_combinations</span><span class="p">,</span> <span class="n">ifconstraints</span><span class="p">):</span>
+        <span class="n">localStack</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ifConstraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_combinations</span><span class="p">):</span>
+            <span class="n">localStack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">ifconstraints</span><span class="p">:</span>
+                <span class="n">ifConstraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ifconstraints</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ifConstraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">localStack</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="n">ifConstraints</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="n">condList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_combinations</span><span class="p">):</span>
+            <span class="n">currExpr</span> <span class="o">=</span> <span class="n">localStack</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ifConstraints</span><span class="p">:</span>
+                <span class="n">currIfConstraint</span> <span class="o">=</span> <span class="n">ifConstraints</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">currIfConstraint</span> <span class="o">=</span> <span class="bp">None</span>
+                
+            <span class="n">quantFunction</span> <span class="o">=</span> <span class="n">getQuantifier</span><span class="p">(</span><span class="n">quantifier</span><span class="p">)</span>
+            <span class="n">cond</span> <span class="o">=</span> <span class="n">quantFunction</span><span class="p">(</span><span class="n">currExpr</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">currIfConstraint</span><span class="p">:</span>
+                <span class="n">cond</span> <span class="o">=</span> <span class="n">Implies</span><span class="p">(</span><span class="n">currIfConstraint</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+            <span class="n">condList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cond</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">BoolArg</span><span class="p">([</span><span class="n">And</span><span class="p">(</span><span class="o">*</span><span class="n">condList</span><span class="p">)])])</span>
+           </div>
+<div class="viewcode-block" id="BracketedConstraint.extend"><a class="viewcode-back" href="../../constraints.html#constraints.BracketedConstraint.BracketedConstraint.extend">[docs]</a>    <span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="n">maxInstances</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">extendedArgs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">maxInstances</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">maxInstances</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">!=</span> <span class="n">maxInstances</span><span class="p">:</span>
+                <span class="n">extendedArgs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maxInstances</span><span class="p">)])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">extendedArgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">maxInstances</span><span class="p">,</span> <span class="n">extendedArgs</span><span class="p">)</span>
+                </div>
+<div class="viewcode-block" id="BracketedConstraint.addOperator"><a class="viewcode-back" href="../../constraints.html#constraints.BracketedConstraint.BracketedConstraint.addOperator">[docs]</a>    <span class="k">def</span> <span class="nf">addOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">arity</span><span class="p">,</span> <span class="n">operator</span><span class="p">)</span> <span class="o">=</span> <span class="n">getOperationConversion</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">arity</span><span class="p">):</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
+        <span class="p">(</span><span class="n">maxInstances</span><span class="p">,</span> <span class="n">extendedArgs</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">finalExprs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maxInstances</span><span class="p">):</span>
+            <span class="n">tempExprs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">extendedArgs</span><span class="p">:</span>
+                <span class="n">tempExprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">finalExprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tempExprs</span><span class="p">)</span>
+        <span class="n">finalExprs</span> <span class="o">=</span> <span class="p">[</span><span class="n">operator</span><span class="p">(</span><span class="o">*</span><span class="n">finalExprs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">finalExprs</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">finalExprs</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="BracketedConstraint.endProcessing"><a class="viewcode-back" href="../../constraints.html#constraints.BracketedConstraint.BracketedConstraint.endProcessing">[docs]</a>    <span class="k">def</span> <span class="nf">endProcessing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">claferStack</span><span class="p">):</span>
+            <span class="n">thisClafer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">claferStack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">thisClafer</span><span class="o">.</span><span class="n">numInstances</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">thisClafer</span><span class="o">.</span><span class="n">numInstances</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">addConstraint</span><span class="p">(</span><span class="n">Implies</span><span class="p">(</span><span class="n">thisClafer</span><span class="o">.</span><span class="n">isOn</span><span class="p">(</span><span class="n">thisClafer</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">expr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">finish</span><span class="p">()))</span>
+                <span class="c">#hack for now</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">addConstraint</span><span class="p">(</span><span class="n">Implies</span><span class="p">(</span><span class="n">thisClafer</span><span class="o">.</span><span class="n">isOn</span><span class="p">(</span><span class="n">thisClafer</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">expr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">finish</span><span class="p">()))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">expr</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">i</span><span class="o">.</span><span class="n">getInstanceSorts</span><span class="p">():</span>
+                    <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span> <span class="o">=</span> <span class="n">j</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">addConstraint</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">pop_value</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z3</span><span class="o">.</span><span class="n">z3_bracketed_constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    </div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ed Zulkoski, Rafael Olaechea.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

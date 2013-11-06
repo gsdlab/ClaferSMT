@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>visitors.VisitorTemplate &mdash; ClaferZ3 0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="ClaferZ3 0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for visitors.VisitorTemplate</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on Mar 26, 2013</span>
+
+<span class="sd">@author: ezulkosk</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">visitors.Visitor</span>
+
+<div class="viewcode-block" id="VisitorTemplate"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate">[docs]</a><span class="k">class</span> <span class="nc">VisitorTemplate</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    *see:* :class:`visitors.Visitor`</span>
+<span class="sd">    </span>
+<span class="sd">    Visitor that simply traverses the Clafer AST, </span>
+<span class="sd">    used as a superclass for other visitors</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+<div class="viewcode-block" id="VisitorTemplate.claferVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.claferVisit">[docs]</a>    <span class="k">def</span> <span class="nf">claferVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: A Clafer AST node</span>
+<span class="sd">        :type element: :class:`~ast.Clafer`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">element</span><span class="o">.</span><span class="n">supers</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+            <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="VisitorTemplate.claferidVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.claferidVisit">[docs]</a>    <span class="k">def</span> <span class="nf">claferidVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: A ClaferId AST node</span>
+<span class="sd">        :type element: :class:`~ast.ClaferId`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span>
+    </div>
+<div class="viewcode-block" id="VisitorTemplate.constraintVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.constraintVisit">[docs]</a>    <span class="k">def</span> <span class="nf">constraintVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: An IRConstraint AST node</span>
+<span class="sd">        :type element: :class:`~ast.IRConstraint`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">exp</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="VisitorTemplate.declarationVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.declarationVisit">[docs]</a>    <span class="k">def</span> <span class="nf">declarationVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: A Declaration AST node</span>
+<span class="sd">        :type element: :class:`~ast.Declaration`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">localDeclarations</span><span class="p">:</span>
+            <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="VisitorTemplate.declpexpVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.declpexpVisit">[docs]</a>    <span class="k">def</span> <span class="nf">declpexpVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: A DeclPExp AST node</span>
+<span class="sd">        :type element: :class:`~ast.DeclPExp`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">declaration</span><span class="p">)</span>
+        <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">bodyParentExp</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="VisitorTemplate.expVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.expVisit">[docs]</a>    <span class="k">def</span> <span class="nf">expVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: A Exp AST node</span>
+<span class="sd">        :type element: :class:`~ast.Exp`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">iExp</span><span class="p">:</span>
+            <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    
+    </div>
+<div class="viewcode-block" id="VisitorTemplate.funexpVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.funexpVisit">[docs]</a>    <span class="k">def</span> <span class="nf">funexpVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: A FunExp AST node</span>
+<span class="sd">        :type element: :class:`~ast.FunExp`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+            <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="VisitorTemplate.gcardVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.gcardVisit">[docs]</a>    <span class="k">def</span> <span class="nf">gcardVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: A GCard AST node</span>
+<span class="sd">        :type element: :class:`~ast.GCard`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span>
+    </div>
+<div class="viewcode-block" id="VisitorTemplate.goalVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.goalVisit">[docs]</a>    <span class="k">def</span> <span class="nf">goalVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: A Goal AST node</span>
+<span class="sd">        :type element: :class:`~ast.Goal`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">exp</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="VisitorTemplate.localdeclarationVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.localdeclarationVisit">[docs]</a>    <span class="k">def</span> <span class="nf">localdeclarationVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: A LocalDeclaration AST node</span>
+<span class="sd">        :type element: :class:`~ast.LocalDeclaration`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span>
+    </div>
+<div class="viewcode-block" id="VisitorTemplate.moduleVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.moduleVisit">[docs]</a>    <span class="k">def</span> <span class="nf">moduleVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: A Module AST node</span>
+<span class="sd">        :type element: :class:`~ast.Module`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+            <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="VisitorTemplate.supersVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.supersVisit">[docs]</a>    <span class="k">def</span> <span class="nf">supersVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: A Supers AST node</span>
+<span class="sd">        :type element: :class:`~ast.Supers`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+            <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="VisitorTemplate.integerliteralVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.integerliteralVisit">[docs]</a>    <span class="k">def</span> <span class="nf">integerliteralVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: An IntegerLiteral AST node</span>
+<span class="sd">        :type element: :class:`~ast.IntegerLiteral`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span>
+        </div>
+<div class="viewcode-block" id="VisitorTemplate.doubleliteralVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.doubleliteralVisit">[docs]</a>    <span class="k">def</span> <span class="nf">doubleliteralVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: A DoubleLiteral AST node</span>
+<span class="sd">        :type element: :class:`~ast.DoubleLiteral`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span>
+        </div>
+<div class="viewcode-block" id="VisitorTemplate.stringliteralVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.stringliteralVisit">[docs]</a>    <span class="k">def</span> <span class="nf">stringliteralVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: A StringLiteral AST node</span>
+<span class="sd">        :type element: :class:`~ast.StringLiteral`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span>
+    </div>
+<div class="viewcode-block" id="VisitorTemplate.noneVisit"><a class="viewcode-back" href="../../visitors.html#visitors.VisitorTemplate.VisitorTemplate.noneVisit">[docs]</a>    <span class="k">def</span> <span class="nf">noneVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ed Zulkoski, Rafael Olaechea.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

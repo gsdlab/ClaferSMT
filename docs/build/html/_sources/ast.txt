@@ -1,123 +1,134 @@
-ast Package
+ast package
 ===========
 
-:mod:`Clafer` Module
---------------------
+Submodules
+----------
+
+ast.Clafer module
+-----------------
 
 .. automodule:: ast.Clafer
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`ClaferId` Module
-----------------------
+ast.ClaferId module
+-------------------
 
 .. automodule:: ast.ClaferId
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`DeclPExp` Module
-----------------------
+ast.DeclPExp module
+-------------------
 
 .. automodule:: ast.DeclPExp
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`Declaration` Module
--------------------------
+ast.Declaration module
+----------------------
 
 .. automodule:: ast.Declaration
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`DoubleLiteral` Module
----------------------------
+ast.DoubleLiteral module
+------------------------
 
 .. automodule:: ast.DoubleLiteral
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`Exp` Module
------------------
+ast.Exp module
+--------------
 
 .. automodule:: ast.Exp
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`FunExp` Module
---------------------
+ast.FunExp module
+-----------------
 
 .. automodule:: ast.FunExp
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`GCard` Module
--------------------
+ast.GCard module
+----------------
 
 .. automodule:: ast.GCard
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`Goal` Module
-------------------
+ast.Goal module
+---------------
 
 .. automodule:: ast.Goal
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`IRConstraint` Module
---------------------------
+ast.IRConstraint module
+-----------------------
 
 .. automodule:: ast.IRConstraint
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`IntegerLiteral` Module
-----------------------------
+ast.IntegerLiteral module
+-------------------------
 
 .. automodule:: ast.IntegerLiteral
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`LocalDeclaration` Module
-------------------------------
+ast.LocalDeclaration module
+---------------------------
 
 .. automodule:: ast.LocalDeclaration
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`Module` Module
---------------------
+ast.Module module
+-----------------
 
 .. automodule:: ast.Module
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`StringLiteral` Module
----------------------------
+ast.StringLiteral module
+------------------------
 
 .. automodule:: ast.StringLiteral
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`Supers` Module
---------------------
+ast.Supers module
+-----------------
 
 .. automodule:: ast.Supers
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: ast
+    :members:
+    :undoc-members:
+    :show-inheritance:

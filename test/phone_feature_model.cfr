@@ -1,0 +1,30 @@
+abstract Feature 0..5
+	memory : integer
+	cost : integer
+
+abstract MobilePhoneFM 1  
+	PasswordProtecion : Feature
+		[ memory = 20 
+		  cost = 10 ]
+	xor Connectivity : Feature
+		[ memory = 0
+		  cost  = 0]
+		Bluetooth : Feature
+			[ memory = 300 
+			  cost = 50 ]		
+		USB : Feature
+			[ memory = 500 
+			  cost = 35 ]		
+		Wifi : Feature
+			[ memory = 725 
+			  cost = 85 ]
+	total_memory : integer
+		[ total_memory = sum Feature.memory ]				  
+	total_cost : integer
+		[ total_cost = sum Feature.cost ]
+		
+concreteMobilePhoneFM : MobilePhoneFM
+
+<< min concreteMobilePhoneFM.total_cost >>
+<< min concreteMobilePhoneFM.total_memory >>	
+			  

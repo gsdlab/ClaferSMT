@@ -1,0 +1,33 @@
+abstract Person
+	age : integer
+		[ this >= 0 ]
+	xor maritalStatus
+		neverMarried
+		married
+			spouse -> Person
+				[ this.maritalStatus.married.spouse = Person ]     
+			[ spouse != Person ]
+		divorced
+		[ married || divorced => age >= 5 ]
+	childs -> Person *
+		[ Person in this.parents ]     
+		[ spouse in this.parents ]
+		[ this.age < age ]
+		
+	parents -> Person 0..2
+		[ Person in this.childs ]
+
+
+Alice : Person
+	[ age = 6 ] 
+	[ spouse = Bob ]
+//	[ childs = Carol ]   // to be inferred
+
+Bob : Person
+//	[ age = 6 ]   // to be inferred
+//	[ spouse = Alice ]   // to be inferred
+//	[ childs = Carol ]   // to be inferred
+
+Carol : Person
+	[ age = 1 ]
+//	[ parents = Alice, Bob ]  // to be inferred

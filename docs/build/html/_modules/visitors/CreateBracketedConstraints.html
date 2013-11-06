@@ -1,0 +1,260 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>visitors.CreateBracketedConstraints &mdash; ClaferZ3 0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="ClaferZ3 0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for visitors.CreateBracketedConstraints</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on Mar 26, 2013</span>
+
+<span class="sd">@author: ezulkosk</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">common</span> <span class="kn">import</span> <span class="n">Common</span>
+<span class="kn">from</span> <span class="nn">common.Common</span> <span class="kn">import</span> <span class="n">mAnd</span>
+<span class="kn">from</span> <span class="nn">constraints</span> <span class="kn">import</span> <span class="n">BracketedConstraint</span>
+<span class="kn">from</span> <span class="nn">structures.ExprArg</span> <span class="kn">import</span> <span class="n">ExprArg</span><span class="p">,</span> <span class="n">Mask</span><span class="p">,</span> <span class="n">BoolArg</span><span class="p">,</span> <span class="n">IntArg</span>
+<span class="kn">from</span> <span class="nn">visitors</span> <span class="kn">import</span> <span class="n">VisitorTemplate</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">visitors.Visitor</span>
+
+
+<span class="n">claferStack</span> <span class="o">=</span> <span class="p">[]</span> <span class="c">#used to determine where the constraint is in the clafer hierarchy</span>
+<span class="n">inConstraint</span> <span class="o">=</span> <span class="bp">False</span> <span class="c">#true if within a constraint</span>
+<span class="n">currentConstraint</span> <span class="o">=</span> <span class="bp">None</span> <span class="c">#holds the constraint currently being traversed</span>
+
+
+<div class="viewcode-block" id="CreateBracketedConstraints"><a class="viewcode-back" href="../../visitors.html#visitors.CreateBracketedConstraints.CreateBracketedConstraints">[docs]</a><span class="k">class</span> <span class="nc">CreateBracketedConstraints</span><span class="p">(</span><span class="n">VisitorTemplate</span><span class="o">.</span><span class="n">VisitorTemplate</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :var self.currentConstraint: (:mod:`~constraints.BracketedConstraint`) Holds the constraint currently being traversed. </span>
+<span class="sd">    :var self.inConstraint: (bool) True if the traversal is currently within a constraint.</span>
+<span class="sd">    :var claferStack: ([:mod:`~common.ClaferSort`]) Stack of clafers used primarily for debugging.</span>
+<span class="sd">    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.</span>
+<span class="sd">    </span>
+<span class="sd">    Converts Clafer constraints to z3 syntax,</span>
+<span class="sd">    adds constraints to z3.z3_constraints</span>
+<span class="sd">    field.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z3</span><span class="p">,</span> <span class="n">inConstraint</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param z3: The Z3 solver.</span>
+<span class="sd">        :type z3: :class:`~common.Z3Instance`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">VisitorTemplate</span><span class="o">.</span><span class="n">VisitorTemplate</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inConstraint</span> <span class="o">=</span> <span class="n">inConstraint</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z3</span> <span class="o">=</span> <span class="n">z3</span>
+    
+<div class="viewcode-block" id="CreateBracketedConstraints.isomorphismVisit"><a class="viewcode-back" href="../../visitors.html#visitors.CreateBracketedConstraints.CreateBracketedConstraints.isomorphismVisit">[docs]</a>    <span class="k">def</span> <span class="nf">isomorphismVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param element: The isomorphism constraint to be added to the solver. </span>
+<span class="sd">        :type element: :class:`~ast.FunExp`</span>
+<span class="sd">        </span>
+<span class="sd">        Mild hack. Only used when generating isomorphism constraints. Used to circumvent </span>
+<span class="sd">        fully creating a proper clafer constraint.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inConstraint</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span> <span class="o">=</span> <span class="n">BracketedConstraint</span><span class="o">.</span><span class="n">BracketedConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z3</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">funexpVisit</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">endProcessing</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inConstraint</span> <span class="o">=</span> <span class="bp">False</span>
+    </div>
+<div class="viewcode-block" id="CreateBracketedConstraints.claferVisit"><a class="viewcode-back" href="../../visitors.html#visitors.CreateBracketedConstraints.CreateBracketedConstraints.claferVisit">[docs]</a>    <span class="k">def</span> <span class="nf">claferVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">element</span><span class="o">.</span><span class="n">supers</span><span class="p">)</span>
+        <span class="n">claferStack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z3</span><span class="o">.</span><span class="n">getSort</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+            <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">claferStack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="CreateBracketedConstraints.claferidVisit"><a class="viewcode-back" href="../../visitors.html#visitors.CreateBracketedConstraints.CreateBracketedConstraints.claferidVisit">[docs]</a>    <span class="k">def</span> <span class="nf">claferidVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inConstraint</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s">&quot;this&quot;</span><span class="p">:</span>
+                <span class="n">exprArgList</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">claferSort</span><span class="o">.</span><span class="n">numInstances</span><span class="p">):</span>
+                    <span class="n">exprArgList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ExprArg</span><span class="p">([(</span><span class="n">element</span><span class="o">.</span><span class="n">claferSort</span><span class="p">,</span> <span class="n">Mask</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">claferSort</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">]))]))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">addArg</span><span class="p">(</span><span class="n">exprArgList</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s">&quot;ref&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">addArg</span><span class="p">([</span><span class="n">ExprArg</span><span class="p">([</span><span class="s">&quot;ref&quot;</span><span class="p">])])</span>
+            <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s">&quot;parent&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">addArg</span><span class="p">([</span><span class="n">ExprArg</span><span class="p">([</span><span class="s">&quot;parent&quot;</span><span class="p">])])</span>
+            <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">claferSort</span><span class="p">:</span>  
+                <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">addArg</span><span class="p">([</span><span class="n">ExprArg</span><span class="p">([(</span><span class="n">element</span><span class="o">.</span><span class="n">claferSort</span><span class="p">,</span> 
+                                                        <span class="n">Mask</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">claferSort</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">claferSort</span><span class="o">.</span><span class="n">numInstances</span><span class="p">)]))])])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c">#localdecl case</span>
+                <span class="n">expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">locals</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+                <span class="n">expr</span> <span class="o">=</span> <span class="p">[</span><span class="n">expr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">expr</span><span class="p">))]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">addArg</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+   </div>
+<div class="viewcode-block" id="CreateBracketedConstraints.constraintVisit"><a class="viewcode-back" href="../../visitors.html#visitors.CreateBracketedConstraints.CreateBracketedConstraints.constraintVisit">[docs]</a>    <span class="k">def</span> <span class="nf">constraintVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inConstraint</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span> <span class="o">=</span> <span class="n">BracketedConstraint</span><span class="o">.</span><span class="n">BracketedConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z3</span><span class="p">,</span> <span class="n">claferStack</span><span class="p">)</span>
+        <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">exp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">endProcessing</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inConstraint</span> <span class="o">=</span> <span class="bp">False</span>
+    </div>
+<div class="viewcode-block" id="CreateBracketedConstraints.funexpVisit"><a class="viewcode-back" href="../../visitors.html#visitors.CreateBracketedConstraints.CreateBracketedConstraints.funexpVisit">[docs]</a>    <span class="k">def</span> <span class="nf">funexpVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">operation</span> <span class="o">==</span><span class="s">&quot;in&quot;</span><span class="p">:</span>
+            <span class="n">Common</span><span class="o">.</span><span class="n">BREAK</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+            <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inConstraint</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">addOperator</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">operation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">operation</span> <span class="o">==</span><span class="s">&quot;in&quot;</span><span class="p">:</span>
+            <span class="n">Common</span><span class="o">.</span><span class="n">BREAK</span> <span class="o">=</span> <span class="bp">False</span>    
+           
+    <span class="c">#assume their is only one sort in the decl at this time, which is true of my old version of clafer</span></div>
+<div class="viewcode-block" id="CreateBracketedConstraints.createAllLocalsCombinations"><a class="viewcode-back" href="../../visitors.html#visitors.CreateBracketedConstraints.CreateBracketedConstraints.createAllLocalsCombinations">[docs]</a>    <span class="k">def</span> <span class="nf">createAllLocalsCombinations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">localDecls</span><span class="p">,</span> <span class="n">exprArg</span><span class="p">,</span> <span class="n">isDisjunct</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">sort</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span> <span class="o">=</span> <span class="n">exprArg</span><span class="o">.</span><span class="n">getInstanceSort</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">ranges</span> <span class="o">=</span> <span class="p">[</span><span class="n">mask</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">localDecls</span><span class="p">]</span>
+        <span class="n">localInstances</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ifConstraints</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="n">integer_combinations</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">ranges</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">integer_combinations</span><span class="p">:</span> 
+            <span class="n">list_of_ints</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">set_of_ints</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">list_of_ints</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">isDisjunct</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">set_of_ints</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_ints</span><span class="p">)):</span>
+                <span class="k">continue</span>
+            <span class="n">localInstances</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ExprArg</span><span class="p">([(</span><span class="n">sort</span><span class="p">,</span> <span class="n">Mask</span><span class="p">(</span><span class="n">sort</span><span class="p">,</span> <span class="p">[</span><span class="n">list_of_ints</span><span class="p">[</span><span class="n">j</span><span class="p">]]))]</span>
+                                           <span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_of_ints</span><span class="p">))])</span>
+            <span class="n">ifConstraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mAnd</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">sort</span><span class="o">.</span><span class="n">isOn</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">j</span><span class="p">))</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">list_of_ints</span><span class="p">]))</span>
+            
+        <span class="k">return</span> <span class="p">(</span><span class="n">localInstances</span><span class="p">,</span> <span class="n">ifConstraints</span><span class="p">)</span>
+     
+    <span class="c">#handle local declarations (some, all, lone, one, no) </span>
+    <span class="c">#not fully implemented</span></div>
+<div class="viewcode-block" id="CreateBracketedConstraints.declpexpVisit"><a class="viewcode-back" href="../../visitors.html#visitors.CreateBracketedConstraints.CreateBracketedConstraints.declpexpVisit">[docs]</a>    <span class="k">def</span> <span class="nf">declpexpVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="n">num_args</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">declaration</span><span class="p">:</span>
+            <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">declaration</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">iExp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">isDisjunct</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">declaration</span><span class="o">.</span><span class="n">isDisjunct</span>
+            <span class="c">#XXX</span>
+            <span class="p">(</span><span class="n">combinations</span><span class="p">,</span> <span class="n">ifconstraints</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createAllLocalsCombinations</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">declaration</span><span class="o">.</span><span class="n">localDeclarations</span><span class="p">,</span> 
+                                                                             <span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>  
+                                                                             <span class="n">isDisjunct</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">combinations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">quantifier</span> <span class="o">==</span> <span class="s">&quot;Some&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">BoolArg</span><span class="p">([</span><span class="bp">False</span><span class="p">])])</span>
+                <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">quantifier</span> <span class="o">==</span> <span class="s">&quot;All&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">BoolArg</span><span class="p">([</span><span class="bp">True</span><span class="p">])])</span>
+                <span class="k">return</span>
+            <span class="n">num_args</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">combinations</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">num_combinations</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">combinations</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_args</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">addLocal</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">declaration</span><span class="o">.</span><span class="n">localDeclarations</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">element</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
+                <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">bodyParentExp</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">visitors</span><span class="o">.</span><span class="n">Visitor</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">bodyParentExp</span><span class="p">)</span>
+            <span class="n">num_args</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">num_combinations</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">ifconstraints</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">addQuantifier</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">quantifier</span><span class="p">,</span> <span class="n">num_args</span><span class="p">,</span> <span class="n">num_combinations</span><span class="p">,</span> <span class="n">ifconstraints</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="CreateBracketedConstraints.localdeclarationVisit"><a class="viewcode-back" href="../../visitors.html#visitors.CreateBracketedConstraints.CreateBracketedConstraints.localdeclarationVisit">[docs]</a>    <span class="k">def</span> <span class="nf">localdeclarationVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="k">pass</span>
+    </div>
+<div class="viewcode-block" id="CreateBracketedConstraints.integerliteralVisit"><a class="viewcode-back" href="../../visitors.html#visitors.CreateBracketedConstraints.CreateBracketedConstraints.integerliteralVisit">[docs]</a>    <span class="k">def</span> <span class="nf">integerliteralVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inConstraint</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">addArg</span><span class="p">([</span><span class="n">IntArg</span><span class="p">([</span><span class="n">element</span><span class="o">.</span><span class="n">value</span><span class="p">])])</span>
+        </div>
+<div class="viewcode-block" id="CreateBracketedConstraints.doubleliteralVisit"><a class="viewcode-back" href="../../visitors.html#visitors.CreateBracketedConstraints.CreateBracketedConstraints.doubleliteralVisit">[docs]</a>    <span class="k">def</span> <span class="nf">doubleliteralVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">element</span>
+        </div>
+<div class="viewcode-block" id="CreateBracketedConstraints.stringliteralVisit"><a class="viewcode-back" href="../../visitors.html#visitors.CreateBracketedConstraints.CreateBracketedConstraints.stringliteralVisit">[docs]</a>    <span class="k">def</span> <span class="nf">stringliteralVisit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="c">#TODO stubbed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentConstraint</span><span class="o">.</span><span class="n">addArg</span><span class="p">([</span><span class="n">IntArg</span><span class="p">([</span><span class="mi">0</span><span class="p">])])</span><span class="c">#element.value])])</span>
+    </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ed Zulkoski, Rafael Olaechea.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>structures.ClaferSort &mdash; ClaferZ3 0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="ClaferZ3 0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for structures.ClaferSort</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on Apr 29, 2013</span>
+
+<span class="sd">@author: ezulkosk</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">common</span> <span class="kn">import</span> <span class="n">Common</span><span class="p">,</span> <span class="n">Options</span>
+<span class="kn">from</span> <span class="nn">common.Common</span> <span class="kn">import</span> <span class="n">mOr</span>
+<span class="kn">from</span> <span class="nn">constraints</span> <span class="kn">import</span> <span class="n">Constraints</span>
+<span class="kn">from</span> <span class="nn">lxml.builder</span> <span class="kn">import</span> <span class="nb">basestring</span>
+<span class="kn">from</span> <span class="nn">z3</span> <span class="kn">import</span> <span class="n">IntVector</span><span class="p">,</span> <span class="n">If</span><span class="p">,</span> <span class="n">Implies</span><span class="p">,</span> <span class="n">And</span><span class="p">,</span> <span class="n">Or</span><span class="p">,</span> <span class="n">Sum</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+
+
+<div class="viewcode-block" id="ClaferSort"><a class="viewcode-back" href="../../structures.html#structures.ClaferSort.ClaferSort">[docs]</a><span class="k">class</span>  <span class="nc">ClaferSort</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :var element: The IR clafer.</span>
+<span class="sd">    :var z3: The Z3Instance.</span>
+<span class="sd">    :var parentStack: Used to determine the parent of the clafer, and if the clafer is top level.</span>
+<span class="sd">    :var isTopLevel: True if the clafer is at the top level of indentation.</span>
+<span class="sd">    :var fields: The direct subclafer ClaferSorts.</span>
+<span class="sd">    :var constraints: The set of Z3 constraints associated with this clafer.</span>
+<span class="sd">    :var summs: List containing useful information for processing cardinality constraints.</span>
+<span class="sd">    :var numInstances: The number of Z3-Int instances used to represent this Clafer.</span>
+<span class="sd">    :var instances: List of Z3-Ints representing the clafer. </span>
+<span class="sd">        An instance is *on* if it is not equal to the number of parentInstances.</span>
+<span class="sd">    :var refs: List of Z3-ints representing the reference clafers that instances of this clafer point.</span>
+<span class="sd">    :var subs: The list of ClaferSorts that directly inherit from this clafer.</span>
+<span class="sd">    :var indexInSuper: Used to map a subinstance to the correct instances in the super. </span>
+<span class="sd">    </span>
+<span class="sd">    Class representing a clafer in Z3 constraints. Clafers are represented as a list of </span>
+<span class="sd">    Z3-Int with a length equal to its global cardinality (for now). </span>
+<span class="sd">    The integers in the list represent which parent instance the corresponding instance</span>
+<span class="sd">    points to. The range of the integers in the list is in [0,parentInstances]. An instance in this </span>
+<span class="sd">    list is considered *on* (that is, will appear in the outputted model), if it is not equal</span>
+<span class="sd">    to parentInstances. If a clafer is top level, then an instance is on if it equals 0, else it is</span>
+<span class="sd">    off. For example:</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; A 1..2 //A has global cardinality of 2</span>
+<span class="sd">    &gt;&gt;&gt;    B 1..3 //B has global cardinality 6</span>
+<span class="sd">    &gt;&gt;&gt; </span>
+<span class="sd">    &gt;&gt;&gt; Instances for A: [0, 1]</span>
+<span class="sd">    &gt;&gt;&gt; Instances for B: [0, 0, 2, 2, 2, 2]</span>
+<span class="sd">    &gt;&gt;&gt; </span>
+<span class="sd">    &gt;&gt;&gt; Corresponding output:</span>
+<span class="sd">    &gt;&gt;&gt;   A0</span>
+<span class="sd">    &gt;&gt;&gt;     B0</span>
+<span class="sd">    &gt;&gt;&gt;     B1</span>
+<span class="sd">    </span>
+<span class="sd">    Instance A0 is on because the first instance of A is 0. Instances B0 and B1 fall under</span>
+<span class="sd">    A0 because the first and second instances are 0, that is, their parent pointers are 0.</span>
+<span class="sd">    Instances B2-B5 are off because parentInstances for B is 2 (since there are 2 A&#39;s).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">z3</span><span class="p">,</span> <span class="n">stack</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element</span> <span class="o">=</span> <span class="n">element</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z3</span> <span class="o">=</span> <span class="n">z3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentStack</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[:]</span>
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentStack</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isTopLevel</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isTopLevel</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">=</span> <span class="n">Constraints</span><span class="o">.</span><span class="n">ClaferConstraints</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">summs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numInstances</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">glCard</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numInstances</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">numInstances</span> <span class="o">=</span> <span class="n">Options</span><span class="o">.</span><span class="n">GLOBAL_SCOPE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instances</span> <span class="o">=</span> <span class="n">IntVector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">numInstances</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instanceRanges</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">full</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indexInSuper</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentSubIndex</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="c">#gets the upper card bound of the parent clafer</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentStack</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parentInstances</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentStack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parentInstances</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">instances</span><span class="p">)</span>
+        <span class="c">#lower and upper cardinality bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lowerCardConstraint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">card</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">upperCardConstraint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">card</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="c">#this eventually has to change</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">upperCardConstraint</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">upperCardConstraint</span> <span class="o">=</span> <span class="n">Options</span><span class="o">.</span><span class="n">GLOBAL_SCOPE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createInstancesConstraintsAndFunctions</span><span class="p">()</span>
+     
+<div class="viewcode-block" id="ClaferSort.addRefConstraints"><a class="viewcode-back" href="../../structures.html#structures.ClaferSort.ClaferSort.addRefConstraints">[docs]</a>    <span class="k">def</span> <span class="nf">addRefConstraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkSuperAndRef</span><span class="p">()</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refSort</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">refs</span> <span class="o">=</span> <span class="n">IntVector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;_ref&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">numInstances</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span><span class="p">:</span>
+            <span class="k">return</span>  
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refSort</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numInstances</span><span class="p">):</span>
+                <span class="c">#refs pointer is &gt;= 0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addRefConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> 
+                <span class="c">#ref pointer is &lt;= upper card of ref parent           </span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addRefConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span><span class="o">.</span><span class="n">numInstances</span><span class="p">)</span>
+        <span class="c">#if integer refs, zero out refs that do not have live parents,</span>
+        <span class="c">#if clafer refs, set equal to ref.parentInstances if not live   </span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numInstances</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refSort</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span> <span class="o">==</span> <span class="s">&quot;integer&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addRefConstraint</span><span class="p">(</span><span class="n">Implies</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isOff</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span>    
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span> <span class="o">==</span> <span class="s">&quot;string&quot;</span><span class="p">:</span>
+                    <span class="c">#TODO stubbed</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addRefConstraint</span><span class="p">(</span><span class="n">Implies</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isOff</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span>    
+                <span class="k">else</span><span class="p">:</span> 
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refSort</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; not supported yet&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addRefConstraint</span><span class="p">(</span><span class="n">If</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isOff</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                                           <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span><span class="o">.</span><span class="n">numInstances</span>
+                                           <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span><span class="o">.</span><span class="n">numInstances</span><span class="p">))</span>  
+                <span class="c">#if refsort.full does not exist, create it</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span><span class="o">.</span><span class="n">full</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span><span class="o">.</span><span class="n">full</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">mOr</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">And</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span><span class="o">.</span><span class="n">isOn</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refSort</span><span class="o">.</span><span class="n">numInstances</span><span class="p">)])</span>     
+                <span class="c">#the clafer that the reference points to must be &quot;on&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addRefConstraint</span><span class="p">(</span><span class="n">Implies</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span><span class="o">.</span><span class="n">numInstances</span>
+                                                     <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="bp">True</span><span class="p">))</span>
+             
+    </div>
+<div class="viewcode-block" id="ClaferSort.isOn"><a class="viewcode-back" href="../../structures.html#structures.ClaferSort.ClaferSort.isOn">[docs]</a>    <span class="k">def</span> <span class="nf">isOn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        index is either an int or Z3-Int</span>
+<span class="sd">        Returns a Boolean Constraint stating whether or not the instance at the given index is *on*.</span>
+<span class="sd">        An instance is on if it is not set to self.parentInstances.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentInstances</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">index</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentInstances</span>
+    </div>
+<div class="viewcode-block" id="ClaferSort.isOff"><a class="viewcode-back" href="../../structures.html#structures.ClaferSort.ClaferSort.isOff">[docs]</a>    <span class="k">def</span> <span class="nf">isOff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a Boolean Constraint stating whether or not the instance at the given index is *on*.</span>
+<span class="sd">        An instance is off if it is set to self.parentInstances.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentInstances</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">index</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentInstances</span>
+       </div>
+<div class="viewcode-block" id="ClaferSort.getInstanceRange"><a class="viewcode-back" href="../../structures.html#structures.ClaferSort.ClaferSort.getInstanceRange">[docs]</a>    <span class="k">def</span> <span class="nf">getInstanceRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Restricts the bounds of each instance.</span>
+<span class="sd">        Returns (lower, upper, extraAbsenceConstraint), where </span>
+<span class="sd">        lower and upper are the bounds, and extraAbsenceConstraint</span>
+<span class="sd">        is true if the instance may be absent from the model, AND is</span>
+<span class="sd">        not covered by the upper bound.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowerCardConstraint</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">upper</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">upper</span> <span class="o">=</span> <span class="n">index</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowerCardConstraint</span>
+        <span class="n">upper</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">upper</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentInstances</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">upperCardConstraint</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">lower</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lower</span> <span class="o">=</span> <span class="n">index</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">upperCardConstraint</span>
+            
+        <span class="n">extraAbsenceConstraint</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="c">#look at parentStack lower bounds, the loop computes the MINIMUM number of instances</span>
+        <span class="c"># of this clafer that MUST be in the model</span>
+        <span class="c">#essentially used to determine if the current instance may be out of the model</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentStack</span><span class="p">:</span>
+            <span class="n">parentCardBound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowerCardConstraint</span> <span class="c">#used to be 1</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentStack</span><span class="p">:</span>
+                <span class="n">parentCardBound</span> <span class="o">=</span> <span class="n">parentCardBound</span> <span class="o">*</span> <span class="n">i</span><span class="o">.</span><span class="n">lowerCardConstraint</span>
+            <span class="k">if</span> <span class="n">parentCardBound</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">index</span> <span class="ow">and</span> <span class="n">upper</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentInstances</span><span class="p">:</span> 
+                <span class="k">if</span> <span class="n">upper</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentInstances</span><span class="p">:</span>
+                    <span class="n">upper</span> <span class="o">=</span> <span class="n">upper</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">extraAbsenceConstraint</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="n">extraAbsenceConstraint</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="ClaferSort.createInstancesConstraintsAndFunctions"><a class="viewcode-back" href="../../structures.html#structures.ClaferSort.ClaferSort.createInstancesConstraintsAndFunctions">[docs]</a>    <span class="k">def</span> <span class="nf">createInstancesConstraintsAndFunctions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instanceRanges</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">getInstanceRange</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numInstances</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numInstances</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="n">extraAbsenceConstraint</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instanceRanges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="c">#parent pointer is &gt;= lower</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addInstanceConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">lower</span><span class="p">)</span> 
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">extraAbsenceConstraint</span><span class="p">:</span> 
+                <span class="c">#parent pointer is &lt;= upper         </span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addInstanceConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">upper</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c">#parent pointer is &lt;= upper, or equal to parentInstances</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addInstanceConstraint</span><span class="p">(</span>
+                    <span class="n">Or</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isOff</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">upper</span><span class="p">))</span>
+            <span class="c">#sorted parent pointers</span>
+            <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">isAbstract</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numInstances</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addInstanceConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>    
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">:</span>
+            <span class="k">return</span> 
+        <span class="c">#if the parent is not live, then no child can point to it  </span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">numInstances</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numInstances</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addInstanceConstraint</span><span class="p">(</span><span class="n">Implies</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">isOff</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="n">i</span><span class="p">))</span>    
+        
+    </div>
+<div class="viewcode-block" id="ClaferSort.createCardinalityConstraints"><a class="viewcode-back" href="../../structures.html#structures.ClaferSort.ClaferSort.createCardinalityConstraints">[docs]</a>    <span class="k">def</span> <span class="nf">createCardinalityConstraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">summs</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numInstances</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numInstances</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getInstanceRange</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">summs</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">If</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">j</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">summs</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">summs</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">summs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sum</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">summs</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">summs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parentInstances</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addCardConstraint</span><span class="p">(</span><span class="n">Implies</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">isOn</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">summs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowerCardConstraint</span><span class="p">))</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">upperCardConstraint</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addCardConstraint</span><span class="p">(</span><span class="n">Implies</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">isOn</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">summs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upperCardConstraint</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addCardConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">summs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowerCardConstraint</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">upperCardConstraint</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addCardConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">summs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upperCardConstraint</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="ClaferSort.addGroupCardConstraints"><a class="viewcode-back" href="../../structures.html#structures.ClaferSort.ClaferSort.addGroupCardConstraints">[docs]</a>    <span class="k">def</span> <span class="nf">addGroupCardConstraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">((</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">superSort</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">superSort</span><span class="o">.</span><span class="n">fields</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)):</span>
+            <span class="k">return</span>
+        <span class="c">#lower bounds</span>
+        <span class="n">upperGCard</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">gcard</span><span class="o">.</span><span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">lowerGCard</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">gcard</span><span class="o">.</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="n">lowerGCard</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">upperGCard</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numInstances</span><span class="p">):</span>
+            
+            <span class="n">bigSumm</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                <span class="n">bigSumm</span> <span class="o">=</span> <span class="n">bigSumm</span> <span class="o">+</span>  <span class="n">j</span><span class="o">.</span><span class="n">summs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="c">#**** LEAVE THIS CODE ****</span>
+            <span class="c">#don&#39;t include inherited fields for now </span>
+            <span class="c">#if self.superSort:</span>
+            <span class="c">#    for j in self.superSort.fields:</span>
+            <span class="c">#        bigSumm = bigSumm +  j.summs[i + self.indexInSuper]</span>
+            <span class="k">if</span> <span class="n">lowerGCard</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addGroupCardConstraint</span><span class="p">(</span><span class="n">bigSumm</span> <span class="o">&gt;=</span> <span class="n">lowerGCard</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">upperGCard</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addGroupCardConstraint</span><span class="p">(</span><span class="n">bigSumm</span> <span class="o">&lt;=</span> <span class="n">upperGCard</span><span class="p">)</span>
+        
+    </div>
+<div class="viewcode-block" id="ClaferSort.checkSuperAndRef"><a class="viewcode-back" href="../../structures.html#structures.ClaferSort.ClaferSort.checkSuperAndRef">[docs]</a>    <span class="k">def</span> <span class="nf">checkSuperAndRef</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c">#assumes that &quot;supers&quot; can only have one element</span>
+        <span class="n">supers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">supers</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">supers</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">iExp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="s">&quot;clafer&quot;</span><span class="p">):</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">supers</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s">&quot;Ref&quot;</span><span class="p">):</span>
+                <span class="n">ref_id</span> <span class="o">=</span> <span class="n">supers</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">iExp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
+                <span class="k">if</span> <span class="n">ref_id</span> <span class="o">==</span> <span class="s">&quot;integer&quot;</span> <span class="ow">or</span> <span class="n">ref_id</span> <span class="o">==</span> <span class="s">&quot;string&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span> <span class="o">=</span> <span class="n">ref_id</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z3</span><span class="o">.</span><span class="n">getSort</span><span class="p">(</span><span class="n">ref_id</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">superSort</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">superSort</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z3</span><span class="o">.</span><span class="n">getSort</span><span class="p">(</span><span class="n">supers</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">iExp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">superSort</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">refSort</span> <span class="o">=</span> <span class="bp">None</span>
+     </div>
+<div class="viewcode-block" id="ClaferSort.addRef"><a class="viewcode-back" href="../../structures.html#structures.ClaferSort.ClaferSort.addRef">[docs]</a>    <span class="k">def</span> <span class="nf">addRef</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    </div>
+<div class="viewcode-block" id="ClaferSort.addSubSort"><a class="viewcode-back" href="../../structures.html#structures.ClaferSort.ClaferSort.addSubSort">[docs]</a>    <span class="k">def</span> <span class="nf">addSubSort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sub</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span>
+        <span class="n">oldSubIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentSubIndex</span>
+        <span class="n">sub</span><span class="o">.</span><span class="n">indexInSuper</span> <span class="o">=</span> <span class="n">oldSubIndex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentSubIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentSubIndex</span> <span class="o">+</span> <span class="n">sub</span><span class="o">.</span><span class="n">numInstances</span>
+        <span class="c">#the super cannot exist without the sub, and vice-versa</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">numInstances</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">addInheritanceConstraint</span><span class="p">(</span><span class="n">And</span><span class="p">(</span><span class="n">Implies</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isOn</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">oldSubIndex</span><span class="p">),</span> <span class="n">sub</span><span class="o">.</span><span class="n">isOn</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
+                                         <span class="n">Implies</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">isOn</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">isOn</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">oldSubIndex</span><span class="p">))))</span>
+        <span class="k">return</span> <span class="n">oldSubIndex</span>
+    </div>
+<div class="viewcode-block" id="ClaferSort.addField"><a class="viewcode-back" href="../../structures.html#structures.ClaferSort.ClaferSort.addField">[docs]</a>    <span class="k">def</span> <span class="nf">addField</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">claferSort</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">claferSort</span><span class="p">)</span>
+    </div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span> <span class="o">+</span> <span class="s">&quot;_sort&quot;</span>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span>  <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">uid</span>
+    
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ed Zulkoski, Rafael Olaechea.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

@@ -3,16 +3,18 @@ Created on Apr 28, 2013
 
 @author: ezulkosk
 '''
-from z3 import If, Function, BoolSort, IntSort, And, Or
-import sys
+from z3 import If, And, Or
 
 NORMAL = 0
 DEBUG = 1
 TEST = 2
+ONE = 3
+ALL = 4
 MODE = NORMAL
-
+BREAK = False
 FUNCTION_ID = 0 
 CONSTRAINT_ID = 0
+FLAG = False
 
 def mAnd(*args):
     '''
@@ -47,27 +49,31 @@ def mOr(*args):
         return Or(*newArgs)
 
 def debug_print(string):
+    '''
+    Only prints the string if in DEBUG mode.
+    '''
     if(MODE == DEBUG):
         print(string)
         
 def standard_print(string):
+    '''
+    Prints the string if **not** in TEST mode.
+    '''
     if(MODE != TEST):
         print(string)
 
-#used to generate unique Z3 function names -- that was a fun bug...
-def getFunctionUID():
-        global FUNCTION_ID
-        FUNCTION_ID = FUNCTION_ID + 1
-        return FUNCTION_ID
-    
-#used to generate unique booleans for UNSAT core
 def getConstraintUID():
+    '''
+    Used to generate unique booleans for UNSAT core
+    '''
     global CONSTRAINT_ID
     CONSTRAINT_ID = CONSTRAINT_ID + 1
     return CONSTRAINT_ID
 
 def reset():
-    FUNCTION_ID = 0
+    '''
+    Only needed for running test suites.
+    '''
     CONSTRAINT_ID = 0
 
 

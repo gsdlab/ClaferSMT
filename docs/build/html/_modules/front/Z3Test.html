@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>front.Z3Test &mdash; ClaferZ3 0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="ClaferZ3 0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for front.Z3Test</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on April 27, 2013</span>
+
+<span class="sd">@author: ezulkosk</span>
+
+<span class="sd">testing method for the Z3 backend of Clafer</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">z3</span> <span class="kn">import</span> <span class="n">BitVec</span><span class="p">,</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">Solver</span><span class="p">,</span> <span class="n">Xor</span><span class="p">,</span> <span class="n">Function</span><span class="p">,</span> <span class="n">IntSort</span><span class="p">,</span> <span class="n">Array</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">sat</span><span class="p">,</span> \
+    <span class="n">is_array</span><span class="p">,</span> <span class="n">Or</span>
+<span class="kn">from</span> <span class="nn">z3consts</span> <span class="kn">import</span> <span class="n">Z3_UNINTERPRETED_SORT</span>
+<span class="kn">from</span> <span class="nn">z3types</span> <span class="kn">import</span> <span class="n">Z3Exception</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+
+<span class="c">#abstract x 4</span>
+<span class="c">#  c 1..3</span>
+<span class="c">#A -&gt; x 3</span>
+<span class="c">#  [#this.c = 2]</span>
+<span class="c">#B -&gt; x 2</span>
+<span class="c">#[B.c = 5]</span>
+
+
+          
+<span class="c">#abstract x 4</span>
+<span class="c">#  c 1..3</span>
+<span class="c">#A -&gt; x 3</span>
+<span class="c">#  [#this.c = 2]</span>
+<span class="c">#B -&gt; x 2</span>
+<span class="c">#[B.c = 5]  </span>
+
+<div class="viewcode-block" id="BitVecVector"><a class="viewcode-back" href="../../front.html#front.Z3Test.BitVecVector">[docs]</a><span class="k">def</span> <span class="nf">BitVecVector</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Create a vector with N Bit-Vectors of size sz&quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="p">[</span> <span class="n">BitVec</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">i</span><span class="p">),</span> <span class="n">sz</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="p">]</span>
+</div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../front.html#front.Z3Test.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="s">&quot;A&quot;</span><span class="p">)</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="s">&quot;B&quot;</span><span class="p">)</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="s">&quot;C&quot;</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="s">&quot;D&quot;</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Solver</span><span class="p">()</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Xor</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">,</span><span class="n">D</span><span class="p">))</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">model</span><span class="p">());</span>
+    
+    <span class="n">f</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="s">&#39;f&#39;</span><span class="p">,</span> <span class="n">IntSort</span><span class="p">(),</span> <span class="n">IntSort</span><span class="p">(),</span> <span class="n">IntSort</span><span class="p">())</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="s">&quot;A&quot;</span><span class="p">,</span> <span class="n">IntSort</span><span class="p">(),</span> <span class="n">IntSort</span><span class="p">())</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="s">&quot;B&quot;</span><span class="p">,</span> <span class="n">IntSort</span><span class="p">(),</span> <span class="n">IntSort</span><span class="p">())</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Solver</span><span class="p">()</span>
+    <span class="c">#c = IntSort()</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c">#s.add(Or(A[0]==1, And(B[0] == 1, B[1] == 0, B[2] == 0)))</span>
+    <span class="c">#s.add(A[0] == 0)</span>
+    <span class="c">#s.add(If())</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">model</span><span class="p">());</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">)</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="s">&quot;A&quot;</span><span class="p">,</span> <span class="n">IntSort</span><span class="p">(),</span> <span class="n">IntSort</span><span class="p">())</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="s">&quot;B&quot;</span><span class="p">,</span> <span class="n">IntSort</span><span class="p">(),</span> <span class="n">IntSort</span><span class="p">())</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Solver</span><span class="p">()</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span>  <span class="mi">1</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+    
+    <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">check</span><span class="p">())</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    </span>
+<span class="sd">    m = s.model()</span>
+<span class="sd">    print(m.eval(A[0]))</span>
+<span class="sd">    print(m.eval(A[1]))</span>
+<span class="sd">    print(m.eval(A[2]))</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    #self.bits = [BitVec(self.element.uid.split(&quot;_&quot;,1)[1] + &quot;$&quot;+str(i), 1) \</span>
+<span class="sd">    #                 for i in range(self.partitions * self.partitionSize)]#</span>
+<span class="sd">    A_refs = [Int(&quot;A_ref$&quot; + str(i)) for i in range(3)]</span>
+<span class="sd">    B_refs = [Int(&quot;B_ref$&quot; + str(i)) for i in range(2)]</span>
+<span class="sd">    x_array = [Int(&quot;x$&quot; + str(i)) for i in range(4)]</span>
+<span class="sd">    c_array = [Int(&quot;c$&quot; + str(i)) for i in range(12)] </span>
+<span class="sd">    </span>
+<span class="sd">    x_c = Function(&quot;x_c&quot;, IntSort(), IntSort())</span>
+<span class="sd">    s = Solver()</span>
+<span class="sd">    #bound A and B ref to the domain of x</span>
+<span class="sd">    s.add(*[i &lt;= 3 for i in A_refs])</span>
+<span class="sd">    s.add(*[i &lt;= 3 for i in B_refs])</span>
+<span class="sd">    s.add(*[i &gt;= 0 for i in A_refs])</span>
+<span class="sd">    s.add(*[i &gt;= 0 for i in B_refs])</span>
+<span class="sd">    </span>
+<span class="sd">    #bound x,c to [0,1]//will eventually use bits for this</span>
+<span class="sd">    s.add(*[i &gt;= 0 and i &lt;= 1 for i in x_array + c_array])</span>
+<span class="sd">  </span>
+<span class="sd">    #uniqueneness constraints for A and B</span>
+<span class="sd">    for i in A_refs:</span>
+<span class="sd">        for j in A_refs:</span>
+<span class="sd">            if not(i is j):</span>
+<span class="sd">                s.add(i != j)</span>
+<span class="sd">    for i in B_refs:</span>
+<span class="sd">        for j in B_refs:</span>
+<span class="sd">            if not(i is j):</span>
+<span class="sd">                s.add(i != j)</span>
+<span class="sd">    print(s.sexpr())</span>
+<span class="sd">    s.add(*[x_c(i) == Sum(c_array[3*i:3*(i+1)]) for i in range(4)])</span>
+<span class="sd">    s.add(*[x_c(i) == 2 for i in A_refs])</span>
+<span class="sd">    </span>
+<span class="sd">    s.add(5 == Sum(*[x_c(i) for i in B_refs]))</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    #s.add(*[x_c(i) == c_array[3*i:3*i+1] for i in range(4)])</span>
+<span class="sd">    print(s.check())</span>
+<span class="sd">    </span>
+<span class="sd">    get_models(s, 1)</span>
+<span class="sd">    &#39;&#39;&#39;</span></div>
+<div class="viewcode-block" id="get_models"><a class="viewcode-back" href="../../front.html#front.Z3Test.get_models">[docs]</a><span class="k">def</span> <span class="nf">get_models</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">M</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c">#s = Solver()</span>
+        <span class="c">#s.add(F)</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">check</span><span class="p">()</span> <span class="o">==</span> <span class="n">sat</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">!=</span> <span class="n">M</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                <span class="c">#print(m)</span>
+                
+                <span class="c"># Create a new constraint the blocks the current model</span>
+                <span class="n">block</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c">#print(&quot;A&quot;)</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
+                    <span class="c">#print(d)</span>
+                    <span class="c"># d is a declaration</span>
+                    <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">arity</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">continue</span><span class="c">#raise Z3Exception(&quot;uninterpreted functions are not supported&quot;)</span>
+                    <span class="c"># create a constant from declaration</span>
+                    <span class="n">c</span> <span class="o">=</span> <span class="n">d</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">is_array</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span><span class="o">.</span><span class="n">kind</span><span class="p">()</span> <span class="o">==</span> <span class="n">Z3_UNINTERPRETED_SORT</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">Z3Exception</span><span class="p">(</span><span class="s">&quot;arrays and uninterpreted sorts are not supported&quot;</span><span class="p">)</span>
+                    <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span> <span class="o">!=</span> <span class="n">m</span><span class="p">[</span><span class="n">d</span><span class="p">])</span>
+                    <span class="k">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">d</span><span class="p">]))</span>
+                    <span class="c">#print(&quot;C&quot;)</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Or</span><span class="p">(</span><span class="n">block</span><span class="p">))</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&quot;UNSAT&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">result</span></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ClaferZ3 0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ed Zulkoski, Rafael Olaechea.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

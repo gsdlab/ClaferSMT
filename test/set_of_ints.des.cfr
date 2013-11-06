@@ -1,0 +1,4 @@
+0 .. * c1_A : integer 2 .. 4 {
+  }
+[all disj x ;
+y : c1_A | x . ref != y . ref][# c1_A . ref = 3]

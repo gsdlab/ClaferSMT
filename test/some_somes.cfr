@@ -1,0 +1,7 @@
+A 1
+  B : integer 2
+[some a:A | 
+  some x  : a.B | x.ref = 1 ]
+//[some a:A | 
+//  some x ; y : a.B | x.ref = 3 && y.ref = 4 ]
+ 

@@ -7,7 +7,9 @@ from common import Common
 from test import bracketedconstraint_this, multiple_joins, this_dot_parent, \
     arithmetic, relations, boolean_connectives, union, simple_abstract, some, \
     simple_set, zoo, simple_zoo, integer_refs, phone_feature_model, \
-    higher_inheritance, this_integer_relation, equal_references, dag_test
+    higher_inheritance, this_integer_relation, equal_references, dag_test, subbooks, \
+    int_ref_set, iso, isowithcons, all_alls, some_somes, AADL_simplified_with_lists, \
+    all_threes, one_plus_one_equals_one
 from test.positive import books_tutorial, \
     check_unique_ref_names_with_inheritance, constraints, enforcingInverseReferences, \
     i101, i10, i137_parsing, i14, i17, i18, i19, i23, \
@@ -19,23 +21,45 @@ from test.positive import books_tutorial, \
     i147refdisambiguation, i188sumquantifier, i40textequality, i57navParent, \
     i61cardinalities, i72sharedreference, i78_transitiveclosure, i83individualscope, \
     i84referencespointingtothesameobject, i98_toplevelreferences, \
-    referencesshouldbeunique, subtypingprimitivetypes, i205refdisambiguationII
+    referencesshouldbeunique, subtypingprimitivetypes, i205refdisambiguationII, \
+    constraintswithbounds
 
-GLOBAL_SCOPE = 5 #this obviously has to change
+'''
+========
+| TODO |
+========
+* Scopes
+* Fix any ops left in Operations
+* Int refs.
+* Real Numbers
+* Change my_type to exptype
+* Traversal of quantified formulas is exponential...
+* Improve support for debugging constraints
+* Fix quantifier symmetry breaker, if two locals FROM THE SAME QUANTIFIER are on the left and right of a func, not symmetric
+* Documentation
+* Change DoubleLiteral to RealLiteral, since that is most likely the Z3 construct that will be used.
+'''
 
-MODE = Common.NORMAL   # Common.[NORMAL | DEBUG | TEST]
-NUM_INSTANCES = -1 # -1 to produce all instances
-PROFILING = False # True to output the translation time, and time to get first model
+
+GLOBAL_SCOPE = 2 #this obviously has to change
+
+MODE = Common.NORMAL # Common.[NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
+PRINT_CONSTRAINTS = True
+NUM_INSTANCES = 10 # -1 to produce all instances
+INFINITE = -1 #best variable name.
+PROFILING = True # True to output the translation time, and time to get first model
 CPROFILING = False #invokes the standard python profiling method (see Z3Run.py)
-GET_ISOMORPHISM_CONSTRAINT = False
+GET_ISOMORPHISM_CONSTRAINT = False #efficiency bugs in quantified formulas is preventing this from working
+BREAK_QUANTIFIER_SYMMETRY = False
+EXTEND_ABSTRACT_SCOPES = True
 
 MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
-TEST_SET = MY_TESTS 
+TEST_SET = POSITIVE_TESTS 
 
 #MODULE = bracketedconstraint_this.getModule()
 #MODULE = multiple_joins.getModule()
-MODULE = this_dot_parent.getModule()
+#MODULE = this_dot_parent.getModule()
 #MODULE = arithmetic.getModule()
 #MODULE = relations.getModule()
 #MODULE = boolean_connectives.getModule()
@@ -52,6 +76,17 @@ MODULE = this_dot_parent.getModule()
 #MODULE = equal_references.getModule()
 #MODULE = dag_test.getModule()
 #MODULE = books_tutorial.getModule()
+#MODULE = subbooks.getModule()
+#MODULE = int_ref_set.getModule()
+#MODULE = one_plus_one_equals_one.getModule()
+#MODULE = iso.getModule()
+#MODULE = isowithcons.getModule()
+#MODULE = all_alls.getModule()
+#MODULE = some_somes.getModule()
+MODULE = constraints.getModule()
+#MODULE = constraintswithbounds.getModule()
+#MODULE = AADL_simplified_with_lists.getModule()
+#MODULE = all_threes.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),
@@ -67,7 +102,10 @@ my_tests = [
           (integer_refs, 1),
           (higher_inheritance, 1),
           (this_integer_relation, 2),
-          (equal_references, 2)
+          (equal_references, 2),
+          (all_alls, 1),
+          (all_threes, 1),
+          (zoo, INFINITE)
          ]
 
 positive_tests = [
