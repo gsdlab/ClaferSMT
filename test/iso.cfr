@@ -1,0 +1,7 @@
+A 1
+  B -> integer 2
+    [ 1 <= this.ref]
+    [ this.ref <= 2] 
+
+
+

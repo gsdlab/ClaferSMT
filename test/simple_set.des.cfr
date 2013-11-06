@@ -1,0 +1,6 @@
+0 .. * c1_B : clafer 3 .. 3 {
+  }
+0 .. * c2_A ->> c1_B 3 .. 3 {
+  }
+[all disj x ;
+y : c2_A | x . ref != y . ref]

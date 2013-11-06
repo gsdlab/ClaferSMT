@@ -1,0 +1,25 @@
+// http://gsd.uwaterloo.ca:8888/question/256/adding-support-for-inverse-in-clafer
+
+abstract Course
+	 assistants -> TA *
+
+abstract TA
+	 first -> Course ?
+		[parent in this.assistants ]
+	
+CompilerGradStudent : TA
+
+AIGradStudent : TA 
+	
+CompilerCourse : Course
+
+MachineLearningCourse : Course
+	
+[CompilerGradStudent.first = CompilerCourse]
+
+[AIGradStudent.first = MachineLearningCourse]
+	
+//tas_with_first_choice : int  = #( ::first & ~ ::assistants)] 
+// cannot access relations and no support for inverse relations for now
+	
+numerOfAssistants : integer = # Course.assistants

@@ -1,0 +1,49 @@
+A 1..2
+  B -> integer 3
+    [this > 0]
+  [sum(this.B) = 6]
+
+
+
+
+
+[
+!((some r2; r1; r3 : B | r2 != r1 && r2 != r3 && r1 != r3 &&  
+(some d4; d5 : A | d4 != d5 &&
+   (some ab1; ab2; ab3 : d4.B | ab1 != ab2 && ab1 != ab3 && ab2 != ab3 && ab1.ref = 1 && ab2.ref = 2 && ab3.ref = 3) && 
+   (some ab1; ab2; ab3 : d5.B | ab1 != ab2 && ab1 != ab3 && ab2 != ab3 && ab1.ref = 1 && ab2.ref = 2 && ab3.ref = 3)
+)) &&  (#A = 2)) ]
+
+
+
+
+
+//[ 
+//  (some a1; a2 : A | 
+//  (a1 != a2)                 &&
+//  (some x: a1.B | x.ref = 1) &&
+//  (some x: a1.B | x.ref = 2) &&
+//  (some x: a1.B | x.ref = 3) &&
+//  (#a1.B = 3)                &&
+//  (some x: a2.B | x.ref = 1) &&
+//  (some x: a2.B | x.ref = 2) &&
+//  (some x: a2.B | x.ref = 3) &&
+//  (#a2.B = 3))
+//]
+//[#A = 2]
+
+//[#A = 2]
+//[
+//(some d0; d1 : A | d0 != d1
+// && #d0.B = 3
+//&& (some d2; d3; d4 : d0.B | d2 != d3 && d2 != d4 && d3 != d4
+//&& d2.ref = 2
+//&& d3.ref = 3
+//&& d4.ref = 1
+//) && #d1.B = 3
+//&& (some d5; d6; d7 : d1.B | d5 != d6 && d5 != d7 && d6 != d7
+//&& d5.ref = 3
+//&& d6.ref = 1
+//&& d7.ref = 2
+//))
+//]

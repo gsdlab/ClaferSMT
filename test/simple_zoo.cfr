@@ -1,0 +1,5 @@
+abstract Animal 4
+  Age -> integer
+Cat : Animal 4
+  Whiskers 6
+Test -> integer 4

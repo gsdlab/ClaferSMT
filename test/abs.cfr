@@ -1,0 +1,4 @@
+abstract A 2
+  B
+
+C : A 2

@@ -1,0 +1,19 @@
+A 1
+  B -> integer 2
+    [ 1 <= this.ref]
+    [ this.ref <= 2] 
+[ !(
+#A = 1 &&
+(some c1_A_sort_0 : A | 
+(some c2_B_sort_0 ; c2_B_sort_1 : B | 
+c2_B_sort_0 in c1_A_sort_0.B &&
+c2_B_sort_1 in c1_A_sort_0.B &&
+#c1_A_sort_0.B = 2 &&
+c2_B_sort_0 != c2_B_sort_1 &&
+c2_B_sort_1 != c2_B_sort_0 &&
+c2_B_sort_0.ref = 1 &&
+c2_B_sort_1.ref = 2
+)))
+]
+
+

@@ -1,0 +1,9 @@
+abstract 0 .. * c1_A : clafer 1 .. 1 {
+  0 .. * c2_D : integer 1 .. 1 {
+    }
+  }
+abstract 0 .. * c3_B : c1_A 1 .. 1 {
+  }
+0 .. * c4_C : c3_B 1 .. 1 {
+  [this . (c2_D . ref)= 6]
+}

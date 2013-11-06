@@ -1,0 +1,23 @@
+abstract 0 .. * c1_Book : clafer 0 .. * {
+  0 .. * c2_authors ->> c13_Author 1 .. * {
+    }
+  [all disj x ;
+  y : this . c2_authors | x . ref != y . ref]
+}
+abstract 0 .. * c12_Person : clafer 0 .. * {
+  }
+abstract 0 .. * c13_Author : c12_Person 0 .. * {
+  0 .. * c14_books ->> c1_Book 1 .. * {
+    }
+  [all disj x ;
+  y : this . c14_books | x . ref != y . ref]
+}
+0 .. * c24_GenerativeProgramming : c1_Book 1 .. 1 {
+  [c32_Czarnecki in this . (c2_authors . ref)&& c36_Eisenecker in this . (c2_authors . ref)] 
+}
+0 .. * c32_Czarnecki : c13_Author 1 .. 1 {
+  [c24_GenerativeProgramming in this . (c14_books . ref)] 
+}
+0 .. * c36_Eisenecker : c13_Author 1 .. 1 {
+  [c24_GenerativeProgramming in this . (c14_books . ref)] 
+}

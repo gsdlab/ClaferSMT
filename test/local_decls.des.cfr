@@ -1,0 +1,5 @@
+0 .. * c1_B : clafer 0 .. 1 {
+  }
+0 .. * c2_A : clafer 1 .. 1 {
+  [some c1_B]
+}

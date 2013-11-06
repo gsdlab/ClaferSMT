@@ -1,0 +1,3 @@
+A : integer 1
+ [this.ref = 1]
+[A.ref ++ A.ref = A.ref]

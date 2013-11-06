@@ -1,0 +1,5 @@
+0 .. * c1_A : clafer 2 .. 2 {
+  0 .. * c2_B : integer 1 .. 1 {
+    }
+  }
+[all x : c1_A | all y : x . c2_B | y . ref = 15]

@@ -1,0 +1,20 @@
+// Example from: http://gsd.uwaterloo.ca/node/310
+// integers reduced to fit in Alloy's default bitwidth
+
+abstract Book			// a template for a book
+    authors -> Author +		// author points at least one author of the book
+  
+abstract Person			// a template for a person
+
+abstract Author : Person	// author is a special person who has at least one book
+    books -> Book +			// book has to point at at least one concrete book
+    
+GenerativeProgramming : Book	// a concrete example of a book
+    [ Czarnecki in authors
+      Eisenecker in authors]    
+
+Czarnecki : Author
+    [  GenerativeProgramming in books ]	 // GenerativeProgramming is one of Czarnecki's books
+
+Eisenecker : Author
+    [  GenerativeProgramming in books ]
