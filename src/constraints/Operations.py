@@ -200,10 +200,9 @@ def op_not(arg):
     return BoolArg([Not(val)])
     
 '''
-CHECKED TO HERE!!!!!!!!!@EFDSGHDHFDSFH$#RHQLEHDSUFHOUDHFUEWFHDLFHDFEWUHFDSFHEFHE
+CHECKED TO HERE********************************************************************************************
 '''    
     
-#need to iterate over all instancesorts, maybe not
 def op_eq(left,right):
     '''
     :param left:
@@ -610,19 +609,6 @@ def op_intersection(left,right):
                 newMask.put(i, Common.max2(l.get(0), r.get(0)))
             newInstanceSorts.append((sort, newMask))
     return ExprArg(left.joinSorts, newInstanceSorts)
-    
-    
-    '''
-    assert isinstance(left, ExprArg)
-    assert isinstance(right, ExprArg)
-    (extendedL, extendedR) = set_extend(left,right)
-    finalInstances = []
-    for i in extendedL.instanceSorts:
-        for _ in range(i.numInstances):
-            finalInstances.append(Common.max2(extendedL.instances.pop(0), extendedR.instances.pop(0)))
-    return ExprArg(extendedR.joinSorts, extendedR.instanceSorts, finalInstances)
-    '''
-
 
 def int_set_difference(left, right):
     newMask = Mask()

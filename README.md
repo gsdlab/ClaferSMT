@@ -23,6 +23,5 @@ Z3 4.2.3
 
 pip install bintrees (make sure it is installed for the correct version of python).
 
-Remove the warning messages from bintrees imports.
+Optional: Remove the warning messages from bintrees imports.
 
-Depending on your version of python, you may need to install lxml for "basestring" to work.

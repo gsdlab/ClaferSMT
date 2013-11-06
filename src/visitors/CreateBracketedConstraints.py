@@ -113,7 +113,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
                 integer_combinations = itertools.permutations(my_range, len(localDecls))
             else:
                 integer_combinations = list(itertools.permutations(my_range, len(localDecls))) + \
-                                            [(i, i) for i in my_range]
+                                            [tuple([i] * len(localDecls)) for i in my_range]
             
         
         localInstances = []
@@ -163,7 +163,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             num_combinations = len(combinations)
             for i in combinations:
                 for j in range(num_args):
-                    self.currentConstraint.addLocal(element.declaration.localDeclarations[j].element, [i[j]])
+                        self.currentConstraint.addLocal(element.declaration.localDeclarations[j].element, [i[j]])
                 visitors.Visitor.visit(self, element.bodyParentExp)
 
         else:
