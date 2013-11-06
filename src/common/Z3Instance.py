@@ -7,7 +7,6 @@ Created on Apr 30, 2013
 from common import Common, Options, Clock
 from common.Common import debug_print, standard_print
 from constraints import Constraints, IsomorphismConstraint
-from gi.overrides.keysyms import m
 from lxml.builder import basestring
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy
