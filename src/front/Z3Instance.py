@@ -8,6 +8,7 @@ from common import Common, Options, Clock
 from common.Common import debug_print, standard_print, mOr
 from common.Exceptions import UnusedAbstractException
 from constraints import Constraints, IsomorphismConstraint
+from lxml.builder import basestring
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize
 from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real
