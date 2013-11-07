@@ -1,8 +1,0 @@
-0 .. * c1_A : clafer 1 .. 1 {
-  0 .. * c2_B : integer 2 .. 2 {
-    [this . ref > 0]
-  }
-  [all disj x ;
-  y : this . c2_B | x . ref != y . ref]
-  [sum this . (c2_B . ref)= 3]
-}

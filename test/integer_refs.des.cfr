@@ -1,9 +1,0 @@
-0 .. * c1_A : integer 2 .. 2 {
-  [this . ref <= 2]
-}
-[all disj x ;
-y : c1_A | x . ref != y . ref]0 .. * c16_B : integer 3 .. 3 {
-  [this . ref = 1]
-}
-[all disj x ;
-y : c16_B | x . ref != y . ref][sum c1_A . ref + sum c16_B . ref = 7]

@@ -1,7 +1,0 @@
-0 .. * c1_A : clafer 1 .. 2 {
-  0 .. * c2_B : clafer 1 .. 2 {
-    0 .. * c3_C : clafer 1 .. 2 {
-      }
-    }
-  [# this . c2_B . c3_C = 2]
-}

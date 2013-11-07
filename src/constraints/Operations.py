@@ -704,7 +704,7 @@ def op_in(left,right):
                 else:
                     cond.append(Implies(left_sort.isOn(left_mask.get(k)),
                                         right_sort.isOn(right_mask.get(k + transform))))
-    return BoolArg([And(*cond)])
+    return BoolArg([mAnd(*cond)])
    
 def op_nin(left,right):
     '''
@@ -897,13 +897,13 @@ def quant_some(exprs, ifConstraints):
     condList = getQuantifierConditionList(exprs)
     if ifConstraints:
         condList = [And(i, j) for i,j in zip(ifConstraints, condList)]
-    return Or(*condList)
+    return mOr(*condList)
 
 def quant_all(exprs, ifConstraints):
     condList = getQuantifierConditionList(exprs)
     if ifConstraints:
         condList = [Implies(i, j) for i,j in zip(ifConstraints, condList)]
-    return And(*condList)
+    return mAnd(*condList)
 
 def quant_no(exprs, ifConstraints):
     condList = getQuantifierConditionList(exprs)

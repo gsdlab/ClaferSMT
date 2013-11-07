@@ -148,6 +148,8 @@ class Mask():
         return self.tree.intersection(keyset)
     
     def copy(self):
+        if self.tree.count == 0:
+            return Mask()
         return Mask(self.tree.copy(), instances=[], copy=True)
     
     def pop_value(self):

@@ -24,6 +24,7 @@ class CreateHierarchy(VisitorTemplate.VisitorTemplate):
 
     
     def claferVisit(self, element):
+        self.z3.z3_sorts[element.uid].checkSuperAndRef()
         visitors.Visitor.visit(self,element.supers)
         for i in element.elements:
             visitors.Visitor.visit(self, i)

@@ -38,7 +38,7 @@ def getModule():
 	id="memory"
 	uid="c2_memory"
 	my_supers = Supers.Supers(isOverlapping=False, elements=[
-		Exp.Exp(expType="Super", my_type="Ref", parentId="", pos=((IntegerLiteral.IntegerLiteral(2),IntegerLiteral.IntegerLiteral(18)), (IntegerLiteral.IntegerLiteral(2),IntegerLiteral.IntegerLiteral(25))), iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="integer", isTop=True)])])
+		Exp.Exp(expType="Super", my_type="", parentId="", pos=((IntegerLiteral.IntegerLiteral(2),IntegerLiteral.IntegerLiteral(18)), (IntegerLiteral.IntegerLiteral(2),IntegerLiteral.IntegerLiteral(25))), iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="integer", isTop=True)])])
 	card=(IntegerLiteral.IntegerLiteral(1),IntegerLiteral.IntegerLiteral(1))
 	globalCard=(IntegerLiteral.IntegerLiteral(0),IntegerLiteral.IntegerLiteral(5))
 	currClafer = Clafer.Clafer(pos=pos, isAbstract=isAbstract, gcard=groupCard, ident=id, uid=uid, my_supers=my_supers, card=card, glCard=globalCard)
@@ -52,7 +52,7 @@ def getModule():
 	id="cost"
 	uid="c3_cost"
 	my_supers = Supers.Supers(isOverlapping=False, elements=[
-		Exp.Exp(expType="Super", my_type="Ref", parentId="", pos=((IntegerLiteral.IntegerLiteral(3),IntegerLiteral.IntegerLiteral(16)), (IntegerLiteral.IntegerLiteral(3),IntegerLiteral.IntegerLiteral(23))), iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="integer", isTop=True)])])
+		Exp.Exp(expType="Super", my_type="", parentId="", pos=((IntegerLiteral.IntegerLiteral(3),IntegerLiteral.IntegerLiteral(16)), (IntegerLiteral.IntegerLiteral(3),IntegerLiteral.IntegerLiteral(23))), iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="integer", isTop=True)])])
 	card=(IntegerLiteral.IntegerLiteral(1),IntegerLiteral.IntegerLiteral(1))
 	globalCard=(IntegerLiteral.IntegerLiteral(0),IntegerLiteral.IntegerLiteral(5))
 	currClafer = Clafer.Clafer(pos=pos, isAbstract=isAbstract, gcard=groupCard, ident=id, uid=uid, my_supers=my_supers, card=card, glCard=globalCard)
@@ -240,7 +240,7 @@ def getModule():
 	id="total_memory"
 	uid="c45_total_memory"
 	my_supers = Supers.Supers(isOverlapping=False, elements=[
-		Exp.Exp(expType="Super", my_type="Ref", parentId="", pos=((IntegerLiteral.IntegerLiteral(21),IntegerLiteral.IntegerLiteral(24)), (IntegerLiteral.IntegerLiteral(21),IntegerLiteral.IntegerLiteral(31))), iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="integer", isTop=True)])])
+		Exp.Exp(expType="Super", my_type="", parentId="", pos=((IntegerLiteral.IntegerLiteral(21),IntegerLiteral.IntegerLiteral(24)), (IntegerLiteral.IntegerLiteral(21),IntegerLiteral.IntegerLiteral(31))), iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="integer", isTop=True)])])
 	card=(IntegerLiteral.IntegerLiteral(1),IntegerLiteral.IntegerLiteral(1))
 	globalCard=(IntegerLiteral.IntegerLiteral(1),IntegerLiteral.IntegerLiteral(1))
 	currClafer = Clafer.Clafer(pos=pos, isAbstract=isAbstract, gcard=groupCard, ident=id, uid=uid, my_supers=my_supers, card=card, glCard=globalCard)
@@ -267,7 +267,7 @@ def getModule():
 	id="total_cost"
 	uid="c52_total_cost"
 	my_supers = Supers.Supers(isOverlapping=False, elements=[
-		Exp.Exp(expType="Super", my_type="Ref", parentId="", pos=((IntegerLiteral.IntegerLiteral(23),IntegerLiteral.IntegerLiteral(22)), (IntegerLiteral.IntegerLiteral(23),IntegerLiteral.IntegerLiteral(29))), iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="integer", isTop=True)])])
+		Exp.Exp(expType="Super", my_type="", parentId="", pos=((IntegerLiteral.IntegerLiteral(23),IntegerLiteral.IntegerLiteral(22)), (IntegerLiteral.IntegerLiteral(23),IntegerLiteral.IntegerLiteral(29))), iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="integer", isTop=True)])])
 	card=(IntegerLiteral.IntegerLiteral(1),IntegerLiteral.IntegerLiteral(1))
 	globalCard=(IntegerLiteral.IntegerLiteral(1),IntegerLiteral.IntegerLiteral(1))
 	currClafer = Clafer.Clafer(pos=pos, isAbstract=isAbstract, gcard=groupCard, ident=id, uid=uid, my_supers=my_supers, card=card, glCard=globalCard)
@@ -302,22 +302,5 @@ def getModule():
 	stack[-1].addElement(currClafer)
 	stack.append(currClafer)
 	stack.pop()
-##### goal #####
-	goal = Goal.Goal(isMaximize=True , exp=
-		Exp.Exp(expType="ParentExp", my_type="Integer", parentId="c60_exp", pos=((IntegerLiteral.IntegerLiteral(28),IntegerLiteral.IntegerLiteral(4)), (IntegerLiteral.IntegerLiteral(28),IntegerLiteral.IntegerLiteral(40))), iExpType="IFunctionExp", iExp=[FunExp.FunExp(operation="min", elements=[
-		Exp.Exp(expType="Argument", my_type="Integer", parentId="c61_exp", pos=((IntegerLiteral.IntegerLiteral(28),IntegerLiteral.IntegerLiteral(8)), (IntegerLiteral.IntegerLiteral(28),IntegerLiteral.IntegerLiteral(40))), iExpType="IFunctionExp", iExp=[FunExp.FunExp(operation=".", elements=[
-		Exp.Exp(expType="Argument", my_type="Set", parentId="c62_exp", pos=((IntegerLiteral.IntegerLiteral(28),IntegerLiteral.IntegerLiteral(8)), (IntegerLiteral.IntegerLiteral(28),IntegerLiteral.IntegerLiteral(29))), iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="c59_concreteMobilePhoneFM", isTop=True)]),
-		Exp.Exp(expType="Argument", my_type="Integer", parentId="", pos=((IntegerLiteral.IntegerLiteral(28),IntegerLiteral.IntegerLiteral(30)), (IntegerLiteral.IntegerLiteral(28),IntegerLiteral.IntegerLiteral(40))), iExpType="IFunctionExp", iExp=[FunExp.FunExp(operation=".", elements=[
-		Exp.Exp(expType="Argument", my_type="Set", parentId="c63_exp", pos=((IntegerLiteral.IntegerLiteral(28),IntegerLiteral.IntegerLiteral(30)), (IntegerLiteral.IntegerLiteral(28),IntegerLiteral.IntegerLiteral(40))), iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="c52_total_cost", isTop=False)]),
-		Exp.Exp(expType="Argument", my_type="Integer", parentId="", pos=((IntegerLiteral.IntegerLiteral(28),IntegerLiteral.IntegerLiteral(30)), (IntegerLiteral.IntegerLiteral(28),IntegerLiteral.IntegerLiteral(40))), iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="ref", isTop=False)])])])])])])]))
-	stack[-1].addElement(goal)
-##### goal #####
-	goal = Goal.Goal(isMaximize=True , exp=
-		Exp.Exp(expType="ParentExp", my_type="Integer", parentId="c64_exp", pos=((IntegerLiteral.IntegerLiteral(29),IntegerLiteral.IntegerLiteral(4)), (IntegerLiteral.IntegerLiteral(29),IntegerLiteral.IntegerLiteral(42))), iExpType="IFunctionExp", iExp=[FunExp.FunExp(operation="min", elements=[
-		Exp.Exp(expType="Argument", my_type="Integer", parentId="c65_exp", pos=((IntegerLiteral.IntegerLiteral(29),IntegerLiteral.IntegerLiteral(8)), (IntegerLiteral.IntegerLiteral(29),IntegerLiteral.IntegerLiteral(42))), iExpType="IFunctionExp", iExp=[FunExp.FunExp(operation=".", elements=[
-		Exp.Exp(expType="Argument", my_type="Set", parentId="c66_exp", pos=((IntegerLiteral.IntegerLiteral(29),IntegerLiteral.IntegerLiteral(8)), (IntegerLiteral.IntegerLiteral(29),IntegerLiteral.IntegerLiteral(29))), iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="c59_concreteMobilePhoneFM", isTop=True)]),
-		Exp.Exp(expType="Argument", my_type="Integer", parentId="", pos=((IntegerLiteral.IntegerLiteral(29),IntegerLiteral.IntegerLiteral(30)), (IntegerLiteral.IntegerLiteral(29),IntegerLiteral.IntegerLiteral(42))), iExpType="IFunctionExp", iExp=[FunExp.FunExp(operation=".", elements=[
-		Exp.Exp(expType="Argument", my_type="Set", parentId="c67_exp", pos=((IntegerLiteral.IntegerLiteral(29),IntegerLiteral.IntegerLiteral(30)), (IntegerLiteral.IntegerLiteral(29),IntegerLiteral.IntegerLiteral(42))), iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="c45_total_memory", isTop=False)]),
-		Exp.Exp(expType="Argument", my_type="Integer", parentId="", pos=((IntegerLiteral.IntegerLiteral(29),IntegerLiteral.IntegerLiteral(30)), (IntegerLiteral.IntegerLiteral(29),IntegerLiteral.IntegerLiteral(42))), iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="ref", isTop=False)])])])])])])]))
-	stack[-1].addElement(goal)
+
 	return module

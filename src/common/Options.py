@@ -9,20 +9,18 @@ from test import bracketedconstraint_this, multiple_joins, this_dot_parent, \
     simple_set, zoo, simple_zoo, integer_refs, phone_feature_model, \
     higher_inheritance, this_integer_relation, equal_references, dag_test, subbooks, \
     int_ref_set, iso, isowithcons, all_alls, some_somes, AADL_simplified_with_lists, \
-    all_threes, one_plus_one_equals_one
-from test.positive import books_tutorial, \
+    all_threes, one_plus_one_equals_one, simple_books, books_tutorial, \
     check_unique_ref_names_with_inheritance, constraints, enforcingInverseReferences, \
     i101, i10, i137_parsing, i14, i17, i18, i19, i23, \
     i40_integers_strings_assignment, i49_parentReduce, i49_resolve_ancestor, \
     i50_stop_following_references, i55, i70, i71, layout, negative, paths, \
     personRelatives, person_tutorial, resolution, simp, telematics, \
     test_neg_typesystem, top_level_constraints_with_relational_joins, i121comments, \
-    i122CVL, i126empty, i131incorrectscopediag, i131incorrectscope, \
-    i147refdisambiguation, i188sumquantifier, i40textequality, i57navParent, \
-    i61cardinalities, i72sharedreference, i78_transitiveclosure, i83individualscope, \
-    i84referencespointingtothesameobject, i98_toplevelreferences, \
-    referencesshouldbeunique, subtypingprimitivetypes, i205refdisambiguationII, \
-    constraintswithbounds
+    i122CVL, i126empty, i131incorrectscope, i147refdisambiguation, i188sumquantifier, \
+    i205refdisambiguationII, i40textequality, i57navParent, i61cardinalities, \
+    i72sharedreference, i78_transitiveclosure, i83individualscope, \
+    i98_toplevelreferences, subtypingprimitivetypes
+
 
 '''
 ========
@@ -41,10 +39,10 @@ from test.positive import books_tutorial, \
 '''
 
 
-GLOBAL_SCOPE = 2 #this obviously has to change
+GLOBAL_SCOPE = 4 #this obviously has to change
 
 MODE = Common.NORMAL # Common.[NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
-PRINT_CONSTRAINTS = True
+PRINT_CONSTRAINTS = False
 NUM_INSTANCES = 10 # -1 to produce all instances
 INFINITE = -1 #best variable name.
 PROFILING = True # True to output the translation time, and time to get first model
@@ -76,6 +74,7 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = equal_references.getModule()
 #MODULE = dag_test.getModule()
 #MODULE = books_tutorial.getModule()
+#MODULE = simple_books.getModule()
 #MODULE = subbooks.getModule()
 #MODULE = int_ref_set.getModule()
 #MODULE = one_plus_one_equals_one.getModule()
@@ -83,10 +82,15 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = isowithcons.getModule()
 #MODULE = all_alls.getModule()
 #MODULE = some_somes.getModule()
-MODULE = constraints.getModule()
+#MODULE = constraints.getModule()
 #MODULE = constraintswithbounds.getModule()
 #MODULE = AADL_simplified_with_lists.getModule()
 #MODULE = all_threes.getModule()
+#MODULE = i101.getModule()
+#MODULE = top_level_constraints_with_relational_joins.getModule()
+#MODULE = telematics.getModule()
+#MODULE = i17.getModule()
+MODULE = i188sumquantifier.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),
@@ -118,7 +122,6 @@ positive_tests = [
         (i121comments, 1),
         (i122CVL, 1),
         (i126empty, 1),
-        (i131incorrectscopediag, 1),
         (i131incorrectscope, 1),
         (i137_parsing, 1),
         (i147refdisambiguation, 1),
@@ -142,14 +145,12 @@ positive_tests = [
         (i72sharedreference, 1),
         (i78_transitiveclosure, 1),
         (i83individualscope, 1),
-        (i84referencespointingtothesameobject, 1),
         (i98_toplevelreferences, 1),
         (layout, 1),
         (negative, 1),
         (paths, 1),
         (personRelatives, 1),
         (person_tutorial, 1),
-        (referencesshouldbeunique, 1),
         (resolution, 1),
         (simp, 1),
         (subtypingprimitivetypes, 1),

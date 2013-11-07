@@ -6,7 +6,7 @@ Created on Sep 15, 2013
 from common import Options
 from common.Clock import Clock
 from front.Z3Instance import Z3Instance
-
+import traceback
 
 SEPARATOR = "========================================================" 
 def print_separate(x):
@@ -52,6 +52,7 @@ def run():
                 print("FAILED: " + str(file.__name__) + " " + str(expected_model_count) + " " + str(actual_model_count))
         except:
             print("FAILED: " + str(file.__name__) + " " + "\nException raised.")
+            traceback.print_exc()
             exception_list.append(str(file.__name__))
             exceptions = exceptions + 1
         Options.NUM_INSTANCES = temp_model_count    
