@@ -9,6 +9,9 @@ from test import bracketedconstraint_this, multiple_joins, this_dot_parent, \
     simple_set, zoo, simple_zoo, integer_refs, phone_feature_model, \
     higher_inheritance, this_integer_relation, equal_references, dag_test, subbooks, \
     int_ref_set, iso, isowithcons, all_alls, some_somes, AADL_simplified_with_lists, \
+    all_threes, one_plus_one_equals_one, minimal_integer_refs
+    
+from test.positive import books_tutorial, \
     all_threes, one_plus_one_equals_one, simple_books, books_tutorial, \
     check_unique_ref_names_with_inheritance, constraints, enforcingInverseReferences, \
     i101, i10, i137_parsing, i14, i17, i18, i19, i23, \
@@ -53,7 +56,7 @@ EXTEND_ABSTRACT_SCOPES = True
 
 MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
-TEST_SET = POSITIVE_TESTS 
+TEST_SET = MY_TESTS 
 
 #MODULE = bracketedconstraint_this.getModule()
 #MODULE = multiple_joins.getModule()
@@ -68,6 +71,7 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = zoo.getModule()
 #MODULE = simple_zoo.getModule()
 #MODULE = integer_refs.getModule()
+MODULE = minimal_integer_refs.getModule()
 #MODULE = phone_feature_model.getModule()
 #MODULE = higher_inheritance.getModule()
 #MODULE = this_integer_relation.getModule()
