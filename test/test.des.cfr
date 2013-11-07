@@ -1,5 +1,0 @@
-0 .. * c1_A : clafer 1 .. 1 {
-  0 .. * c2_X : clafer 3 .. 3 {
-    [this . parent in this . parent]
-  }
-  }

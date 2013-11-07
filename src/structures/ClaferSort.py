@@ -62,17 +62,28 @@ class  ClaferSort(object):
         self.fields = []
         self.constraints = Constraints.ClaferConstraints(self)
         self.summs = []
-        self.numInstances = int(self.element.glCard[1].value)
-        if(self.numInstances == -1):
-            self.numInstances = Options.GLOBAL_SCOPE
-        self.instances = IntVector(self.element.uid.split("_",1)[1],self.numInstances)
-        self.instanceRanges = []
         self.refs = []
         self.subs = []
         self.full = None
+        self.instanceRanges = []
         self.indexInSuper = 0
         self.currentSubIndex = 0
         
+        self.numInstances = int(self.element.glCard[1].value)
+        if(self.numInstances == -1):
+            self.numInstances = Options.GLOBAL_SCOPE
+        #lower and upper cardinality bounds
+        self.lowerCardConstraint = self.element.card[0].value
+        self.upperCardConstraint = self.element.card[1].value
+        #this eventually has to change
+        if(self.upperCardConstraint == -1):
+            self.upperCardConstraint = Options.GLOBAL_SCOPE
+    
+    def modifyAbstract(self):
+        a= 0
+    
+    def initialize(self):
+        self.instances = IntVector(self.element.uid.split("_",1)[1],self.numInstances)
         #gets the upper card bound of the parent clafer
         if not self.parentStack:
             self.parent = None
@@ -80,16 +91,9 @@ class  ClaferSort(object):
         else:
             self.parent = self.parentStack[-1]
             self.parentInstances = len(self.parent.instances)
-        #lower and upper cardinality bounds
-        self.lowerCardConstraint = self.element.card[0].value
-        self.upperCardConstraint = self.element.card[1].value
-        #this eventually has to change
-        if(self.upperCardConstraint == -1):
-            self.upperCardConstraint = Options.GLOBAL_SCOPE
         self.createInstancesConstraintsAndFunctions()
-     
+    
     def addRefConstraints(self):
-        self.checkSuperAndRef()
         if(self.refSort):
             self.refs = IntVector(self.element.uid.split("_",1)[1] + "_ref",self.numInstances)
         if not self.refSort:
@@ -162,7 +166,10 @@ class  ClaferSort(object):
             lower = 0
         else:
             lower = index // self.upperCardConstraint
-            
+        
+        if lower > upper:
+            return (self.parentInstances, self.parentInstances, False)
+           
         extraAbsenceConstraint = False
         #look at parentStack lower bounds, the loop computes the MINIMUM number of instances
         # of this clafer that MUST be in the model
@@ -205,7 +212,7 @@ class  ClaferSort(object):
         
     
     def createCardinalityConstraints(self):
-        self.summs = [[] for i in range(self.numInstances + 1)]
+        self.summs = [[] for i in range(self.parentInstances+1)]
         for i in range(self.numInstances):
             (lower, upper, _) = self.getInstanceRange(i)
             for j in range(lower, upper + 1):
@@ -250,10 +257,12 @@ class  ClaferSort(object):
         
     
     def checkSuperAndRef(self):
-        #assumes that "supers" can only have one element
+        #THIS IS A HACK BECAUSE THE IR IS NOW BROKEN.
         supers = self.element.supers
-        if(supers.elements[0].iExp[0].id != "clafer"):
-            if(supers.elements[0].type == "Ref"):
+        ID = supers.elements[0].iExp[0].id
+        TYPE = supers.elements[0].type
+        if(ID != "clafer"):
+            if(not TYPE):
                 ref_id = supers.elements[0].iExp[0].id
                 if ref_id == "int":
                     ref_id = "integer"
@@ -272,19 +281,19 @@ class  ClaferSort(object):
     def addRef(self):
         pass
     
+    
+    def addSubSortConstraints(self, sub):
+        #the super cannot exist without the sub, and vice-versa
+        for i in range(sub.numInstances):
+            self.constraints.addInheritanceConstraint(And(Implies(self.isOn(i + sub.indexInSuper), sub.isOn(i)),
+                                         Implies(sub.isOn(i),self.isOn(i + sub.indexInSuper))))
+    
     def addSubSort(self, sub):
         self.subs.append(sub)
         oldSubIndex = self.currentSubIndex
         sub.indexInSuper = oldSubIndex
         self.currentSubIndex = self.currentSubIndex + sub.numInstances
-        #the super cannot exist without the sub, and vice-versa
-        for i in range(sub.numInstances):
-            cons = And(Implies(self.isOn(i + oldSubIndex), sub.isOn(i)),
-                                         Implies(sub.isOn(i),self.isOn(i + oldSubIndex)))
-            self.constraints.addInheritanceConstraint(And(Implies(self.isOn(i + oldSubIndex), sub.isOn(i)),
-                                         Implies(sub.isOn(i),self.isOn(i + oldSubIndex))))
-        return oldSubIndex
-    
+        
     def addField(self, claferSort):
         self.fields.append(claferSort)
     

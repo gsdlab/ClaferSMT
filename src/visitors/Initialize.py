@@ -1,14 +1,13 @@
 '''
-Created on May 1, 2013
+Created on Nov 6, 2013
 
 @author: ezulkosk
 '''
-
 from visitors import VisitorTemplate
 import ast
 import visitors
 
-class CreateHierarchy(VisitorTemplate.VisitorTemplate):
+class Initialize(VisitorTemplate.VisitorTemplate):
     '''
     :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
     
@@ -24,12 +23,10 @@ class CreateHierarchy(VisitorTemplate.VisitorTemplate):
 
     
     def claferVisit(self, element):
-        self.z3.z3_sorts[element.uid].checkSuperAndRef()
-        visitors.Visitor.visit(self,element.supers)
+        if element.isAbstract:
+            self.z3.z3_sorts[element.uid].modifyAbstract()
+        self.z3.z3_sorts[element.uid].initialize()
         for i in element.elements:
             visitors.Visitor.visit(self, i)
-        for i in element.elements:
-            if isinstance(i, ast.Clafer.Clafer):
-                self.z3.z3_sorts[element.uid].addField(self.z3.z3_sorts[i.uid])
     
     

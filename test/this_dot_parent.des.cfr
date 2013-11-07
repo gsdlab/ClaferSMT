@@ -1,5 +1,0 @@
-0 .. * c1_A : clafer 1 .. 2 {
-  0 .. * c2_B : clafer 1 .. 3 {
-    [# this . parent . c2_B = 3]
-  }
-  }

@@ -1,0 +1,26 @@
+// Example from: http://gsd.uwaterloo.ca/node/310
+// integers reduced to fit in Alloy's default bitwidth
+
+abstract Book			// a template for a book
+    year : integer			// year has a numeric value
+    //page 2..*				// at least 2 pages
+    ISBN
+    GS1 ?
+    [ year >= 5 => ISBN ]  
+    [ year >= 6 => GS1 ]
+  
+abstract Person			// a template for a person
+    name : int
+    dob : int ?			// of course the person always has dob but for our application it is possible not to give it 
+
+abstract Author : Person	// author is a special person who has at least one book
+    books -> Book +			// book has to point at at least one concrete book
+
+GenerativeProgramming : Book	// a concrete example of a book
+    [ no GS1 ]
+
+Czarnecki : Author
+    [ GenerativeProgramming in books ]	 // GenerativeProgramming is one of Czarnecki's books
+
+Eisenecker : Author
+    [ GenerativeProgramming in books ]

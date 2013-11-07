@@ -5,14 +5,16 @@ Created on Apr 30, 2013
 '''
 
 from common import Common, Options, Clock
-from common.Common import debug_print, standard_print
+from common.Common import debug_print, standard_print, mOr
+from common.Exceptions import UnusedAbstractException
 from constraints import Constraints, IsomorphismConstraint
 from lxml.builder import basestring
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
-    CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy
+    CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize
 from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real
 from z3consts import Z3_UNINTERPRETED_SORT
 from z3types import Z3Exception
+import sys
 
 
 class Z3Instance(object):
@@ -58,7 +60,30 @@ class Z3Instance(object):
     def mapColonClafers(self):
         for i in self.z3_sorts.values():
             if i.superSort:
-                i.indexInSuper = i.superSort.addSubSort(i)     
+                i.superSort.addSubSort(i)     
+    
+    def addSubSortConstraints(self):
+        for i in self.z3_sorts.values():
+            if i.superSort:
+                i.superSort.addSubSortConstraints(i)     
+    
+    def getScope(self, sort):
+        if sort.element.isAbstract:
+            summ = 0
+            for i in sort.subs:
+                summ = summ + self.getScope(i)
+            return summ
+        else:
+            return sort.numInstances
+    
+    def setAbstractScopes(self):
+        for i in self.z3_sorts.values():
+            if i.element.isAbstract:
+                summ = 0
+                for j in i.subs:
+                    summ = summ + self.getScope(j)
+                i.numInstances = summ #temp
+                raise UnusedAbstractException(i.element.uid)
     
     def setOptions(self):
         """
@@ -82,46 +107,57 @@ class Z3Instance(object):
         
         Converts Clafer constraints to Z3 constraints and computes models.
         '''
+        try:
+            self.clock.tick("translation")
+            
+            """ Create a ClaferSort associated with each Clafer. """  
+            Visitor.visit(CreateSorts.CreateSorts(self), self.module)
+            
+            """ Resolve any 'parent' or 'this' ClaferID's. """
+            Visitor.visit(ResolveClaferIds.ResolveClaferIds(self), self.module)
+            
+            """ Add subclafers to the *fields* variable in the corresponding parent clafer. Also handles supers and refs. """
+            Visitor.visit(CreateHierarchy.CreateHierarchy(self), self.module)
+            
+            debug_print("Mapping colon clafers.")
+            self.mapColonClafers()
+            
+            """ Abstract scopes need to be adjusted for our approach. """
+            self.setAbstractScopes()
+            
+            """ Initializing ClaferSorts and their instances. """
+            Visitor.visit(Initialize.Initialize(self), self.module)
+            
+            debug_print("Creating cardinality constraints.")
+            self.createCardinalityConstraints()
+            
+            debug_print("Creating ref constraints.")
+            self.createRefConstraints()
+            
+            debug_print("Adding subsort constraints.")
+            self.addSubSortConstraints()
+            
+            debug_print("Creating group cardinality constraints.")
+            self.createGroupCardConstraints()
+            
+            debug_print("Creating bracketed constraints.")
+            Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
+               
+            debug_print("Asserting constraints.")
+            self.assertConstraints()     
+            
+            debug_print("Printing constraints.") 
+            self.printConstraints()
         
-        self.clock.tick("translation")
-        
-        """ Create a ClaferSort associated with each Clafer. """  
-        Visitor.visit(CreateSorts.CreateSorts(self), self.module)
-        
-        """ Resolve any 'parent' or 'this' ClaferID's. """
-        Visitor.visit(ResolveClaferIds.ResolveClaferIds(self), self.module)
-        
-        """ Add subclafers to the *fields* variable in the corresponding parent clafer. """
-        Visitor.visit(CreateHierarchy.CreateHierarchy(self), self.module)
-        
-        debug_print("Creating cardinality constraints.")
-        self.createCardinalityConstraints()
-        
-        debug_print("Creating ref constraints.")
-        self.createRefConstraints()
-        
-        debug_print("Mapping colon clafers.")
-        self.mapColonClafers()
-        
-        debug_print("Creating group cardinality constraints.")
-        self.createGroupCardConstraints()
-        
-        debug_print("Creating bracketed constraints.")
-        Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
-           
-        debug_print("Asserting constraints.")
-        self.assertConstraints()     
-        
-        debug_print("Printing constraints.") 
-        self.printConstraints()
-    
-        debug_print("Getting models.")  
-        self.clock.tock("translation")
-        models = self.get_models(Options.NUM_INSTANCES)
-        
-        self.clock.printEvents()
-        
-        return len(models)
+            debug_print("Getting models.")  
+            self.clock.tock("translation")
+            models = self.get_models(Options.NUM_INSTANCES)
+            
+            self.clock.printEvents()
+            
+            return len(models)
+        except UnusedAbstractException as e:
+            print("Unused abstract clafer: " + str(e))
         
     def printVars(self, model, count):
         self.clock.tick("printing")
@@ -194,6 +230,9 @@ class Z3Instance(object):
                             raise Z3Exception("arrays and uninterpreted sorts are not supported")
                         block.append(c != m[d])
                         #print(str(d) + " = " + str(m[d]))
+                    if not block:
+                        #input was an empty clafer model (no concretes)
+                        return [[]]
                     self.solver.add(Or(block))
                 count += 1
             else:
