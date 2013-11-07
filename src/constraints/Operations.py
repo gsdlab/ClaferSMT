@@ -121,6 +121,8 @@ def joinWithClaferRef(arg):
     
 def joinWithRef(arg): 
     (sort, _) = arg.instanceSorts[0]
+    print (sort)
+    print (arg)
     if isinstance(sort.refSort, PrimitiveType):
         return joinWithPrimitive(arg)
     else: 

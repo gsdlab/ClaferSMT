@@ -43,4 +43,5 @@ if __name__ == '__main__':
     if Options.CPROFILING:
         cProfile.run("main(sys.argv[1:])", sort=1)
     else:
+        print (sys.argv)
         main(sys.argv[1:])
