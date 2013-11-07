@@ -1,5 +1,6 @@
 *.pyc
 *~
+*.des.cfr
 *.pyo
 *.py.class
 .project
