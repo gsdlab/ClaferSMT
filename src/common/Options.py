@@ -41,7 +41,7 @@ from test import bracketedconstraint_this, multiple_joins, this_dot_parent, \
 
 GLOBAL_SCOPE = 4 #this obviously has to change
 
-MODE = Common.NORMAL # Common.[NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
+MODE = Common.TEST # Common.[NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
 NUM_INSTANCES = 10 # -1 to produce all instances
 INFINITE = -1 #best variable name.

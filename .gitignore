@@ -4,3 +4,4 @@
 *.py.class
 .project
 .pydevproject
+src/test/
