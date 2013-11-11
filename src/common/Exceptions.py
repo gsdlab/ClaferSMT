@@ -9,3 +9,7 @@ class UnusedAbstractException(Exception):
 
         # Call the base class constructor with the parameters it needs
         Exception.__init__(self, message)
+        self.message = message
+
+    def __str__(self):
+        return "Unused abstract clafer: " + str(self.message)

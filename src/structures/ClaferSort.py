@@ -78,6 +78,12 @@ class  ClaferSort(object):
         #this eventually has to change
         if(self.upperCardConstraint == -1):
             self.upperCardConstraint = Options.GLOBAL_SCOPE
+        if not self.parentStack:
+            self.parent = None
+            self.parentInstances = 1
+        else:
+            self.parent = self.parentStack[-1]
+            self.parentInstances = self.parent.numInstances
     
     def modifyAbstract(self):
         a= 0
@@ -85,12 +91,6 @@ class  ClaferSort(object):
     def initialize(self):
         self.instances = IntVector(self.element.uid.split("_",1)[1],self.numInstances)
         #gets the upper card bound of the parent clafer
-        if not self.parentStack:
-            self.parent = None
-            self.parentInstances = 1
-        else:
-            self.parent = self.parentStack[-1]
-            self.parentInstances = len(self.parent.instances)
         self.createInstancesConstraintsAndFunctions()
     
     def addRefConstraints(self):
@@ -158,7 +158,7 @@ class  ClaferSort(object):
         not covered by the upper bound.
         '''
         if self.lowerCardConstraint == 0:
-                upper = len(self.instances)
+                upper = self.numInstances
         else:
             upper = index // self.lowerCardConstraint
         upper = min(upper, self.parentInstances)
@@ -284,15 +284,16 @@ class  ClaferSort(object):
     
     def addSubSortConstraints(self, sub):
         #the super cannot exist without the sub, and vice-versa
+        oldSubIndex = self.currentSubIndex
+        sub.indexInSuper = oldSubIndex
+        self.currentSubIndex = self.currentSubIndex + sub.numInstances
         for i in range(sub.numInstances):
             self.constraints.addInheritanceConstraint(And(Implies(self.isOn(i + sub.indexInSuper), sub.isOn(i)),
                                          Implies(sub.isOn(i),self.isOn(i + sub.indexInSuper))))
     
     def addSubSort(self, sub):
         self.subs.append(sub)
-        oldSubIndex = self.currentSubIndex
-        sub.indexInSuper = oldSubIndex
-        self.currentSubIndex = self.currentSubIndex + sub.numInstances
+        
         
     def addField(self, claferSort):
         self.fields.append(claferSort)

@@ -5,11 +5,11 @@ Created on April 27, 2013
 
 '''
 from common import Common, Options
-from front import TestClafers
+from front import TestClafers, ModelStats
 from front.Z3Instance import Z3Instance
 import cProfile
 import sys
-
+import imp
 
 
 
@@ -30,6 +30,14 @@ def main(args):
         TestClafers.runForOne()
     elif Common.MODE == Common.ALL:
         TestClafers.runForAll()
+    elif Common.MODE == Common.MODELSTATS:
+        ModelStats.run()
+    elif Common.MODE == Common.COMMANDLINE or Common.MODE == Common.EXPERIMENT:
+        file = args[0]
+        file = imp.load_source("module", str(file))
+        module = file.getModule()
+        z3 = Z3Instance(module)
+        z3.run()
     else:
         module = Options.MODULE
         
@@ -43,5 +51,4 @@ if __name__ == '__main__':
     if Options.CPROFILING:
         cProfile.run("main(sys.argv[1:])", sort=1)
     else:
-        print (sys.argv)
         main(sys.argv[1:])

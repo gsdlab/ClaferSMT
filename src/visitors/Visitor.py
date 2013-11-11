@@ -51,5 +51,5 @@ def visit(visitor, element):
     elif element == None:
         visitor.noneVisit()
     else:
-        print("Error")
+        print("Error in visitor: " + str(element))
     

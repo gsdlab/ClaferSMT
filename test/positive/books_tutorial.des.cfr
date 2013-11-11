@@ -1,61 +1,57 @@
-abstract 0 .. * c1_Book : clafer 0 .. * {
-  0 .. * c2_title : string 1 .. 1 {
-    0 .. * c3_subtitle : string 0 .. 1 {
+abstract 0 .. * c0_Book : clafer 0 .. * {
+  0 .. * c0_title : string 1 .. 1 {
+    0 .. * c0_subtitle : string 0 .. 1 {
       }
     }
-  0 .. * c4_year : integer 1 .. 1 {
+  0 .. * c0_year : integer 1 .. 1 {
     }
-  0 .. * c5_page : clafer 2 .. * {
-    }
-  1 .. 1 c6_format : clafer 1 .. 1 {
-    0 .. * c7_paper : clafer 0 .. 1 {
-      0 .. * c8_hardcover : clafer 0 .. 1 {
+  1 .. 1 c0_format : clafer 1 .. 1 {
+    0 .. * c0_paper : clafer 0 .. 1 {
+      0 .. * c0_hardcover : clafer 0 .. 1 {
         }
       }
-    0 .. * c9_electronic : clafer 0 .. 1 {
+    0 .. * c0_electronic : clafer 0 .. 1 {
       }
     }
-  1 .. 1 c10_kind : clafer 1 .. 1 {
-    0 .. * c11_textbook : clafer 0 .. 1 {
+  1 .. 1 c0_kind : clafer 1 .. 1 {
+    0 .. * c0_textbook : clafer 0 .. 1 {
       }
-    0 .. * c12_manual : clafer 0 .. 1 {
+    0 .. * c0_manual : clafer 0 .. 1 {
       }
-    0 .. * c13_reference : clafer 0 .. 1 {
+    0 .. * c0_reference : clafer 0 .. 1 {
       }
-    0 .. * c14_fiction : clafer 0 .. 1 {
+    0 .. * c0_fiction : clafer 0 .. 1 {
       }
-    0 .. * c15_nonfiction : clafer 0 .. 1 {
-      }
-    0 .. * c16_other : string 0 .. 1 {
+    0 .. * c0_nonfiction : clafer 0 .. 1 {
       }
     }
-  0 .. * c17_authors ->> c44_Author 1 .. * {
+  0 .. * c0_authors ->> c0_Author 1 .. * {
     }
   [all disj x ;
-  y : this . c17_authors | x . ref != y . ref][this . (c4_year . ref)>= 5 => some this . c33_ISBN]0 .. * c33_ISBN : string 0 .. 1 {
-    0 .. * c34_GS1 : string 0 .. 1 {
+  y : this . c0_authors | x . ref != y . ref][this . (c0_year . ref)>= 5 => some this . c0_ISBN]0 .. * c0_ISBN : string 0 .. 1 {
+    0 .. * c0_GS1 : string 0 .. 1 {
       }
-    [this . parent . (c4_year . ref)>= 6 => some this . c34_GS1]
+    [this . parent . (c0_year . ref)>= 6 => some this . c0_GS1]
   }
   }
-abstract 0 .. * c41_Person : clafer 0 .. * {
-  0 .. * c42_name : string 1 .. 1 {
+abstract 0 .. * c0_Person : clafer 0 .. * {
+  0 .. * c0_name : string 1 .. 1 {
     }
-  0 .. * c43_dob : string 0 .. 1 {
+  0 .. * c0_dob : string 0 .. 1 {
     }
   }
-abstract 0 .. * c44_Author : c41_Person 0 .. * {
-  0 .. * c45_books ->> c1_Book 1 .. * {
+abstract 0 .. * c0_Author : c0_Person 0 .. * {
+  0 .. * c0_books ->> c0_Book 1 .. * {
     }
   [all disj x ;
-  y : this . c45_books | x . ref != y . ref]
+  y : this . c0_books | x . ref != y . ref]
 }
-0 .. * c55_GenerativeProgramming : c1_Book 1 .. 1 {
-  [no this . c33_ISBN . c34_GS1]
+0 .. * c0_GenerativeProgramming : c0_Book 1 .. 1 {
+  [no this . c0_ISBN . c0_GS1]
 }
-0 .. * c58_Czarnecki : c44_Author 1 .. 1 {
-  [c55_GenerativeProgramming in this . (c45_books . ref)] 
+0 .. * c0_Czarnecki : c0_Author 1 .. 1 {
+  [c0_GenerativeProgramming in this . (c0_books . ref)] 
 }
-0 .. * c62_Eisenecker : c44_Author 1 .. 1 {
-  [c55_GenerativeProgramming in this . (c45_books . ref)] 
+0 .. * c0_Eisenecker : c0_Author 1 .. 1 {
+  [c0_GenerativeProgramming in this . (c0_books . ref)] 
 }

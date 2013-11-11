@@ -4,25 +4,20 @@ Created on Oct 6, 2013
 @author: ezulkosk
 '''
 from common import Common
-from test import bracketedconstraint_this, multiple_joins, this_dot_parent, \
-    arithmetic, relations, boolean_connectives, union, simple_abstract, some, \
-    simple_set, zoo, simple_zoo, integer_refs, phone_feature_model, \
-    higher_inheritance, this_integer_relation, equal_references, dag_test, subbooks, \
-    int_ref_set, iso, isowithcons, all_alls, some_somes, AADL_simplified_with_lists, \
-    all_threes, one_plus_one_equals_one, minimal_integer_refs
-    
-from test.positive import books_tutorial, \
-    all_threes, one_plus_one_equals_one, simple_books, books_tutorial, \
-    check_unique_ref_names_with_inheritance, constraints, enforcingInverseReferences, \
-    i101, i10, i137_parsing, i14, i17, i18, i19, i23, \
-    i40_integers_strings_assignment, i49_parentReduce, i49_resolve_ancestor, \
-    i50_stop_following_references, i55, i70, i71, layout, negative, paths, \
-    personRelatives, person_tutorial, resolution, simp, telematics, \
-    test_neg_typesystem, top_level_constraints_with_relational_joins, i121comments, \
-    i122CVL, i126empty, i131incorrectscope, i147refdisambiguation, i188sumquantifier, \
-    i205refdisambiguationII, i40textequality, i57navParent, i61cardinalities, \
-    i72sharedreference, i78_transitiveclosure, i83individualscope, \
-    i98_toplevelreferences, subtypingprimitivetypes
+from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
+    this_dot_parent, arithmetic, relations, boolean_connectives, union, \
+    simple_abstract, some, simple_set, integer_refs, higher_inheritance, \
+    this_integer_relation, equal_references, all_alls, all_threes, zoo, \
+    books_tutorial, check_unique_ref_names_with_inheritance, constraints, \
+    enforcingInverseReferences, i101, i10, i121comments, i122CVL, i126empty, \
+    i131incorrectscope, i137_parsing, i147refdisambiguation, i14, i17, i18, i19, \
+    i205refdisambiguationII, i23, i40_integers_strings_assignment, i40textequality, \
+    i49_parentReduce, i49_resolve_ancestor, i50_stop_following_references, i55, \
+    i57navParent, i61cardinalities, i70, i71, i72sharedreference, \
+    i78_transitiveclosure, i83individualscope, i98_toplevelreferences, layout, \
+    negative, paths, personRelatives, person_tutorial, resolution, simp, \
+    subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
+    one_plus_one_equals_one
 
 
 '''
@@ -44,7 +39,7 @@ from test.positive import books_tutorial, \
 
 GLOBAL_SCOPE = 4 #this obviously has to change
 
-MODE = Common.NORMAL # Common.[NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
+MODE = Common.TEST # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
 NUM_INSTANCES = 10 # -1 to produce all instances
 INFINITE = -1 #best variable name.
@@ -56,14 +51,14 @@ EXTEND_ABSTRACT_SCOPES = True
 
 MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
-TEST_SET = MY_TESTS 
+TEST_SET = POSITIVE_TESTS 
 
 #MODULE = bracketedconstraint_this.getModule()
 #MODULE = multiple_joins.getModule()
 #MODULE = this_dot_parent.getModule()
 #MODULE = arithmetic.getModule()
 #MODULE = relations.getModule()
-#MODULE = boolean_connectives.getModule()
+MODULE = boolean_connectives.getModule()
 #MODULE = union.getModule()
 #MODULE = simple_abstract.getModule()
 #MODULE = some.getModule()
@@ -71,7 +66,7 @@ TEST_SET = MY_TESTS
 #MODULE = zoo.getModule()
 #MODULE = simple_zoo.getModule()
 #MODULE = integer_refs.getModule()
-MODULE = minimal_integer_refs.getModule()
+#MODULE = minimal_integer_refs.getModule()
 #MODULE = phone_feature_model.getModule()
 #MODULE = higher_inheritance.getModule()
 #MODULE = this_integer_relation.getModule()
@@ -94,7 +89,9 @@ MODULE = minimal_integer_refs.getModule()
 #MODULE = top_level_constraints_with_relational_joins.getModule()
 #MODULE = telematics.getModule()
 #MODULE = i17.getModule()
-MODULE = i188sumquantifier.getModule()
+#MODULE = i188sumquantifier.getModule()
+#MODULE = i78_transitiveclosure.getModule()
+
 
 my_tests = [ 
           (multiple_joins, 1),
@@ -159,8 +156,7 @@ positive_tests = [
         (simp, 1),
         (subtypingprimitivetypes, 1),
         (telematics, 1),
-        (test_neg_typesystem, 1),
-        (top_level_constraints_with_relational_joins, 1)
+        (test_neg_typesystem, 1)
                   ]
 
 

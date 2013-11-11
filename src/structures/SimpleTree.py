@@ -13,7 +13,7 @@ class SimpleTree():
         
     def addNode(self, node, parent):
         if parent:
-            if not self.nodes[parent]:  
+            if not self.nodes.get(parent):  
                 self.nodes[parent] = [node]
             else:   
                 self.nodes[parent].append(node)

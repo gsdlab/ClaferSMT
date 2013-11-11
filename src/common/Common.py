@@ -10,6 +10,9 @@ DEBUG = 1
 TEST = 2
 ONE = 3
 ALL = 4
+MODELSTATS = 5
+COMMANDLINE = 6
+EXPERIMENT = 7
 MODE = NORMAL
 BREAK = False
 FUNCTION_ID = 0 
@@ -59,7 +62,7 @@ def standard_print(string):
     '''
     Prints the string if **not** in TEST mode.
     '''
-    if(MODE != TEST):
+    if(MODE != TEST and MODE != EXPERIMENT):
         print(string)
 
 def getConstraintUID():

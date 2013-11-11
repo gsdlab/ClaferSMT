@@ -121,8 +121,6 @@ def joinWithClaferRef(arg):
     
 def joinWithRef(arg): 
     (sort, _) = arg.instanceSorts[0]
-    print (sort)
-    print (arg)
     if isinstance(sort.refSort, PrimitiveType):
         return joinWithPrimitive(arg)
     else: 
@@ -548,6 +546,24 @@ def op_card(arg):
                 instances.append(If(sort.isOn(j), 1, 0))  
     return IntArg([Sum(instances)])
 
+def int_set_union(leftIntSort, rightIntSort):
+    (_,(left_sort, left_mask)) = leftIntSort
+    (_,(right_sort, right_mask)) = rightIntSort
+    newMask = Mask()
+    sort = IntSort()
+    for i in left_mask.keys():
+        sort.cardinalityMask.put(i, left_sort.cardinalityMask.get(i))
+        newMask.put(i, If(left_sort.cardinalityMask.get(i) == 1, left_mask.get(i), 0))
+    delta = left_mask.size()
+    for i in right_mask.keys():
+        constraint = And(right_sort.cardinalityMask.get(i) == 1, 
+                         *[Or(left_mask.get(j) != right_mask.get(i), left_sort.cardinalityMask.get(j) == 0) for j in left_mask.keys()])
+        sort.cardinalityMask.put(i + delta, If(constraint, 1, 0))
+        newMask.put(i+delta, If(constraint, right_mask.get(i), 0))
+    return (sort, newMask)
+
+    
+
 def op_union(left,right):
     '''
     :param left:
@@ -571,19 +587,23 @@ def op_union(left,right):
             (_, nextInstanceSort) = nextSorts[0]
             newInstanceSorts.append(nextInstanceSort)
         else:
+            
             (_, (sort, l)) = nextSorts[0]
             (_, (_, r)) = nextSorts[1]
+            
+            if isinstance(sort, IntSort):
+                (sort, newMask) = int_set_union(nextSorts[0],nextSorts[1])
+            
             newMask = Mask()
             for i in l.difference(r.getTree()):
                 newMask.put(i, l.get(i))
             for i in r.difference(l.getTree()):
                 newMask.put(i, r.get(i))
-            for i in l.intersection(r.keys()):
+            for i in l.intersection(r.getTree()):
                 newMask.put(i, Common.min2(l.get(0), r.get(0)))
             newInstanceSorts.append((sort, newMask))
     return ExprArg(newInstanceSorts)
                 
-  
 def op_intersection(left,right):
     '''
     :param left:
@@ -612,13 +632,17 @@ def op_intersection(left,right):
             newInstanceSorts.append((sort, newMask))
     return ExprArg(left.joinSorts, newInstanceSorts)
 
-def int_set_difference(left, right):
+def int_set_difference(leftIntSort, rightIntSort):
+    (_,(left_sort, left_mask)) = leftIntSort
+    (_,(right_sort, right_mask)) = rightIntSort
+    
     newMask = Mask()
     sort = IntSort()
-    for i in left.keys():
-        constraint = And(*[left.get(i) != j for j in right.values()])
+    for i in left_mask.keys():
+        constraint = And(left_sort.cardinalityMask.get(i) == 1, 
+                         *[Or(left_mask.get(i) != right_mask.get(j), right_sort.cardinalityMask.get(j) == 0) for j in right_mask.keys()])
         sort.cardinalityMask.put(i, If(constraint, 1, 0))
-        newMask.put(i, If(constraint, left.get(i), 0))
+        newMask.put(i, If(constraint, left_mask.get(i), 0))
     return (sort, newMask)
 
 def op_difference(left,right):
@@ -649,7 +673,7 @@ def op_difference(left,right):
             (_, (_, r)) = nextSorts[1]
             
             if isinstance(sort, IntSort):
-                (sort, newMask) = int_set_difference(l,r)
+                (sort, newMask) = int_set_difference(nextSorts[0], nextSorts[1])
             else:
                 newMask = Mask()
                 for i in l.difference(r.getTree()):

@@ -3,7 +3,7 @@ Created on Oct 10, 2013
 
 @author: ezulkosk
 '''
-from common import Options
+from common import Options, Common
 import sys
 import time
 
@@ -97,6 +97,9 @@ class Clock():
         Prints out all completed events.
         """
         if self.isBroken:
+            return
+        if Common.MODE == Common.EXPERIMENT:
+            print(self.completed_event_map.get("first model"))  
             return
         for i in self.completed_event_map.keys():
             self.printEvent(i)

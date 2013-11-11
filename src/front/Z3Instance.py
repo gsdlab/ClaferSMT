@@ -8,9 +8,9 @@ from common import Common, Options, Clock
 from common.Common import debug_print, standard_print, mOr
 from common.Exceptions import UnusedAbstractException
 from constraints import Constraints, IsomorphismConstraint
-from lxml.builder import basestring
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
-    CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize
+    CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
+    SetScopes
 from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real
 from z3consts import Z3_UNINTERPRETED_SORT
 from z3types import Z3Exception
@@ -74,7 +74,7 @@ class Z3Instance(object):
                 summ = summ + self.getScope(i)
             return summ
         else:
-            return sort.numInstances
+            return sort.numInstances 
     
     def setAbstractScopes(self):
         for i in self.z3_sorts.values():
@@ -82,8 +82,9 @@ class Z3Instance(object):
                 summ = 0
                 for j in i.subs:
                     summ = summ + self.getScope(j)
-                i.numInstances = summ #temp
-                raise UnusedAbstractException(i.element.uid)
+                i.numInstances = summ#min(summ, Options.GLOBAL_SCOPE)#summ #temp
+                if summ == 0:
+                    raise UnusedAbstractException(i.element.uid)
     
     def setOptions(self):
         """
@@ -121,9 +122,12 @@ class Z3Instance(object):
             
             debug_print("Mapping colon clafers.")
             self.mapColonClafers()
-            
+          
+            """ Adjusting instances for scopes. """
+            #Visitor.visit(SetScopes.SetScopes(self), self.module)
+          
             """ Abstract scopes need to be adjusted for our approach. """
-            self.setAbstractScopes()
+            #self.setAbstractScopes()
             
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
@@ -154,10 +158,9 @@ class Z3Instance(object):
             models = self.get_models(Options.NUM_INSTANCES)
             
             self.clock.printEvents()
-            
             return len(models)
         except UnusedAbstractException as e:
-            print("Unused abstract clafer: " + str(e))
+            print(str(e))
         
     def printVars(self, model, count):
         self.clock.tick("printing")
@@ -206,13 +209,13 @@ class Z3Instance(object):
                 #print(self.solver.statistics())
                 # Create a new constraint the blocks the current model
                 
-                if not Common.MODE == Common.TEST:
+                if not Common.MODE == Common.TEST and not Common.MODE == Common.EXPERIMENT:
                     self.printVars(m, count)
                 if Options.GET_ISOMORPHISM_CONSTRAINT:
                     #Common.FLAG = True
                     IsomorphismConstraint.IsomorphismConstraint(self, m).createIsomorphicConstraint()
                     #self.printConstraints()
-                    print("AFTER")
+                    #print("AFTER")
                     isoConstraint = self.z3_bracketed_constraints.pop()
                     isoConstraint.assertConstraints(self)
                     #Common.FLAG = False
