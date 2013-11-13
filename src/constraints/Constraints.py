@@ -93,7 +93,9 @@ class ClaferConstraints(Constraints):
                        self.inheritance_constraints,
                        self.ref_constraints
                        ]   
-        [self.assertConstraint(j,z3) for i in constraints for j in i]
+        for i in constraints:
+            for j in i:
+                self.assertConstraint(j,z3)
     
     def debug_print(self):
         constraints = [

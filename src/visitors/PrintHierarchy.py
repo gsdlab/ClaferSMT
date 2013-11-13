@@ -43,7 +43,7 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
     def claferVisit(self, element):
         sort = self.z3.z3_sorts[element.uid]
         if sort.parent:
-            parent = sort.parent.element.getNonUniqueID()
+            parent = sort.parent.element.uid#getNonUniqueID()
         else:
             parent = None
         for j in range(sort.numInstances):

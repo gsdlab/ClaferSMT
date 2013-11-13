@@ -4,6 +4,7 @@ Created on Oct 21, 2013
 @author: ezulkosk
 '''
 from bintrees.avltree import AVLTree
+from common import Assertions
 from structures.ClaferSort import BoolSort, IntSort, PrimitiveType
 
 
@@ -62,14 +63,22 @@ class IntArg(ExprArg):
         '''
         Convenience class that extends ExprArg and holds an integer instance.
         '''
-        self.instanceSorts = [(IntSort(), Mask.createIntMask(instances))]
+        sort = IntSort()
+        for i in range(len(instances)):
+            sort.cardinalityMask.put(i, 1)
+        self.instanceSorts = [(sort, Mask.createIntMask(instances))]
+        
         
 class BoolArg(ExprArg):
     def __init__(self, instances):
         '''
         Convenience class that extends ExprArg and holds a boolean instance.
-        '''
+        ''' 
         self.instanceSorts = [(BoolSort(), Mask.createBoolMask(instances))]
+        Assertions.nonEmpty(instances)
+        
+    def getValue(self):
+        return self.instanceSorts[0][1].get(0)
  
 
 class JoinArg(ExprArg):
@@ -135,10 +144,12 @@ class Mask():
        
     @staticmethod
     def createIntMask(instances):
+        Assertions.nonEmpty(instances)
         return Mask([(i, instances[i]) for i in range(len(instances))])
     
     @staticmethod
     def createBoolMask(instances):
+        Assertions.nonEmpty(instances)
         return Mask([(i, instances[i]) for i in range(len(instances))])
     
     def difference(self, keyset):

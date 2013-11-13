@@ -3,6 +3,7 @@ Created on Apr 29, 2013
 
 @author: ezulkosk
 '''
+from common import Assertions
 from constraints import Constraints
 from constraints.Constraints import GenericConstraints
 from structures.ExprArg import BoolArg
@@ -140,6 +141,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
         #    condList.append(currExpr)
         quantFunction = getQuantifier(quantifier)
         cond = quantFunction(localStack, ifConstraints)
+        Assertions.nonEmpty(cond)
         self.stack.append([BoolArg([cond])])
         
         
@@ -168,6 +170,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
                 tempExprs.append(j[i])
             finalExprs.append(tempExprs)
         finalExprs = [operator(*finalExprs[i]) for i in range(len(finalExprs))]
+        Assertions.nonEmpty(finalExprs)
         self.stack.append(finalExprs)
     
     def endProcessing(self):

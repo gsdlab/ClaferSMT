@@ -10,7 +10,7 @@ from common.Exceptions import UnusedAbstractException
 from constraints import Constraints, IsomorphismConstraint
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
-    SetScopes
+    SetScopes, AdjustAbstracts
 from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real
 from z3consts import Z3_UNINTERPRETED_SORT
 from z3types import Z3Exception
@@ -82,7 +82,22 @@ class Z3Instance(object):
                 summ = 0
                 for j in i.subs:
                     summ = summ + self.getScope(j)
-                i.numInstances = summ#min(summ, Options.GLOBAL_SCOPE)#summ #temp
+                i.numInstances = summ#max(summ, Options.GLOBAL_SCOPE)#summ #temp
+                i.upperCardConstraint = summ
+                if summ == 0:
+                    raise UnusedAbstractException(i.element.uid)
+                
+    def adjustAbstracts(self):
+        for i in self.z3_sorts.values():
+            if i.element.isAbstract:
+                Visitor.visit(AdjustAbstracts.AdjustAbstracts(self), i.element)
+    
+    def findUnusedAbstracts(self):
+        for i in self.z3_sorts.values():
+            if i.element.isAbstract:
+                summ = 0
+                for j in i.subs:
+                    summ = summ + self.getScope(j)
                 if summ == 0:
                     raise UnusedAbstractException(i.element.uid)
     
@@ -124,10 +139,11 @@ class Z3Instance(object):
             self.mapColonClafers()
           
             """ Adjusting instances for scopes. """
-            #Visitor.visit(SetScopes.SetScopes(self), self.module)
+            #ddVisitor.visit(SetScopes.SetScopes(self), self.module)
           
             """ Abstract scopes need to be adjusted for our approach. """
-            #self.setAbstractScopes()
+            self.setAbstractScopes()
+            self.adjustAbstracts()
             
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)

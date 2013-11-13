@@ -17,7 +17,7 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     i78_transitiveclosure, i83individualscope, i98_toplevelreferences, layout, \
     negative, paths, personRelatives, person_tutorial, resolution, simp, \
     subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
-    one_plus_one_equals_one
+    one_plus_one_equals_one, scope_test
 
 
 '''
@@ -37,9 +37,9 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
 '''
 
 
-GLOBAL_SCOPE = 4 #this obviously has to change
+GLOBAL_SCOPE = 4#this obviously has to change
 
-MODE = Common.TEST # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
+MODE = Common.ALL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
 NUM_INSTANCES = 10 # -1 to produce all instances
 INFINITE = -1 #best variable name.
@@ -51,14 +51,14 @@ EXTEND_ABSTRACT_SCOPES = True
 
 MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
-TEST_SET = POSITIVE_TESTS 
+TEST_SET = MY_TESTS 
 
 #MODULE = bracketedconstraint_this.getModule()
 #MODULE = multiple_joins.getModule()
 #MODULE = this_dot_parent.getModule()
 #MODULE = arithmetic.getModule()
 #MODULE = relations.getModule()
-MODULE = boolean_connectives.getModule()
+#MODULE = boolean_connectives.getModule()
 #MODULE = union.getModule()
 #MODULE = simple_abstract.getModule()
 #MODULE = some.getModule()
@@ -70,7 +70,7 @@ MODULE = boolean_connectives.getModule()
 #MODULE = phone_feature_model.getModule()
 #MODULE = higher_inheritance.getModule()
 #MODULE = this_integer_relation.getModule()
-#MODULE = equal_references.getModule()
+MODULE = equal_references.getModule()
 #MODULE = dag_test.getModule()
 #MODULE = books_tutorial.getModule()
 #MODULE = simple_books.getModule()
@@ -91,7 +91,8 @@ MODULE = boolean_connectives.getModule()
 #MODULE = i17.getModule()
 #MODULE = i188sumquantifier.getModule()
 #MODULE = i78_transitiveclosure.getModule()
-
+#MODULE = scope_test.getModule()
+#MODULE = i131incorrectscope.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),

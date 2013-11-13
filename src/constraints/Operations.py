@@ -3,7 +3,7 @@ Created on Nov 1, 2013
 
 @author: ezulkosk
 '''
-from common import Common
+from common import Common, Assertions
 from common.Common import mOr, mAnd
 from structures.ClaferSort import BoolSort, IntSort, PrimitiveType
 from structures.ExprArg import Mask, ExprArg, JoinArg, IntArg, BoolArg
@@ -42,6 +42,7 @@ def joinWithSuper(sort, mask):
                     If(sort.isOn(mask.get(i)), 
                        sort.superSort.instances[i + sort.indexInSuper], 
                        sort.superSort.parentInstances))
+        Assertions.nonEmptyMask(newMask)
     return(sort.superSort, newMask)
 
 def joinWithParent(arg):
@@ -52,11 +53,13 @@ def joinWithParent(arg):
         for j in mask.keys():
             (lower,upper,_) = sort.instanceRanges[j]
             for k in range(lower, upper + 1):
-                if k == sort.parentInstances:
+                if k >= sort.parentInstances:
                     break
                 prevClause = newMask.get(k)
                 newMask.put(k, mOr(prevClause, mask.get(j) == k))
+        a=0
         newInstanceSorts.append((sort.parent, newMask))
+        Assertions.nonEmptyMask(newMask)
     for i in newInstanceSorts:
         (sort, mask) = i
         for j in mask.keys():
@@ -70,6 +73,7 @@ def addPrimitive(newSort, newMask, oldSort, oldMask, index):
     constraint = And(oldSort.isOn(oldMask.get(index)), mAnd(*[oldSort.refs[index] != i for i in newMask.values()]))
     cardinalityMask.put(newIndex, If(constraint, 1, 0))
     newMask.put(newIndex, If(constraint, oldSort.refs[index], 0))
+    Assertions.nonEmptyMask(newMask)
 
 
 def joinWithPrimitive(arg):
@@ -82,6 +86,7 @@ def joinWithPrimitive(arg):
             for i in mask.keys():
                 addPrimitive(newSort, newMask, sort, mask, i)         
             newInstanceSorts.append((newSort, newMask)) #should change the "int", but not sure how yet
+            Assertions.nonEmptyMask(newMask)
         else:
             print("Error on: " + sort.refSort + ", refs other than int (e.g. double) unimplemented")
             sys.exit()
@@ -113,6 +118,7 @@ def joinWithClaferRef(arg):
                 clause = mOr(*[k == j for k in tempRefs])
                 newMask.put(j, mOr(newMask.get(j), clause))
         newInstanceSorts.append((sort.refSort, newMask))
+        Assertions.nonEmptyMask(newMask)
     for i in newInstanceSorts:
         (sort, mask) = i
         for j in mask.keys():
@@ -153,6 +159,7 @@ def joinWithClafer(left, right):
                         newMask.put(i, mOr(prevClause, And(left_sort.isOn(left_mask.get(j)), 
                                                         right_sort.instances[i] == j)))
             newInstanceSorts.append((right_sort, newMask))
+            Assertions.nonEmptyMask(newMask)
     for i in newInstanceSorts:
         (sort, mask) = i
         for j in mask.keys():
@@ -161,6 +168,7 @@ def joinWithClafer(left, right):
 
 def computeJoin(joinList):
     #can be optimized... a lot...
+    copy = joinList[:]
     left = joinList.pop(0) 
     while joinList:
         right = joinList.pop(0)
@@ -172,6 +180,10 @@ def computeJoin(joinList):
                 left = joinWithRef(left)
         else:
             left = joinWithClafer(left, right)
+    for i in left.getInstanceSorts():
+        (sort, mask) = i
+        Assertions.nonEmptyMask(mask)
+    Assertions.nonEmpty(left.getInstanceSorts())
     return left.getInstanceSorts()
 
 ''' 
@@ -432,6 +444,7 @@ def op_implies(left,right):
                 for i in l.intersection(r.getTree()):
                     cond.append(Implies(sort.isOn(l.get(i)),
                                               sort.isOn(r.get(i))))
+        Assertions.nonEmpty(cond)
         return BoolArg([And(*cond)])
     #return BoolArg([mAnd(*[Implies(i,j) for i,j in zip(left.instances, right.instances)])])
 
@@ -447,7 +460,14 @@ def op_equivalence(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return BoolArg([And(op_implies(left, right), op_implies(right,left))])
+    leftcopy = left.clone()
+    rightcopy = right.clone()
+    leftResult = op_implies(left, right)
+    rightResult = op_implies(rightcopy, leftcopy)
+    lval = leftResult.getValue()
+    rval = rightResult.getValue()
+    cond = [And(lval, rval)]
+    return BoolArg(cond)
     #return BoolArg([mAnd(*[mAnd(Implies(i,j), Implies(j,i)) for i,j in zip(left.instances, right.instances)])])
     
 def op_ifthenelse(cond, ifExpr, elseExpr):
@@ -705,7 +725,20 @@ def getMatch(key, my_list):
                     matches.append((totalIndexInSuper, i))
                     break
     return matches
-                
+        
+
+def int_set_in(leftIntSort, rightIntSort):
+    (left_sort, left_mask) = leftIntSort
+    (right_sort, right_mask) = rightIntSort
+    cond = []
+    for i in left_mask.keys():
+        constraint = Or(left_sort.cardinalityMask.get(i) == 0, 
+                        Or(*[And(right_sort.cardinalityMask.get(j) == 1, 
+                                 right_mask.get(j) == left_mask.get(i)) for j in right_mask.keys()]))
+        cond.append(constraint)
+    return(And(*cond))
+
+
 def op_in(left,right):
     '''
     :param left:
@@ -722,14 +755,18 @@ def op_in(left,right):
     for i in sortedL:
         (left_sort, left_mask) = i
         matches = getMatch(left_sort, sortedR)
-        for j in matches:
-            (transform, (right_sort,right_mask)) = j
-            for k in left_mask.keys():
-                if not right_mask.get(k + transform):
-                    cond.append(left_sort.isOff(left_mask.get(k)))
-                else:
-                    cond.append(Implies(left_sort.isOn(left_mask.get(k)),
-                                        right_sort.isOn(right_mask.get(k + transform))))
+        if isinstance(left_sort, IntSort):
+            assert(matches) #must have ints in both sets (i think the front-end ensures this
+            cond.append(int_set_in(i, matches[0][1]))
+        else:
+            for j in matches:
+                (transform, (right_sort,right_mask)) = j
+                for k in left_mask.keys():
+                    if not right_mask.get(k + transform):
+                        cond.append(left_sort.isOff(left_mask.get(k)))
+                    else:
+                        cond.append(Implies(left_sort.isOn(left_mask.get(k)),
+                                            right_sort.isOn(right_mask.get(k + transform))))
     return BoolArg([mAnd(*cond)])
    
 def op_nin(left,right):

@@ -6,7 +6,9 @@ Created on Apr 29, 2013
 from common import Common, Options
 from common.Common import mOr
 from constraints import Constraints
+from pip.backwardcompat import reduce
 from z3 import IntVector, If, Implies, And, Or, Sum, Not
+import operator
 import sys
 
 
@@ -71,7 +73,8 @@ class  ClaferSort(object):
         
         self.numInstances = int(self.element.glCard[1].value)
         if(self.numInstances == -1):
-            self.numInstances = Options.GLOBAL_SCOPE
+            newScope = Options.GLOBAL_SCOPE
+            self.numInstances = newScope
         #lower and upper cardinality bounds
         self.lowerCardConstraint = self.element.card[0].value
         self.upperCardConstraint = self.element.card[1].value
@@ -89,13 +92,19 @@ class  ClaferSort(object):
         a= 0
     
     def initialize(self):
-        self.instances = IntVector(self.element.uid.split("_",1)[1],self.numInstances)
+        self.instances = IntVector(self.element.uid,self.numInstances) #used to be self.element.uid.split("_",1)[1]
         #gets the upper card bound of the parent clafer
+        if not self.parentStack:
+            self.parent = None
+            self.parentInstances = 1
+        else:
+            self.parent = self.parentStack[-1]
+            self.parentInstances = self.parent.numInstances
         self.createInstancesConstraintsAndFunctions()
     
     def addRefConstraints(self):
         if(self.refSort):
-            self.refs = IntVector(self.element.uid.split("_",1)[1] + "_ref",self.numInstances)
+            self.refs = IntVector(self.element.uid + "_ref",self.numInstances)#used to be self.element.uid.split("_",1)[1] + "_ref"
         if not self.refSort:
             return  
         if not isinstance(self.refSort, PrimitiveType):
@@ -158,7 +167,7 @@ class  ClaferSort(object):
         not covered by the upper bound.
         '''
         if self.lowerCardConstraint == 0:
-                upper = self.numInstances
+            upper = self.parentInstances # this is new upper = self.numInstances
         else:
             upper = index // self.lowerCardConstraint
         upper = min(upper, self.parentInstances)
