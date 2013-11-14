@@ -22,8 +22,8 @@ def main(args):
     
     Starting point for ClaferZ3.
     '''
+    Options.setCommandLineOptions()
     Common.MODE = Options.MODE 
-    
     if Common.MODE == Common.TEST:
         TestClafers.run()
     elif Common.MODE == Common.ONE:
@@ -34,6 +34,8 @@ def main(args):
         ModelStats.run()
     elif Common.MODE == Common.COMMANDLINE or Common.MODE == Common.EXPERIMENT:
         file = args[0]
+        if file.endswith(".cfr"):
+            sys.exit("Run 'clafer --mode=python " + str(file) + "' first.")
         file = imp.load_source("module", str(file))
         module = file.getModule()
         z3 = Z3Instance(module)

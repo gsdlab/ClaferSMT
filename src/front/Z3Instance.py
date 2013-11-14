@@ -177,6 +177,7 @@ class Z3Instance(object):
             return len(models)
         except UnusedAbstractException as e:
             print(str(e))
+            return 0
         
     def printVars(self, model, count):
         self.clock.tick("printing")

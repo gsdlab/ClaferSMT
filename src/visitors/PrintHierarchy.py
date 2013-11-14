@@ -29,7 +29,7 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
     def recursivePrint(self, node, level):
         indent = "  " * level
         if self.tree.refs.get(node):
-            ref = " = " + self.tree.refs[node]
+            ref = " = " + str(self.tree.refs[node])
         else:
             ref = ""
         print(indent + node + ref)

@@ -4,6 +4,7 @@ Created on Oct 6, 2013
 @author: ezulkosk
 '''
 from common import Common
+from optparse import OptionParser
 from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     this_dot_parent, arithmetic, relations, boolean_connectives, union, \
     simple_abstract, some, simple_set, integer_refs, higher_inheritance, \
@@ -18,6 +19,8 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     negative, paths, personRelatives, person_tutorial, resolution, simp, \
     subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
     one_plus_one_equals_one, scope_test
+import argparse
+import sys
 
 
 '''
@@ -36,10 +39,13 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
 * Change DoubleLiteral to RealLiteral, since that is most likely the Z3 construct that will be used.
 '''
 
+'''
+POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
+'''
 
-GLOBAL_SCOPE = 4#this obviously has to change
+GLOBAL_SCOPE = 6#this obviously has to change
 
-MODE = Common.ALL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
+MODE = Common.COMMANDLINE # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL | COMMANDLINE], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
 NUM_INSTANCES = 10 # -1 to produce all instances
 INFINITE = -1 #best variable name.
@@ -51,7 +57,7 @@ EXTEND_ABSTRACT_SCOPES = True
 
 MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
-TEST_SET = MY_TESTS 
+TEST_SET = POSITIVE_TESTS 
 
 #MODULE = bracketedconstraint_this.getModule()
 #MODULE = multiple_joins.getModule()
@@ -93,6 +99,7 @@ MODULE = equal_references.getModule()
 #MODULE = i78_transitiveclosure.getModule()
 #MODULE = scope_test.getModule()
 #MODULE = i131incorrectscope.getModule()
+MODULE = enforcingInverseReferences.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),
@@ -115,50 +122,104 @@ my_tests = [
          ]
 
 positive_tests = [
-        (books_tutorial, 1),
-        (check_unique_ref_names_with_inheritance, 1),
-        (constraints, 1),
-        (enforcingInverseReferences, 1),
-        (i101, 1),
-        (i10, 1),
-        (i121comments, 1),
-        (i122CVL, 1),
+        (books_tutorial,INFINITE),
+        (check_unique_ref_names_with_inheritance,INFINITE),
+        (constraints,INFINITE),
+        (enforcingInverseReferences,INFINITE),
+        (i101, 0),
+        (i10,INFINITE),
+        (i121comments, 2),
+        (i122CVL,INFINITE),
         (i126empty, 1),
-        (i131incorrectscope, 1),
+        (i131incorrectscope, 2),
         (i137_parsing, 1),
-        (i147refdisambiguation, 1),
+        (i147refdisambiguation, 3),
         (i14, 1),
-        (i17, 1),
-        (i188sumquantifier, 1),
-        (i18, 1),
-        (i19, 1),
-        (i205refdisambiguationII, 1),
-        (i23, 1),
-        (i40_integers_strings_assignment, 1),
+        (i17, 0),
+        (i188sumquantifier,INFINITE),
+        (i18, 2),
+        (i19,INFINITE),
+        (i205refdisambiguationII,INFINITE),
+        (i23,INFINITE),
+        (i40_integers_strings_assignment, 6),
         (i40textequality, 1),
         (i49_parentReduce, 1),
-        (i49_resolve_ancestor, 1),
+        (i49_resolve_ancestor,INFINITE),
         (i50_stop_following_references, 1),
         (i55, 1),
         (i57navParent, 1),
-        (i61cardinalities, 1),
-        (i70, 1),
-        (i71, 1),
-        (i72sharedreference, 1),
-        (i78_transitiveclosure, 1),
-        (i83individualscope, 1),
-        (i98_toplevelreferences, 1),
+        (i61cardinalities,INFINITE),
+        (i70, 3),
+        (i71,INFINITE),
+        (i72sharedreference,INFINITE),
+        (i78_transitiveclosure, 0),
+        (i83individualscope,INFINITE),
+        (i98_toplevelreferences, 0),
         (layout, 1),
         (negative, 1),
-        (paths, 1),
-        (personRelatives, 1),
-        (person_tutorial, 1),
-        (resolution, 1),
+        (paths,INFINITE),
+        (personRelatives,INFINITE),
+        (person_tutorial,INFINITE),
+        (resolution,INFINITE),
         (simp, 1),
-        (subtypingprimitivetypes, 1),
-        (telematics, 1),
-        (test_neg_typesystem, 1)
+        (subtypingprimitivetypes,INFINITE),
+        (telematics,INFINITE),
+        (test_neg_typesystem,INFINITE)
                   ]
 
+
+modeMap = {
+           'experiment' : Common.EXPERIMENT,
+           'modelstats' : Common.MODELSTATS,
+           'normal'     : Common.NORMAL,
+           'debug'      : Common.DEBUG,
+           'test'       : Common.TEST,
+           'one'        : Common.ONE,
+           'all'        : Common.ALL,
+           'commandline': Common.COMMANDLINE
+           }
+
+testMap = {
+           'edstests'   : MY_TESTS,
+           'positive'   : POSITIVE_TESTS
+           }
+
+
+def setCommandLineOptions():
+    parser = argparse.ArgumentParser(description='Process a clafer model with Z3.')
+    parser.add_argument('file', help='the clafer python file', nargs='?')
+    parser.add_argument('--mode', '-m', dest='mode', default='commandline',
+                       choices=['experiment', 'modelstats', 'normal', 'debug', 'test', 'one', 'all', 'commandline'])
+    parser.add_argument('--printconstraints', dest='printconstraints', help='print all Z3 constraints (for debugging)')
+    parser.add_argument('--profiling', '-p', dest='profiling', help='basic profiling of phases of the solver')
+    parser.add_argument('--cprofiling', dest='cprofiling', help='uses cprofile for profiling functions of the translation')
+    parser.add_argument('--numinstances', '-n', dest='numinstances', type=int, default='1', help='the number of models to be displayed (-1 for all)')
+    parser.add_argument('--globalscope', '-g', dest='globalscope', type=int, default='1', help='the global scope for unbounded clafers (note that this does not match regular clafer)')
+    parser.add_argument('--testset', '-t', dest='testset', default='edstests', help='The test set to be used for modes [experiment | test | one | all]',
+                        choices=['edstests', 'positive'])
+    
+    args = parser.parse_args()
+    
+    if not args.file and (args.mode in ['commandline']):
+        sys.exit("If no file is given, mode must be set to [experiment | test | one | all].")
+    
+    global MODE
+    MODE = modeMap[args.mode]
+    if args.printconstraints:
+        global PRINT_CONSTRAINTS
+        PRINT_CONSTRAINTS = True
+    if args.profiling:
+        global PROFILING
+        PROFILING = True
+    if args.cprofiling:
+        global CPROFILING
+        CPROFILING = True
+    global NUM_INSTANCES
+    NUM_INSTANCES = args.numinstances
+    global GLOBAL_SCOPE
+    GLOBAL_SCOPE = args.globalscope
+    global TEST_SET
+    TEST_SET = testMap[args.testset]
+    
 
 

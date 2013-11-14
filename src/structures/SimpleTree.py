@@ -22,7 +22,10 @@ class SimpleTree():
             self.nodes[node] = []
     
     def addRef(self, node, ref):
-        self.refs[node] = ref
+        if self.refs.get(node):
+            self.refs[node].append(ref)
+        else:
+            self.refs[node] = [ref]
     
     def addChild(self, node, child):
         self.nodes[node] = self.nodes[node].append(child)
