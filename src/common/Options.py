@@ -18,10 +18,9 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     i78_transitiveclosure, i83individualscope, i98_toplevelreferences, layout, \
     negative, paths, personRelatives, person_tutorial, resolution, simp, \
     subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
-    one_plus_one_equals_one, scope_test
+    one_plus_one_equals_one, scope_test, trivial, trivial2
 import argparse
 import sys
-
 
 '''
 ========
@@ -45,8 +44,11 @@ POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
 
 GLOBAL_SCOPE = 6#this obviously has to change
 
-MODE = Common.COMMANDLINE # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL | COMMANDLINE], where ONE outputs one model from each test
+ECLIPSE = False
+
+MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL | COMMANDLINE], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
+STRING_CONSTRAINTS = False
 NUM_INSTANCES = 10 # -1 to produce all instances
 INFINITE = -1 #best variable name.
 PROFILING = True # True to output the translation time, and time to get first model
@@ -54,7 +56,7 @@ CPROFILING = False #invokes the standard python profiling method (see Z3Run.py)
 GET_ISOMORPHISM_CONSTRAINT = False #efficiency bugs in quantified formulas is preventing this from working
 BREAK_QUANTIFIER_SYMMETRY = False
 EXTEND_ABSTRACT_SCOPES = True
-
+FILE = ""
 MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
 TEST_SET = POSITIVE_TESTS 
@@ -76,10 +78,10 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = phone_feature_model.getModule()
 #MODULE = higher_inheritance.getModule()
 #MODULE = this_integer_relation.getModule()
-MODULE = equal_references.getModule()
+#MODULE = equal_references.getModule()
 #MODULE = dag_test.getModule()
 #MODULE = books_tutorial.getModule()
-#MODULE = simple_books.getModule()
+MODULE = simple_books.getModule()
 #MODULE = subbooks.getModule()
 #MODULE = int_ref_set.getModule()
 #MODULE = one_plus_one_equals_one.getModule()
@@ -99,7 +101,10 @@ MODULE = equal_references.getModule()
 #MODULE = i78_transitiveclosure.getModule()
 #MODULE = scope_test.getModule()
 #MODULE = i131incorrectscope.getModule()
-MODULE = enforcingInverseReferences.getModule()
+#MODULE = enforcingInverseReferences.getModule()
+#MODULE = trivial.getModule()
+#MODULE = trivial2.getModule()
+
 
 my_tests = [ 
           (multiple_joins, 1),
@@ -190,19 +195,21 @@ def setCommandLineOptions():
     parser.add_argument('file', help='the clafer python file', nargs='?')
     parser.add_argument('--mode', '-m', dest='mode', default='commandline',
                        choices=['experiment', 'modelstats', 'normal', 'debug', 'test', 'one', 'all', 'commandline'])
-    parser.add_argument('--printconstraints', dest='printconstraints', help='print all Z3 constraints (for debugging)')
-    parser.add_argument('--profiling', '-p', dest='profiling', help='basic profiling of phases of the solver')
-    parser.add_argument('--cprofiling', dest='cprofiling', help='uses cprofile for profiling functions of the translation')
+    parser.add_argument('--printconstraints', dest='printconstraints', action='store_const',  const=True, help='print all Z3 constraints (for debugging)')
+    parser.add_argument('--profiling', '-p', dest='profiling', action='store_const',  const=True,  help='basic profiling of phases of the solver')
+    parser.add_argument('--cprofiling', dest='cprofiling',action='store_const',  const=True,  help='uses cprofile for profiling functions of the translation')
     parser.add_argument('--numinstances', '-n', dest='numinstances', type=int, default='1', help='the number of models to be displayed (-1 for all)')
     parser.add_argument('--globalscope', '-g', dest='globalscope', type=int, default='1', help='the global scope for unbounded clafers (note that this does not match regular clafer)')
     parser.add_argument('--testset', '-t', dest='testset', default='edstests', help='The test set to be used for modes [experiment | test | one | all]',
                         choices=['edstests', 'positive'])
+    parser.add_argument('--stringconstraints' , '-s', dest='stringconstraints',action='store_const',  const=True,  help='Flag to output to Z3-Str format instead.')
     
     args = parser.parse_args()
-    
-    if not args.file and (args.mode in ['commandline']):
+    if not args.file and not (args.mode in ['experiment', 'test', 'one', 'all']):
         sys.exit("If no file is given, mode must be set to [experiment | test | one | all].")
-    
+    else:
+        global FILE
+        FILE = args.file
     global MODE
     MODE = modeMap[args.mode]
     if args.printconstraints:
@@ -220,6 +227,9 @@ def setCommandLineOptions():
     GLOBAL_SCOPE = args.globalscope
     global TEST_SET
     TEST_SET = testMap[args.testset]
+    if args.stringconstraints:
+        global STRING_CONSTRAINTS
+        STRING_CONSTRAINTS=True
     
 
 

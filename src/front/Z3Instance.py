@@ -8,6 +8,7 @@ from common import Common, Options, Clock
 from common.Common import debug_print, standard_print, mOr
 from common.Exceptions import UnusedAbstractException
 from constraints import Constraints, IsomorphismConstraint
+from front import Z3Str
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
     SetScopes, AdjustAbstracts
@@ -24,8 +25,7 @@ class Z3Instance(object):
     Stores and instantiates all necessary constraints for the ClaferZ3 model.
     '''
     def __init__(self, module):
-        if(Common.MODE == Common.TEST):
-            Common.reset()
+        Common.reset() #resets variables if in test mode
         self.module = module
         self.z3_bracketed_constraints = []
         self.z3_sorts = {}
@@ -108,6 +108,7 @@ class Z3Instance(object):
         """
         self.solver.set(unsat_core=True)
         self.solver.set(model_completion=True)
+        #self.solver.set(produce_models=True)
         #set_option(auto_config=False)
         #set_option(candidate_models=True)
         if Common.MODE == Common.DEBUG:
@@ -163,12 +164,17 @@ class Z3Instance(object):
             debug_print("Creating bracketed constraints.")
             Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
                
+            if Options.STRING_CONSTRAINTS:
+                self.printZ3StrConstraints()
+                Z3Str.clafer_to_z3str("z3str_in")
+                return 1
+               
             debug_print("Asserting constraints.")
             self.assertConstraints()     
             
             debug_print("Printing constraints.") 
             self.printConstraints()
-        
+            
             debug_print("Getting models.")  
             self.clock.tock("translation")
             models = self.get_models(Options.NUM_INSTANCES)
@@ -200,11 +206,33 @@ class Z3Instance(object):
     def printConstraints(self):
         if not (Common.MODE == Common.DEBUG and Options.PRINT_CONSTRAINTS):
             return
+        #print(self.solver.sexpr())
         for i in self.z3_sorts.values():
             i.constraints.debug_print()
         self.join_constraints.debug_print()
         for i in self.z3_bracketed_constraints:
             i.debug_print()
+            
+    def printZ3StrConstraints(self):
+        f_n = open("z3str_in", 'w')
+        f_n.write("(set-option :auto-config true)\n")
+        f_n.write("(set-option :produce-models true)\n")
+        
+        for i in self.z3_sorts.values():
+            for j in i.instances + i.refs:
+                f_n.write("(declare-variable " + str(j) + " Int)\n")
+        
+        for i in self.z3_sorts.values():
+            i.constraints.z3str_print(f_n)
+        self.join_constraints.z3str_print(f_n)
+        for i in self.z3_bracketed_constraints:
+            i.z3str_print(f_n)
+        
+        f_n.write("(check-sat)\n")
+        f_n.write("(get-model)\n")
+        
+        
+        f_n.close()
         
     #this is not my method, some stackoverflow or z3.codeplex.com method. Can't remember, should find it.
     # i no longer need this method, if i implement the isomorphism detection

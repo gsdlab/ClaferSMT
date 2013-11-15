@@ -3,7 +3,7 @@ Created on Oct 3, 2013
 
 @author: ezulkosk
 '''
-from common import Common
+from common import Common, Z3Str_Printer
 from common.Common import debug_print
 from z3 import Bool, Implies, simplify, And, Not
 
@@ -25,6 +25,11 @@ class Constraints():
             z3.unsat_core_trackers.append(p)
             z3.unsat_map[str(p)] = constraint
             z3.solver.add(Implies(p, constraint))
+            
+    def convert(self, f_n, constraint):
+        #print("#####")
+        #print(constraint)
+        f_n.write(Z3Str_Printer.obj_to_string(constraint) + "\n")
 
 class GenericConstraints(Constraints): 
     def __init__(self, ident):
@@ -52,6 +57,11 @@ class GenericConstraints(Constraints):
         for i in self.constraints:
             debug_print(i)
             debug_print("")
+            
+    def z3str_print(self, f_n):
+        for i in self.constraints:
+            self.convert(f_n, i)
+            
 
 class ClaferConstraints(Constraints):
     def __init__(self, claferSort):
@@ -109,3 +119,15 @@ class ClaferConstraints(Constraints):
             for j in i:
                 debug_print(j)
                 debug_print("")
+                
+    def z3str_print(self,f_n):
+        constraints = [
+                       self.instance_constraints,
+                       self.card_constraints,
+                       self.group_card_constraints,
+                       self.inheritance_constraints,
+                       self.ref_constraints
+                       ]   
+        for i in constraints:
+            for j in i:
+                self.convert(f_n, j)
