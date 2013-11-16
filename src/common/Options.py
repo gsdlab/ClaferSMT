@@ -44,9 +44,9 @@ POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
 
 GLOBAL_SCOPE = 6#this obviously has to change
 
-ECLIPSE = False
+ECLIPSE = True
 
-MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL | COMMANDLINE], where ONE outputs one model from each test
+MODE = Common.DEBUG # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
 STRING_CONSTRAINTS = False
 NUM_INSTANCES = 10 # -1 to produce all instances
@@ -70,6 +70,7 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = union.getModule()
 #MODULE = simple_abstract.getModule()
 #MODULE = some.getModule()
+MODULE = paths.getModule()
 #MODULE = simple_set.getModule()
 #MODULE = zoo.getModule()
 #MODULE = simple_zoo.getModule()
@@ -81,7 +82,7 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = equal_references.getModule()
 #MODULE = dag_test.getModule()
 #MODULE = books_tutorial.getModule()
-MODULE = simple_books.getModule()
+#MODULE = simple_books.getModule()
 #MODULE = subbooks.getModule()
 #MODULE = int_ref_set.getModule()
 #MODULE = one_plus_one_equals_one.getModule()
@@ -103,6 +104,7 @@ MODULE = simple_books.getModule()
 #MODULE = i131incorrectscope.getModule()
 #MODULE = enforcingInverseReferences.getModule()
 #MODULE = trivial.getModule()
+
 #MODULE = trivial2.getModule()
 
 
@@ -131,7 +133,7 @@ positive_tests = [
         (check_unique_ref_names_with_inheritance,INFINITE),
         (constraints,INFINITE),
         (enforcingInverseReferences,INFINITE),
-        (i101, 0),
+        (i101, 1),
         (i10,INFINITE),
         (i121comments, 2),
         (i122CVL,INFINITE),
@@ -193,43 +195,48 @@ testMap = {
 def setCommandLineOptions():
     parser = argparse.ArgumentParser(description='Process a clafer model with Z3.')
     parser.add_argument('file', help='the clafer python file', nargs='?')
-    parser.add_argument('--mode', '-m', dest='mode', default='commandline',
-                       choices=['experiment', 'modelstats', 'normal', 'debug', 'test', 'one', 'all', 'commandline'])
-    parser.add_argument('--printconstraints', dest='printconstraints', action='store_const',  const=True, help='print all Z3 constraints (for debugging)')
+    parser.add_argument('--mode', '-m', dest='mode', default='normal',
+                       choices=['experiment', 'modelstats', 'normal', 'debug', 'test', 'one', 'all'])
+    parser.add_argument('--printconstraints', dest='printconstraints', default=True, action='store_const',  const=True, help='print all Z3 constraints (for debugging)')
     parser.add_argument('--profiling', '-p', dest='profiling', action='store_const',  const=True,  help='basic profiling of phases of the solver')
-    parser.add_argument('--cprofiling', dest='cprofiling',action='store_const',  const=True,  help='uses cprofile for profiling functions of the translation')
+    parser.add_argument('--cprofiling', dest='cprofiling',action='store_const', default=False, const=True,  help='uses cprofile for profiling functions of the translation')
     parser.add_argument('--numinstances', '-n', dest='numinstances', type=int, default='1', help='the number of models to be displayed (-1 for all)')
     parser.add_argument('--globalscope', '-g', dest='globalscope', type=int, default='1', help='the global scope for unbounded clafers (note that this does not match regular clafer)')
     parser.add_argument('--testset', '-t', dest='testset', default='edstests', help='The test set to be used for modes [experiment | test | one | all]',
                         choices=['edstests', 'positive'])
-    parser.add_argument('--stringconstraints' , '-s', dest='stringconstraints',action='store_const',  const=True,  help='Flag to output to Z3-Str format instead.')
-    
+    parser.add_argument('--stringconstraints' , '-s', default=False, dest='stringconstraints',action='store_const',  const=True,  help='Flag to output to Z3-Str format instead.')
+    parser.add_argument('--eclipse', '-e', dest='eclipse', default=True, action='store_const',  const=False, help='Do not set this...')
     args = parser.parse_args()
+    
+    global ECLIPSE
+    if  args.eclipse:
+        ECLIPSE = True 
+        return
+    else:
+        ECLIPSE = False
+    
     if not args.file and not (args.mode in ['experiment', 'test', 'one', 'all']):
-        sys.exit("If no file is given, mode must be set to [experiment | test | one | all].")
+        parser.print_help()
+        sys.exit("\nERROR: If no file is given, mode must be set to [experiment | test | one | all].")
     else:
         global FILE
         FILE = args.file
     global MODE
     MODE = modeMap[args.mode]
-    if args.printconstraints:
-        global PRINT_CONSTRAINTS
-        PRINT_CONSTRAINTS = True
-    if args.profiling:
-        global PROFILING
-        PROFILING = True
-    if args.cprofiling:
-        global CPROFILING
-        CPROFILING = True
+    global PRINT_CONSTRAINTS
+    PRINT_CONSTRAINTS = args.printconstraints
+    global PROFILING
+    PROFILING = args.profiling
+    global CPROFILING
+    CPROFILING = args.cprofiling
     global NUM_INSTANCES
     NUM_INSTANCES = args.numinstances
     global GLOBAL_SCOPE
     GLOBAL_SCOPE = args.globalscope
     global TEST_SET
     TEST_SET = testMap[args.testset]
-    if args.stringconstraints:
-        global STRING_CONSTRAINTS
-        STRING_CONSTRAINTS=True
+    global STRING_CONSTRAINTS
+    STRING_CONSTRAINTS= args.stringconstraints
     
 
 

@@ -55,8 +55,8 @@ class GenericConstraints(Constraints):
             
     def debug_print(self):
         for i in self.constraints:
-            debug_print(i)
-            debug_print("")
+            print(i)
+            print("")
             
     def z3str_print(self, f_n):
         for i in self.constraints:
@@ -117,8 +117,8 @@ class ClaferConstraints(Constraints):
                        ]   
         for i in constraints:
             for j in i:
-                debug_print(j)
-                debug_print("")
+                print(j)
+                print("")
                 
     def z3str_print(self,f_n):
         constraints = [

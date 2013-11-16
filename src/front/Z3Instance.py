@@ -231,7 +231,6 @@ class Z3Instance(object):
         f_n.write("(check-sat)\n")
         f_n.write("(get-model)\n")
         
-        
         f_n.close()
         
     #this is not my method, some stackoverflow or z3.codeplex.com method. Can't remember, should find it.

@@ -5,7 +5,7 @@ Goals: 0
 Global scope: 2..4
 Can skip resolver: True
 */
-
+open util/integer
 pred show {}
 run show for 1 but 2 c0_A
 

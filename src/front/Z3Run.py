@@ -22,8 +22,7 @@ def main(args):
     
     Starting point for ClaferZ3.
     '''
-    if not Options.ECLIPSE:
-        Options.setCommandLineOptions()
+    Options.setCommandLineOptions()
     Common.MODE = Options.MODE 
     if Common.MODE == Common.TEST:
         TestClafers.run()
@@ -33,8 +32,9 @@ def main(args):
         TestClafers.runForAll()
     elif Common.MODE == Common.MODELSTATS:
         ModelStats.run()
-    elif (not Options.ECLIPSE) and (Common.MODE == Common.COMMANDLINE or Common.MODE == Common.EXPERIMENT or Common.MODE == Common.DEBUG):
+    elif (not Options.ECLIPSE) and (Common.MODE == Common.NORMAL or Common.MODE == Common.EXPERIMENT or Common.MODE == Common.DEBUG):
         file = Options.FILE
+        print(file)
         if file.endswith(".cfr"):
             sys.exit("Run 'clafer --mode=python " + str(file) + "' first.")
         file = imp.load_source("module", str(file))
