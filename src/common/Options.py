@@ -18,7 +18,7 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     i78_transitiveclosure, i83individualscope, i98_toplevelreferences, layout, \
     negative, paths, personRelatives, person_tutorial, resolution, simp, \
     subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
-    one_plus_one_equals_one, scope_test, trivial, trivial2
+    one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths
 import argparse
 import sys
 
@@ -71,6 +71,7 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = simple_abstract.getModule()
 #MODULE = some.getModule()
 #MODULE = paths.getModule()
+MODULE = mypaths.getModule()
 #MODULE = simple_set.getModule()
 #MODULE = zoo.getModule()
 #MODULE = simple_zoo.getModule()
@@ -104,7 +105,7 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = i131incorrectscope.getModule()
 #MODULE = enforcingInverseReferences.getModule()
 #MODULE = trivial.getModule()
-MODULE = i72sharedreference.getModule()
+#MODULE = i72sharedreference.getModule()
 #MODULE = trivial2.getModule()
 
 
@@ -164,7 +165,7 @@ positive_tests = [
         (i98_toplevelreferences, 0),
         (layout, 1),
         (negative, 1),
-        (paths,INFINITE),
+        (paths, 3),
         (personRelatives,INFINITE),
         (person_tutorial,INFINITE),
         (resolution,INFINITE),

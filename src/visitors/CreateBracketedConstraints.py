@@ -174,8 +174,13 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             num_args = 1
             num_combinations = 1
             ifconstraints = []
-            self.currentConstraint.addQuantifier(element.quantifier, num_args, num_combinations, ifconstraints)
-            
+            exprList = self.currentConstraint.stack.pop()
+            exprArgList = []
+            for i in exprList:
+                self.currentConstraint.stack.append([i])
+                self.currentConstraint.addQuantifier(element.quantifier, num_args, num_combinations, ifconstraints)
+                exprArgList.append(self.currentConstraint.stack.pop()[0])
+            self.currentConstraint.addArg(exprArgList)
     
     def localdeclarationVisit(self, element):
         pass

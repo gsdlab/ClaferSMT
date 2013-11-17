@@ -34,7 +34,7 @@ def main(args):
         ModelStats.run()
     elif (not Options.ECLIPSE) and (Common.MODE == Common.NORMAL or Common.MODE == Common.EXPERIMENT or Common.MODE == Common.DEBUG):
         file = Options.FILE
-        print(file)
+        #print(file)
         if file.endswith(".cfr"):
             sys.exit("Run 'clafer --mode=python " + str(file) + "' first.")
         file = imp.load_source("module", str(file))

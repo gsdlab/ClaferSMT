@@ -347,8 +347,14 @@ def op_lt(left,right):
     assert isinstance(right, ExprArg)
     (_, left_mask) = left.getInstanceSort(0)
     (_, right_mask) = right.getInstanceSort(0)
-    lval = left_mask.pop_value()
-    rval = right_mask.pop_value()
+    
+    #if(left_mask.size() > 1 or right_mask.size() > 1):
+    #    print("bug clafer makes no sense.")
+    lval = sum(left_mask.values())
+    rval = sum(right_mask.values())
+    #else:
+    #    lval = left_mask.pop_value()
+    #    rval = right_mask.pop_value()
     return BoolArg([lval < rval])  
         
 def op_le(left,right):
@@ -365,8 +371,10 @@ def op_le(left,right):
     assert isinstance(right, ExprArg)
     (_, left_mask) = left.getInstanceSort(0)
     (_, right_mask) = right.getInstanceSort(0)
-    lval = left_mask.pop_value()
-    rval = right_mask.pop_value()
+    #lval = left_mask.pop_value()
+    #rval = right_mask.pop_value()
+    lval = sum(left_mask.values())
+    rval = sum(right_mask.values())
     return BoolArg([lval <= rval])  
 
 def op_gt(left,right):
