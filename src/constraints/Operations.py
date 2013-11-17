@@ -711,7 +711,6 @@ def op_union(left,right):
             (_, nextInstanceSort) = nextSorts[0]
             newInstanceSorts.append(nextInstanceSort)
         else:
-            
             (_, (sort, l)) = nextSorts[0]
             (_, (_, r)) = nextSorts[1]
             
@@ -829,7 +828,11 @@ def getMatch(key, my_list):
                     matches.append((totalIndexInSuper, i))
                     break
     return matches
-        
+
+
+'''
+CHECKED UNDER HERE********************************************************************************************
+'''         
 
 def int_set_in(leftIntSort, rightIntSort):
     (left_sort, left_mask) = leftIntSort
@@ -892,9 +895,6 @@ def op_nin(left,right):
     return BoolArg([expr.pop_value()])
 
  
-'''
-CHECKED UNDER HERE********************************************************************************************
-''' 
 
 def op_domain_restriction(l,r):
     '''

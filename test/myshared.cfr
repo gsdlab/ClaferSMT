@@ -9,10 +9,12 @@ abstract WaitingLine *
     participants -> Person *
 
 JohnAndMaryLine : WaitingLine
+    participants -> Person *
     [ participants  = JohnDoe,MaryJane ]
   //  [ #participants = 3]
 
 BusLine : WaitingLine
+    participants -> Person *
     [ JohnDoe in participants 
       MaryJane in participants ]
 //    [#participants =3 ]

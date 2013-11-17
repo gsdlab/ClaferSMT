@@ -98,13 +98,13 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = top_level_constraints_with_relational_joins.getModule()
 #MODULE = telematics.getModule()
 #MODULE = i17.getModule()
-MODULE = i188sumquantifier.getModule()
+#MODULE = i188sumquantifier.getModule()
 #MODULE = i78_transitiveclosure.getModule()
 #MODULE = scope_test.getModule()
 #MODULE = i131incorrectscope.getModule()
 #MODULE = enforcingInverseReferences.getModule()
 #MODULE = trivial.getModule()
-#MODULE = i72sharedreference.getModule()
+MODULE = i72sharedreference.getModule()
 #MODULE = trivial2.getModule()
 
 

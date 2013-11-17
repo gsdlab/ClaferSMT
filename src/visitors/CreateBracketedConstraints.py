@@ -142,13 +142,11 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             #print(symmetryChecker.isSymmetric)
         else:
             isSymmetric = False
-        #end new
         num_args = 0
         if element.declaration:
             visitors.Visitor.visit(self, element.declaration.body.iExp[0])
             arg = self.currentConstraint.stack.pop()
             isDisjunct = element.declaration.isDisjunct
-            #XXX
             for i in range(len(arg)):
                 (combinations, ifconstraints) = self.createAllLocalsCombinations(element.declaration.localDeclarations, 
                                                                                  arg[i],  
@@ -167,8 +165,8 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
                             self.currentConstraint.addLocal(element.declaration.localDeclarations[j].element, [i[j]])
                     visitors.Visitor.visit(self, element.bodyParentExp)
                 self.currentConstraint.addQuantifier(element.quantifier, num_args, num_combinations, ifconstraints)
+            exprArgList = []
             for i in range(len(arg)):
-                exprArgList = []
                 exprArgList.insert(0, self.currentConstraint.stack.pop()[0])
             self.currentConstraint.addArg(exprArgList)
         else:
