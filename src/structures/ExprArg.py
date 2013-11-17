@@ -155,6 +155,12 @@ class Mask():
     def difference(self, keyset):
         return self.tree.difference(keyset)
     
+    def remove(self, key):
+        try:
+            self.tree.remove(key)
+        except:
+            return
+    
     def intersection(self, keyset):
         return self.tree.intersection(keyset)
     
@@ -181,6 +187,7 @@ class Mask():
     
     def put(self, key, value):
         return self.tree.insert(key, value)
+    
     
     def get(self, index):
         return self.tree.get(index)

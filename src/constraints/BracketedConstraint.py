@@ -9,6 +9,7 @@ from constraints.Constraints import GenericConstraints
 from structures.ExprArg import BoolArg
 from z3 import Implies, And, Or
 import constraints.Operations as Ops
+import sys
 
 
 '''
@@ -152,6 +153,8 @@ class BracketedConstraint(Constraints.GenericConstraints):
             maxInstances = max(maxInstances, len(i))
         for i in args:
             if len(i) != maxInstances:
+                if len(i) != 1:
+                    sys.exit("Bug in BracketedConstraint.")
                 extendedArgs.append([i[0].clone() for _ in range(maxInstances)])
             else:
                 extendedArgs.append(i)

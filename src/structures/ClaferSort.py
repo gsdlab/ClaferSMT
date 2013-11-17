@@ -57,6 +57,11 @@ class  ClaferSort(object):
         self.element = element
         self.z3 = z3
         self.parentStack = stack[:]
+        (_,upper) = self.element.card
+        if upper.value == -1:
+            self.unbounded = True
+        else:
+            self.unbounded = False
         if(not self.parentStack):
             self.isTopLevel = True
         else:
@@ -79,8 +84,8 @@ class  ClaferSort(object):
         self.lowerCardConstraint = self.element.card[0].value
         self.upperCardConstraint = self.element.card[1].value
         #this eventually has to change
-        if(self.upperCardConstraint == -1):
-            self.upperCardConstraint = Options.GLOBAL_SCOPE
+        #if(self.upperCardConstraint == -1):
+        #    self.upperCardConstraint = Options.GLOBAL_SCOPE
         if not self.parentStack:
             self.parent = None
             self.parentInstances = 1
@@ -92,6 +97,9 @@ class  ClaferSort(object):
         a= 0
     
     def initialize(self):
+        (_, upper) = self.element.glCard
+        #print(upper)
+        self.numInstances = upper.value
         self.instances = IntVector(self.element.uid,self.numInstances) #used to be self.element.uid.split("_",1)[1]
         #gets the upper card bound of the parent clafer
         if not self.parentStack:

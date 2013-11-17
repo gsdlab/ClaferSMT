@@ -27,15 +27,15 @@ import sys
 | TODO |
 ========
 * Scopes
+* Check "this" in quantifier.
 * Fix any ops left in Operations
-* Int refs.
 * Real Numbers
-* Change my_type to exptype
+* Strings
+* Change DoubleLiteral to RealLiteral
+* Fix printer
 * Traversal of quantified formulas is exponential...
-* Improve support for debugging constraints
 * Fix quantifier symmetry breaker, if two locals FROM THE SAME QUANTIFIER are on the left and right of a func, not symmetric
 * Documentation
-* Change DoubleLiteral to RealLiteral, since that is most likely the Z3 construct that will be used.
 '''
 
 '''
@@ -70,7 +70,7 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = union.getModule()
 #MODULE = simple_abstract.getModule()
 #MODULE = some.getModule()
-MODULE = paths.getModule()
+#MODULE = paths.getModule()
 #MODULE = simple_set.getModule()
 #MODULE = zoo.getModule()
 #MODULE = simple_zoo.getModule()
@@ -98,13 +98,13 @@ MODULE = paths.getModule()
 #MODULE = top_level_constraints_with_relational_joins.getModule()
 #MODULE = telematics.getModule()
 #MODULE = i17.getModule()
-#MODULE = i188sumquantifier.getModule()
+MODULE = i188sumquantifier.getModule()
 #MODULE = i78_transitiveclosure.getModule()
 #MODULE = scope_test.getModule()
 #MODULE = i131incorrectscope.getModule()
 #MODULE = enforcingInverseReferences.getModule()
 #MODULE = trivial.getModule()
-
+#MODULE = i72sharedreference.getModule()
 #MODULE = trivial2.getModule()
 
 
@@ -158,7 +158,7 @@ positive_tests = [
         (i61cardinalities,INFINITE),
         (i70, 3),
         (i71,INFINITE),
-        (i72sharedreference,INFINITE),
+        (i72sharedreference, 4),
         (i78_transitiveclosure, 0),
         (i83individualscope,INFINITE),
         (i98_toplevelreferences, 0),
@@ -169,7 +169,7 @@ positive_tests = [
         (person_tutorial,INFINITE),
         (resolution,INFINITE),
         (simp, 1),
-        (subtypingprimitivetypes,INFINITE),
+        (subtypingprimitivetypes, 1),
         (telematics,INFINITE),
         (test_neg_typesystem,INFINITE)
                   ]
@@ -197,7 +197,7 @@ def setCommandLineOptions():
     parser.add_argument('file', help='the clafer python file', nargs='?')
     parser.add_argument('--mode', '-m', dest='mode', default='normal',
                        choices=['experiment', 'modelstats', 'normal', 'debug', 'test', 'one', 'all'])
-    parser.add_argument('--printconstraints', dest='printconstraints', default=True, action='store_const',  const=True, help='print all Z3 constraints (for debugging)')
+    parser.add_argument('--printconstraints', '--pc', dest='printconstraints', default=False, action='store_const',  const=True, help='print all Z3 constraints (for debugging)')
     parser.add_argument('--profiling', '-p', dest='profiling', action='store_const',  const=True,  help='basic profiling of phases of the solver')
     parser.add_argument('--cprofiling', dest='cprofiling',action='store_const', default=False, const=True,  help='uses cprofile for profiling functions of the translation')
     parser.add_argument('--numinstances', '-n', dest='numinstances', type=int, default='1', help='the number of models to be displayed (-1 for all)')

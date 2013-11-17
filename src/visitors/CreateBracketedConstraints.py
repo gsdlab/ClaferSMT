@@ -149,30 +149,35 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             arg = self.currentConstraint.stack.pop()
             isDisjunct = element.declaration.isDisjunct
             #XXX
-            (combinations, ifconstraints) = self.createAllLocalsCombinations(element.declaration.localDeclarations, 
-                                                                             arg[0],  
-                                                                             isDisjunct,
-                                                                             isSymmetric)
-            if len(combinations) == 0:
-                if element.quantifier == "Some":
-                    self.currentConstraint.stack.append([BoolArg([False])])
-                elif element.quantifier == "All":
-                    self.currentConstraint.stack.append([BoolArg([True])])
-                return
-            num_args = len(combinations[0])
-            num_combinations = len(combinations)
-            for i in combinations:
-                for j in range(num_args):
-                        self.currentConstraint.addLocal(element.declaration.localDeclarations[j].element, [i[j]])
-                visitors.Visitor.visit(self, element.bodyParentExp)
-
+            for i in range(len(arg)):
+                (combinations, ifconstraints) = self.createAllLocalsCombinations(element.declaration.localDeclarations, 
+                                                                                 arg[i],  
+                                                                                 isDisjunct,
+                                                                                 isSymmetric)
+                if len(combinations) == 0:
+                    if element.quantifier == "Some":
+                        self.currentConstraint.stack.append([BoolArg([False])])
+                    elif element.quantifier == "All":
+                        self.currentConstraint.stack.append([BoolArg([True])])
+                    return
+                num_args = len(combinations[0])
+                num_combinations = len(combinations)
+                for i in combinations:
+                    for j in range(num_args):
+                            self.currentConstraint.addLocal(element.declaration.localDeclarations[j].element, [i[j]])
+                    visitors.Visitor.visit(self, element.bodyParentExp)
+                self.currentConstraint.addQuantifier(element.quantifier, num_args, num_combinations, ifconstraints)
+            for i in range(len(arg)):
+                exprArgList = []
+                exprArgList.insert(0, self.currentConstraint.stack.pop()[0])
+            self.currentConstraint.addArg(exprArgList)
         else:
             visitors.Visitor.visit(self, element.bodyParentExp)
             num_args = 1
             num_combinations = 1
             ifconstraints = []
-        
-        self.currentConstraint.addQuantifier(element.quantifier, num_args, num_combinations, ifconstraints)
+            self.currentConstraint.addQuantifier(element.quantifier, num_args, num_combinations, ifconstraints)
+            
     
     def localdeclarationVisit(self, element):
         pass

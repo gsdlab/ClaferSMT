@@ -3,6 +3,8 @@ Created on Nov 10, 2013
 
 @author: ezulkosk
 '''
+from ast.IntegerLiteral import IntegerLiteral
+from common import Options
 from visitors import VisitorTemplate
 import ast
 import visitors
@@ -17,14 +19,26 @@ class SetScopes(VisitorTemplate.VisitorTemplate):
         :type z3: :class:`~common.Z3Instance`
         '''
         self.z3 = z3
+        self.glStack = [1]
 
+    '''
+    may need to fix for 3..*
+    '''
+    
     def claferVisit(self, element):
-        sort = self.z3.z3_sorts[element.uid]
-        a = 0
-        for i in range(sort.numInstances):
-            sort.getInstanceRange(i)
-        visitors.Visitor.visit(self,element.supers)
+        (_, upper) = element.card
+        (glower, _) = element.glCard
+        upper = upper.value
+        
+        if upper == -1:
+            element.glCard = (glower, IntegerLiteral(Options.GLOBAL_SCOPE))
+            self.glStack.append(Options.GLOBAL_SCOPE)
+        else:
+            upper = self.glStack[-1] * upper
+            element.glCard = (glower, IntegerLiteral(upper))
+            self.glStack.append(upper)
         for i in element.elements:
             visitors.Visitor.visit(self, i)
+        self.glStack.pop()
             
     

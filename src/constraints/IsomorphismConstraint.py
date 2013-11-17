@@ -134,7 +134,7 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
         
     def createArg(self, arg_id):
         #Exp.Exp()), ( iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="c14_F_sort_0", isTop=True)]
-        return Exp.Exp(expType="Argument", my_type="Set", parentId="", pos=self.zero_pos, \
+        return Exp.Exp(expType="Argument", exptype="Set", parentId="", pos=self.zero_pos, \
                        iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id=arg_id, isTop=False)]) 
     
     def createLocalDecl(self, arg):
@@ -145,7 +145,7 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
     
     def createDeclaration(self, locals, sort):
         return Declaration.Declaration(isDisjunct=False, localDeclarations=locals,  body=
-        Exp.Exp(expType="Body", my_type="Set", parentId="", pos=self.zero_pos, iExpType="IClaferId", \
+        Exp.Exp(expType="Body", exptype="Set", parentId="", pos=self.zero_pos, iExpType="IClaferId", \
                 iExp=[ClaferId.ClaferId(moduleName="", my_id=sort, isTop=True)]))
     
     def createFunExpr(self, op, elems):

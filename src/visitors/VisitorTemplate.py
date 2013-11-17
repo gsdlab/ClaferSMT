@@ -116,10 +116,10 @@ class VisitorTemplate(object):
         '''
         pass
         
-    def doubleliteralVisit(self, element):
+    def realliteralVisit(self, element):
         '''
-        :param element: A DoubleLiteral AST node
-        :type element: :class:`~ast.DoubleLiteral`
+        :param element: A RealLiteral AST node
+        :type element: :class:`~ast.RealLiteral`
         '''
         pass
         

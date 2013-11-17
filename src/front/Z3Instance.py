@@ -4,6 +4,7 @@ Created on Apr 30, 2013
 @author: ezulkosk
 '''
 
+from ast.IntegerLiteral import IntegerLiteral
 from common import Common, Options, Clock
 from common.Common import debug_print, standard_print, mOr
 from common.Exceptions import UnusedAbstractException
@@ -77,15 +78,22 @@ class Z3Instance(object):
             return sort.numInstances 
     
     def setAbstractScopes(self):
+        hasChanged = False
         for i in self.z3_sorts.values():
             if i.element.isAbstract:
                 summ = 0
                 for j in i.subs:
                     summ = summ + self.getScope(j)
-                i.numInstances = summ#max(summ, Options.GLOBAL_SCOPE)#summ #temp
-                i.upperCardConstraint = summ
+                (lower, upper) = i.element.glCard
+                i.element.glCard = (lower, IntegerLiteral(summ))
+                if upper.value != summ:
+                    #print(str(upper) + " " + str(summ))
+                    hasChanged = True
+                #i.numInstances = summ#max(summ, Options.GLOBAL_SCOPE)#summ #temp
+                #i.upperCardConstraint = summ
                 if summ == 0:
                     raise UnusedAbstractException(i.element.uid)
+        return hasChanged
                 
     def adjustAbstracts(self):
         for i in self.z3_sorts.values():
@@ -139,12 +147,17 @@ class Z3Instance(object):
             debug_print("Mapping colon clafers.")
             self.mapColonClafers()
           
-            """ Adjusting instances for scopes. """
-            #ddVisitor.visit(SetScopes.SetScopes(self), self.module)
+            debug_print("Adjusting instances for scopes.")
+            Visitor.visit(SetScopes.SetScopes(self), self.module)
           
-            """ Abstract scopes need to be adjusted for our approach. """
-            self.setAbstractScopes()
-            self.adjustAbstracts()
+            debug_print("Adjusting abstract scopes.")
+            ''' I think these have to loop until fixed-point??? ''' 
+            ''' success?!?!?!? '''
+            hasChanged = True
+            while hasChanged:
+                #print("A")
+                hasChanged = self.setAbstractScopes()
+                self.adjustAbstracts()
             
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)

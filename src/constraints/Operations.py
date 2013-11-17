@@ -167,8 +167,6 @@ def joinWithClafer(left, right):
     return ExprArg(newInstanceSorts)
 
 def computeJoin(joinList):
-    #can be optimized... a lot...
-    copy = joinList[:]
     left = joinList.pop(0) 
     while joinList:
         right = joinList.pop(0)
@@ -181,7 +179,7 @@ def computeJoin(joinList):
         else:
             left = joinWithClafer(left, right)
     for i in left.getInstanceSorts():
-        (sort, mask) = i
+        (_, mask) = i
         Assertions.nonEmptyMask(mask)
     Assertions.nonEmpty(left.getInstanceSorts())
     return left.getInstanceSorts()
@@ -210,10 +208,43 @@ def op_not(arg):
     (_, mask) = arg.getInstanceSort(0)
     val = mask.pop_value()
     return BoolArg([Not(val)])
+      
     
-'''
-CHECKED TO HERE********************************************************************************************
-'''    
+def getClaferMatch(key, my_list):
+    '''
+    returns the items in list with the same sort as key,
+    along with the index of the instances in the supersort
+    '''
+    matches = []
+    for i in my_list:
+        (sort, _) = i
+        if key == sort:
+            matches.append((True,0,i))
+        else:
+            totalIndexInSuper = 0
+            tempKey = key
+            while tempKey.superSort:
+                totalIndexInSuper = totalIndexInSuper + tempKey.indexInSuper
+                tempKey = tempKey.superSort
+                if tempKey == sort:
+                    matches.append((True, totalIndexInSuper, i))
+                    break
+            totalIndexInSuper = 0
+            tempKey = sort
+            while tempKey.superSort:
+                totalIndexInSuper = totalIndexInSuper + tempKey.indexInSuper
+                tempKey = tempKey.superSort
+                if tempKey == key:
+                    matches.append((False, totalIndexInSuper, i))
+                    break
+            
+    return matches
+
+def find(key, list):
+    for i in list:
+        (sort, mask) =  i
+        if sort == key:
+            return mask
     
 def op_eq(left,right):
     '''
@@ -229,6 +260,8 @@ def op_eq(left,right):
     assert isinstance(right, ExprArg)
     sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.getInstanceSorts()])
     sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.getInstanceSorts()])
+    unmatchedL = [(sort, mask.copy()) for (sort,mask) in sortedL]
+    unmatchedR = [(sort, mask.copy()) for (sort,mask) in sortedR]
     
     #integer equality case
     (left_sort, left_mask) = left.getInstanceSort(0)
@@ -239,31 +272,48 @@ def op_eq(left,right):
     #clafer-set equality case
     else:
         cond = []
-        while True:
-            nextSorts = getNextInstanceSort(sortedL, sortedR)
-            if not nextSorts:
-                break
-            if len(nextSorts) == 1:
-                (_, (sort, l)) = nextSorts[0]
-                #if only one side of the equation has elements a sort,
-                #make sure none are on.
-                for i in l.values():
-                    cond.append(sort.isOff(i))
-                    
-            else:
-                (_, (sort, l)) = nextSorts[0]
-                (_, (_, r)) = nextSorts[1]
-                for i in l.difference(r.getTree()):
-                    cond.append(sort.isOff(l.get(i)))
-                for i in r.difference(l.getTree()):
-                    cond.append(sort.isOff(r.get(i)))
-                for i in l.intersection(r.getTree()):
-                    cond.append(mAnd(Implies(sort.isOn(l.get(i)),
-                                              sort.isOn(r.get(i))),
-                                          Implies(sort.isOff(l.get(i)),
-                                              sort.isOff(r.get(i)))))
-        return BoolArg([And(*cond)])
-    
+        for i in sortedL:
+            (left_sort, left_mask) = i
+            matches = getClaferMatch(left_sort, sortedR)
+            for j in matches:
+                (leftIsSub, transform, (right_sort,right_mask)) = j
+                if leftIsSub:
+                    sub_sort = left_sort
+                    sub_mask = left_mask
+                    super_mask = right_mask
+                    super_sort = right_sort
+                    unmatchedSub = unmatchedL
+                    unmatchedSuper = unmatchedR
+                else:
+                    sub_sort = right_sort
+                    sub_mask = right_mask
+                    super_mask = left_mask
+                    super_sort = left_sort
+                    unmatchedSub = unmatchedR
+                    unmatchedSuper = unmatchedL
+                #unmatched extension
+                unmatchedSubMask = find(sub_sort, unmatchedSub)
+                unmatchedSuperMask = find(super_sort, unmatchedSuper)
+                for i in sub_mask.keys():
+                    unmatchedSubMask.remove(i)
+                    unmatchedSuperMask.remove(i+transform)
+                #end unmatched extension
+                for k in sub_mask.keys():
+                    if not super_mask.get(k + transform):
+                        cond.append(sub_sort.isOff(sub_mask.get(k)))
+                    else:
+                        cond.append(And(Implies(sub_sort.isOn(sub_mask.get(k)),
+                                            super_sort.isOn(super_mask.get(k + transform))),
+                                        Implies(super_sort.isOn(super_mask.get(k + transform)),
+                                            sub_sort.isOn(sub_mask.get(k)))))
+        #unmatched extension
+        for i in unmatchedL + unmatchedR:
+            (sort, mask) = i
+            for j in mask.keys():
+                cond.append(sort.isOff(mask.get(j)))
+        return BoolArg([mAnd(*cond)])
+        
+            
 def op_ne(left,right):
     '''
     :param left:
@@ -415,7 +465,56 @@ def op_implies(left,right):
     assert isinstance(right, ExprArg)
     sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.getInstanceSorts()])
     sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.getInstanceSorts()])
+    unmatchedL = [(sort, mask.copy()) for (sort,mask) in sortedL]
     
+    #integer equality case
+    #boolean equality case
+    (left_sort, left_mask) = left.getInstanceSort(0)
+    (right_sort, right_mask) = right.getInstanceSort(0)
+    if isinstance(left_sort, BoolSort) or isinstance(right_sort, BoolSort):
+        return BoolArg([Implies(left_mask.pop_value(), right_mask.pop_value())])
+    elif isinstance(left_sort, IntSort) or isinstance(right_sort, IntSort):
+        return BoolArg([int_set_in((left_sort, left_mask), (right_sort, right_mask))])
+    #clafer-set equality case
+    else:
+        cond = []
+        for i in sortedL:
+            (left_sort, left_mask) = i
+            matches = getClaferMatch(left_sort, sortedR)
+            for j in matches:
+                (leftIsSub, transform, (right_sort,right_mask)) = j
+                if leftIsSub:
+                    sub_sort = left_sort
+                    sub_mask = left_mask
+                    super_mask = right_mask
+                    super_sort = right_sort
+                else:
+                    sub_sort = right_sort
+                    sub_mask = right_mask
+                    super_mask = left_mask
+                    super_sort = left_sort
+                #unmatched extension
+                unmatchedMask = find(left_sort, unmatchedL)
+                for i in sub_mask.keys():
+                    unmatchedMask.remove(i)
+                    unmatchedMask.remove(i+transform)
+                #end unmatched extension
+                for k in sub_mask.keys():
+                    if not super_mask.get(k + transform) and leftIsSub:
+                        cond.append(sub_sort.isOff(sub_mask.get(k)))
+                    elif leftIsSub:
+                        cond.append(Implies(sub_sort.isOn(sub_mask.get(k)),
+                                            super_sort.isOn(super_mask.get(k + transform))))
+                    else:
+                        cond.append(Implies(super_sort.isOn(super_mask.get(k + transform)),
+                                            sub_sort.isOn(sub_mask.get(k))))
+        #unmatched extension
+        for i in unmatchedL:
+            (sort, mask) = i
+            for j in mask.keys():
+                cond.append(sort.isOff(mask.get(j)))
+        return BoolArg([mAnd(*cond)])
+    '''
     #integer equality case
     (left_sort, left_mask) = left.getInstanceSort(0)
     (right_sort, right_mask) = right.getInstanceSort(0)
@@ -447,6 +546,7 @@ def op_implies(left,right):
         Assertions.nonEmpty(cond)
         return BoolArg([And(*cond)])
     #return BoolArg([mAnd(*[Implies(i,j) for i,j in zip(left.instances, right.instances)])])
+    '''
 
 def op_equivalence(left,right):
     '''
@@ -542,7 +642,7 @@ def op_join(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return JoinArg(left, right)
+    return JoinArg(left, right) 
 
 def op_card(arg):
     '''
@@ -583,6 +683,10 @@ def int_set_union(leftIntSort, rightIntSort):
     return (sort, newMask)
 
     
+
+'''
+CHECKED TO HERE********************************************************************************************
+'''
 
 def op_union(left,right):
     '''
@@ -749,6 +853,8 @@ def op_in(left,right):
     
     Ensures that left is a subset of right.
     '''
+    return op_implies(left,right)
+    '''
     sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.getInstanceSorts()])
     sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.getInstanceSorts()])
     cond = []
@@ -768,7 +874,8 @@ def op_in(left,right):
                         cond.append(Implies(left_sort.isOn(left_mask.get(k)),
                                             right_sort.isOn(right_mask.get(k + transform))))
     return BoolArg([mAnd(*cond)])
-   
+   '''
+
 def op_nin(left,right):
     '''
     :param left:
@@ -783,6 +890,11 @@ def op_nin(left,right):
     assert isinstance(right, ExprArg)
     expr = op_in(left,right)
     return BoolArg([expr.pop_value()])
+
+ 
+'''
+CHECKED UNDER HERE********************************************************************************************
+''' 
 
 def op_domain_restriction(l,r):
     '''

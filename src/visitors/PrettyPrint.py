@@ -83,7 +83,6 @@ class PrettyPrint(object):
         self.dec()
         prettyPrint("}")
         
-    #expType, my_type, parentId, pos, iExpType ,iExp
     def expVisit(self, element):
         prettyPrint("expType=" + str(element.expType))
         prettyPrint("type=" + str(element.type))
