@@ -4,6 +4,7 @@ Created on Apr 29, 2013
 @author: ezulkosk
 '''
 from common import Assertions
+from common.Common import debug_print
 from constraints import Constraints
 from constraints.Constraints import GenericConstraints
 from structures.ExprArg import BoolArg
@@ -19,6 +20,7 @@ import sys
         1. arity
         2. function associated with the operator
 '''
+
 ClaferToZ3OperationsMap = {
                            #Unary Ops
                            "!"           : (1, Ops.op_not),
@@ -193,6 +195,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
                     (_, mask) = j
                     self.addConstraint(mask.pop_value())
         self.z3.z3_bracketed_constraints.append(self)
+        
     
     def __str__(self):
         return str(self.value)

@@ -5,7 +5,7 @@ Created on Mar 26, 2013
 '''
 
 from common import Common, Options
-from common.Common import mAnd
+from common.Common import mAnd, debug_print
 from constraints import BracketedConstraint
 from structures.ClaferSort import PrimitiveType
 from structures.ExprArg import ExprArg, Mask, BoolArg, IntArg
@@ -42,6 +42,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.inConstraint = inConstraint
         self.currentConstraint = None
         self.z3 = z3
+        self.BRACKETEDCONSCOUNT = 1
     
     def isomorphismVisit(self, element):
         '''
@@ -87,6 +88,8 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
    
     def constraintVisit(self, element):
         self.inConstraint = True
+        debug_print(self.BRACKETEDCONSCOUNT)
+        self.BRACKETEDCONSCOUNT = self.BRACKETEDCONSCOUNT + 1
         self.currentConstraint = BracketedConstraint.BracketedConstraint(self.z3, claferStack)
         visitors.Visitor.visit(self, element.exp)
         self.currentConstraint.endProcessing()

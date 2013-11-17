@@ -75,7 +75,8 @@ class Z3Instance(object):
                 summ = summ + self.getScope(i)
             return summ
         else:
-            return sort.numInstances 
+            (_, upper) = sort.element.glCard
+            return upper.value#sort.numInstances 
     
     def setAbstractScopes(self):
         hasChanged = False
@@ -159,8 +160,14 @@ class Z3Instance(object):
                 hasChanged = self.setAbstractScopes()
                 self.adjustAbstracts()
             
+            
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
+            
+            #count = 1
+            #for i in self.getSorts():
+            #    print(str(count) +  " " + str(i) + " " +     str(i.numInstances))
+            #    count = count +1
             
             debug_print("Creating cardinality constraints.")
             self.createCardinalityConstraints()

@@ -18,7 +18,8 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     i78_transitiveclosure, i83individualscope, i98_toplevelreferences, layout, \
     negative, paths, personRelatives, person_tutorial, resolution, simp, \
     subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
-    one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths
+    one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths, \
+    AADL_simplified_with_lists
 import argparse
 import sys
 
@@ -26,8 +27,6 @@ import sys
 ========
 | TODO |
 ========
-* Scopes
-* Check "this" in quantifier.
 * Fix any ops left in Operations
 * Real Numbers
 * Strings
@@ -42,7 +41,7 @@ import sys
 POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
 '''
 
-GLOBAL_SCOPE = 6#this obviously has to change
+GLOBAL_SCOPE = 1#this obviously has to change
 
 ECLIPSE = True
 
@@ -71,7 +70,7 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = simple_abstract.getModule()
 #MODULE = some.getModule()
 #MODULE = paths.getModule()
-MODULE = mypaths.getModule()
+#MODULE = mypaths.getModule()
 #MODULE = simple_set.getModule()
 #MODULE = zoo.getModule()
 #MODULE = simple_zoo.getModule()
@@ -93,7 +92,7 @@ MODULE = mypaths.getModule()
 #MODULE = some_somes.getModule()
 #MODULE = constraints.getModule()
 #MODULE = constraintswithbounds.getModule()
-#MODULE = AADL_simplified_with_lists.getModule()
+MODULE = AADL_simplified_with_lists.getModule()
 #MODULE = all_threes.getModule()
 #MODULE = i101.getModule()
 #MODULE = top_level_constraints_with_relational_joins.getModule()
@@ -131,7 +130,7 @@ my_tests = [
 
 positive_tests = [
         (books_tutorial,INFINITE),
-        (check_unique_ref_names_with_inheritance,INFINITE),
+        (check_unique_ref_names_with_inheritance, 1),
         (constraints,INFINITE),
         (enforcingInverseReferences,INFINITE),
         (i101, 1),
@@ -171,7 +170,7 @@ positive_tests = [
         (resolution,INFINITE),
         (simp, 1),
         (subtypingprimitivetypes, 1),
-        (telematics,INFINITE),
+        (telematics, 1),
         (test_neg_typesystem,INFINITE)
                   ]
 
