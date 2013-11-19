@@ -19,8 +19,9 @@ abstract Book			// a template for a book
     //    other : string			// other allows giving a kind in text
     authors -> Author +		// author points at least one author of the book
     [ year >= 5 => ISBN ]  
-    ISBN : string ? 			// it is currently not possible to specify in Clafer that ISBN has 10 digits
-        GS1 : string ?
+    ISBN : int ? 			// it is currently not possible to specify in Clafer that ISBN has 10 digits
+        [1000000000 <=  ISBN && ISBN <= 9999999999]
+   	GS1 : string ?
         [ year >= 6 => GS1 ]
   
 abstract Person			// a template for a person
@@ -33,7 +34,7 @@ abstract Author : Person	// author is a special person who has at least one book
 GenerativeProgramming : Book	// a concrete example of a book
     [ //title = "name"
       // no subtitle
-      // year = 5
+      year = 5
       // #  page = 4			// number (#) of instances of page is 589
       // paper				// because the book is paper it automatically also has a format
       // nonfiction			// because the book is nonfiction it automatically also has a kind

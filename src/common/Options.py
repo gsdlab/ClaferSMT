@@ -19,7 +19,7 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     negative, paths, personRelatives, person_tutorial, resolution, simp, \
     subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
     one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths, \
-    AADL_simplified_with_lists
+    AADL_simplified_with_lists, teststring
 import argparse
 import sys
 
@@ -35,22 +35,23 @@ import sys
 * Traversal of quantified formulas is exponential...
 * Fix quantifier symmetry breaker, if two locals FROM THE SAME QUANTIFIER are on the left and right of a func, not symmetric
 * Documentation
+* Create an "EmptyString" Int!
 '''
 
 '''
 POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
 '''
 
-GLOBAL_SCOPE = 1#this obviously has to change
+GLOBAL_SCOPE = 6#this obviously has to change
 
 ECLIPSE = True
 
-MODE = Common.DEBUG # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
+MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
-STRING_CONSTRAINTS = False
+STRING_CONSTRAINTS = True
 NUM_INSTANCES = 10 # -1 to produce all instances
 INFINITE = -1 #best variable name.
-PROFILING = True # True to output the translation time, and time to get first model
+PROFILING = False # True to output the translation time, and time to get first model
 CPROFILING = False #invokes the standard python profiling method (see Z3Run.py)
 GET_ISOMORPHISM_CONSTRAINT = False #efficiency bugs in quantified formulas is preventing this from working
 BREAK_QUANTIFIER_SYMMETRY = False
@@ -83,6 +84,7 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = dag_test.getModule()
 #MODULE = books_tutorial.getModule()
 #MODULE = simple_books.getModule()
+MODULE = teststring.getModule()
 #MODULE = subbooks.getModule()
 #MODULE = int_ref_set.getModule()
 #MODULE = one_plus_one_equals_one.getModule()
@@ -92,7 +94,7 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = some_somes.getModule()
 #MODULE = constraints.getModule()
 #MODULE = constraintswithbounds.getModule()
-MODULE = AADL_simplified_with_lists.getModule()
+#MODULE = AADL_simplified_with_lists.getModule()
 #MODULE = all_threes.getModule()
 #MODULE = i101.getModule()
 #MODULE = top_level_constraints_with_relational_joins.getModule()
@@ -197,8 +199,8 @@ def setCommandLineOptions():
     parser.add_argument('file', help='the clafer python file', nargs='?')
     parser.add_argument('--mode', '-m', dest='mode', default='normal',
                        choices=['experiment', 'modelstats', 'normal', 'debug', 'test', 'one', 'all'])
-    parser.add_argument('--printconstraints', '--pc', dest='printconstraints', default=False, action='store_const',  const=True, help='print all Z3 constraints (for debugging)')
-    parser.add_argument('--profiling', '-p', dest='profiling', action='store_const',  const=True,  help='basic profiling of phases of the solver')
+    parser.add_argument('--printconstraints', '--pc', dest='printconstraints', default=False, const = True, action='store_const', help='print all Z3 constraints (for debugging)')
+    parser.add_argument('--profiling', '-p', dest='profiling', action='store_const', default = False,  const=True,  help='basic profiling of phases of the solver')
     parser.add_argument('--cprofiling', dest='cprofiling',action='store_const', default=False, const=True,  help='uses cprofile for profiling functions of the translation')
     parser.add_argument('--numinstances', '-n', dest='numinstances', type=int, default='1', help='the number of models to be displayed (-1 for all)')
     parser.add_argument('--globalscope', '-g', dest='globalscope', type=int, default='1', help='the global scope for unbounded clafers (note that this does not match regular clafer)')

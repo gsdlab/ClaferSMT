@@ -13,7 +13,7 @@ from front import Z3Str
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
     SetScopes, AdjustAbstracts
-from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real
+from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real, Int
 from z3consts import Z3_UNINTERPRETED_SORT
 from z3types import Z3Exception
 import sys
@@ -27,6 +27,7 @@ class Z3Instance(object):
     '''
     def __init__(self, module):
         Common.reset() #resets variables if in test mode
+        self.EMPTYSTRING = Int("EMPTYSTRING")
         self.module = module
         self.z3_bracketed_constraints = []
         self.z3_sorts = {}
@@ -239,9 +240,22 @@ class Z3Instance(object):
         f_n.write("(set-option :produce-models true)\n")
         
         for i in self.z3_sorts.values():
-            for j in i.instances + i.refs:
+            f_n.write("(declare-variable " + "EMPTYSTRING String)\n")
+            f_n.write("(assert (= EMPTYSTRING \"\"))\n")
+            for j in i.instances:
                 f_n.write("(declare-variable " + str(j) + " Int)\n")
-        
+            if i.refs:
+                if i.refSort.type == "string":
+                    sort = "String"
+                elif i.refSort.type == "integer":
+                    sort = "Int"
+                elif i.refSort.type == "real":
+                    sort = "Real"
+                else:
+                    print(i.refSort.type)
+                    sys.exit("Bug in printZ3StrConstraints")
+                for j in i.refs:
+                    f_n.write("(declare-variable " + str(j) + " " + sort + ")\n")
         for i in self.z3_sorts.values():
             i.constraints.z3str_print(f_n)
         self.join_constraints.z3str_print(f_n)

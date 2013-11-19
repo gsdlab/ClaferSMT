@@ -3,11 +3,11 @@ Created on Nov 1, 2013
 
 @author: ezulkosk
 '''
-from common import Common, Assertions
+from common import Common, Assertions, Options
 from common.Common import mOr, mAnd
-from structures.ClaferSort import BoolSort, IntSort, PrimitiveType
+from structures.ClaferSort import BoolSort, IntSort, PrimitiveType, StringSort
 from structures.ExprArg import Mask, ExprArg, JoinArg, IntArg, BoolArg
-from z3 import If, And, Sum, Not, Implies, Xor, Or, IntVector
+from z3 import If, And, Sum, Not, Implies, Xor, Or, IntVector, Int
 import sys
 
 
@@ -80,13 +80,20 @@ def joinWithPrimitive(arg):
     newInstanceSorts = []    
     for i in arg.getInstanceSorts():
         (sort, mask) = i
-        if sort.refSort == "integer" or sort.refSort == "string": #change for string soon
+        if sort.refSort == "integer" or (sort.refSort == "string" and not Options.STRING_CONSTRAINTS):  #change for string soon
             newMask = alreadyExists(IntSort(), newInstanceSorts) #check that this works!!!
             newSort = IntSort()
             for i in mask.keys():
                 addPrimitive(newSort, newMask, sort, mask, i)         
             newInstanceSorts.append((newSort, newMask)) #should change the "int", but not sure how yet
             Assertions.nonEmptyMask(newMask)
+        elif sort.refSort == "string":
+            '''fix this up'''
+            newSort = StringSort()
+            newMask = Mask()
+            for i in mask.keys():
+                newMask.put(i, sort.refs[i])
+            newInstanceSorts.append((newSort, newMask))
         else:
             print("Error on: " + sort.refSort + ", refs other than int (e.g. double) unimplemented")
             sys.exit()
@@ -127,6 +134,8 @@ def joinWithClaferRef(arg):
     
 def joinWithRef(arg): 
     (sort, _) = arg.instanceSorts[0]
+    if len(arg.instanceSorts) > 1:
+       sys.exit("bug in join with ref, need to implement...")
     if isinstance(sort.refSort, PrimitiveType):
         return joinWithPrimitive(arg)
     else: 
@@ -138,8 +147,10 @@ def joinWithRef(arg):
 def joinWithClafer(left, right):
     newInstanceSorts = []
     for l in left.getInstanceSorts():
-        (left_sort, left_mask) = l
+        (curr_left_sort, curr_left_mask) = l
         for r in right.getInstanceSorts():
+            left_sort = curr_left_sort
+            left_mask = curr_left_mask
             (right_sort, right_mask) = r
             noMatch = False
             while not(right_sort in left_sort.fields):
@@ -148,7 +159,7 @@ def joinWithClafer(left, right):
                     break
                 (left_sort, left_mask) = joinWithSuper(left_sort, left_mask)
             if noMatch:
-                break
+                continue
             newMask = alreadyExists(right_sort, newInstanceSorts)
             for i in right_mask.keys():
                 (lower, upper, _) = right_sort.instanceRanges[i]
@@ -158,6 +169,9 @@ def joinWithClafer(left, right):
                         prevClause = newMask.get(i)
                         newMask.put(i, mOr(prevClause, And(left_sort.isOn(left_mask.get(j)), 
                                                         right_sort.instances[i] == j)))
+            '''CAREFUL!!! '''
+            if newMask.size() == 0:
+                continue
             newInstanceSorts.append((right_sort, newMask))
             Assertions.nonEmptyMask(newMask)
     for i in newInstanceSorts:
@@ -1051,6 +1065,42 @@ def op_sum(arg):
 # END ARITHMETIC
 #######################################################################
 ''' 
+
+'''
+#######################################################################
+# STRINGS
+#######################################################################
+'''
+
+def op_concat(left, right):
+    pass
+
+def op_length(arg):
+    (sort, mask) = arg.getInstanceSort(0)
+    for i in mask.keys():
+        a = mask.get(i)
+    return IntArg([Int("Length$" + str(a))])
+
+def op_substring(whole_string, left_index, right_index):
+    pass
+
+def op_replace(whole_string, from_string, to_string):
+    pass
+
+def op_split(left, right):
+    pass
+
+def op_contains(left, right):
+    pass
+
+def op_indexof(left, right):
+    pass
+
+'''
+#######################################################################
+# END STRINGS
+#######################################################################
+'''
 
 ''' 
 #######################################################################

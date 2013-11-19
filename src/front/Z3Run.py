@@ -22,7 +22,7 @@ def main(args):
     
     Starting point for ClaferZ3.
     '''
-    Options.setCommandLineOptions()
+ 
     Common.MODE = Options.MODE 
     if Common.MODE == Common.TEST:
         TestClafers.run()
@@ -51,6 +51,7 @@ def main(args):
         
    
 if __name__ == '__main__':
+    Options.setCommandLineOptions()
     if Options.CPROFILING:
         cProfile.run("main(sys.argv[1:])", sort=1)
     else:

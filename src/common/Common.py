@@ -3,7 +3,7 @@ Created on Apr 28, 2013
 
 @author: ezulkosk
 '''
-from z3 import If, And, Or
+from z3 import If, And, Or, Int
 
 NORMAL = 0
 DEBUG = 1
@@ -19,6 +19,7 @@ BREAK = False
 FUNCTION_ID = 0 
 CONSTRAINT_ID = 0
 FLAG = False
+
 
 def mAnd(*args):
     '''

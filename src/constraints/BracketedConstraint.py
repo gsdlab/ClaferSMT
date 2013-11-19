@@ -54,7 +54,15 @@ ClaferToZ3OperationsMap = {
                            ":>"          : (2, Ops.op_range_restriction),
                            "."           : (2, Ops.op_join),
                            #Ternary Ops
-                           "ifthenelse"  : (3, Ops.op_ifthenelse)       
+                           "ifthenelse"  : (3, Ops.op_ifthenelse),
+                           #String Ops
+                           "concat"      : (2, Ops.op_concat),
+                           "length"      : (1, Ops.op_length),
+                           "substring"   : (3, Ops.op_substring),
+                           "contains"    : (2, Ops.op_contains),
+                           "indexOf"     : (2, Ops.op_indexof),
+                           "replace"     : (3, Ops.op_replace),
+                           "split"       : (2, Ops.op_split)
                            }
 
 QuantifierMap = {

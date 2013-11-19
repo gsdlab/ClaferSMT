@@ -37,6 +37,7 @@ def main(args):
     B = Bool("B")
     C = Bool("C")
     D = Bool("D")
+    Int("c$" )
     s = Solver()
     s.add(Xor(A,B,C,D))
     s.check()

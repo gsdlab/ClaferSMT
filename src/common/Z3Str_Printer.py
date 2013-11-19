@@ -29,7 +29,13 @@ def strprint(c):
     if k in z3_infix:
         return ("(" + str(c.decl()) + " " + " ".join([str(strprint(d)) for d in c.children()]) + ")")
     elif z3.is_const(c):
-        return(str(c))
+        c = str(c)
+        if c.find("$") != -1:
+            array = c.split("$")
+            return("(" + array.pop(0) + " " + " ".join(array) + ")")
+        elif c == "EMPTYSTRING":
+            return c
+        return(c)
     else:
         sys.exit("Bug in Z3Str_Printer: " + str(c))
 
