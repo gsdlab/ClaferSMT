@@ -19,7 +19,7 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     negative, paths, personRelatives, person_tutorial, resolution, simp, \
     subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
     one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths, \
-    AADL_simplified_with_lists, teststring
+    AADL_simplified_with_lists, teststring, testunion
 import argparse
 import sys
 
@@ -46,9 +46,9 @@ GLOBAL_SCOPE = 6#this obviously has to change
 
 ECLIPSE = True
 
-MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
+MODE = Common.DEBUG # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
-STRING_CONSTRAINTS = True
+STRING_CONSTRAINTS = False
 NUM_INSTANCES = 10 # -1 to produce all instances
 INFINITE = -1 #best variable name.
 PROFILING = False # True to output the translation time, and time to get first model
@@ -84,7 +84,8 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = dag_test.getModule()
 #MODULE = books_tutorial.getModule()
 #MODULE = simple_books.getModule()
-MODULE = teststring.getModule()
+#MODULE = teststring.getModule()
+#MODULE = testunion.getModule()
 #MODULE = subbooks.getModule()
 #MODULE = int_ref_set.getModule()
 #MODULE = one_plus_one_equals_one.getModule()
@@ -101,7 +102,7 @@ MODULE = teststring.getModule()
 #MODULE = telematics.getModule()
 #MODULE = i17.getModule()
 #MODULE = i188sumquantifier.getModule()
-#MODULE = i78_transitiveclosure.getModule()
+MODULE = i78_transitiveclosure.getModule()
 #MODULE = scope_test.getModule()
 #MODULE = i131incorrectscope.getModule()
 #MODULE = enforcingInverseReferences.getModule()

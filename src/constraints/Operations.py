@@ -227,7 +227,8 @@ def op_not(arg):
 def getClaferMatch(key, my_list):
     '''
     returns the items in list with the same sort as key,
-    along with the index of the instances in the supersort
+    along with the index of the instances in the supersort,
+    along with True if the key is the subsort, else False
     '''
     matches = []
     for i in my_list:
@@ -706,10 +707,24 @@ def int_set_union(leftIntSort, rightIntSort):
 
     
 
-'''
-CHECKED TO HERE********************************************************************************************
-'''
-
+def putIfNotMatched(sort, mask, index, value, matches):
+    if not matches:
+        mask.put(index, value)
+    else:
+        cond = []
+        for i in matches:
+            (leftIsSub, transform, (match_sort,match_mask)) = i
+            if leftIsSub:
+                if match_mask.get(index + transform):
+                    cond.append(match_sort.isOff(match_mask.get(index + transform)))
+            else:
+                if match_mask.get(index - transform):
+                    cond.append(match_sort.isOff(match_mask.get(index - transform)))
+        if not cond:
+            mask.put(index, value)
+        else:
+            mask.put(index, If(mAnd(*cond), value, sort.parentInstances))
+           
 def op_union(left,right):
     '''
     :param left:
@@ -729,9 +744,17 @@ def op_union(left,right):
         nextSorts = getNextInstanceSort(sortedL, sortedR)
         if not nextSorts:
             break
+        (_, (sort,_))=nextSorts[0]
+        matches = getClaferMatch(sort, newInstanceSorts)
         if len(nextSorts) == 1:
-            (_, nextInstanceSort) = nextSorts[0]
-            newInstanceSorts.append(nextInstanceSort)
+            if not matches:
+                (_, nextInstanceSort) = nextSorts[0]
+                newInstanceSorts.append(nextInstanceSort)
+            else:
+                (_, (sort, mask)) = nextSorts[0]
+                newMask = Mask()
+                for i in mask.keys():
+                    putIfNotMatched(sort, newMask, i, mask.get(i), matches)
         else:
             (_, (sort, l)) = nextSorts[0]
             (_, (_, r)) = nextSorts[1]
@@ -741,11 +764,11 @@ def op_union(left,right):
             
             newMask = Mask()
             for i in l.difference(r.getTree()):
-                newMask.put(i, l.get(i))
+                putIfNotMatched(sort, newMask, i, l.get(i), matches)
             for i in r.difference(l.getTree()):
-                newMask.put(i, r.get(i))
+                putIfNotMatched(sort, newMask, i, r.get(i), matches)
             for i in l.intersection(r.getTree()):
-                newMask.put(i, Common.min2(l.get(0), r.get(0)))
+                putIfNotMatched(sort, newMask, i, Common.min2(l.get(0), r.get(0)), matches)
             newInstanceSorts.append((sort, newMask))
     return ExprArg(newInstanceSorts)
                 
@@ -766,6 +789,8 @@ def op_intersection(left,right):
         nextSorts = getNextInstanceSort(sortedL, sortedR)
         if not nextSorts:
             break
+        (_, (sort,_))=nextSorts[0]
+        matches = getClaferMatch(sort, newInstanceSorts)
         if len(nextSorts) == 1:
             continue
         else:
@@ -773,7 +798,8 @@ def op_intersection(left,right):
             (_, (_, r)) = nextSorts[1]
             newMask = Mask()
             for i in l.intersection(r.keys()):
-                newMask.put(i, Common.max2(l.get(0), r.get(0)))
+                #newMask.put(i, Common.max2(l.get(0), r.get(0)))
+                putIfNotMatched(sort, newMask, i, Common.max2(l.get(0), r.get(0)), matches)
             newInstanceSorts.append((sort, newMask))
     return ExprArg(left.joinSorts, newInstanceSorts)
 
@@ -809,10 +835,19 @@ def op_difference(left,right):
         nextSorts = getNextInstanceSort(sortedL, sortedR)
         if not nextSorts:
             break
+        (_, (sort,_))=nextSorts[0]
+        matches = getClaferMatch(sort, newInstanceSorts)
         if len(nextSorts) == 1:
             (side, nextInstanceSort) = nextSorts[0]
             if(side == "l"):
-                newInstanceSorts.append(nextInstanceSort)
+                if not matches:
+                    newInstanceSorts.append(nextInstanceSort)
+                else:
+                    (sort, mask) = nextInstanceSort
+                    newMask = Mask()
+                    for i in mask.keys():
+                        putIfNotMatched(sort, newMask, i, mask.get(i), matches)
+                    newInstanceSorts.append((sort, newMask))
         else:
             (_, (sort, l)) = nextSorts[0]
             (_, (_, r)) = nextSorts[1]
@@ -822,11 +857,15 @@ def op_difference(left,right):
             else:
                 newMask = Mask()
                 for i in l.difference(r.getTree()):
-                    newMask.put(i, l.get(i))
+                    #newMask.put(i, l.get(i))
+                    putIfNotMatched(sort, newMask, i, l.get(i), matches)
                 for i in l.intersection(r.getTree()):
-                    newMask.put(i, If(sort.isOn(r.get(i))
+                    #newMask.put(i, If(sort.isOn(r.get(i))
+                    #                     , l.get(i)
+                    #                     , sort.parentInstances))
+                    putIfNotMatched(sort, newMask, i, If(sort.isOn(r.get(i))
                                          , l.get(i)
-                                         , sort.parentInstances))
+                                         , sort.parentInstances), matches)
             newInstanceSorts.append((sort, newMask))
     return ExprArg(newInstanceSorts)
     
