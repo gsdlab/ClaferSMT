@@ -18,8 +18,10 @@ MODE = NORMAL
 BREAK = False
 FUNCTION_ID = 0 
 CONSTRAINT_ID = 0
+STRING_ID = 0
 FLAG = False
-
+string_map = {}
+STRCONS_SUB = "STRCONS_SUB"
 
 def mAnd(*args):
     '''
@@ -75,11 +77,20 @@ def getConstraintUID():
     CONSTRAINT_ID = CONSTRAINT_ID + 1
     return CONSTRAINT_ID
 
+def getStringUID():
+    '''
+    Used to generate unique booleans for UNSAT core
+    '''
+    global STRING_ID
+    STRING_ID = STRING_ID + 1
+    return STRING_ID
+
 def reset():
     '''
     Only needed for running test suites.
     '''
     CONSTRAINT_ID = 0
+    STRING_ID = 0
 
 
 def min2(l,r):

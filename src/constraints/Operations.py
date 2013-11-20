@@ -1111,29 +1111,40 @@ def op_sum(arg):
 #######################################################################
 '''
 
+''' need to improve to handle multiple strings'''
+
 def op_concat(left, right):
     pass
 
 def op_length(arg):
-    (sort, mask) = arg.getInstanceSort(0)
-    for i in mask.keys():
-        a = mask.get(i)
-    return IntArg([Int("Length$" + str(a))])
+    (_, mask) = arg.getInstanceSort(0)
+    arg_i = mask.get(0)
+    stringID = Common.STRCONS_SUB + str(Common.getStringUID())
+    Common.string_map[stringID] = arg_i
+    return IntArg([Int("Length$" + str(stringID))])
 
 def op_substring(whole_string, left_index, right_index):
+    (_, whole_mask) = whole_string.getInstanceSort(0)
+    whole_i = whole_mask.get(0)
     pass
+    
+    return IntArg([Int("Length$" + str(whole_i))])
 
 def op_replace(whole_string, from_string, to_string):
     pass
 
 def op_split(left, right):
-    pass
+    sys.exit("Split not implemented.")
 
 def op_contains(left, right):
     pass
 
 def op_indexof(left, right):
-    pass
+    (_, mask) = left.getInstanceSort(0)
+    left_i = mask.get(0)
+    (_, mask) = right.getInstanceSort(0)
+    right_i = mask.get(0)
+    return IntArg([Int("Indexof$" + left_i + "$" + right_i)])
 
 '''
 #######################################################################

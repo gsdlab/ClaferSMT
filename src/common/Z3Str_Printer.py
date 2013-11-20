@@ -5,6 +5,7 @@
 #
 # Author: Leonardo de Moura (leonardo)
 ############################################
+from common import Common
 from z3 import BoolRef, ArithRef, IntNumRef
 from z3consts import *
 from z3core import *
@@ -17,6 +18,7 @@ def obj_to_string(constraint):
     return ("(assert " + strprint(constraint) + ")")
         
 def strprint(c):
+    
     k = c.decl().kind()
     if(z3_op_to_str.get(k)):
         op = z3_op_to_str.get(k)
@@ -32,7 +34,14 @@ def strprint(c):
         c = str(c)
         if c.find("$") != -1:
             array = c.split("$")
-            return("(" + array.pop(0) + " " + " ".join(array) + ")")
+            retStr = "(" + array.pop(0)
+            for i in array:
+                if i.startswith(Common.STRCONS_SUB):
+                    retStr = retStr + " " + strprint(Common.string_map[i])
+                else:
+                    retStr = retStr + " " + strprint(i)
+            retStr = retStr + ")"
+            return retStr
         elif c == "EMPTYSTRING":
             return c
         return(c)

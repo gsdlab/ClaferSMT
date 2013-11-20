@@ -1,0 +1,4 @@
+abstract Person 1
+A : Person 1
+[#(Person ++ A) = 1]
+
