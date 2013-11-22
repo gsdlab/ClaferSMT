@@ -239,12 +239,15 @@ class Z3Instance(object):
         d = DimacsConverter()
         t = Tactic("tseitin-cnf")
         cnf = t(self.goal)
+        clauses = []
         #print(cnf)
         for i in cnf:
             for j in i:
                 #print(j)
-                variables = d.toDimacs(j)
-                f_n.write(",".join([str(i) for i in variables]) + "\n")
+                clauses.append(d.toDimacs(j))
+        f_n.write("p cnf " + str(d.varcount-1) + " " + str(len(clauses)))
+        for clause in clauses:
+                f_n.write(" ".join([str(i) for i in clause])  + " 0"+ "\n")
         f_n.close()
 
     

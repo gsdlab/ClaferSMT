@@ -21,6 +21,7 @@ class DimacsConverter():
     def __init__(self):
         self.vars = {}
         self.varcount = 1
+        
     
     def getVarIndex(self, variable):
         if self.vars.get(variable):
