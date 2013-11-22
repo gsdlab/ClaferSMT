@@ -1,10 +1,8 @@
-############################################
-# Copyright (c) 2012 Microsoft Corporation
-# 
-# Z3 Python interface
-#
-# Author: Leonardo de Moura (leonardo)
-############################################
+'''
+Created on Nov 21, 2013
+
+@author: ezulkosk
+'''
 from common import Common
 from z3 import BoolRef, ArithRef, IntNumRef
 from z3consts import *
@@ -13,7 +11,41 @@ import io
 import sys
 import z3
 
+'''
+###################################
+# CNF + DIM[H]AC[K]S
+###################################
+'''
+class DimacsConverter():
+    
+    def __init__(self):
+        self.vars = {}
+        self.varcount = 1
+    
+    def getVarIndex(self, variable):
+        if self.vars.get(variable):
+            return self.vars[variable]
+        else:
+            self.vars[variable] = self.varcount
+            self.varcount = self.varcount + 1
+            return self.vars[variable]
+    
+    def toDimacs(self, clause):
+        variables = []
+        #print(clause)
+        if z3.is_const(clause):
+            if not isinstance(clause, IntNumRef):
+                variables.append(self.getVarIndex(str(clause)))
+        for c in clause.children():
+            variables = variables + self.toDimacs(c)
+        return variables
 
+
+'''
+###################################
+# Z3-Str
+###################################
+'''
 def obj_to_string(constraint):
     return ("(assert " + strprint(constraint) + ")")
         
@@ -34,12 +66,20 @@ def strprint(c):
         c = str(c)
         if c.find("$") != -1:
             array = c.split("$")
-            retStr = "(" + array.pop(0)
-            for i in array:
-                if i.startswith(Common.STRCONS_SUB):
-                    retStr = retStr + " " + strprint(Common.string_map[i])
+            op = array.pop(0)
+            retStr = "(" + op
+            if op in ["Length"]:
+                arity = 1
+            elif op in ["Indexof", "Contains", "Concat"]:
+                arity = 2
+            elif op in ["Substring", "Replace"]:
+                arity = 3
+            for i in range(arity):
+                arg = array.pop(0)
+                if arg.startswith(Common.STRCONS_SUB):
+                    retStr = retStr + " " + strprint(Common.string_map[arg])
                 else:
-                    retStr = retStr + " " + strprint(i)
+                    retStr = retStr + " " + strprint("$".join([arg] + array))
             retStr = retStr + ")"
             return retStr
         elif c == "EMPTYSTRING":

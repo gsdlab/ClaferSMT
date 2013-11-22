@@ -48,10 +48,12 @@ ECLIPSE = True
 
 MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
-STRING_CONSTRAINTS = True
-NUM_INSTANCES = 10 # -1 to produce all instances
+STRING_CONSTRAINTS = False
+CNF = True
+GOAL = True
+NUM_INSTANCES = 1 # -1 to produce all instances
 INFINITE = -1 #best variable name.
-PROFILING = False # True to output the translation time, and time to get first model
+PROFILING = True # True to output the translation time, and time to get first model
 CPROFILING = False #invokes the standard python profiling method (see Z3Run.py)
 GET_ISOMORPHISM_CONSTRAINT = False #efficiency bugs in quantified formulas is preventing this from working
 BREAK_QUANTIFIER_SYMMETRY = False
@@ -59,7 +61,10 @@ EXTEND_ABSTRACT_SCOPES = True
 FILE = ""
 MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
-TEST_SET = POSITIVE_TESTS 
+TEST_SET = MY_TESTS 
+DIMACS_FILE="dimacs"
+
+
 
 #MODULE = bracketedconstraint_this.getModule()
 #MODULE = multiple_joins.getModule()
@@ -73,7 +78,7 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = paths.getModule()
 #MODULE = mypaths.getModule()
 #MODULE = simple_set.getModule()
-#MODULE = zoo.getModule()
+MODULE = zoo.getModule()
 #MODULE = simple_zoo.getModule()
 #MODULE = integer_refs.getModule()
 #MODULE = minimal_integer_refs.getModule()
@@ -84,7 +89,7 @@ TEST_SET = POSITIVE_TESTS
 #MODULE = dag_test.getModule()
 #MODULE = books_tutorial.getModule()
 #MODULE = simple_books.getModule()
-MODULE = teststring.getModule()
+#MODULE = teststring.getModule()
 #MODULE = testunion.getModule()
 #MODULE = subbooks.getModule()
 #MODULE = int_ref_set.getModule()
@@ -209,6 +214,9 @@ def setCommandLineOptions():
                         choices=['edstests', 'positive'])
     parser.add_argument('--stringconstraints' , '-s', default=False, dest='stringconstraints',action='store_const',  const=True,  help='Flag to output to Z3-Str format instead.')
     parser.add_argument('--eclipse', '-e', dest='eclipse', default=True, action='store_const',  const=False, help='Do not set this...')
+    parser.add_argument('--cnf', default=False, dest='cnf',action='store_const',  const=True,  help='Outputs CNF of formula.')
+    parser.add_argument('--dimacs', default="dimacs", dest='dimacs', help='Output DIMACS.')
+    
     args = parser.parse_args()
     
     global ECLIPSE
@@ -240,6 +248,10 @@ def setCommandLineOptions():
     TEST_SET = testMap[args.testset]
     global STRING_CONSTRAINTS
     STRING_CONSTRAINTS= args.stringconstraints
+    global CNF
+    CNF= args.cnf
+    global DIMACS_FILE
+    DIMACS_FILE = args.dimacs
     
 
 

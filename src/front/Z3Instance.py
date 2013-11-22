@@ -10,14 +10,18 @@ from common.Common import debug_print, standard_print, mOr
 from common.Exceptions import UnusedAbstractException
 from constraints import Constraints, IsomorphismConstraint
 from front import Z3Str
+from front.Converters import DimacsConverter
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
     SetScopes, AdjustAbstracts
-from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real, Int
+from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real, Int, \
+    Goal, tactics, tactic_description, Tactic, SolverFor
 from z3consts import Z3_UNINTERPRETED_SORT
 from z3types import Z3Exception
 import sys
 
+
+    
 
 class Z3Instance(object):
     ''' 
@@ -31,9 +35,11 @@ class Z3Instance(object):
         self.module = module
         self.z3_bracketed_constraints = []
         self.z3_sorts = {}
+        #self.solver = SolverFor("QF_LIA")
         self.solver = Solver()
         self.setOptions()
         self.clock = Clock.Clock()
+        self.goal = Goal()
         #print(self.solver.help())
         #print(get_version_string())
         
@@ -137,6 +143,8 @@ class Z3Instance(object):
         try:
             self.clock.tick("translation")
             
+            #for i in  tactics():
+            #    print( i + " ===> " + str(tactic_description(str(i))))
             """ Create a ClaferSort associated with each Clafer. """  
             Visitor.visit(CreateSorts.CreateSorts(self), self.module)
             
@@ -189,10 +197,16 @@ class Z3Instance(object):
                 self.printZ3StrConstraints()
                 Z3Str.clafer_to_z3str("z3str_in")
                 return 1
+            
                
             debug_print("Asserting constraints.")
             self.assertConstraints()     
             
+            if Options.CNF:
+                debug_print("Outputting DIMACS.")
+                self.convertToDimacs()
+                return 1
+                
             debug_print("Printing constraints.") 
             self.printConstraints()
             
@@ -217,6 +231,23 @@ class Z3Instance(object):
         standard_print("")
         self.clock.tack("printing")
     
+    def convertToDimacs(self):
+        f_n = open(Options.DIMACS_FILE, 'w')
+        #print(Options.DIMACS_FILE)
+        #self.printCNF()
+        #print(self.goal)
+        d = DimacsConverter()
+        t = Tactic("tseitin-cnf")
+        cnf = t(self.goal)
+        #print(cnf)
+        for i in cnf:
+            for j in i:
+                #print(j)
+                variables = d.toDimacs(j)
+                f_n.write(",".join([str(i) for i in variables]) + "\n")
+        f_n.close()
+
+    
     def assertConstraints(self):
         for i in self.z3_sorts.values():
             i.constraints.assertConstraints(self)
@@ -234,6 +265,7 @@ class Z3Instance(object):
         for i in self.z3_bracketed_constraints:
             i.debug_print()
             
+    
     def printZ3StrConstraints(self):
         f_n = open("z3str_in", 'w')
         f_n.write("(set-option :auto-config true)\n")
@@ -276,6 +308,7 @@ class Z3Instance(object):
         self.clock.tick("first model")
         while True:
             self.clock.tick("unsat")
+            
             if (Common.MODE != Common.DEBUG and self.solver.check() == sat and count != desired_number_of_models) or \
                 (Common.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == sat and count != desired_number_of_models):
                 if count == 0:

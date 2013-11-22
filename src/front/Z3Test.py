@@ -6,7 +6,7 @@ Created on April 27, 2013
 testing method for the Z3 backend of Clafer
 '''
 from z3 import BitVec, Bool, Solver, Xor, Function, IntSort, Array, Int, sat, \
-    is_array, Or
+    is_array, Or, Goal, Then
 from z3consts import Z3_UNINTERPRETED_SORT
 from z3types import Z3Exception
 import sys
@@ -37,37 +37,28 @@ def main(args):
     B = Bool("B")
     C = Bool("C")
     D = Bool("D")
-    Int("c$" )
+    x = Int("x" )
+    y = Int("y")
     s = Solver()
-    s.add(Xor(A,B,C,D))
     s.check()
     print(s.model());
+    g = Goal()
+    g.add(x == 0, y >= x + 1)
+    
+    print(g.depth())
+    print(g)
+    s.add(g)
+    print(s.check())
+    r = Then('simplify', 'solve-eqs')(g)
+    # r has 1 subgoal
+    print(len(r))
+    print(r)
     
     f = Function('f', IntSort(), IntSort(), IntSort())
     A = Array("A", IntSort(), IntSort())
     B = Array("B", IntSort(), IntSort())
     s = Solver()
     #c = IntSort()
-    s.add(A[0]==1)
-    #s.add(Or(A[0]==1, And(B[0] == 1, B[1] == 0, B[2] == 0)))
-    #s.add(A[0] == 0)
-    #s.add(If())
-    s.check()
-    print(s.model());
-    c = Int('a')
-    A = Array("A", IntSort(), IntSort())
-    B = Array("B", IntSort(), IntSort())
-    a = [f(c,c) == A[i] + B[i] for i in range(4)]
-    s = Solver()
-    s.add(A[0] + A[1] + A[2] >  1)
-    s.add(A[0] <= 1)
-    s.add(A[0] >= 0)
-    s.add(A[1] <= 1)
-    s.add(A[1] >= 0)
-    s.add(A[2] <= 1)
-    s.add(A[2] >= 0)
-    
-    s.add(a)
     print(s.check())
     '''
     

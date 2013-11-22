@@ -3,8 +3,9 @@ Created on Oct 3, 2013
 
 @author: ezulkosk
 '''
-from common import Common, Z3Str_Printer
+from common import Common, Options
 from common.Common import debug_print
+from front import Converters
 from z3 import Bool, Implies, simplify, And, Not
 
 
@@ -19,17 +20,23 @@ class Constraints():
             #z3.solver.add(And(constraint, Not(constraint)))
             print(simplify(constraint))
         if Common.MODE != Common.DEBUG: 
-            z3.solver.add(constraint)
+            if Options.GOAL:
+                z3.goal.add(constraint)
+            else:
+                z3.solver.add(constraint)
         if Common.MODE == Common.DEBUG:
             p = Bool(str(self.assertID) + "_" + str(Common.getConstraintUID()))
             z3.unsat_core_trackers.append(p)
             z3.unsat_map[str(p)] = constraint
-            z3.solver.add(Implies(p, constraint))
+            if Options.GOAL:
+                z3.goal.add(Implies(p, constraint))
+            else:
+                z3.solver.add(Implies(p, constraint))
             
     def convert(self, f_n, constraint):
         #print("#####")
         #print(constraint)
-        f_n.write(Z3Str_Printer.obj_to_string(constraint) + "\n")
+        f_n.write(Converters.obj_to_string(constraint) + "\n")
 
 class GenericConstraints(Constraints): 
     def __init__(self, ident):
