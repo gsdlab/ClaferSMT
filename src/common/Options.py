@@ -35,21 +35,20 @@ import sys
 * Traversal of quantified formulas is exponential...
 * Fix quantifier symmetry breaker, if two locals FROM THE SAME QUANTIFIER are on the left and right of a func, not symmetric
 * Documentation
-* Create an "EmptyString" Int!
 '''
 
 '''
 POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
 '''
 
-GLOBAL_SCOPE = 6#this obviously has to change
+GLOBAL_SCOPE = 4#this obviously has to change
 
 ECLIPSE = True
 
 MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
-STRING_CONSTRAINTS = False
-CNF = True
+STRING_CONSTRAINTS = True
+CNF = False
 GOAL = True
 NUM_INSTANCES = 1 # -1 to produce all instances
 INFINITE = -1 #best variable name.
@@ -78,7 +77,7 @@ DIMACS_FILE="dimacs"
 #MODULE = paths.getModule()
 #MODULE = mypaths.getModule()
 #MODULE = simple_set.getModule()
-MODULE = zoo.getModule()
+#MODULE = zoo.getModule()
 #MODULE = simple_zoo.getModule()
 #MODULE = integer_refs.getModule()
 #MODULE = minimal_integer_refs.getModule()
@@ -89,7 +88,7 @@ MODULE = zoo.getModule()
 #MODULE = dag_test.getModule()
 #MODULE = books_tutorial.getModule()
 #MODULE = simple_books.getModule()
-#MODULE = teststring.getModule()
+MODULE = teststring.getModule()
 #MODULE = testunion.getModule()
 #MODULE = subbooks.getModule()
 #MODULE = int_ref_set.getModule()

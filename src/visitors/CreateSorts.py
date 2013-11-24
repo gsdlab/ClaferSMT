@@ -33,6 +33,7 @@ class CreateSorts(VisitorTemplate.VisitorTemplate):
         '''
         visitors.Visitor.visit(self,element.supers)
         sort = ClaferSort(element, self.z3, self.stack)
+        print(element.uid)
         self.z3.addSort(element.uid, sort)  
         self.stack.append(sort)
         for i in element.elements:

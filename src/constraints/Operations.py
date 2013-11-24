@@ -37,7 +37,10 @@ def joinWithSuper(sort, mask):
     '''
     newMask = Mask()
     for i in mask.keys():
-        #ClaferSort.addSubSort(self, sub), is somewhat related 
+        #ClaferSort.addSubSort(self, sub), is somewhat related
+        #print(sort)
+        #print(sort.superSort)
+        #print(sort.refSort) 
         newMask.put(i + sort.indexInSuper,
                     If(sort.isOn(mask.get(i)), 
                        sort.superSort.instances[i + sort.indexInSuper], 
@@ -103,7 +106,7 @@ def joinWithClaferRef(arg):
     newInstanceSorts = []
     for i in arg.getInstanceSorts():
         (sort, mask) = i
-        while not sort.refs:
+        while not sort.refSort:
             (sort, mask) = joinWithSuper(sort, mask)
         tempRefs = []
         newMask = alreadyExists(sort.refSort, newInstanceSorts)
@@ -171,6 +174,8 @@ def joinWithClafer(left, right):
                                                         right_sort.instances[i] == j)))
             '''CAREFUL!!! '''
             if newMask.size() == 0:
+                print(left)
+                print(right)
                 continue
             newInstanceSorts.append((right_sort, newMask))
             Assertions.nonEmptyMask(newMask)

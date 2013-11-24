@@ -1,2 +1,2 @@
 a : int
-[#a.ref = 5]
+[a.ref = 5]

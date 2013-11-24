@@ -128,7 +128,7 @@ class Z3Instance(object):
         #set_option(auto_config=False)
         #set_option(candidate_models=True)
         if Common.MODE == Common.DEBUG:
-            #set_option(max_width=2)
+            set_option(max_width=100)
             set_option(max_depth=1000)
             set_option(max_args=1000)
             set_option(auto_config=False)
@@ -154,6 +154,9 @@ class Z3Instance(object):
             """ Add subclafers to the *fields* variable in the corresponding parent clafer. Also handles supers and refs. """
             Visitor.visit(CreateHierarchy.CreateHierarchy(self), self.module)
             
+            #for i in self.getSorts():
+            #   print(i)
+            
             debug_print("Mapping colon clafers.")
             self.mapColonClafers()
           
@@ -169,6 +172,8 @@ class Z3Instance(object):
                 hasChanged = self.setAbstractScopes()
                 self.adjustAbstracts()
             
+            #for i in self.getSorts():
+            #     print(str(i) + " " + str(i.element.glCard[1]))
             
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
@@ -198,7 +203,6 @@ class Z3Instance(object):
                 Z3Str.clafer_to_z3str("z3str_in")
                 return 1
             
-               
             debug_print("Asserting constraints.")
             self.assertConstraints()     
             

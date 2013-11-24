@@ -1,0 +1,49 @@
+This is BibTeX, Version 0.99d (TeX Live 2012/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: claferZ3_report.aux
+The style file: abbrv.bst
+Database file #1: doc.bib
+Warning--I didn't find a database entry for "BakClaferSLE2010"
+Warning--empty school in Olaechea2013
+You've used 7 entries,
+            2118 wiz_defined-function locations,
+            547 strings with 5158 characters,
+and the built_in function-call counts, 2394 in all, are:
+= -- 234
+> -- 130
+< -- 2
++ -- 51
+- -- 44
+* -- 170
+:= -- 414
+add.period$ -- 21
+call.type$ -- 7
+change.case$ -- 42
+chr.to.int$ -- 0
+cite$ -- 8
+duplicate$ -- 89
+empty$ -- 158
+format.name$ -- 44
+if$ -- 486
+int.to.chr$ -- 0
+int.to.str$ -- 7
+missing$ -- 6
+newline$ -- 38
+num.names$ -- 14
+pop$ -- 40
+preamble$ -- 1
+purify$ -- 36
+quote$ -- 0
+skip$ -- 69
+stack$ -- 0
+substring$ -- 123
+swap$ -- 23
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 28
+warning$ -- 1
+while$ -- 22
+width$ -- 8
+write$ -- 76
+(There were 2 warnings)
