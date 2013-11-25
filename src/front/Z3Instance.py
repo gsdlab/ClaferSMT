@@ -21,9 +21,8 @@ from z3types import Z3Exception
 import sys
 
 
-    
-
 class Z3Instance(object):
+    
     ''' 
     :var module: The Clafer AST
 

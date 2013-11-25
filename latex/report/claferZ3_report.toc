@@ -3,6 +3,6 @@
 \contentsline {section}{\numberline {3}Solution Overview}{2}{section.3}
 \contentsline {section}{\numberline {4}Detailed Solution Overview}{3}{section.4}
 \contentsline {subsection}{\numberline {4.1}Representation of a clafer}{4}{subsection.4.1}
-\contentsline {subsection}{\numberline {4.2}Bracketed Constraints}{5}{subsection.4.2}
+\contentsline {subsection}{\numberline {4.2}Bracketed Constraints}{4}{subsection.4.2}
 \contentsline {section}{\numberline {5}Related and Previous Work}{5}{section.5}
 \contentsline {section}{\numberline {6}Planned Contributions}{5}{section.6}

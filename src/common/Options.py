@@ -19,7 +19,7 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     negative, paths, personRelatives, person_tutorial, resolution, simp, \
     subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
     one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths, \
-    AADL_simplified_with_lists, teststring, testunion
+    AADL_simplified_with_lists, teststring, testunion, simple_real
 import argparse
 import sys
 
@@ -35,6 +35,7 @@ import sys
 * Traversal of quantified formulas is exponential...
 * Fix quantifier symmetry breaker, if two locals FROM THE SAME QUANTIFIER are on the left and right of a func, not symmetric
 * Documentation
+* Need to treat ints and reals "the same" if in the same set.
 '''
 
 '''
@@ -45,11 +46,11 @@ GLOBAL_SCOPE = 4#this obviously has to change
 
 ECLIPSE = True
 
-MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
-PRINT_CONSTRAINTS = False
-STRING_CONSTRAINTS = True
+MODE = Common.DEBUG # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
+PRINT_CONSTRAINTS = True
+STRING_CONSTRAINTS = False
 CNF = False
-GOAL = True
+GOAL = False
 NUM_INSTANCES = 1 # -1 to produce all instances
 INFINITE = -1 #best variable name.
 PROFILING = True # True to output the translation time, and time to get first model
@@ -88,7 +89,7 @@ DIMACS_FILE="dimacs"
 #MODULE = dag_test.getModule()
 #MODULE = books_tutorial.getModule()
 #MODULE = simple_books.getModule()
-MODULE = teststring.getModule()
+#MODULE = teststring.getModule()
 #MODULE = testunion.getModule()
 #MODULE = subbooks.getModule()
 #MODULE = int_ref_set.getModule()
@@ -113,7 +114,7 @@ MODULE = teststring.getModule()
 #MODULE = trivial.getModule()
 #MODULE = i72sharedreference.getModule()
 #MODULE = trivial2.getModule()
-
+MODULE = simple_real.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),
@@ -132,6 +133,7 @@ my_tests = [
           (equal_references, 2),
           (all_alls, 1),
           (all_threes, 1),
+          (simple_real, 1),
           (zoo, INFINITE)
          ]
 

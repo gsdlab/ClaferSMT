@@ -5,9 +5,10 @@ Created on Nov 1, 2013
 '''
 from common import Common, Assertions, Options
 from common.Common import mOr, mAnd
-from structures.ClaferSort import BoolSort, IntSort, PrimitiveType, StringSort
+from structures.ClaferSort import BoolSort, IntSort, PrimitiveType, StringSort, \
+    RealSort
 from structures.ExprArg import Mask, ExprArg, JoinArg, IntArg, BoolArg
-from z3 import If, And, Sum, Not, Implies, Xor, Or, IntVector, Int
+from z3 import If, And, Sum, Not, Implies, Xor, Or, IntVector, Int, ToReal
 import sys
 
 
@@ -98,8 +99,12 @@ def joinWithPrimitive(arg):
                 newMask.put(i, sort.refs[i])
             newInstanceSorts.append((newSort, newMask))
         else:
-            print("Error on: " + sort.refSort + ", refs other than int (e.g. double) unimplemented")
-            sys.exit()
+            newMask = alreadyExists(RealSort(), newInstanceSorts) #check that this works!!!
+            newSort = RealSort()
+            for i in mask.keys():
+                addPrimitive(newSort, newMask, sort, mask, i)         
+            newInstanceSorts.append((newSort, newMask)) #should change the "int", but not sure how yet
+            Assertions.nonEmptyMask(newMask)
     return ExprArg(newInstanceSorts)
     
 def joinWithClaferRef(arg):
@@ -174,8 +179,8 @@ def joinWithClafer(left, right):
                                                         right_sort.instances[i] == j)))
             '''CAREFUL!!! '''
             if newMask.size() == 0:
-                print(left)
-                print(right)
+                #print(left)
+                #print(right)
                 continue
             newInstanceSorts.append((right_sort, newMask))
             Assertions.nonEmptyMask(newMask)
@@ -287,6 +292,12 @@ def op_eq(left,right):
     (left_sort, left_mask) = left.getInstanceSort(0)
     (right_sort, right_mask) = right.getInstanceSort(0)
     if isinstance(left_sort, IntSort) or isinstance(right_sort, IntSort):
+        return BoolArg([sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]) 
+                        == sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()])])
+    #real equality case
+    (left_sort, left_mask) = left.getInstanceSort(0)
+    (right_sort, right_mask) = right.getInstanceSort(0)
+    if isinstance(left_sort, RealSort) or isinstance(right_sort, RealSort):
         return BoolArg([sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]) 
                         == sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()])])
     #clafer-set equality case

@@ -5,7 +5,7 @@ Created on Oct 21, 2013
 '''
 from bintrees.avltree import AVLTree
 from common import Assertions
-from structures.ClaferSort import BoolSort, IntSort, PrimitiveType
+from structures.ClaferSort import BoolSort, IntSort, PrimitiveType, RealSort
 
 
 
@@ -64,6 +64,16 @@ class IntArg(ExprArg):
         Convenience class that extends ExprArg and holds an integer instance.
         '''
         sort = IntSort()
+        for i in range(len(instances)):
+            sort.cardinalityMask.put(i, 1)
+        self.instanceSorts = [(sort, Mask.createIntMask(instances))]
+        
+class RealArg(ExprArg):
+    def __init__(self, instances):
+        '''
+        Convenience class that extends ExprArg and holds an integer instance.
+        '''
+        sort = RealSort()
         for i in range(len(instances)):
             sort.cardinalityMask.put(i, 1)
         self.instanceSorts = [(sort, Mask.createIntMask(instances))]

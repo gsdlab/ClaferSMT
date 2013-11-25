@@ -7,7 +7,7 @@ from common import Common, Options
 from common.Common import mOr
 from constraints import Constraints
 from pip.backwardcompat import reduce
-from z3 import IntVector, If, Implies, And, Or, Sum, Not
+from z3 import IntVector, If, Implies, And, Or, Sum, Not, RealVector
 import operator
 import sys
 
@@ -111,7 +111,9 @@ class  ClaferSort(object):
         self.createInstancesConstraintsAndFunctions()
     
     def addRefConstraints(self):
-        if(self.refSort):
+        if isinstance(self.refSort, PrimitiveType) and self.refSort.type == "real":
+            self.refs = RealVector(self.element.uid + "_ref",self.numInstances)
+        elif(self.refSort):
             self.refs = IntVector(self.element.uid + "_ref",self.numInstances)#used to be self.element.uid.split("_",1)[1] + "_ref"
         if not self.refSort:
             return  
@@ -133,7 +135,8 @@ class  ClaferSort(object):
                     else:
                         self.constraints.addRefConstraint(Implies(self.isOff(i), self.refs[i] == 0))    
                 else: 
-                    sys.exit(str(self.refSort) + " not supported yet")
+                    self.constraints.addRefConstraint(Implies(self.isOff(i), self.refs[i] == 0))    
+                    #sys.exit(str(self.refSort) + " not supported yet")
             else:
                 self.constraints.addRefConstraint(If(self.isOff(i)
                                            , self.refs[i] == self.refSort.numInstances
@@ -434,8 +437,43 @@ class IntSort():
     def __eq__(self, other):
         return isinstance(other, IntSort)
     
+    
+class RealSort():
+    
+    def __init__(self):
+        from structures.ExprArg import Mask
+        self.cardinalityMask = Mask()
+        self.index = 0
+        
+    def isOn(self, arg):
+        '''
+        Returns a Boolean Constraint stating whether or not the instance at the given arg is *on*.
+        '''
+        return self.cardinalityMask.get(arg)
+    
+    def isOff(self, arg):
+        '''
+        Returns a Boolean Constraint stating whether or not the instance at the given index is *off*.
+        '''
+        return not self.isOn(arg)
+    
+    def getNextIndex(self):
+        self.index = self.index + 1
+        return self.index - 1
+    
+    def getCardinalityMask(self):
+        return self.cardinalityMask
+    
+    def __lt__(self, other):
+        return not (isinstance(other, IntSort) or isinstance(other, BoolSort) or isinstance(other, StringSort))
+        
+    
+    def __eq__(self, other):
+        return isinstance(other, IntSort)
+    
+    
     def __str__(self):
-        return "IntSort"
+        return "RealSort"
     
     def __repr__(self):
         return self.__str__()

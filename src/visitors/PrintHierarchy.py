@@ -61,7 +61,7 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                 if not sort.refs:
                         self.tree.addNode(str(sort.instances[j]), parentInstance)
                 else:
-                    if isinstance(sort.refSort, PrimitiveType) and (sort.refSort == "integer" or sort.refSort == "string"):
+                    if isinstance(sort.refSort, PrimitiveType) and (sort.refSort == "integer" or sort.refSort == "string" or sort.refSort == "real"):
                         self.tree.addNode(str(sort.instances[j]), parentInstance)
                         self.tree.addRef(str(sort.instances[j]), str(self.model.eval(sort.refs[j])))
                     else:
