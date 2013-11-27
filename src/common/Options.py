@@ -42,12 +42,12 @@ import sys
 POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
 '''
 
-GLOBAL_SCOPE = 4#this obviously has to change
+GLOBAL_SCOPE = 1#this obviously has to change
 
 ECLIPSE = True
 
-MODE = Common.DEBUG # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
-PRINT_CONSTRAINTS = True
+MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
+PRINT_CONSTRAINTS = False
 STRING_CONSTRAINTS = False
 CNF = False
 GOAL = False
@@ -114,7 +114,7 @@ DIMACS_FILE="dimacs"
 #MODULE = trivial.getModule()
 #MODULE = i72sharedreference.getModule()
 #MODULE = trivial2.getModule()
-MODULE = simple_real.getModule()
+#MODULE = simple_real.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),

@@ -43,7 +43,7 @@ def main(args):
     s.check()
     print(s.model());
     g = Goal()
-    g.add(x == 0, y >= x + 1)
+    g.add(x == 0, y >= x + 100000000000000000000)
     
     print(g.depth())
     print(g)
