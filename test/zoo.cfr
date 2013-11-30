@@ -1,4 +1,4 @@
-abstract Animal 9
+abstract Animal *
   Head
     Eye 2
     Ear 2
