@@ -1,0 +1,177 @@
+abstract Mortgage 
+  valueProposition -> string 
+  term -> MortgageTerm 
+  xor kind 
+    open 
+    closed 
+  principalMortgageAmount -> Currency 
+  [ 5000 <= principalMortgageAmount <= 9999999 ] 
+  balance -> Currency 
+  [ balance <= principalMortgageAmount ] 
+  propertyValue -> Currency 
+  loanToValue -> Percentage 
+  [ loanToValue = balance /propertyValue ] 
+  amortization -> integer 
+  [ 1 <= amortization <= 30 ] 
+  xor interestRate 
+    fixedForTheFullTerm 
+    resetTogetherWithPaymentAmountEachTimeScotiabankPrimeRateChanges 
+  currentInterestRate -> Percentage 
+  [ 0.5 <= currentInterestRate <= 25 ] 
+ 
+  currentPayment -> Currency 
+  xor paymentFrequency 
+    weekly ; biweekly ; semimonthly ; monthly 
+  xor financingAvailable 
+    conventional 
+    insured 
+//////////////////////////////////////
+abstract fifteenPrepayment15Increase 
+  prepayUpTo15OfOriginalAmount 
+  increasePaymentsByUpTo15OfCurrentTermPayment 
+abstract anyAmountAnytime 
+  anyAmountUpToFullAmount 
+    atAnyTime 
+    withoutPenalty 
+//////////////////////////////
+abstract FixedRate : Mortgage 
+  [ valueProposition = “Play it safe by knowing exactly what your mortgage rate and payment will be for the full term.” &&
+    fixedForTheFullTerm ] 
+abstract OpenTerm : FixedRate 
+  [ valueProposition = “Get fixed payments, the flexibility to pay off your mortgage faster, and the security of locking into another term at any time.” &&
+  open &&
+  term in sixmonths + oneyear ] 
+  prepaymentOptions -> anyAmountAnytime 
+abstract FlexibleClosed Mortgage : FixedRate 
+  [ valueProposition = “Lock into a competitive rate for 6 months with the option to convert to a longer term without penalty.” &&
+  closed &&
+  term = sixmonths ] 
+  prepaymentOptions -> 15%Prepayment15%Increase 
+abstract 1,2YearClosedTermMortgages : FixedRate 
+  [ valueProposition = “Get the stability of a fixed rate and payment over the short-term at a very competitive rate.” &&
+  closed &&
+  term in oneyear + twoyears ] 
+  prepaymentOptions -> fifteenPrepayment15Increase 
+abstract three457YearClosedTermMortgages : FixedRate 
+  [ valueProposition = “Get the stability of a fixed rate and payment over the long-term at a very competitive rate.” &&
+  closed &&
+  term in threeyears + fouryears + fiveyears + sevenyears ] 
+  prepaymentOptions -> fifteenPrepayment15Increase 
+  cashBackOption 
+    cashBackUpTo5ofMortgagePrinciple 
+      upfront 
+abstract fiveYearClosedTermMortgages : FixedRate 
+  [ valueProposition = “By locking into a longer term mortgage, especially while current interest rates are so low, you can have the security of knowing your payment won't change.” &&
+  closed &&
+  term = fiveyears ] 
+ prepaymentOptions -> 15%Prepayment15%Increase 
+abstract tenYearClosedTermMortgages : FixedRate 
+  [ valueProposition = “A competitive low rate and payment that are guaranteed for 10 years.” &&
+  closed &&
+  term = tenyears ] 
+  prepaymentOptions -> fifteenPrepayment15Increase 
+  cashBackOption 
+    cashBackUpTo5ofMortgagePrinciple 
+      upFront 
+////////////////////////////////////////
+abstract VariableRate : Mortgage 
+  [ valueProposition = [ “Consider a variable rate mortgage. Where the rate you pay fluctuates with Scotiabank Prime Rate.” &&
+  term = fiveyears && 
+  resetTogetherWithPaymentAmountEachTimeScotiabankPrimeRateChanges ] 
+  addedBenefits 
+    convertAnytimeToFixedTermProductWithTermGreaterThanTheRemainingTerm 
+      withoutPenalty 
+abstract ScotiaFlexValueMortgageClosedTerm : VariableRate 
+  [ valueProposition = “Take advantage of a mortgage with a low rate and low payment.” &&
+  closed ] 
+  prepaymentOptions -> fifteenPrepayment15Increase 
+abstract ScotiaFlexValueMortgageOpenTerm : VariableRate 
+  [ valueProposition = “Flexibility means greater mortgage value: you get a low rate and low payments, and a guaranteed rate discount when you lock into Scotiabank's 5-year fixed rate.” &&
+  open ] 
+  prepaymentOptions -> anyAmountAnytime 
+//////////////////////////
+abstract SaveNowSaveLaterMortgage : FixedRate 
+  [ valueProposition = “Save now with a competitive mortgage rate and save later with a guaranteed rate discount. Limited time offer.” &&
+  closed &&
+  term = oneyear ] 
+  optionalRenewalTerm -> MortgageTerm = fiveyears 
+  initialInterestRateDiscount -> Percentage = 1.66 
+  renewalInterestRateDiscount -> Percentage = 1.25 
+  prepaymentOptions -> fifteenPrepayment15Increase 
+  addedBenefits 
+    renewTo5yearFixedRateClosedTerm 
+      noEarlyRenewalInterest 
+      noEarlyPrepaymentPenaltie 
+abstract LongAndShortMortgage : Mortgage 
+  [ valueProposition = “Trying to decide between short-term rates and more secure long-term borrowing options? Here's a mortgage for you.” ] 
+  fixedRate : FixedRate 
+    [ closed ] 
+  flexValue : VariableRate 
+  [ principalMortgageAmount = fixedRate.principalMortgageAmount + flexValue. principalMortgageAmount] 
+  [ balance = fixedRate.balance + flexValue.balance ] 
+  [ conventional <=> fixedRate.conventional && flexValue.conventional ] 
+  [ insured <=> fixedRate.insured && flexValue.insured ]  [ weekly <=> fixedRate.weekly && flexValue.weekly ] 
+  [ biweekly <=> fixedRate.biweekly && flexValue.biweekly ] 
+  [ semi-monthly <=> fixedRate.semi-monthly && flexValue.semi-monthly] 
+  [ monthly <=> fixedRate.monthly && flexValue.monthly] 
+  prepaymentOptions -> fifteenPrepayment15Increase 
+  addedBenefits 
+    partOfScotiaTotalequityPlan 
+abstract SecondaryHomeFinancingProgram : Mortgage 
+  [ valueProposition = “If you're looking for a getaway or a second home to call your own, consider your many financing options.”  &&
+  term != tenyears ] 
+  prepaymentOptions -> fifteenPrepayment15Increase 
+  conditions 
+    [ loanToValue <= 90 &&
+    75 <= loanToValue <= 90 <=> insured ] 
+abstract ScotiaMortgageForSelfemployed : Mortgage 
+  [ valueProposition = “Are you self-employed and looking to buy a home? See how much easier it can be.” &&
+  term != tenyears ] 
+  prepaymentOptions -> fifteenPrepayment15Increase 
+  conditions 
+    [ loanToValue <= 90 &&
+    75 <= loanToValue <= 90 <=> insured ] 
+abstract ScotiabankStartRightMortgageProgram : Mortgage 
+  xor residentType 
+    temporary 
+      [ valueProposition = “We can help you feel at home faster if you are working and living in Canada temporarily.” ] 
+    permanent 
+      [ valueProposition = “A specially designed program to meet your mortgage needs and help you in obtaining your first home in Canada.” ] 
+  prepaymentOptions -> fifteenPrepayment15Increase 
+  conditions 
+  [ loanToValue <= 95 &&
+  (temporary => ( 65 <= loanToValue <=> insured) ) || (permanent => ( 75 <= loanToValue <=> insured)) ] 
+///////////////////////////////
+abstract ScotiaTotalEquityPlan 
+  borrowingLimit -> Currency // calculated 
+  establishedWithASingleApplication 
+  appraisedPropertyValue -> Currency // provided in application 
+  [ borrowingLimit = 0.8 * appraisedPropertyValue ] 
+  currentMortgageBalance -> Currency // provided in application 
+  homeEquity -> Percentage // calculated 
+  [ homeEquity >= 20 &&
+  homeEquity = currentMortgageBalance * 100 / appraisedPropertyValue] 
+  //choose any combination of products 
+  'FixedRate * 
+  'VariableRate * 
+  'LongAndShortMortgage * 
+  'ScotiaLinePersonalLineofCredit * 
+  'CreditLineForBusiness * 
+  'ScotiaLineForBusinessVISACard * 
+  'ScotiaGoldPassportForBusinessVISACard * 
+  'ScotiabankVisaCard * 
+  'ScotiaPlanPersonalLoans * 
+  'TermLoanForBusiness * 
+  'OverdraftProtection ? 
+  [ (sum FixedRate.balance + 
+  sum VariableRate.balance + 
+  sum LongAndShortMortgage.balance + 
+  sum ScotiaLinePersonalLineofCredit.balance + 
+  sum CreditLineForBusiness.balance + 
+  sum ScotiaLineForBusinessVISACard.balance + 
+  sum ScotiaGoldPassportForBusinessVISACard.balance + 
+  sum ScotiabankVisaCard.balance + 
+  sum ScotiaPlanPersonalLoans.balance + 
+  sum TermLoanForBusiness.balance + 
+  OverdraftProtection.balance) 
+  <= borrowingLimit ] 

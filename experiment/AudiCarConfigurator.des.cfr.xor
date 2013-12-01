@@ -1,0 +1,85 @@
+0 .. * c0_AudiCar : clafer 1 .. 1 {
+  1 .. 1 c0_ModelLine : clafer 1 .. 1 {
+    0 .. * c0_AudiA4 : clafer 0 .. 1 {
+      [some this . parent . parent . c0_Model . c0_A4Saloon || some this . parent . parent . c0_Model . c0_A4Avant || some this . parent . parent . c0_Model . c0_S4Saloon || some this . parent . parent . c0_Model . c0_S4Avant]
+    }
+    0 .. * c0_AudiA6 : clafer 0 .. 1 {
+      [some this . parent . parent . c0_Model . c0_A6Saloon || some this . parent . parent . c0_Model . c0_A6Avant]
+    }
+    }
+  1 .. 1 c0_BodyStyle : clafer 1 .. 1 {
+    0 .. * c0_Saloon : clafer 0 .. 1 {
+      [some this . parent . parent . c0_Model . c0_A4Saloon || some this . parent . parent . c0_Model . c0_S4Saloon || some this . parent . parent . c0_Model . c0_A6Saloon]
+    }
+    0 .. * c0_Avant : clafer 0 .. 1 {
+      [some this . parent . parent . c0_Model . c0_A4Avant || some this . parent . parent . c0_Model . c0_S4Avant || some this . parent . parent . c0_Model . c0_A6Avant]
+    }
+    }
+  0 .. * c0_Engine : clafer 1 .. 1 {
+    1 .. 1 c0_WheelDrive : clafer 1 .. 1 {
+      0 .. * c0_Quatro : clafer 0 .. 1 {
+        }
+      0 .. * c0_FrontWheelDrive : clafer 0 .. 1 {
+        }
+      0 .. * c0_RearWheelDrive : clafer 0 .. 1 {
+        }
+      }
+    1 .. 1 c0_DriveTrain : clafer 1 .. 1 {
+      0 .. * c0_Automatic : clafer 0 .. 1 {
+        }
+      0 .. * c0_Manual : clafer 0 .. 1 {
+        }
+      0 .. * c0_STronic : clafer 0 .. 1 {
+        }
+      }
+    }
+  0 .. * c0_Exterior : clafer 1 .. 1 {
+    1 .. 1 c0_color : c0_Color 1 .. 1 {
+      }
+    0 .. * c0_wheel : c0_Wheel 1 .. 2 {
+      }
+    0 .. * c0_ExteriorPackage : clafer 0 .. 1 {
+      0 .. * c0_BlackStyling : clafer 1 .. 1 {
+        }
+      0 .. * c0_ContrastRoof : clafer 1 .. 1 {
+        }
+      }
+    }
+  1 .. 1 c0_Model : clafer 1 .. 1 {
+    0 .. * c0_A4Saloon : clafer 0 .. 1 {
+      }
+    0 .. * c0_A4Avant : clafer 0 .. 1 {
+      }
+    0 .. * c0_S4Saloon : clafer 0 .. 1 {
+      }
+    0 .. * c0_S4Avant : clafer 0 .. 1 {
+      }
+    0 .. * c0_A6Saloon : clafer 0 .. 1 {
+      }
+    0 .. * c0_A6Avant : clafer 0 .. 1 {
+      }
+    }
+  }
+abstract 0 .. * c0_Wheel : clafer 0 .. * {
+  0 .. * c0_Size : int 1 .. 1 {
+    }
+  [15 <= this . (c0_Size . ref)&& this . (c0_Size . ref)<= 20]1 .. 1 c0_TypeWheel : clafer 1 .. 1 {
+    0 .. * c0_Spoke5 : clafer 0 .. 1 {
+      }
+    0 .. * c0_Spoke6 : clafer 0 .. 1 {
+      }
+    0 .. * c0_Harm7 : clafer 0 .. 1 {
+      }
+    0 .. * c0_Hole6 : clafer 0 .. 1 {
+      }
+    }
+  }
+abstract 1 .. 1 c0_Color : clafer 0 .. * {
+  0 .. * c0_Metallic : clafer 0 .. 1 {
+    }
+  0 .. * c0_PearlEffect : clafer 0 .. 1 {
+    }
+  0 .. * c0_Other : clafer 0 .. 1 {
+    }
+  [# this . c0_Metallic + # this . c0_PearlEffect + # this . c0_Other = 1]
+}
