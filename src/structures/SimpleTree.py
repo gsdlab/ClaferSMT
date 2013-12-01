@@ -4,6 +4,8 @@ Created on Oct 30, 2013
 @author: ezulkosk
 '''
 
+
+
 class SimpleTree():
     
     def __init__(self):
@@ -22,10 +24,11 @@ class SimpleTree():
             self.nodes[node] = []
     
     def addRef(self, node, ref):
+        import visitors.PrintHierarchy
         if self.refs.get(node):
-            self.refs[node].append(ref)
+            self.refs[node].append(visitors.PrintHierarchy.removePrefix(ref))
         else:
-            self.refs[node] = [ref]
+            self.refs[node] = [visitors.PrintHierarchy.removePrefix(ref)]
     
     def addChild(self, node, child):
         self.nodes[node] = self.nodes[node].append(child)

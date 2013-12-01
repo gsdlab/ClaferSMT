@@ -12,7 +12,7 @@ class RealLiteral(object):
 
 
     def __init__(self,value):
-        self.value=z3.ToReal(value)
+        self.value=z3.RealVal(value)
         
     def __str__(self):
         return str(self.value)

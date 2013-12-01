@@ -269,9 +269,9 @@ class  ClaferSort(object):
                 bigSumm = bigSumm +  j.summs[i]
             #**** LEAVE THIS CODE ****
             #don't include inherited fields for now 
-            #if self.superSort:
-            #    for j in self.superSort.fields:
-            #        bigSumm = bigSumm +  j.summs[i + self.indexInSuper]
+            if self.superSort:
+                for j in self.superSort.fields:
+                    bigSumm = bigSumm +  j.summs[i + self.indexInSuper]
             if lowerGCard != 0:
                 self.constraints.addGroupCardConstraint(bigSumm >= lowerGCard)
             if upperGCard != -1:

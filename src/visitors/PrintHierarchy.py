@@ -10,12 +10,20 @@ from visitors import VisitorTemplate
 import visitors
 
 
+def removePrefix(string):
+        if string.startswith("c"):
+            newStr = string.split("_",1)
+            newStr = newStr[1]
+        else:
+            newStr = string
+        return newStr
 
 class PrintHierarchy(VisitorTemplate.VisitorTemplate):
     '''
     :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
     
     '''
+    
     
     def __init__(self, z3, model):
         '''
@@ -28,11 +36,12 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
     
     def recursivePrint(self, node, level):
         indent = "  " * level
+        nodeStr = removePrefix(node)
         if self.tree.refs.get(node):
-            ref = " = " + str(self.tree.refs[node])
+            ref = " = " + removePrefix(str(self.tree.refs[node]))
         else:
             ref = ""
-        print(indent + node + ref)
+        print(indent + nodeStr + ref)
         for i in self.tree.nodes.get(node, []):
             self.recursivePrint(i, level + 1)
     

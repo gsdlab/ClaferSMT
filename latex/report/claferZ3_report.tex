@@ -1,4 +1,4 @@
-% easychair.tex,v 3.2 2012/05/15
+ % easychair.tex,v 3.2 2012/05/15
 %
 % Select appropriate paper format in your document class as
 % instructed by your conference organizers. Only withtimes
@@ -153,7 +153,7 @@ Clafer is a modeling language with first-class support for feature and meta-mode
 %
 \indent In Listing \ref{listing:ClaferPhone}  we show a specification of two mobile phones in Clafer. 
 %
- \texttt{Phone} is an example of a top-level (non-nested) abstract clafer. \textbf{Abstract clafers} do not get directly instantiated in the resulting model, however concrete clafers, such as BudgetPhone and SmartPhone, can extend abstract clafers to inherit their sub-clafers. \textbf{Sub-clafers} are indicated by indentation, and cannot exist without their parent. Although our example only has two levels of indentation, other specifications may have more. The * after \texttt{Phone} indicates that zero or more \texttt{Phone}s may be included in the resulting model. \texttt{Phone} has an optional feature \texttt{PasswordProtection}, denoted by the question mark after it. \texttt{myApps} is a \textbf{reference clafer} (denoted by the  -$>$ symbol) that refers  to a set of \texttt{App}s. We emphasize that this is a set: an implicit constraint is that the same phone cannot have two of the same \texttt{App}. However, \textit{different} phones may install the same \texttt{App}. A \texttt{Phone}, has a final attribute of \texttt{cost}, which we indicate is of type real number. Note that a clafer that are primitive types (int/string/real) get desugared into reference clafers that point to instances of their respective type. \texttt{App} on line 6 is an example of a \textbf{concrete clafer}.\\
+ \texttt{Phone} is an example of a top-level (non-nested) abstract clafer. \textbf{Abstract clafers} do not get directly instantiated in the resulting model, however concrete clafers, such as BudgetPhone and SmartPhone, can extend abstract clafers to inherit their sub-clafers. \textbf{Sub-clafers} are indicated by indentation, and cannot exist without their parent. Although our example only has two levels of indentation, other specifications may have more. The * after \texttt{Phone} indicates that zero or more \texttt{Phone}s may be included in the resulting model. \texttt{Phone} has an optional feature \texttt{Wifi}, denoted by the question mark after it. \texttt{myApps} is a \textbf{reference clafer} (denoted by the  -$>$ symbol) that refers  to a set of \texttt{App}s. We emphasize that this is a set: an implicit constraint is that the same phone cannot have two of the same \texttt{App}. However, \textit{different} phones may install the same \texttt{App}. A \texttt{Phone}, has a final attribute of \texttt{cost}, which we indicate is of type real number. Note that clafers that are declared primitive (int/string/real) get \textit{desugared} into reference clafers that point to instances of their respective type. \texttt{App} on line 6 is an example of a \textbf{concrete clafer}.\\
 %
 \indent On line 9, we introduce the concrete clafer \texttt{BudgetPhone}, which inherits all subclafers from \texttt{Phone}. The number 2 after it indicates that their must be exactly two \texttt{BudgetPhone}s in the resulting model. \texttt{BudgetPhone} has two constraints associated with it on lines 10-11 (indicated by square brackets). Line 10 consists of a quantified formula (with quantifier \textit{no}), indicating that a \texttt{BudgetPhone} cannot have \texttt{App}s. Note that this constraint must be true of \textit{all} \texttt{BudgetPhone} instances, due to its level of indentation. Line 11 indicates the price of \texttt{BudgetPhone}s, constraining the inherited clafer \texttt{cost}. Line 14 restricts the cost of \texttt{SmartPhone}s to be its original cost, plus the sum of all installed \texttt{App}s. The dot character in ``myApps.appCost''  in essence serves as a navigation operator, by performing a join between the set of \texttt{App}s associated with this individual \texttt{SmartPhone} and the \texttt{appCost}s associated with them. A model of the specification is given in Listing \ref{listing:ClaferPhoneInstance}.\\ %As a final note, each instance of an abstract clafer can only be instantiated by one instance concrete clafer (\eg \textit{BudgetPhone0} and \textit{BudgetPhone1} cannot both instantiate \textit{Phone0}).
 \indent This example only illustrates a fragment of the expressions supported by Clafer. Most notably, set operations such as intersection and union allow richer expressions over instances of clafers. We describe the other components of the language in Section \ref{detailedsolution}
@@ -169,10 +169,10 @@ columns=fullflexible
 
 \begin{figure}[!t]
 \par\noindent
-\begin{minipage}[t]{.32\textwidth}
+\begin{minipage}[t]{.33\textwidth}
 \begin{lstlisting}[language=clafer, numbers=left, caption=Clafer specification of two types of phones and apps., label={listing:ClaferPhone}]
 abstract Phone *
-	PasswordProtection  ?
+	Wifi  ?
 	myApps ->  App *
 	cost : real
 
@@ -180,7 +180,7 @@ App *
 	appCost : real
 
 BudgetPhone: Phone 2
-	[ no myApps ]
+	[ no myApps && no Wifi ]
 	[ cost = 49.99 ]	
 
 SmartPhone: Phone 1
@@ -191,20 +191,20 @@ SmartPhone: Phone 1
 \hfill
 \begin{minipage}[t]{.32\textwidth}
 \begin{lstlisting}[language=clafer, caption=A generated model of a mobile phone and its apps in Clafer., label={listing:ClaferPhoneInstance}]
-App0
-	appCost = 0.99
-App1
-	appCost = 2.99
-BudgetPhone0 : Phone0
-	PasswordProtection0
-	cost = 49.99
-BudgetPhone1 : Phone1
-	cost = 49.99
-SmartPhone0 : Phone2
-	PasswordProtection1
-	myApps0 -> App0
-	myApps1 -> App1
-	cost = 103.97
+  App0
+	  appCost = 0.99
+  App1
+	  appCost = 2.99
+  BudgetPhone0 : Phone0
+	  Wifi0
+	  cost = 49.99
+  BudgetPhone1 : Phone1
+  	  cost = 49.99
+  SmartPhone0 : Phone2
+	  Wifi1
+	  myApps0 -> App0
+	  myApps1 -> App1
+	  cost = 103.97
 \end{lstlisting}%
 \end{minipage}%
 \hfill
@@ -213,7 +213,7 @@ SmartPhone0 : Phone2
 
 
 Phone: [0, 0, 0]
-PasswordProtection: [0, 2, 3]
+Wifi: [0, 2, 3]
 myApps: [2, 2, 3]
 myApps_ref: [0, 1, 3]
 cost: [0, 1, 2]
@@ -231,7 +231,7 @@ SmartPhone: [0]
 %	\subfigure{
 % \begin{lstlisting}[language=clafer]
 %Phone0
-%	PasswordProtection0
+%	Wifi0
 %	Apps0 ->  SwApps0
 %	Apps1 ->  SwApps1
 %	
@@ -247,7 +247,7 @@ SmartPhone: [0]
 %	\subfigure{
 % \begin{lstlisting}[language=clafer]
 %Phone0
-%	PasswordProtection0
+%	Wifi0
 %	Apps0 ->  SwApps0
 %	Apps1 ->  SwApps1
 %	
@@ -270,7 +270,7 @@ SmartPhone: [0]
 %
 %
 %Phone0
-%	PasswordProtection0
+%	Wifi0
 %	Apps0 ->  SwApps0
 %	Apps1 ->  SwApps1
 %	
@@ -393,10 +393,10 @@ AndroidApps -> SwApps *
 
 
 \section{Related and Previous Work}
-This work most closely resembles that of \cite{jimmy}. Their work translates Clafer to Choco, a CSP language. We have borrowed components from that work, particularly in our representation of clafers and inherited clafers. We are able to extend Clafer with constraints over strings and real numbers, which neither the Choco nor Alloy backend currently support. Z3 also allows us to handle arbitrarily larger integers, which neither of the other backends support. In addition, in the future we intend to extend this project in order to eliminate the need for scopes on unbounded clafers. We discuss this in Section \ref{futurework}. \\
+DISCUSS THE TVL PAPER AN SMT APPROACH TO AUTO... \\
 \indent The work of Michel et. al. \cite{Michel2012} discusses how configuration problems can be encoded in SMT using TVL \cite{Classen2011} -- a text based feature modeling language similar to Clafer. TVL supports many of the components of feature modeling, including hierarchy, group cardinality, attributes, enums, and cross-tree constraints. However, several aspects of Clafer make the translation to an SMT solver much more difficult than that of TVL in \cite{Michel2012}. Most notably, Clafer supports many set constraints that make translation much more difficult. \\
 \indent  A previous project \cite{Olaechea2013} within the GSD lab was capable of translating a small subset of Clafer to Z3, in order to support attributed feature models for multi-objective optimization. The primary components of Clafer necessary for this domain include hierarchical constraints, fixed-size cardinalities (e.g. [0..1]), and basic arithmetic constraints. This project subsumes that translation by allowing arbitrary Clafer constraints.
-
+\indent This work most closely resembles that of \cite{jimmy}. Their work translates Clafer to Choco, a CSP language. We have borrowed components from that work, particularly in our representation of clafers and inherited clafers. We are able to extend Clafer with constraints over strings and real numbers, which neither the Choco nor Alloy backend currently support. Z3 also allows us to handle arbitrarily larger integers, which neither of the other backends support. In addition, in the future we intend to extend this project in order to eliminate the need for scopes on unbounded clafers. We discuss this in Section \ref{futurework}. \\
 \section{Future Work}
 This project utilized only a small subset of the available features of Z3. For example, Z3 has support for uninterpreted functions and data types. We would like to modify our translation to take advantage of these features. With this approach, we may be able to eliminate the need for scopes in our implementation. The work in \cite{Mana}, which translates components of Alloy to SMT, may be a useful starting point for this extension.\\
 \indent One particular reason we did not take this approach yet is due to translation efficiency. As an example, in an early version of this project we used an uninterpreted function to represent cardinality constraints. Given a clafer, the function would restrict its instances to conform to the cardinality constraints. By blasting this function into basic propositional logic (which we can do since we have a bounded number of instances), our translation times were significantly decreased\footnote{Although time differences were not recorded, some relatively small specifications required 2-3 additional seconds.}, even for small models. We emphasize that here we are referring to \textit{translation time}; Z3 took approximately the same time to solve models whether or not functions were used.\\

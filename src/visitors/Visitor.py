@@ -46,6 +46,8 @@ def visit(visitor, element):
         visitor.integerliteralVisit(element)
     elif isinstance(element, ast.DoubleLiteral.DoubleLiteral):
         visitor.realliteralVisit(element)
+    elif isinstance(element, ast.RealLiteral.RealLiteral):
+        visitor.realliteralVisit(element)
     elif isinstance(element, ast.StringLiteral.StringLiteral):
         visitor.stringliteralVisit(element)
     elif element == None:
