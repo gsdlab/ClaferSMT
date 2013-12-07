@@ -8,8 +8,10 @@ from common import Common, Options
 from common.Common import mAnd, debug_print
 from constraints import BracketedConstraint
 from structures.ClaferSort import PrimitiveType
-from structures.ExprArg import ExprArg, Mask, BoolArg, IntArg, RealArg
+from structures.ExprArg import ExprArg, Mask, BoolArg, IntArg, RealArg, \
+    StringArg
 from visitors import VisitorTemplate
+from z3 import Int
 from visitors.CheckFunctionSymmetry import CheckFunctionSymmetry
 import itertools
 import sys
@@ -197,6 +199,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             self.currentConstraint.addArg([RealArg([element.value])])
         
     def stringliteralVisit(self, element):
-        #TODO stubbed
-        self.currentConstraint.addArg([IntArg([0])])#element.value])])
+        stringID = Common.STRCONS_SUB + str(Common.getStringUID())
+        Common.string_map[stringID] = element.value
+        self.currentConstraint.addArg([StringArg([Int(stringID)])])#element.value])])
     

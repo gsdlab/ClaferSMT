@@ -5,7 +5,8 @@ Created on Oct 21, 2013
 '''
 from bintrees.avltree import AVLTree
 from common import Assertions
-from structures.ClaferSort import BoolSort, IntSort, PrimitiveType, RealSort
+from structures.ClaferSort import BoolSort, IntSort, PrimitiveType, RealSort, \
+    StringSort
 
 
 
@@ -90,6 +91,15 @@ class BoolArg(ExprArg):
     def getValue(self):
         return self.instanceSorts[0][1].get(0)
  
+class StringArg(ExprArg):
+    def __init__(self, instances):
+        '''
+        Convenience class that extends ExprArg and holds an integer instance.
+        '''
+        sort = StringSort()
+        for i in range(len(instances)):
+            sort.cardinalityMask.put(i, 1)
+        self.instanceSorts = [(sort, Mask.createIntMask(instances))]
 
 class JoinArg(ExprArg):
     def __init__(self, left, right):

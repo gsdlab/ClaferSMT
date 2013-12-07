@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012/Debian) (format=pdflatex 2013.4.14)  6 DEC 2013 20:33
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012/Debian) (format=pdflatex 2013.4.14)  7 DEC 2013 01:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -972,20 +972,17 @@ Overfull \hbox (10.01648pt too wide) in paragraph at lines 326--327
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [4]
-
-LaTeX Warning: Citation `jimmy' on page 5 undefined on input line 365.
-
 [5]
 
 LaTeX Warning: Reference `listing:ClaferMoreComplexSpec' on page 6 undefined on
- input line 389.
+ input line 390.
 
 
 LaTeX Warning: Reference `listing:ClaferMoreComplexSpec' on page 6 undefined on
- input line 389.
+ input line 390.
 
 [6] [7]
-Underfull \hbox (badness 10000) in paragraph at lines 481--484
+Underfull \hbox (badness 10000) in paragraph at lines 482--485
 
  []
 
@@ -997,24 +994,27 @@ Missing character: There is no … in font cmr9!
 ) 
 AED: lastpage setting LastPage
 [10]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 499.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 499.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 500.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 500.
  (./claferZ3_report.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 499.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 499.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 500.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 500.
 Package rerunfilecheck Info: File `claferZ3_report.out' has not changed.
 (rerunfilecheck)             Checksum: 49886D990B3ED310B6EBE942A78E3C75;1197.
 
 
 LaTeX Warning: There were undefined references.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 499.
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 500.
  ) 
 Here is how much of TeX's memory you used:
- 19737 strings out of 495059
- 361588 string characters out of 3182030
- 513074 words of memory out of 3000000
- 22407 multiletter control sequences out of 15000+200000
+ 19736 strings out of 495059
+ 361581 string characters out of 3182030
+ 513073 words of memory out of 3000000
+ 22406 multiletter control sequences out of 15000+200000
  15765 words of font info for 52 fonts, out of 3000000 for 9000
  14 hyphenation exceptions out of 8191
  56i,11n,60p,1407b,1389s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -1038,10 +1038,10 @@ amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfon
 ts/cm/cmtt8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
 mtt9.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></u
 sr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb>
-Output written on claferZ3_report.pdf (10 pages, 290952 bytes).
+Output written on claferZ3_report.pdf (10 pages, 291951 bytes).
 PDF statistics:
- 404 PDF objects out of 1000 (max. 8388607)
- 366 compressed objects within 4 object streams
+ 405 PDF objects out of 1000 (max. 8388607)
+ 367 compressed objects within 4 object streams
  127 named destinations out of 1000 (max. 500000)
  165 words of extra memory for PDF output out of 10000 (max. 10000000)
 

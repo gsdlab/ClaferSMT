@@ -85,6 +85,8 @@ def strprint(c):
             return retStr
         elif c == "EMPTYSTRING":
             return c
+        elif c.startswith(Common.STRCONS_SUB):
+            return("\"" + Common.string_map[c] + "\"")
         return(c)
     else:
         sys.exit("Bug in Z3Str_Printer: " + str(c))

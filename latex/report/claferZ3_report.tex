@@ -362,7 +362,7 @@ This section describes the Z3 constraints that are generated to represent a Claf
 
 \subsection{Representation of a clafer}
 \label{representation}
-We borrow two key ideas from a previous translation of Clafer to Choco \cite{jimmy}: 1) clafers are represented as a finite number of integers; and 2) clafers that extend abstract clafers have a direct mapping to their supers (we discuss this point later).\\
+We borrow two key ideas from a previous translation of Clafer to Choco \cite{Liang}: 1) clafers are represented as a finite number of integers; and 2) clafers that extend abstract clafers have a direct mapping to their supers (we discuss this point later).\\
 \indent We reprensent a clafer as a finite list of integers. Consider the \texttt{Phone} clafer in Listing \ref{listing:ClaferPhone}. Since our outputted Clafer model will have at most two \texttt{Phone} clafers, we can represent it with a list of two integer variables, say $[phone0, phone1]$.  \\
 \indent For star-cardinalities (as in the reference clafer \texttt{Apps}), we place a finite \textit{scope} $s$ on the clafer, indicating that only $s$ instances can occur in the model. For the sake of example, let us assume that the scope of all unbounded clafers is $4$. Then we can represent the clafer \texttt{Apps} with the list $[Apps0, Apps1, Apps2, Apps3]$.\\
 \indent Semantically, the values of these integer variables represent \textit{parent pointers}, indicating where the clafer should be placed in the outputted model. For example, if the variable $Apps0$ is set to $0$ by the solver, then it should fall directly beneath $Phone0$ in the hierarchy of the outputted model. Likewise, if $Apps0 = 1$, then $Apps0$ would be placed under $Phone1$.\\
@@ -380,7 +380,8 @@ asdf
 \subsection{Other Constraints}
 asdf
 \subsection{Discussion}
-sound, incomplete, qflia (mostly)
+Due to space restrictions, we do not discuss the full set of expressions available in Clafer. Most expressions follow patterns analogous to those previously presented. We also did not discuss arithmetic constraints, however they translate naturally into Z3.\\
+\indent Although we have not formally proven it, we believe our approach is sound, in that it will only produce models that satisfy the specification. However, our approach is incomplete for multiple reasons. Most notably, since we bound our specifications, we may miss larger models. Further, Clafer technically allows non-linear arithmetic, although we have not seen any specifications so far that require it. With that in mind, our approach of translating bounded Clafer specifications can generally be expressed within the logic of \texttt{QF\_UFNRA} (quantifier-free non-linear real arithmetic), however all Clafer models encountered so far can be expressed in \texttt{QF\_LIA} (quantifier-free linear integer arithmetic).
 
 
 \subsection{Bracketed Constraints}
