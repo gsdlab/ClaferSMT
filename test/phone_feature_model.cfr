@@ -27,4 +27,4 @@ concreteMobilePhoneFM : MobilePhoneFM
 
 << min concreteMobilePhoneFM.total_cost >>
 << min concreteMobilePhoneFM.total_memory >>	
-			  
+		  

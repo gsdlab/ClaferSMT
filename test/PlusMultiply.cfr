@@ -1,0 +1,29 @@
+// metamodel
+
+abstract Equation
+   name -> string
+   i1 -> Equation
+   [ i1.ref != this ]
+   i2 -> Equation
+   [ i2.ref != this ]
+   a1 -> integer
+      [ this.ref = i1.o ]
+   a2 -> integer
+      [ this.ref = i2.o ]
+   o -> integer
+
+abstract Plus : Equation
+   [ o = a1 + a2 ]
+
+abstract Mult : Equation
+   [ o = a1 * a2 ]
+
+// model
+
+i -> integer = 3
+
+plus : Plus *
+
+mult : Mult *
+
+[ # plus = 3 ]

@@ -1,0 +1,33 @@
+abstract Person
+	age : integer
+	xor maritalStatus
+		neverMarried
+		married
+			spouse -> Person
+				[ this != Person ]   // cannot marry oneself
+				[ this.maritalStatus.married.spouse = Person ]     // here, the modeler means spouse.maritalStatus.married.spouse 
+		divorced
+		[ married || divorced => age >= 3 ]
+	childs -> Person *
+		[ Person in this.parents ]
+		[ spouse in this.parents ]
+		[ this.age < age ]
+		x : int
+		[this.x = this.age]
+		y : int
+		//[this.x < this.y]
+		[this.y = age]
+	parents -> Person 0..2
+		[ Person in this.childs ]
+
+Alice : Person
+	[ age = 4 ]
+	[ married ]
+
+Bob : Person
+	[ age = 5 ]
+	//[ childs ]
+
+Carol : Person
+	[ age = 1 ]
+	[ parents ]

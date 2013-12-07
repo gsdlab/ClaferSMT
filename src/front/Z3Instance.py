@@ -276,10 +276,9 @@ class Z3Instance(object):
         f_n = open("z3str_in", 'w')
         f_n.write("(set-option :auto-config true)\n")
         f_n.write("(set-option :produce-models true)\n")
-        
-        for i in self.z3_sorts.values():
-            f_n.write("(declare-variable " + "EMPTYSTRING String)\n")
-            f_n.write("(assert (= EMPTYSTRING \"\"))\n")
+        f_n.write("(declare-variable " + "EMPTYSTRING String)\n")
+        f_n.write("(assert (= EMPTYSTRING \"\"))\n")
+        for i in self.z3_sorts.values():    
             for j in i.instances:
                 f_n.write("(declare-variable " + str(j) + " Int)\n")
             if i.refs:
@@ -356,8 +355,9 @@ class Z3Instance(object):
                     self.solver.add(Or(block))
                 count += 1
             else:
-                self.clock.tock("unsat")
+                
                 if Common.MODE == Common.DEBUG and count == 0:
+                    self.clock.tock("unsat")
                     debug_print(self.solver.check(self.unsat_core_trackers))
                     core = self.solver.unsat_core()
                     debug_print(len(core))

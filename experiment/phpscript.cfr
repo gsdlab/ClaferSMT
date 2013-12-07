@@ -1,0 +1,25 @@
+//lines 1-13
+g : int
+usergroup : int
+role : int //string
+r : int //string
+[g = usergroup]
+[g < 3 && g = 0  => role = 47] //role = "visitor"]
+[g < 3 && g != 0 => role = 48] //role = "new"]
+[g > 3 && g = 9  => role = 49] //role = "admin"]
+[g > 3 && g != 9 => role = r]
+
+//line 14
+p : int
+price : int
+[p = price]
+
+//line 15-16
+total : int
+taxrate : int
+ship : int
+[total = (1 + taxrate) * p + ship] 
+
+//lines 17-19
+notifyAdmin ?
+[total > 500 && total = 50  <=> notifyAdmin ] //total > 500 && substr(role, 0, 1) = "n" 

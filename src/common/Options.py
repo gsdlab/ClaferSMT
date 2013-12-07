@@ -20,7 +20,7 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
     one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths, \
     AADL_simplified_with_lists, teststring, testunion, simple_real, Phone, \
-    int_ref_set
+    int_ref_set, phpscript, iso
 import argparse
 import sys
 
@@ -49,10 +49,10 @@ ECLIPSE = True
 
 MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
-STRING_CONSTRAINTS = False
+STRING_CONSTRAINTS = True
 CNF = False
 GOAL = False
-NUM_INSTANCES = 1 # -1 to produce all instances
+NUM_INSTANCES = 10 # -1 to produce all instances
 INFINITE = -1 #best variable name.
 PROFILING = True # True to output the translation time, and time to get first model
 CPROFILING = False #invokes the standard python profiling method (see Z3Run.py)
@@ -75,6 +75,7 @@ DIMACS_FILE="dimacs"
 #MODULE = boolean_connectives.getModule()
 #MODULE = union.getModule()
 #MODULE = simple_abstract.getModule()
+#MODULE = phpscript.getModule()
 #MODULE = some.getModule()
 #MODULE = paths.getModule()
 #MODULE = mypaths.getModule()
@@ -93,9 +94,9 @@ DIMACS_FILE="dimacs"
 #MODULE = teststring.getModule()
 #MODULE = testunion.getModule()
 #MODULE = subbooks.getModule()
-MODULE = int_ref_set.getModule()
+#MODULE = int_ref_set.getModule()
 #MODULE = one_plus_one_equals_one.getModule()
-#MODULE = iso.getModule()
+MODULE = iso.getModule()
 #MODULE = isowithcons.getModule()
 #MODULE = all_alls.getModule()
 #MODULE = some_somes.getModule()
@@ -115,7 +116,7 @@ MODULE = int_ref_set.getModule()
 #MODULE = trivial.getModule()
 #MODULE = i72sharedreference.getModule()
 #MODULE = trivial2.getModule()
-MODULE = simple_real.getModule()
+#MODULE = simple_real.getModule()
 #MODULE = Phone.getModule()
 
 my_tests = [ 

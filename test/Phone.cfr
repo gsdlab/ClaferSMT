@@ -1,0 +1,17 @@
+
+App *
+  cost : int
+  [cost >= 0]
+
+abstract Phone *
+  Wifi ?
+  myApps -> App *
+  cost : int
+
+
+BudgetPhone : Phone 2
+  [no myApps && no Wifi]
+  [cost = 50]
+
+SmartPhone : Phone 1
+  [cost = 400 + sum(myApps.cost)]

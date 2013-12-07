@@ -300,6 +300,13 @@ def op_eq(left,right):
     if isinstance(left_sort, RealSort) or isinstance(right_sort, RealSort):
         return BoolArg([sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]) 
                         == sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()])])
+    #string equality case
+    (left_sort, left_mask) = left.getInstanceSort(0)
+    (right_sort, right_mask) = right.getInstanceSort(0)
+    if isinstance(left_sort, StringSort) or isinstance(right_sort, StringSort):
+        return BoolArg([left_mask.get(0) == right_mask.get(0)])
+        #return BoolArg([sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]) 
+        #                == sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()])])
     #clafer-set equality case
     else:
         cond = []

@@ -1,0 +1,5 @@
+abstract degree : integer
+Vehicle
+  driveconfig : DC
+
+abstract DC

@@ -1,0 +1,16 @@
+/*
+component CYGNUM_HAL_ARM_AAED2000_CLOCK{
+          display "Board (CPU and bus) speed"
+          legal_values ["150/75MHz" "166/83MHz" ]
+          flavor data
+
+option CYGNUM_HAL_ARM_AAED2000_CLOCK_PREDIV{
+            display "CPU clock PREDIV"
+            calculated [CYGNUM_HAL_ARM_AAED2000_CLOCK == "150/75MHz" ? 12 : CYGNUM_HAL_ARM_AAED2000_CLOCK == "166/83MHz" ? 18 : 0 ]
+	        flavor data
+          }
+*/
+
+CYGNUM_HAL_ARM_AAED2000_CLOCK
+	display : string = "Board (CPU and bus) speed"
+	value : string 

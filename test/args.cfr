@@ -1,0 +1,7 @@
+abstract Argument
+ClaferArgs
+   xor mode : Argument
+		alloy : int = 3
+			alloy42 : string ? = 4 
+   testcase : int
+  	        [this.ref = alloy + alloy42]

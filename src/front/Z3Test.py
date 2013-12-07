@@ -6,7 +6,7 @@ Created on April 27, 2013
 testing method for the Z3 backend of Clafer
 '''
 from z3 import BitVec, Bool, Solver, Xor, Function, IntSort, Array, Int, sat, \
-    is_array, Or, Goal, Then
+    is_array, Or, Goal, Then, RealVal
 from z3consts import Z3_UNINTERPRETED_SORT
 from z3types import Z3Exception
 import sys
@@ -33,6 +33,7 @@ def BitVecVector(prefix, sz, N):
   return [ BitVec('%s_%s' % (prefix, i), sz) for i in range(N) ]
 
 def main(args):
+    R = RealVal(1/3)
     A = Bool("A")
     B = Bool("B")
     C = Bool("C")
@@ -40,6 +41,7 @@ def main(args):
     x = Int("x" )
     y = Int("y")
     s = Solver()
+    print(R.sexpr())
     s.check()
     print(s.model());
     g = Goal()
