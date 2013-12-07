@@ -1,19 +1,17 @@
 \contentsline {section}{\numberline {1}Introduction}{2}{section.1}
 \contentsline {section}{\numberline {2}Clafer Overview}{3}{section.2}
 \contentsline {section}{\numberline {3}Solution Overview}{3}{section.3}
-\contentsline {subsection}{\numberline {3.1}Interpreting Z3 output as a Clafer Model}{5}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.1}Interpreting Z3 output as a Clafer Model}{4}{subsection.3.1}
 \contentsline {section}{\numberline {4}Detailed Solution Overview}{5}{section.4}
-\contentsline {subsection}{\numberline {4.1}Representation of a clafer}{5}{subsection.4.1}
-\contentsline {subsection}{\numberline {4.2}Hierarchical and Cardinality Constraints}{6}{subsection.4.2}
-\contentsline {subsection}{\numberline {4.3}Set Constraints}{6}{subsection.4.3}
-\contentsline {subsection}{\numberline {4.4}Quantifiers}{6}{subsection.4.4}
-\contentsline {subsection}{\numberline {4.5}Other Constraints}{6}{subsection.4.5}
-\contentsline {subsection}{\numberline {4.6}Discussion}{6}{subsection.4.6}
-\contentsline {subsection}{\numberline {4.7}Bracketed Constraints}{6}{subsection.4.7}
-\contentsline {section}{\numberline {5}Extensions to Clafer}{7}{section.5}
-\contentsline {subsection}{\numberline {5.1}String Constraints}{7}{subsection.5.1}
-\contentsline {subsection}{\numberline {5.2}Isomorphic Model Prevention}{8}{subsection.5.2}
+\contentsline {subsection}{\numberline {4.1}Hierarchical and Cardinality Constraints}{5}{subsection.4.1}
+\contentsline {subsection}{\numberline {4.2}Set Constraints}{5}{subsection.4.2}
+\contentsline {subsection}{\numberline {4.3}Quantifiers}{5}{subsection.4.3}
+\contentsline {subsection}{\numberline {4.4}Discussion}{6}{subsection.4.4}
+\contentsline {subsection}{\numberline {4.5}Bracketed Constraints}{6}{subsection.4.5}
+\contentsline {section}{\numberline {5}Extensions to Clafer}{6}{section.5}
+\contentsline {subsection}{\numberline {5.1}String Constraints}{6}{subsection.5.1}
+\contentsline {subsection}{\numberline {5.2}Isomorphic Model Prevention}{7}{subsection.5.2}
 \contentsline {section}{\numberline {6}Experimental Results}{8}{section.6}
-\contentsline {section}{\numberline {7}Related and Previous Work}{9}{section.7}
+\contentsline {section}{\numberline {7}Related and Previous Work}{8}{section.7}
 \contentsline {section}{\numberline {8}Future Work}{9}{section.8}
-\contentsline {section}{\numberline {9}Conclusions}{10}{section.9}
+\contentsline {section}{\numberline {9}Conclusions}{9}{section.9}

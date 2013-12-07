@@ -3,17 +3,15 @@
 \BOOKMARK [1][-]{section.3}{Solution Overview}{}% 3
 \BOOKMARK [2][-]{subsection.3.1}{Interpreting Z3 output as a Clafer Model}{section.3}% 4
 \BOOKMARK [1][-]{section.4}{Detailed Solution Overview}{}% 5
-\BOOKMARK [2][-]{subsection.4.1}{Representation of a clafer}{section.4}% 6
-\BOOKMARK [2][-]{subsection.4.2}{Hierarchical and Cardinality Constraints}{section.4}% 7
-\BOOKMARK [2][-]{subsection.4.3}{Set Constraints}{section.4}% 8
-\BOOKMARK [2][-]{subsection.4.4}{Quantifiers}{section.4}% 9
-\BOOKMARK [2][-]{subsection.4.5}{Other Constraints}{section.4}% 10
-\BOOKMARK [2][-]{subsection.4.6}{Discussion}{section.4}% 11
-\BOOKMARK [2][-]{subsection.4.7}{Bracketed Constraints}{section.4}% 12
-\BOOKMARK [1][-]{section.5}{Extensions to Clafer}{}% 13
-\BOOKMARK [2][-]{subsection.5.1}{String Constraints}{section.5}% 14
-\BOOKMARK [2][-]{subsection.5.2}{Isomorphic Model Prevention}{section.5}% 15
-\BOOKMARK [1][-]{section.6}{Experimental Results}{}% 16
-\BOOKMARK [1][-]{section.7}{Related and Previous Work}{}% 17
-\BOOKMARK [1][-]{section.8}{Future Work}{}% 18
-\BOOKMARK [1][-]{section.9}{Conclusions}{}% 19
+\BOOKMARK [2][-]{subsection.4.1}{Hierarchical and Cardinality Constraints}{section.4}% 6
+\BOOKMARK [2][-]{subsection.4.2}{Set Constraints}{section.4}% 7
+\BOOKMARK [2][-]{subsection.4.3}{Quantifiers}{section.4}% 8
+\BOOKMARK [2][-]{subsection.4.4}{Discussion}{section.4}% 9
+\BOOKMARK [2][-]{subsection.4.5}{Bracketed Constraints}{section.4}% 10
+\BOOKMARK [1][-]{section.5}{Extensions to Clafer}{}% 11
+\BOOKMARK [2][-]{subsection.5.1}{String Constraints}{section.5}% 12
+\BOOKMARK [2][-]{subsection.5.2}{Isomorphic Model Prevention}{section.5}% 13
+\BOOKMARK [1][-]{section.6}{Experimental Results}{}% 14
+\BOOKMARK [1][-]{section.7}{Related and Previous Work}{}% 15
+\BOOKMARK [1][-]{section.8}{Future Work}{}% 16
+\BOOKMARK [1][-]{section.9}{Conclusions}{}% 17

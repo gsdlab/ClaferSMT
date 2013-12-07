@@ -16,6 +16,11 @@ A.~E. Ghazi and M.~Taghdiri.
 \newblock {Relational reasoning via SMT solving}.
 \newblock {\em FM 2011: Formal Methods}, 2011.
 
+\bibitem{Jacksona}
+D.~Jackson.
+\newblock {\em {Software Abstractions: Logic, Language, and Analysis}}.
+\newblock The MIT Press, 2011.
+
 \bibitem{Liang}
 J.~Liang.
 \newblock {Solving Clafer Models with Choco}.
