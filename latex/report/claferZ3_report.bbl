@@ -1,7 +1,7 @@
 \begin{thebibliography}{10}
 
 \bibitem{BakClafer}
-K.~Bąk, K.~Czarnecki, and A.~Wąsowski.
+K.~Bak, K.~Czarnecki, and A.~Wasowski.
 \newblock {Feature and meta-models in Clafer: mixed, specialized, and coupled}.
 \newblock {\em Software Language Engineering}, 2011.
 
@@ -15,11 +15,6 @@ A.~Classen, Q.~Boucher, and P.~Heymans.
 A.~E. Ghazi and M.~Taghdiri.
 \newblock {Relational reasoning via SMT solving}.
 \newblock {\em FM 2011: Formal Methods}, 2011.
-
-\bibitem{Jacksona}
-D.~Jackson.
-\newblock {\em {Software Abstractions: Logic, Language, and Analysis}}.
-\newblock The MIT Press, 2011.
 
 \bibitem{Liang}
 J.~Liang.

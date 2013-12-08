@@ -18,7 +18,9 @@
 
 % This provides the \BibTeX macro
 \usepackage{doc}
+\usepackage{amsmath,relsize}
 \usepackage{makeidx}
+\usepackage{pbox}
 \usepackage{tikz}
 \usetikzlibrary{shapes,arrows}
 \usepackage{graphicx}
@@ -120,7 +122,7 @@ Ed Zulkoski\\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{abstract}
-We present a new backend for Clafer - a variability modeling language - using the Z3 Satisfiability Modulo Theory (SMT) solver. Z3 is well respected for its speed and has been shown to outperform other solvers in the domain of partial modeling -- one type of modeling within the scope of Clafer. We show that, by retaining the notion of a $scope$, Clafer can generally be expressed within the logic of \texttt{QF\_UFNRA} (quantifier-free non-linear real arithmetic), however all Clafer models encountered so far can be expressed in \texttt{QF\_LIA} (quantifier-free linear integer arithmetic). We are capable of supporting language features not previously available in Clafer, including constraints over real numbers, and string constraints, leveraging Z3-Str: a theory extension to Z3. We conclude with a discussion of other extensions we have made, as well as new directions for future work that would not be possible with other Clafer backends.
+We present a new backend for Clafer - a variability modeling language - using the Z3 Satisfiability Modulo Theory (SMT) solver. Z3 is well respected for its speed and has been shown to outperform other solvers in the domain of partial modeling -- one type of modeling within the scope of Clafer. We show that, by retaining the notion of a $scope$, Clafer can generally be expressed within the logic of \texttt{QF\_UFNRA} (quantifier-free non-linear real arithmetic), however all Clafer models encountered so far can be expressed in \texttt{QF\_LIA} (quantifier-free linear integer arithmetic). We are capable of supporting language features not previously available in Clafer, including constraints over real numbers, and string constraints, leveraging Z3-Str: a theory extension to Z3. We evaluate our tool over models from a variety sources in the literature. We conclude by discussing potential directions for future work that would not be possible with previous Clafer backends.
 \end{abstract}
 
 \setcounter{tocdepth}{2}
@@ -140,10 +142,11 @@ We present a new backend for Clafer - a variability modeling language - using th
 %------------------------------------------------------------------------------
 \section{Introduction}
 Clafer is a modeling language with first-class support for feature and meta-modeling \cite{BakClafer}. In earlier work, Clafer has been translated to two backend solvers 1) Alloy -- a bounded relational model checker, and 2) Choco -- a library for constraint satisfaction problems. A Clafer specification can be translated to either of these two backends, which produce models of the specification if it is satisfiable, or produce an unsatisfiable core otherwise. Depending on the type of constraints within the Clafer specification, one backend may be more suitable than the other. For example, Alloy does not perform well on arithmetic constraints over large integers, as it deals with them by flattening bounded integer ranges into boolean formulas, however the Choco solver is much more capable in this regard. Still, Choco requires some bounding on integer ranges to facilitate the search process.\\
-\indent Furthermore, some desirable language features, such as constraints over real numbers and strings, are not currently supported by either backend due to restrictions of the solvers. Many domains require real numbers to be modeled naturally. For example, any models involving probabilities or percentages can be modeled using reals. One applicable domain that has previously been modeled in Clafer is that of banking. The work investigated the family of available Scotiabank mortgage options, which include interest rates and monetary amounts, both of which can be naturally modeled with reals\footnote{See \url{http://gsd.uwaterloo.ca/node/356}.}. However, due to restrictions of previous backends, the specification could not be instantiated. Clafer should be capable of analyzing these models. \\
+\indent Furthermore, some desirable language features, such as constraints over real numbers and strings, are not currently supported by either backend due to restrictions of the solvers. Many domains require real numbers to be modeled naturally. For example, any models involving probabilities or percentages can be modeled using reals. One applicable domain that has previously been modeled in Clafer is that of banking. The work investigated the family of available Scotiabank mortgage options, which include interest rates and monetary amounts, both of which can be naturally modeled with reals\footnote{See \url{http://gsd.uwaterloo.ca/node/356}.}. However, due to restrictions of previous backends, the specification could not be instantiated. Clafer should be capable of analyzing these types of specifications. \\
 \indent In short, the restrictions of Clafer are intrinsically tied to the limitations of its backend solver. In order to address some of these restrictions, we have developed a new translation from Clafer to Z3 \cite{Moura} -- a state-of-the-art SMT solver. Z3 is well known to be a fast solver, motivating our desire to create a new Clafer backend with it. In an experiment by \cite{Saadatpanah2012}, randomly generated partial models were analyzed by four solvers: Alloy, a relational logic solver; Minizinc, a  \textit{constraint satisfaction problems} (CSP) solver; Clasp with GrinGo, an \textit{answer set programming} (ASP) solver; and Z3. Z3 was shown to be more efficient (based on solving time) in general, and also scaled better to harder problems. Z3 has also been shown to perform well relative to other SMT solvers, winning the SMTCOMP 2012 competition in the theory categories of \texttt{QF\_UFLIA}, \texttt{QF\_UFLRA}, and \texttt{QF\_BV}, among others\footnote{Results can be found at \url{http://www.smtexec.org/exec/?jobs=1004} .}. Further, a recent extension to Z3: Z3-Str \cite{Zheng2013}, allows support for some string constraints (\eg length, substring).\\
 \indent This paper makes the following contributions:
-\begin{enumerate}
+%\vspace{-0.3mm}
+\begin{enumerate}[noitemsep]
 \item We describe how Clafer models can be reduced to constraints in logics supported by Z3. 
 \item We have developed a tool called \textit{ClaferZ3} that reflects the translation described in this work, and can be found at \url{https://github.com/gsdlab/ClaferZ3}.
 \item Our tool supports constraints over real numbers and strings, which are not supported by previous Clafer backends, and thus expands the scope of models that Clafer can analyze. Furthermore, integer instances are unbounded.
@@ -158,10 +161,10 @@ Clafer is a modeling language with first-class support for feature and meta-mode
 %
 \indent In Listing \ref{listing:ClaferPhone}  we show a specification of two mobile phones in Clafer. 
 %
- \texttt{Phone} is an example of a top-level (non-nested) abstract clafer. \textbf{Abstract clafers} do not get directly instantiated in the resulting model, however concrete clafers, such as BudgetPhone and SmartPhone, can extend abstract clafers to inherit their sub-clafers. \textbf{Sub-clafers} are indicated by indentation, and cannot exist without their parent. Although our example only has two levels of indentation, other specifications may have more. The * after \texttt{Phone} indicates that zero or more \texttt{Phone}s may be included in the resulting model. \texttt{Phone} has an optional feature \texttt{Wifi}, denoted by the question mark after it. \texttt{instApps} is a \textbf{reference clafer} (denoted by the  -$>$ symbol) that refers  to a set of installed \texttt{App}s. We emphasize that this is a set: an implicit constraint is that the same phone cannot have two of the same \texttt{App}. However, \textit{different} phones may install the same \texttt{App}. A \texttt{Phone}, has a final attribute of \texttt{cost}, which we indicate is of type real number. Note that clafers that are declared primitive (int/string/real) get \textit{desugared} into reference clafers that point to instances of their respective type. On line 6,  \texttt{App}  is an example of a \textbf{concrete clafer}.\\
+ \texttt{Phone} is an example of a top-level (non-nested) abstract clafer. \textbf{Abstract clafers} do not get directly instantiated in the resulting model, however concrete clafers, such as BudgetPhone and SmartPhone, can extend abstract clafers to inherit their sub-clafers. \textbf{Sub-clafers} are indicated by indentation, and cannot exist without their parent. Although our example only has two levels of indentation, other specifications may have more. The * after \texttt{Phone} indicates that zero or more \texttt{Phone}s may be included in the resulting model. \texttt{Phone} has an optional feature \texttt{Wifi}, denoted by the question mark after it. \texttt{instApps} is a \textbf{reference clafer} (denoted by the $\rightarrow$ symbol) that refers  to a set of installed \texttt{App}s. We emphasize that this is a set: an implicit constraint is that the same phone cannot have two of the same \texttt{App}. However, \textit{different} phones may install the same \texttt{App}. A \texttt{Phone}, has a final attribute of \texttt{cost}, which we indicate is of type real number. Note that clafers that are declared primitive (int/string/real) get \textit{desugared} into reference clafers that point to instances of their respective type. \\
 %
-\indent On line 9, we introduce the concrete clafer \texttt{BudgetPhone}, which inherits all subclafers from \texttt{Phone}. The number 2 after it indicates that their must be exactly two \texttt{BudgetPhone}s in the resulting model. \texttt{BudgetPhone} has two constraints associated with it on lines 10-11 (indicated by square brackets). Line 10 consists of a quantified formula (with quantifier \textit{no}), indicating that a \texttt{BudgetPhone} cannot have \texttt{App}s. Note that this constraint must be true of \textit{all} \texttt{BudgetPhone} instances, due to its level of indentation. Line 11 indicates the price of \texttt{BudgetPhone}s, constraining the inherited clafer \texttt{cost}. Line 14 restricts the cost of \texttt{SmartPhone}s to be its original cost, plus the sum of all installed \texttt{App}s. The dot character in ``instApps.appCost''  in essence serves as a navigation operator, by performing a join between the set of \texttt{App}s associated with this individual \texttt{SmartPhone} and the \texttt{appCost}s associated with them. A model of the specification is given in Listing \ref{listing:ClaferPhoneInstance}.\\ %As a final note, each instance of an abstract clafer can only be instantiated by one instance concrete clafer (\eg \textit{BudgetPhone0} and \textit{BudgetPhone1} cannot both instantiate \textit{Phone0}).
-\indent This example only illustrates a fragment of the expressions supported by Clafer. Most notably, set operations such as intersection and union allow richer expressions over instances of clafers. We describe the other components of the language in Section \ref{detailedsolution}
+\indent \texttt{App} (on line 6) is an example of a \textbf{concrete clafer}. On line 9, we introduce the concrete clafer \texttt{BudgetPhone}, which inherits all subclafers from \texttt{Phone}. The number 2 after it indicates that their must be exactly two \texttt{BudgetPhone}s in the resulting model. \texttt{BudgetPhone} has two constraints associated with it on lines 10-11 (indicated by square brackets). Line 10 consists of a quantified expression (with quantifier \textit{no}), indicating that a \texttt{BudgetPhone} cannot have \texttt{App}s. Note that this constraint must be true of \textit{all} \texttt{BudgetPhone} instances, due to its level of indentation. Line 11 indicates the price of \texttt{BudgetPhone}s, constraining the inherited clafer \texttt{cost}. Line 14 restricts the cost of \texttt{SmartPhone}s to be its \textit{base} cost (99.99), plus the sum of all installed \texttt{App}s. The dot character in ``instApps.appCost''  in essence serves as a navigation operator, by performing a join between the set of \texttt{App}s associated with this individual \texttt{SmartPhone} and the \texttt{appCost}s associated with them. A model of the specification is given in Listing \ref{listing:ClaferPhoneInstance}.\\ %As a final note, each instance of an abstract clafer can only be instantiated by one instance concrete clafer (\eg \textit{BudgetPhone0} and \textit{BudgetPhone1} cannot both instantiate \textit{Phone0}).
+\indent This example only illustrates a fragment of the expressions supported by Clafer. Most notably, set operations such as intersection and union allow richer expressions over instances of clafers. We describe the other components of the language in Section \ref{detailedsolution}.
 
 \lstdefinelanguage{clafer}
 {morekeywords={abstract, xor, or, integer, min, max, sum},
@@ -202,14 +205,14 @@ SmartPhone: Phone 1
 	  appCost = 2.99
   BudgetPhone0 : Phone0
 	  Wifi0
-	  cost = 49.99
+      cost0 = 49.99
   BudgetPhone1 : Phone1
-  	  cost = 49.99
+  	  cost1 = 49.99
   SmartPhone0 : Phone2
 	  Wifi1
 	  instApps0 -> App0
 	  instApps1 -> App1
-	  cost = 103.97
+	  cost2 = 103.97
 \end{lstlisting}%
 \end{minipage}%
 \hfill
@@ -293,10 +296,10 @@ SmartPhone: [0]
 
 
 \section{Solution Overview}
-
+\label{solutionoverview}
 \begin{figure}
 \centering
-\label{claferZ3toolchain}
+
 \begin{tikzpicture}[node distance = 3cm, auto]
     % Place nodes
     \node [block] (FrontEnd) {Clafer Front End};
@@ -325,6 +328,7 @@ SmartPhone: [0]
   %  \path [line,dashed] (system) |- (evaluate);
 \end{tikzpicture}
 \caption{Depicts ClaferZ3 within the Clafer toolchain. Nodes marked red indicate contributions of this work.}
+\label{claferZ3toolchain}
 \end{figure}
 We describe the approach of our translation through our example in Section \ref{claferoverview}. For consistency (and due to large amounts of overlapping terminology), we define the following terms and notations: 1) we use capitalized \textit{Clafer} to denote the language Clafer itself, and lowercase \textit{clafer} to denote individual components of the input (\eg \texttt{Phone} in Listing \ref{listing:ClaferPhone}); 2) we call the Clafer input the \textit{specification} (\eg Listing \ref{listing:ClaferPhone}); 3) an output that conforms to the specification is a \textit{model} (e.g. Listing \ref{listing:ClaferPhoneInstance}); and 4) individual occurrences of a clafer in the model are \textit{instances} (\eg \textit{Phone0} in Listing \ref{listing:ClaferPhoneInstance}). \\
 \indent Figure \ref{claferZ3toolchain} depicts how our translation of Clafer to Z3 fits into the Clafer toolchain. Clafer specifications are first run through the front-end (scanner, parser, type-checker, etc.), and a representation of the input is generated in Python. Using the Z3Py API, ClaferZ3 generates a set of variables and asserts constraints over them. If string constraints are not present, then we can use the standard Z3 implementation to check for satisfiability, else we use Z3-Str.  If the solver finds a satisfying assignment over the generated variables and constraints, then the values of these variables can be interpreted as a Clafer model. \\
@@ -333,9 +337,9 @@ We describe the approach of our translation through our example in Section \ref{
 We borrow two key ideas from a previous translation of Clafer to Choco \cite{Liang}: 1) clafers are represented as a finite number of integers; and 2) clafers that extend abstract clafers have a direct mapping to their supers (we discuss this point later).\\
 \indent We reprensent a clafer as a finite list of integers. Consider the \texttt{BudgetPhone} clafer in Listing \ref{listing:ClaferPhone}. Since a model will have at most two \texttt{BudgetPhone} clafers, we can represent it with a list of two integer variables, say $[BudgetPhone_0, BudgetPhone_1]$.  \\
 \indent For star-cardinalities (as in the reference clafer \texttt{App}), we place a finite \textit{scope} $s$ on the clafer, indicating that only $s$ instances can occur in the model. For the sake of example, let us assume that the scope of all unbounded clafers is $3$. Then we can represent the clafer \texttt{App} with the list $[App_0, App_1, App_2]$.\\
-\indent Listing \ref{listing:ClaferPhoneZ3} depicts a possible Z3 output for our model. Note that, for example, ``Wifi: [0,2,3]'' is shorthand for $Wifi_0 = 0, Wifi_1 = 2, Wifi_2 = 3$. Semantically, the values of these integer variables represent \textit{parent pointers}, indicating where the clafer should be placed in the model. For example, if the variable $App_0$ is set to $0$ by the solver, then it should fall directly beneath $Phone_0$ in the hierarchy of the model. Likewise, if $App_0 = 1$, then $App_0$ would be placed under $Phone_1$.\\
-\indent A clafer instance is \textit{excluded} from the model if its integer variable is set to a pre-defined \textit{sentinel} value, which equals the total number of instance variables of the clafer's parent. For example, since the \texttt{cost} clafer is directly underneath \texttt{Phone}, and \texttt{Phone} has three instances variables, any \texttt{cost} instance set to 3 will not be included in the model. For \textit{top-level clafers} that do not have a parent, the instance is included if its corresponding variable is set to 0, and not included if set to 1. For simplicity in the remainder of the paper, given a clafer \texttt{x}, an instance \textit{$x_i$} is excluded if  $x_i = x_{off}$ ($Wifi2 = Wifi_{off}$ in our example). \\
-\indent Reference clafers (e.g. \texttt{instApps}) require an additional variable associated with each instance, which corresponds to where the reference points. For a reference clafer instance $x_i$, we label its reference $x_i\_ref$. In Listing \ref{listing:ClaferPhoneZ3}, since $instApps_0\_ref = 0$, $instApps_0$ points to $App_0$. The $sentinel$ value for a reference variable is equal to the number of instances of the referenced clafer (e.g. $instApps_{off} = App_{off}$).  \\
+\indent Listing \ref{listing:ClaferPhoneZ3} depicts a possible Z3 output for our specification. Note that, for example, ``Wifi: [0,2,3]'' is shorthand for $Wifi_0 = 0, Wifi_1 = 2, Wifi_2 = 3$. Semantically, the values of these integer variables represent \textit{parent pointers}, indicating where the clafer should be placed in the model. For example, if the variable $App_0$ is set to $0$ by the solver, then it should fall directly beneath $Phone_0$ in the hierarchy of the model. Likewise, if $App_0 = 1$, then $App_0$ would be placed under $Phone_1$.\\
+\indent A clafer instance is \textit{excluded} from the model if its integer variable is set to a pre-defined \textit{sentinel} value, which equals the total number of instance variables of the clafer's parent. For example, since the \texttt{cost} clafer is directly underneath \texttt{Phone}, and \texttt{Phone} has three instances variables, any \texttt{cost} instance set to 3 will not be included in the model. For \textit{top-level clafers} that do not have a parent, the instance is included if its corresponding variable is set to 0, and not included if set to 1. For simplicity in the remainder of the paper, given a clafer \texttt{x}, an instance \textit{$x_i$} is excluded if  $x_i = x_{off}$ ($Wifi_2 = Wifi_{off}$ in our example). \\
+\indent Reference clafers (e.g. \texttt{instApps}) require an additional variable associated with each instance, which corresponds to where the reference points. For a reference clafer instance $x_i$, we label its reference $x_i\_ref$. In Listing \ref{listing:ClaferPhoneZ3}, since $instApps_0\_ref = 0$, $instApps_0$ points to $App_0$. The $sentinel$ value for a reference variable is equal to the number of instances of the referenced clafer (e.g. $instApps\_ref_{off} = App_{off}$).  \\
 \indent Integer and real number clafers (\eg cost) are treated similarly to reference clafers, however their references have unbounded ranges. Also, if an integer clafer is not present in the model, we set its reference to 0 to facilitate other set operations, such as summation. \\
 %\indent As a larger example, once again consider Listing \ref{listing:ClaferPhoneInstance}, along with the corresponding output of Z3 in Listing \ref{listing:ClaferPhoneZ3}. For space limitations, each line of Listing \ref{listing:ClaferPhoneZ3} corresponds to all instances of the specified clafer; the line ``Apps: [0,0,2,2]'' is shorthand for $Apps0 = 0, Apps1 = 0, Apps2 = 2, Apps3 = 2$. Since $Apps0 = Apps1 = 0$, they are both beneath $Phone0$, however $Apps2$ and $Apps3$ are not present in the model (since $Apps_{sentinel} = 2$). Since $Apps0\_ref = 0$, $Apps0$ must reference $SwApps0$. Furthermore, since $Apps2$ and $Apps3$ are not present in the model, $Apps2\_ref = Apps3\_ref = SwApps_{sentinel}$.
 %\indent The logic of Clafer can essentially be reduced to the following main components:
@@ -362,31 +366,76 @@ We borrow two key ideas from a previous translation of Clafer to Choco \cite{Lia
 %\end{figure}
 
 
+
 \section{Detailed Solution Overview}
 \label{detailedsolution}
+\begin{figure}
+\makebox[\textwidth][c]{
+  \begin{tabular}{| c | l | c |}
+  
+    \hline
+    \textbf{Constraint Type} & \textbf{Example Spec.} & \textbf{Generated Z3 Constraints} \\ \hline \hline
+    Hierarchy & \pbox{20cm}{\vspace{3mm} Phone 3\\ \text{\hspace{4mm} App 5} \vspace{1 mm}} & $\displaystyle\mathop{\mathlarger{\mathlarger{\forall}}}\limits_{i:Phone}{0 \le i \le 1}$, and $\displaystyle\mathop{\mathlarger{\mathlarger{\forall}}}_{i:App}{0 \le i \le 3}$ \\ \hline
+    
+    No Child wo/Parent & \pbox{20cm}{\vspace{3 mm} Phone 3\\ \text{\hspace{4mm} App 5} \vspace{1 mm}} & $\bigwedge\limits_{i=0}^{2}{\left(Phone_i == Phone_{off} \Rightarrow \bigwedge\limits_{j:App}{j \neq i}\right)}$ \\ \hline
+    
+    Instance $\Leftrightarrow$ Ref & \pbox{20cm}{\vspace{3 mm} App 5\\ Phone $\rightarrow$ App 3 \vspace{1 mm}} & $\displaystyle\mathop{\mathlarger{\mathlarger{\forall}}}_{i:Phone}{\left(i == Phone_{off} \Leftrightarrow i\_ref == App_{off}\right)}$ \\ \hline
+    
+    Cardinality & \pbox{20cm}{\vspace{3 mm} Phone 3\\ \text{\hspace{4mm} App 2..5} \vspace{1 mm}} & $\bigwedge\limits_{i=0}^{2}{\left(Phone_i \neq Phone_{off} \Rightarrow 2 \le \sum\limits_{j:App}If(j == i, 1, 0) \le 5 \right)}$ \\ \hline 
+    
+    Quantifiers & \pbox{20cm}{\vspace{3 mm} App $\rightarrow$ int 3\\ \text{[all disj x,y:App $|$ $x.ref \neq y.ref$]} \vspace{1 mm}} & $\displaystyle\mathop{\mathlarger{\mathlarger{\forall}}}\limits_{i:App}
+    \displaystyle\mathop{\mathlarger{\mathlarger{\forall}}}\limits_{j:App}{\left(i \neq j   \Rightarrow i\_ref \neq j\_ref \right)}$ \\ \hline 
+    
+  \end{tabular}}
+
+\caption{Translation rules.}
+\label{translationtable}
+\end{figure}
+
+\begin{figure}
+
+\makebox[\textwidth][c]{
+  \begin{tabular}{| c | l | c |}
+    \hline
+    \textbf{Operation} & \textbf{Example Spec.} & \textbf{Generated Set} \\ \hline \hline
+    Join & \pbox{20cm}{\vspace{3mm} App 4\\ \text{Phone $\rightarrow$ App 3}\\ $[$... Phone.ref ...$]$ \vspace{1 mm}} &\pbox{20cm}{ $\{e_i$ \text{$ | $} $ 0 \le i \le 3\}$, where\\ $e_i = If(\bigvee\limits_{j=0}^{2} (Phone_j\_ref == i), App_i, App_{off})$ }\\ \hline
+   
+    Set Cardinality & \pbox{20cm}{\vspace{3mm} App 4\\ \text{Phone $\rightarrow$ App 1..3}\\ $[$... $\#(Phone.ref)$ ...$]$ \vspace{1 mm}} & $\sum\limits_{e_i} If(e_i \neq App_{off}, 1, 0)$, where the $e_i$'s are computed from the join.\\ \hline
+  \end{tabular}}
+
+\caption{Set operations.}
+\label{setoperations}
+\end{figure}
 %We illustrate some components of our approach through the example Clafer specification and instance in Listings \ref{listing:ClaferPhone} and \ref{listing:ClaferPhoneInstance}, respectively. Note that there are many aspects of Clafer not present in this model, such as abstract clafers and inheritance; we reserve a description of these for the final report.
-This section describes the Z3 constraints that are generated to represent a Clafer specification in Z3. We begin with our representation of a clafer in Section \ref{representation}. The remaining sections constrain this representation to conform to all restrictions of the specification (\eg cardinality constraints, bracketed constraints, etc.).
+This section describes the Z3 constraints that are generated to represent a Clafer specification in Z3. Table \ref{translationtable} describes the constraints generated for some example specifications. Note that although we describe our constraints using \textit{for-all} quantifiers, we \textbf{do not} use quantified expressions in our translation; quantifiers are expanded into all possible interpretations. We first discuss the hierarchy and cardinality constraints, followed by set constraints and quantified expressions.
 
 \subsection{Hierarchical and Cardinality Constraints}
-asdf
-A reference exists \textit{iff} its corresponding clafer exists (e.g. $Apps0 \ne Apps_{sentinel} \Leftrightarrow Apps0\_ref \ne SwApps_{sentinel}$).
-\subsection{Set Constraints}
-a\cite{Jacksona}
-asdf
+
+Hierarchy rules restrict clafer instances to be within the range of parent instances. This is necessary, as we interpret the variable valuations as \textit{parent pointers} when translating the results to a Clafer model, as discussed in Section \ref{solutionoverview}. Instances cannot exist without their parent (\texttt{No Child wo/Parent}). Additionally, if a clafer has a reference, the reference exists \textit{iff} the instance exists (\texttt{Instance $\Leftrightarrow$ Ref}). Cardinality constraints restrict the number of instances that can occur of a clafer. Hierarchy must be considered when computing cardinality: in the example specification for cardinality in Table \ref{translationtable}, \textit{every} \texttt{Phone} that is present in the model must have between two and five \texttt{App}s. The inner summation in the constraint serves as a \textit{mask}; for a given \texttt{Phone} $i$, we only wish to count the number of \texttt{App}s that are under $i$ within the hierarchy.    %\\
+
 \subsection{Quantifiers}
-Quantified expressions.
+Clafer supports quantified expressions that appear within square brackets in the specification, and generally take the form: [$quantifier$ $vars:type$ $|$ $expr$]. The row labeled \texttt{Quantifiers} provides an example of these expressions. This example also includes the keyword \texttt{disj}, which states that $expr$ should only be evaluated if the $vars$ are distinct; this is captured by the $x \neq y$ part of the Z3 expression. \\
+\indent We believe quantifiers to be one of the largest bottlenecks for our translation as well as solving time. In general, if there are $n$ $vars$ in the declaration of the quantifier (\eg x and y from the example), and the type of $vars$ has $m$ instances ($m=3$ for \texttt{App}), we must generate $m^n$ different constraints, one for each permutation of $n$ instances from $m$.
+
+\subsection{Set Constraints}
+Bracketed constraints may also contain set operations, such as relational join  and cardinality. 
+Joins serve as a way to \textit{navigate} from one set of instances to some related set. Consider the \texttt{Join} row of Table \ref{setoperations}. Essentially, $Phone.ref$ indicates that we want to navigate from a set of type \texttt{Phone} to a set of type \texttt{App}. Our new set contains an expression $e_i$ for \textbf{all} instances of \texttt{App}, however only \texttt{App}s referenced by some \texttt{Phone} will be \textit{on}.\\ 
+\indent Set cardinality is indicated by the $\#$ operator. Given a set of expressions with clafer type $t$, we count the number of expressions that do not evaluate to $t_{off}$. Our examples only illustrates simple case of joins and set cardinality; in general, the sets may include multiple types of clafer instances, and our approach must be adjusted according.
+%\cite{Jacksona}
+
+
 \subsection{Discussion}
-Due to space restrictions, we do not discuss the full set of expressions available in Clafer. Most expressions follow patterns analogous to those previously presented. We also did not discuss arithmetic constraints, however they translate naturally into Z3.\\
+Due to space restrictions, we do not discuss the full set of expressions available in Clafer. Most expressions follow patterns analogous to those previously presented. We also did not discuss arithmetic constraints, however they translate naturally into Z3. Set operations, such as union and intersection, require further discussion. In addition, we have implemented some optimizations to reduce the number of required constraints; many are analogous to those found in \cite{Liang}. \\
 \indent Although we have not formally proven it, we believe our approach is sound, in that it will only produce models that satisfy the specification. However, our approach is incomplete for multiple reasons. Most notably, since we bound our specifications, we may miss larger models. Further, Clafer technically allows non-linear arithmetic, although we have not seen any specifications so far that require it. With that in mind, our approach of translating bounded Clafer specifications can generally be expressed within the logic of \texttt{QF\_UFNRA} (quantifier-free non-linear real arithmetic), however all Clafer models encountered so far can be expressed in \texttt{QF\_LIA} (quantifier-free linear integer arithmetic).
 
 
-\subsection{Bracketed Constraints}
+%\subsection{Bracketed Constraints}
 
-We must also support Clafer's bracketed constraints (as in [$sum\text{ }Apps.ref.memory <= 100$] from Listing \ref{listing:ClaferPhone}), which we only discuss at a very high-level. To generate this constraint, we must first compute each of the joins in $Apps.ref.memory$. which is intuitively the set of \texttt{memory} clafers that are beneath any \texttt{SwApp} referenced by an \texttt{Apps} instance. We must then ensure that the sum of this set of \texttt{memory} instances is less than 100. Note that this is indeed the case in our example, since $memory0 + memory1 =   41 \le 100$.\\
-\indent Although this example is not too difficult to convert to Z3 constraints, more complicated expressions and language features make set constraints challenging. Consider the specification in Listing \ref{listing:ClaferMoreComplexSpec}. Both \texttt{IphoneApps} and \texttt{AndroidApps} reference \texttt{SwApps}, however when considering the summation on the last line, we must only consider instances of \texttt{SwApps} referenced by instances of \texttt{AndroidApps}. As another example, two previously unmentioned Clafer keywords are \texttt{this} and \texttt{parent}, which essentially allows one to consider each instance of a clafer individually. For example, the constraint: [$this.ref.memory = 15$] in Listing \ref{listing:ClaferMoreComplexSpec}  essentially states that the \texttt{memory} field of any \texttt{SwApp} referenced by an \texttt{IphoneApp} must be equal to 15. This requires us to generate constraints corresponding to \textit{all} individual instances of \texttt{IphoneApp}.
+%We must also support Clafer's bracketed constraints (as in [$sum\text{ }Apps.ref.memory <= 100$] from Listing \ref{listing:ClaferPhone}), which we only discuss at a very high-level. To generate this constraint, we must first compute each of the joins in $Apps.ref.memory$. which is intuitively the set of \texttt{memory} clafers that are beneath any \texttt{SwApp} referenced by an \texttt{Apps} instance. We must then ensure that the sum of this set of \texttt{memory} instances is less than 100. Note that this is indeed the case in our example, since $memory0 + memory1 =   41 \le 100$.\\
+%\indent Although this example is not too difficult to convert to Z3 constraints, more complicated expressions and language features make set constraints challenging. Consider the specification in Listing \ref{listing:ClaferMoreComplexSpec}. Both \texttt{IphoneApps} and \texttt{AndroidApps} reference \texttt{SwApps}, however when considering the summation on the last line, we must only consider instances of \texttt{SwApps} referenced by instances of \texttt{AndroidApps}. As another example, two previously unmentioned Clafer keywords are \texttt{this} and \texttt{parent}, which essentially allows one to consider each instance of a clafer individually. For example, the constraint: [$this.ref.memory = 15$] in Listing \ref{listing:ClaferMoreComplexSpec}  essentially states that the \texttt{memory} field of any \texttt{SwApp} referenced by an \texttt{IphoneApp} must be equal to 15. This requires us to generate constraints corresponding to \textit{all} individual instances of \texttt{IphoneApp}.
 
 \section{Extensions to Clafer}
-A notable difference of using Z3, as opposed to previous backends of Clafer, is its ability to handle constraints on real numbers\footnote{Due to complications with the Clafer frontend grammar, we have only been able to prototype these constraints with small hand-generated models. This also applies to string constraints. These restrictions will be addressed in the near future.}. Z3 handles real numbers naturally, so incorporating constraints over them into our translation required minimal effort. We therefore do not discuss further details. \\
+A notable difference of using Z3, as opposed to previous backends of Clafer, is its ability to handle constraints with real numbers\footnote{Due to complications with the Clafer frontend grammar, we have only been able to prototype these constraints with small hand-generated models. This also applies to string constraints. These restrictions will be addressed in the near future.}. Z3 handles real numbers naturally, so incorporating constraints over them into our translation required minimal effort. We therefore do not discuss further details. \\
 \indent We next briefly describe our extensions allowing string constraints. We also propose a new algorithm to prevent the generation of models that are isomorphic to previously generated models.
 
 \subsection{String Constraints}
@@ -448,14 +497,13 @@ AddsToSix0
 
 \subsection{Isomorphic Model Prevention}
 \label{isomorphism}
-Clafer can produce many models for a given specification, however many models may have the same structure, that is, they are \textit{isomorphic}. While we do not formally define isomorphism of models, intuitively two models are isomorphic if they have the same number of instances of each clafer, the same tree structure, and the graph formed by reference clafers is isomorphic. From a user's viewpoint,  these \textit{redundant} models are not as useful, and should be excluded if possible. Consider Listing \ref{listing:isospecification}. Essentially, this specification requires three unique positive integers, such that their sum is six. There are six unique models (one for each permutation of the numbers 1, 2, and 3), however they are all isomorphic to each other. \\
-\indent Suppose the first example model from Listing \ref{listing:isospecification} has been generated. Listing \ref{listing:isoconstraint} is the constraint (in Clafer syntax) that is added to the specification to prevent future models isomorphic to the first. Essentially, each future model either have a different number of clafers (which is not possible due to cardinality constraints), or must have a digit not equal 1, 2, or 3. Note that by using the \textit{some} quantifier, the order of the \texttt{Digit}s is ignored. \\
-\indent Although we have only shown a simple example with integers, the approach extends naturally to larger models and reference clafers. This improves upon previous approaches that only look at the tree structure of the model, and cannot detect isomorphism over reference clafers. We note that this approach is possible as Z3 allows pushing new constraints after a solution has been found. Unfortunately, our approach may add an exponential number of constraints, making it infeasible for many specifications. We are still investigating optimizations for this approach.
+Clafer may produce multiple models for a given specification, however there may be many models that have the same structure, that is, they are \textit{isomorphic}. While we do not formally define isomorphism of models, intuitively two models are isomorphic if they have the same number of instances of each clafer, the same tree structure, and the graph formed by reference clafers is isomorphic. From a user's viewpoint,  these \textit{redundant} models are not as useful, and should be excluded if possible. Consider Listing \ref{listing:isospecification}. Essentially, this specification requires three unique positive integers, such that their sum is six. There are six unique models (one for each permutation of the numbers 1, 2, and 3), however they are all isomorphic to each other. \\
+\indent Suppose the first example model from Listing \ref{listing:isospecification} has been generated. Listing \ref{listing:isoconstraint} is the constraint (in Clafer syntax) that is added to the specification to prevent future models that are isomorphic to the first. Essentially, each future model either has a different number of clafers (which is not possible in this example due to cardinality constraints), or must have a digit not equal to 1, 2, or 3. Note that by using the \textit{some} quantifier, the order of the \texttt{Digit}s is ignored. Adding this constraint to the system prevents the generation of models isomorphic to the first; for this example no more models can be produced. \\
+\indent Although we have only shown a simple example with integers, the approach extends naturally to larger models and reference clafers. This improves upon previous approaches that only look at the tree structure of the model, and cannot detect isomorphism over reference clafers. We note that this approach is possible as Z3 allows \textit{pushing} new constraints after an initial solution has been found. Unfortunately, our approach may add an exponential number of constraints, making it infeasible for many specifications. We are still investigating optimizations for this approach.
 
 
 \section{Experimental Results}
-We provide initial experimental results from four sources: 1) the Audi Car Configurator model from \cite{Michel2012}; 2) a simple Clafer specification of a zoo from \cite{Liang}; 3) a PHP script involving string and integer constraints from \cite{Zheng2013}; and 4) the Clafer test suite. The Clafer test suite contains mostly small specifications, however it was useful for checking the proper functionality of our tool. The test suite contains 43 specifications, and we evaluated all but two. The two excluded specifications did not adhere to small design restrictions of our approach, which are reserved for future work\footnote{Essentially, these specifications require instances of abstract clafers to be part of the concrete model.}. \\
-\indent Currently, we do not have any larger models in our evaluation, and we plan to address this limitation of our results in the future. However, our evaluation does demonstrate that our tool can properly analyze specifications from a variety of domains, even outside of what would typically be considered variability models (e.g. the PHP script).\\
+We provide initial experimental results from four sources: 1) the Audi Car Configurator model from \cite{Michel2012}; 2) a simple Clafer specification of a zoo from \cite{Liang}; 3) a PHP script involving string and integer constraints from \cite{Zheng2013}\footnote{Although we have specified this model, we cannot evaluate it yet, once again due to grammar restrictions in the frontend. However, due to its small size we expect that this specification will take minimal time to instantiate.}; and 4) the Clafer test suite. We include the specification for the Audi Car Configurator and the PHP script in Appendices \ref{appendix} and \ref{appendix2}, respectively. The Clafer test suite contains mostly small specifications, however it was useful for checking the proper functionality of our tool. The test suite contains 43 specifications, and we evaluated all but two. The two excluded specifications did not adhere to small design restrictions of our approach, which are reserved for future work\footnote{Essentially, these specifications require instances of abstract clafers to be part of the concrete model.}. Currently, we do not have any \textit{large} models in our evaluation, and we plan to address this limitation in future work. \\ %However, our evaluation does demonstrate that our tool can properly analyze specifications from a variety of domains, even outside of what would typically be considered variability models (e.g. the PHP script).\\
 \begin{figure}
 \begin{center}
   \begin{tabular}{ l || c | r }
@@ -463,7 +511,7 @@ We provide initial experimental results from four sources: 1) the Audi Car Confi
     Specification & Translation Time(s) & Solving Time(s) \\ \hline \hline
     Clafer Test Suite & 10.55 & 0.88 \\ \hline
     Audi Configurator & 0.13 & 0.01 \\ \hline
-    PHP Script & N/A & N/A \\ \hline
+    %PHP Script & N/A & N/A \\ \hline
     Zoo & 0.84 & 0.15 \\
     \hline
   \end{tabular}
@@ -475,22 +523,106 @@ We provide initial experimental results from four sources: 1) the Audi Car Confi
 \indent Table \ref{resultstable} shows the translation and solving time for our set of specifications. Translation time indicates the time required to convert a Clafer specification to a set of Z3 constraints. Solving time indicates how long Z3 takes to find the first satisfying model for each specification. Although the translation is currently a large bottleneck for our approach, it can certainly be optimized. We find that the low solving times for all specifications indicates that our approach is promising.
 
 \section{Related and Previous Work}
-\indent The work of Michel et. al. \cite{Michel2012} discusses how configuration problems can be encoded in SMT using TVL \cite{Classen2011} -- a text based feature modeling language similar to Clafer. TVL supports many of the components of feature modeling, including hierarchy, group cardinality, attributes, enums, and cross-tree constraints. However, several aspects of Clafer require extensions to this work. Most notably, set constraints and quantified expressions. \\
+\indent The work of Michel et. al. \cite{Michel2012} discusses how configuration problems can be encoded in SMT using TVL \cite{Classen2011} -- a text based feature modeling language similar to Clafer. TVL supports many of the components of Clafer, including hierarchy, group cardinality, attributes, enums, and cross-tree constraints. However, several aspects of Clafer require extensions to this work (most notably, set constraints and quantified expressions). \\
 \indent  A previous project \cite{Olaechea2013} within the GSD lab was capable of translating a small subset of Clafer to Z3, in order to support attributed feature models for multi-objective optimization. The primary components of Clafer necessary for this domain include hierarchical constraints, fixed-size cardinalities (e.g. [0..1]), and basic arithmetic constraints. This project subsumes that translation by allowing arbitrary Clafer constraints.\\
-\indent This work most closely resembles that of \cite{Liang}. Their work translates Clafer to Choco, a CSP language. We have borrowed components from that work, particularly in our representation of clafers and inherited clafers. We are able to extend Clafer with constraints over strings and real numbers, which neither the Choco nor Alloy backend currently support. Z3 also allows us to handle arbitrarily larger integers, which neither of the other backends support. In addition, in the future we intend to extend this project in order to eliminate the need for scopes on unbounded clafers. We discuss this in Section \ref{future}. \\
+\indent This work most closely resembles that of \cite{Liang}. Their work translates Clafer to Choco, a CSP language. We have borrowed components from that work, particularly in our representation of clafers and inherited clafers. We are able to extend Clafer with constraints over strings and real numbers, which neither the Choco nor Alloy backend currently support. Z3 also allows us to handle arbitrarily larger integers, which neither of the other backends support. In addition, in the future we intend to extend this project in order to eliminate the need for scopes on unbounded clafers. We discuss this in Section \ref{future}. 
 
 \section{Future Work}
 \label{future}
 This project utilized only a small subset of the available features of Z3. For example, Z3 has support for uninterpreted functions and data types. We would like to modify our translation to take advantage of these features. With this approach, we may be able to eliminate the need for scopes in our implementation. The work in \cite{Achraf}, which translates components of Alloy to SMT, and that of \cite{Moura2009}, which discusses some set theoretic operations using the theory of arrays, may be useful starting points for this extension.\\
-\indent One particular reason we did not take this approach yet is due to translation efficiency. As an example, in an early version of this project we used an uninterpreted function to represent cardinality constraints. Given a clafer, the function would restrict its instances to conform to the cardinality constraints. By blasting this function into simple arithmetic constraints (which we can do since we have a bounded number of instances), our translation times were significantly decreased\footnote{Although time differences were not recorded, some relatively small specifications required 2-3 additional seconds.}, even for small models. We emphasize that here we are referring to \textit{translation time}; Z3 took approximately the same time to solve models whether or not functions were used.\\
+\indent One particular reason we did not take this approach yet is due to translation efficiency. As an example, in an early version of this project we used an uninterpreted function to represent cardinality constraints. Given a clafer, the function would restrict its instances in a way similar to Table \ref{translationtable} . By blasting this function into simple arithmetic constraints (which we can do since we have a bounded number of instances), our translation times were significantly decreased\footnote{Although time differences were not recorded, some relatively small specifications required 2-3 additional seconds.}, even for small models. We emphasize that here we are referring to \textit{translation time}; Z3 took approximately the same time to solve models whether or not functions were used.\\
 \indent A proper evaluation is necessary to compare the three Clafer backends that are now available. Since each backend was developed independently and contain unique optimizations, this comparison cannot properly evaluate the effectiveness of Alloy/Choco/Z3 as a backend. However, it would be useful to users of Clafer who wish to choose the ideal backend for their application. 
 \indent Finally, we intend to further evaluate our extensions for string and real number constraints. Although we currently have models with these constraints, they cannot be properly compiled by Clafer, due to lack of support in the Clafer frontend (see footnote 3). These issues will be addressed in the near future. 
 
 \section{Conclusions}
-We have developed a translation from Clafer to Z3. We extend capabilities of Clafer with string constraints using Z3-Str, as well as constraints over real numbers and unbounded integers. Z3's capability to push new constraints to existing specifications allows a new approach to isomorphism detection of Clafer models. Initial results indicate that our approach seems reasonably fast over a variety of specifications, however larger inputs will be needed to validate our results. With the expressive power of Clafer, coupled with the support for new data types, our approach supports the analysis of new domains of models that previous tools are incapable of handling. 
+We have developed a translation from Clafer to Z3. We extend capabilities of Clafer with string constraints using Z3-Str, as well as constraints over real numbers and unbounded integers. Z3's capability to push new constraints to existing specifications allows a new approach to preventing isomorphic Clafer models. Initial results indicate that our approach seems reasonably fast over a variety of specifications, however larger inputs will be needed to validate our results. With the expressive power of Clafer, coupled with the support for new data types, our approach supports the analysis of new domains of models that previous tools are incapable of handling. 
 
 
 
 \bibliographystyle{abbrv}
 \bibliography{doc}
+\appendix
+\section{Audi Car Configurator Specification}
+\label{appendix}
+\begin{lstlisting}[language=clafer, numbers=left]
+AudiCar
+  xor ModelLine
+    AudiA4
+      [ A4Saloon || A4Avant || S4Saloon || S4Avant ]
+    AudiA6
+      [ A6Saloon || A6Avant ]
+  xor BodyStyle
+    Saloon
+      [ A4Saloon || S4Saloon || A6Saloon ]
+    Avant
+      [ A4Avant || S4Avant || A6Avant ]
+  Engine
+    xor WheelDrive
+      Quatro
+      FrontWheelDrive 
+      RearWheelDrive 
+    xor DriveTrain
+      Automatic
+      Manual
+      STronic
+  Exterior
+    `Color
+    wheel : Wheel
+    1..2 ExteriorPackage ?
+      BlackStyling
+      ContrastRoof
+  xor Model
+    A4Saloon
+    A4Avant
+    S4Saloon
+    S4Avant
+    A6Saloon
+    A6Avant
+
+abstract Wheel
+  Size : int
+  [ 15 <= Size && Size <= 20 ]
+  xor TypeWheel
+    Spoke5
+    Spoke6
+    Harm7
+    Hole6
+
+abstract xor Color
+  Metallic
+  PearlEffect
+  Other
+\end{lstlisting}%
+
+\section{PHP Script Specification}
+\label{appendix2}
+Refer to \cite{Zheng2013} for the original PHP script.
+
+\begin{lstlisting}[language=clafer, numbers=left]
+//lines 1-13 from original PHP Script
+g : int
+usergroup : int
+role : string
+r : string
+[g = usergroup]
+[g < 3 && g = 0  => role = "visitor"]
+[g < 3 && g != 0 => role = "new"]
+[g > 3 && g = 9  => role = "admin"]
+[g > 3 && g != 9 => role = r]
+
+//line 14
+p : int
+price : int
+[p = price]
+
+//lines 15-16
+total : int
+taxrate : int
+ship : int
+[total = (1 + taxrate) * p + ship] 
+
+//lines 17-19
+notifyAdmin ?
+[total > 500 && substr(role, 0, 1) = "n"  <=> notifyAdmin ] 
+\end{lstlisting}%
 \end{document}
