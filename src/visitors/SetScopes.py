@@ -5,6 +5,7 @@ Created on Nov 10, 2013
 '''
 from ast.IntegerLiteral import IntegerLiteral
 from common import Options
+from common.Exceptions import UnusedAbstractException
 from visitors import VisitorTemplate
 import ast
 import visitors
@@ -41,4 +42,5 @@ class SetScopes(VisitorTemplate.VisitorTemplate):
             visitors.Visitor.visit(self, i)
         self.glStack.pop()
             
+
     

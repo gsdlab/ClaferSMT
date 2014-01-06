@@ -45,23 +45,24 @@ POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
 
 GLOBAL_SCOPE = 1#this obviously has to change
 
-ECLIPSE = True
+ECLIPSE = False
 
 MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
-STRING_CONSTRAINTS = True
+STRING_CONSTRAINTS = False
 CNF = False
 GOAL = False
 NUM_INSTANCES = 10 # -1 to produce all instances
 INFINITE = -1 #best variable name.
 PROFILING = True # True to output the translation time, and time to get first model
 CPROFILING = False #invokes the standard python profiling method (see Z3Run.py)
-GET_ISOMORPHISM_CONSTRAINT = False #efficiency bugs in quantified formulas is preventing this from working
+GET_ISOMORPHISM_CONSTRAINT = False #efficiency bugs in quantified formulas are preventing this from working
 BREAK_QUANTIFIER_SYMMETRY = False
 EXTEND_ABSTRACT_SCOPES = True
 FILE = ""
 MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
+STRING_TESTS = 3 #tests that involve strings / string constraints
 TEST_SET = MY_TESTS 
 DIMACS_FILE="dimacs"
 
@@ -75,7 +76,7 @@ DIMACS_FILE="dimacs"
 #MODULE = boolean_connectives.getModule()
 #MODULE = union.getModule()
 #MODULE = simple_abstract.getModule()
-MODULE = phpscript.getModule()
+#MODULE = phpscript.getModule()
 #MODULE = some.getModule()
 #MODULE = paths.getModule()
 #MODULE = mypaths.getModule()
@@ -118,6 +119,7 @@ MODULE = phpscript.getModule()
 #MODULE = trivial2.getModule()
 #MODULE = simple_real.getModule()
 #MODULE = Phone.getModule()
+MODULE = check_unique_ref_names_with_inheritance.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),
@@ -142,7 +144,6 @@ my_tests = [
 
 positive_tests = [
         (books_tutorial,INFINITE),
-        (check_unique_ref_names_with_inheritance, 1),
         (constraints,INFINITE),
         (enforcingInverseReferences,INFINITE),
         (i101, 1),
@@ -156,12 +157,9 @@ positive_tests = [
         (i14, 1),
         (i17, 0),
         (i188sumquantifier,INFINITE),
-        (i18, 2),
         (i19,INFINITE),
         (i205refdisambiguationII,INFINITE),
         (i23,INFINITE),
-        (i40_integers_strings_assignment, 6),
-        (i40textequality, 1),
         (i49_parentReduce, 1),
         (i49_resolve_ancestor,INFINITE),
         (i50_stop_following_references, 1),
@@ -181,11 +179,17 @@ positive_tests = [
         (person_tutorial,INFINITE),
         (resolution,INFINITE),
         (simp, 1),
-        (subtypingprimitivetypes, 1),
         (telematics, 1),
         (test_neg_typesystem,INFINITE)
                   ]
 
+string_tests = [
+                (check_unique_ref_names_with_inheritance, 1),
+                (i18, 2),
+                (i40_integers_strings_assignment, 6),
+                (i40textequality, 1),
+                (subtypingprimitivetypes, 1)
+                ]
 
 modeMap = {
            'experiment' : Common.EXPERIMENT,
@@ -200,7 +204,8 @@ modeMap = {
 
 testMap = {
            'edstests'   : MY_TESTS,
-           'positive'   : POSITIVE_TESTS
+           'positive'   : POSITIVE_TESTS,
+           'string'     : STRING_TESTS
            }
 
 
@@ -215,21 +220,19 @@ def setCommandLineOptions():
     parser.add_argument('--numinstances', '-n', dest='numinstances', type=int, default='1', help='the number of models to be displayed (-1 for all)')
     parser.add_argument('--globalscope', '-g', dest='globalscope', type=int, default='1', help='the global scope for unbounded clafers (note that this does not match regular clafer)')
     parser.add_argument('--testset', '-t', dest='testset', default='edstests', help='The test set to be used for modes [experiment | test | one | all]',
-                        choices=['edstests', 'positive'])
+                        choices=['edstests', 'positive', 'string'])
     parser.add_argument('--stringconstraints' , '-s', default=False, dest='stringconstraints',action='store_const',  const=True,  help='Flag to output to Z3-Str format instead.')
-    parser.add_argument('--eclipse', '-e', dest='eclipse', default=True, action='store_const',  const=False, help='Do not set this...')
+    parser.add_argument('--eclipse', '-e', dest='eclipse', default=False, action='store_const',  const=False, help='Do not set this...')
     parser.add_argument('--cnf', default=False, dest='cnf',action='store_const',  const=True,  help='Outputs CNF of formula.')
     parser.add_argument('--dimacs', default="dimacs", dest='dimacs', help='Output DIMACS.')
     
     args = parser.parse_args()
-    
     global ECLIPSE
     if  args.eclipse:
         ECLIPSE = True 
         return
     else:
         ECLIPSE = False
-    
     if not args.file and not (args.mode in ['experiment', 'test', 'one', 'all']):
         parser.print_help()
         sys.exit("\nERROR: If no file is given, mode must be set to [experiment | test | one | all].")

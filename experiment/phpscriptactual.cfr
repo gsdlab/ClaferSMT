@@ -1,0 +1,25 @@
+//lines 1-13 from original PHP Script
+g : int
+usergroup : int
+role : string
+r : string
+[g = usergroup]
+[g < 3 && g = 0  => role = "visitor"]
+[g < 3 && g != 0 => role = "new"]
+[g > 3 && g = 9  => role = "admin"]
+[g > 3 && g != 9 => role = r]
+
+//line 14
+p : int
+price : int
+[p = price]
+
+//lines 15-16
+total : int
+taxrate : int
+ship : int
+[total = (1 + taxrate) * p + ship] 
+
+//lines 17-19
+notifyAdmin ?
+[total > 500 && substr(role, 0, 1) = "n"  <=> notifyAdmin ] 

@@ -3,18 +3,18 @@ Created on Nov 21, 2013
 
 @author: ezulkosk
 '''
-from common import Common
+from common import Common, Options
 from z3 import BoolRef, ArithRef, IntNumRef
 from z3consts import *
 from z3core import *
 import io
 import sys
 import z3
-
+from z3 import Tactic
 '''
-###################################
-# CNF + DIM[H]AC[K]S
-###################################
+####################################
+# CNF + DIMACS Abstraction of QFLIA
+####################################
 '''
 class DimacsConverter():
     
@@ -41,12 +41,61 @@ class DimacsConverter():
             variables = variables + self.toDimacs(c)
         return variables
 
+def convertToDimacs(self):
+        f_n = open(Options.DIMACS_FILE, 'w')
+        d = DimacsConverter()
+        t = Tactic("tseitin-cnf")
+        cnf = t(self.goal)
+        clauses = []
+        #print(cnf)
+        for i in cnf:
+            for j in i:
+                #print(j)
+                clauses.append(d.toDimacs(j))
+        f_n.write("p cnf " + str(d.varcount-1) + " " + str(len(clauses)))
+        for clause in clauses:
+                f_n.write(" ".join([str(i) for i in clause])  + " 0"+ "\n")
+        f_n.close()
+
 
 '''
 ###################################
 # Z3-Str
 ###################################
 '''
+
+def printZ3StrConstraints(z3):
+    f_n = open("z3str_in", 'w')
+    f_n.write("(set-option :auto-config true)\n")
+    f_n.write("(set-option :produce-models true)\n")
+    f_n.write("(declare-variable " + "EMPTYSTRING String)\n")
+    f_n.write("(assert (= EMPTYSTRING \"\"))\n")
+    for i in z3.z3_sorts.values():    
+        for j in i.instances:
+            f_n.write("(declare-variable " + str(j) + " Int)\n")
+        if i.refs:
+            if i.refSort.type == "string":
+                sort = "String"
+            elif i.refSort.type == "integer":
+                sort = "Int"
+            elif i.refSort.type == "real":
+                sort = "Real"
+            else:
+                print(i.refSort.type)
+                sys.exit("Bug in printZ3StrConstraints")
+            for j in i.refs:
+                f_n.write("(declare-variable " + str(j) + " " + sort + ")\n")
+    for i in z3.z3_sorts.values():
+        i.constraints.z3str_print(f_n)
+    z3.join_constraints.z3str_print(f_n)
+    for i in z3.z3_bracketed_constraints:
+        i.z3str_print(f_n)
+    
+    f_n.write("(check-sat)\n")
+    f_n.write("(get-model)\n")
+    
+    f_n.close()
+    
 def obj_to_string(constraint):
     return ("(assert " + strprint(constraint) + ")")
         

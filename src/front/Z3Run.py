@@ -32,7 +32,7 @@ def main(args):
         TestClafers.runForAll()
     elif Common.MODE == Common.MODELSTATS:
         ModelStats.run()
-    elif (not Options.ECLIPSE) and (Common.MODE == Common.NORMAL or Common.MODE == Common.EXPERIMENT or Common.MODE == Common.DEBUG):
+    elif (not Options.ECLIPSE) and (Common.MODE in [Common.NORMAL, Common.EXPERIMENT, Common.DEBUG]):
         file = Options.FILE
         #print(file)
         if file.endswith(".cfr"):

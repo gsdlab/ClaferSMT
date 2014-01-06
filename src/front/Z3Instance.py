@@ -9,7 +9,7 @@ from common import Common, Options, Clock
 from common.Common import debug_print, standard_print, mOr
 from common.Exceptions import UnusedAbstractException
 from constraints import Constraints, IsomorphismConstraint
-from front import Z3Str
+from front import Z3Str, Converters
 from front.Converters import DimacsConverter
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
@@ -84,29 +84,6 @@ class Z3Instance(object):
             (_, upper) = sort.element.glCard
             return upper.value#sort.numInstances 
     
-    def setAbstractScopes(self):
-        hasChanged = False
-        for i in self.z3_sorts.values():
-            if i.element.isAbstract:
-                summ = 0
-                for j in i.subs:
-                    summ = summ + self.getScope(j)
-                (lower, upper) = i.element.glCard
-                i.element.glCard = (lower, IntegerLiteral(summ))
-                if upper.value != summ:
-                    #print(str(upper) + " " + str(summ))
-                    hasChanged = True
-                #i.numInstances = summ#max(summ, Options.GLOBAL_SCOPE)#summ #temp
-                #i.upperCardConstraint = summ
-                if summ == 0:
-                    raise UnusedAbstractException(i.element.uid)
-        return hasChanged
-                
-    def adjustAbstracts(self):
-        for i in self.z3_sorts.values():
-            if i.element.isAbstract:
-                Visitor.visit(AdjustAbstracts.AdjustAbstracts(self), i.element)
-    
     def findUnusedAbstracts(self):
         for i in self.z3_sorts.values():
             if i.element.isAbstract:
@@ -127,6 +104,7 @@ class Z3Instance(object):
         #set_option(auto_config=False)
         #set_option(candidate_models=True)
         if Common.MODE == Common.DEBUG:
+            #these may not be necessary
             set_option(max_width=100)
             set_option(max_depth=1000)
             set_option(max_args=1000)
@@ -142,8 +120,6 @@ class Z3Instance(object):
         try:
             self.clock.tick("translation")
             
-            #for i in  tactics():
-            #    print( i + " ===> " + str(tactic_description(str(i))))
             """ Create a ClaferSort associated with each Clafer. """  
             Visitor.visit(CreateSorts.CreateSorts(self), self.module)
             
@@ -153,9 +129,6 @@ class Z3Instance(object):
             """ Add subclafers to the *fields* variable in the corresponding parent clafer. Also handles supers and refs. """
             Visitor.visit(CreateHierarchy.CreateHierarchy(self), self.module)
             
-            #for i in self.getSorts():
-            #   print(i)
-            
             debug_print("Mapping colon clafers.")
             self.mapColonClafers()
           
@@ -163,24 +136,10 @@ class Z3Instance(object):
             Visitor.visit(SetScopes.SetScopes(self), self.module)
           
             debug_print("Adjusting abstract scopes.")
-            ''' I think these have to loop until fixed-point??? ''' 
-            ''' success?!?!?!? '''
-            hasChanged = True
-            while hasChanged:
-                #print("A")
-                hasChanged = self.setAbstractScopes()
-                self.adjustAbstracts()
-            
-            #for i in self.getSorts():
-            #     print(str(i) + " " + str(i.element.glCard[1]))
+            AdjustAbstracts.adjustAbstractsFixedPoint(self)
             
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
-            
-            #count = 1
-            #for i in self.getSorts():
-            #    print(str(count) +  " " + str(i) + " " +     str(i.numInstances))
-            #    count = count +1
             
             debug_print("Creating cardinality constraints.")
             self.createCardinalityConstraints()
@@ -198,7 +157,7 @@ class Z3Instance(object):
             Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
                
             if Options.STRING_CONSTRAINTS:
-                self.printZ3StrConstraints()
+                Converters.printZ3StrConstraints(self)
                 Z3Str.clafer_to_z3str("z3str_in")
                 return 1
             
@@ -207,7 +166,7 @@ class Z3Instance(object):
             
             if Options.CNF:
                 debug_print("Outputting DIMACS.")
-                self.convertToDimacs()
+                Converters.convertToDimacs()
                 return 1
                 
             debug_print("Printing constraints.") 
@@ -234,25 +193,7 @@ class Z3Instance(object):
         standard_print("")
         self.clock.tack("printing")
     
-    def convertToDimacs(self):
-        f_n = open(Options.DIMACS_FILE, 'w')
-        #print(Options.DIMACS_FILE)
-        #self.printCNF()
-        #print(self.goal)
-        d = DimacsConverter()
-        t = Tactic("tseitin-cnf")
-        cnf = t(self.goal)
-        clauses = []
-        #print(cnf)
-        for i in cnf:
-            for j in i:
-                #print(j)
-                clauses.append(d.toDimacs(j))
-        f_n.write("p cnf " + str(d.varcount-1) + " " + str(len(clauses)))
-        for clause in clauses:
-                f_n.write(" ".join([str(i) for i in clause])  + " 0"+ "\n")
-        f_n.close()
-
+    
     
     def assertConstraints(self):
         for i in self.z3_sorts.values():
@@ -272,37 +213,7 @@ class Z3Instance(object):
             i.debug_print()
             
     
-    def printZ3StrConstraints(self):
-        f_n = open("z3str_in", 'w')
-        f_n.write("(set-option :auto-config true)\n")
-        f_n.write("(set-option :produce-models true)\n")
-        f_n.write("(declare-variable " + "EMPTYSTRING String)\n")
-        f_n.write("(assert (= EMPTYSTRING \"\"))\n")
-        for i in self.z3_sorts.values():    
-            for j in i.instances:
-                f_n.write("(declare-variable " + str(j) + " Int)\n")
-            if i.refs:
-                if i.refSort.type == "string":
-                    sort = "String"
-                elif i.refSort.type == "integer":
-                    sort = "Int"
-                elif i.refSort.type == "real":
-                    sort = "Real"
-                else:
-                    print(i.refSort.type)
-                    sys.exit("Bug in printZ3StrConstraints")
-                for j in i.refs:
-                    f_n.write("(declare-variable " + str(j) + " " + sort + ")\n")
-        for i in self.z3_sorts.values():
-            i.constraints.z3str_print(f_n)
-        self.join_constraints.z3str_print(f_n)
-        for i in self.z3_bracketed_constraints:
-            i.z3str_print(f_n)
-        
-        f_n.write("(check-sat)\n")
-        f_n.write("(get-model)\n")
-        
-        f_n.close()
+    
         
     #this is not my method, some stackoverflow or z3.codeplex.com method. Can't remember, should find it.
     # i no longer need this method, if i implement the isomorphism detection
@@ -322,19 +233,14 @@ class Z3Instance(object):
                 #if count ==0:
                 #print(m)
                 result.append(m)
-                #print(self.solver.statistics())
-                # Create a new constraint the blocks the current model
-                
+                # Create a new constraint that blocks the current model
+            
                 if not Common.MODE == Common.TEST and not Common.MODE == Common.EXPERIMENT:
                     self.printVars(m, count)
                 if Options.GET_ISOMORPHISM_CONSTRAINT:
-                    #Common.FLAG = True
                     IsomorphismConstraint.IsomorphismConstraint(self, m).createIsomorphicConstraint()
-                    #self.printConstraints()
-                    #print("AFTER")
                     isoConstraint = self.z3_bracketed_constraints.pop()
                     isoConstraint.assertConstraints(self)
-                    #Common.FLAG = False
                 else:
                     block = []
                     for d in m:

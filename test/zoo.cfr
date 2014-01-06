@@ -11,8 +11,12 @@ abstract Animal *
 Cat : Animal 4
   Whiskers 6
 
-Rhino : Animal 3
+Rhino : Animal 1..*
   Horn
 
-Elephant : Animal 2
+Elephant : Animal *
   Trunk
+
+[Cat in Animal] 
+[Animal -- Cat in Rhino]
+  
