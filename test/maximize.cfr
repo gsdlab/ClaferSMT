@@ -1,0 +1,3 @@
+ShouldBe7 : int
+[ShouldBe7 < 8]
+<< max ShouldBe7 >>

@@ -61,7 +61,6 @@ def joinWithParent(arg):
                     break
                 prevClause = newMask.get(k)
                 newMask.put(k, mOr(prevClause, mask.get(j) == k))
-        a=0
         newInstanceSorts.append((sort.parent, newMask))
         Assertions.nonEmptyMask(newMask)
     for i in newInstanceSorts:
@@ -143,7 +142,7 @@ def joinWithClaferRef(arg):
 def joinWithRef(arg): 
     (sort, _) = arg.instanceSorts[0]
     if len(arg.instanceSorts) > 1:
-       sys.exit("bug in join with ref, need to implement...")
+        sys.exit("bug in join with ref, need to implement...")
     if isinstance(sort.refSort, PrimitiveType):
         return joinWithPrimitive(arg)
     else: 
@@ -265,8 +264,8 @@ def getClaferMatch(key, my_list):
             
     return matches
 
-def find(key, list):
-    for i in list:
+def find(key, l):
+    for i in l:
         (sort, mask) =  i
         if sort == key:
             return mask

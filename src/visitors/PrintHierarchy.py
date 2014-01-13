@@ -24,7 +24,6 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
     
     '''
     
-    
     def __init__(self, z3, model):
         '''
         :param z3: The Z3 solver.

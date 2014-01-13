@@ -20,7 +20,7 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
     one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths, \
     AADL_simplified_with_lists, teststring, testunion, simple_real, Phone, \
-    int_ref_set, phpscript, iso
+    int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max
 import argparse
 import sys
 
@@ -45,7 +45,7 @@ POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
 
 GLOBAL_SCOPE = 1#this obviously has to change
 
-ECLIPSE = False
+ECLIPSE = True
 
 MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
@@ -119,7 +119,10 @@ DIMACS_FILE="dimacs"
 #MODULE = trivial2.getModule()
 #MODULE = simple_real.getModule()
 #MODULE = Phone.getModule()
-MODULE = check_unique_ref_names_with_inheritance.getModule()
+#MODULE = check_unique_ref_names_with_inheritance.getModule()
+#MODULE = maximize.getModule()
+MODULE = two_objective_min.getModule()
+#MODULE = two_objective_max.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),
@@ -222,13 +225,12 @@ def setCommandLineOptions():
     parser.add_argument('--testset', '-t', dest='testset', default='edstests', help='The test set to be used for modes [experiment | test | one | all]',
                         choices=['edstests', 'positive', 'string'])
     parser.add_argument('--stringconstraints' , '-s', default=False, dest='stringconstraints',action='store_const',  const=True,  help='Flag to output to Z3-Str format instead.')
-    parser.add_argument('--eclipse', '-e', dest='eclipse', default=False, action='store_const',  const=False, help='Do not set this...')
     parser.add_argument('--cnf', default=False, dest='cnf',action='store_const',  const=True,  help='Outputs CNF of formula.')
     parser.add_argument('--dimacs', default="dimacs", dest='dimacs', help='Output DIMACS.')
     
     args = parser.parse_args()
     global ECLIPSE
-    if  args.eclipse:
+    if ECLIPSE:
         ECLIPSE = True 
         return
     else:

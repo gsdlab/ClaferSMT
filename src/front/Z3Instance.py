@@ -11,9 +11,11 @@ from common.Exceptions import UnusedAbstractException
 from constraints import Constraints, IsomorphismConstraint
 from front import Z3Str, Converters
 from front.Converters import DimacsConverter
+from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
+    GuidedImprovementAlgorithm
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
-    SetScopes, AdjustAbstracts
+    SetScopes, AdjustAbstracts, CheckForGoals
 from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real, Int, \
     Goal, tactics, tactic_description, Tactic, SolverFor
 from z3consts import Z3_UNINTERPRETED_SORT
@@ -38,6 +40,7 @@ class Z3Instance(object):
         self.solver = Solver()
         self.setOptions()
         self.clock = Clock.Clock()
+        self.objectives = []
         self.goal = Goal()
         #print(self.solver.help())
         #print(get_version_string())
@@ -155,7 +158,10 @@ class Z3Instance(object):
             
             debug_print("Creating bracketed constraints.")
             Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
-               
+            
+            debug_print("Checking for goals.")
+            Visitor.visit(CheckForGoals.CheckForGoals(self), self.module)
+        
             if Options.STRING_CONSTRAINTS:
                 Converters.printZ3StrConstraints(self)
                 Z3Str.clafer_to_z3str("z3str_in")
@@ -216,8 +222,41 @@ class Z3Instance(object):
     
         
     #this is not my method, some stackoverflow or z3.codeplex.com method. Can't remember, should find it.
-    # i no longer need this method, if i implement the isomorphism detection
+    # i no longer need this method if i implement the isomorphism detection
     def get_models(self, desired_number_of_models):
+        if not self.objectives:
+            return self.standard_get_models(desired_number_of_models)
+        else:
+            return self.GIA(desired_number_of_models)
+    
+    def GIA(self, desired_number_of_models):
+        metrics_objective_direction = []
+        metrics_variables = []
+        
+        for i in self.objectives:
+            (dir, var) = i
+            metrics_objective_direction.append(dir)
+            metrics_variables.append(var)
+        
+        
+        # Non-Parallel    
+        GIAOptionsNP = GuidedImprovementAlgorithmOptions(verbosity=0, \
+            incrementallyWriteLog=False, \
+            writeTotalTimeFilename="timefile.csv", \
+            writeRandomSeedsFilename="randomseed.csv", useCallLogs=False)    
+        GIAAlgorithmNP = GuidedImprovementAlgorithm(self.solver, metrics_variables, \
+                metrics_objective_direction, [], options=GIAOptionsNP) 
+        '''featurevars instead of []'''
+        outfilename = str("giaoutput").strip()#"npGIA_" + str(sys.argv[1]).strip() + ".csv"
+
+        ParetoFront = GIAAlgorithmNP.ExecuteGuidedImprovementAlgorithm(outfilename, desired_number_of_models)
+        count = 0
+        for i in ParetoFront:
+            self.printVars(i, count)
+            count = count + 1
+        return ParetoFront
+    
+    def standard_get_models(self, desired_number_of_models):
         result = []
         count = 0
         #print(self.solver.sexpr())

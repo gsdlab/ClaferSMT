@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''
-From the Z3-Str project, slightly adapted to fit into ClaferZ3 by Ed Zulkoski.
+From the Z3-Str project, slightly adapted to fit into ClaferZ3.
 '''
 
 import sys
@@ -141,7 +141,6 @@ def processOutput(output):
             continue
         result = result + line + "\n"     
     return result
-      
 
 def clafer_to_z3str(inputFile):
     if not inputFile:

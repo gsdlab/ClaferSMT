@@ -4,6 +4,9 @@ Created on Mar 24, 2013
 @author: ezulkosk
 '''
 
+MAX=True
+MIN=False
+
 class Goal(object):
     '''
     All variables analogous to those described in IntClafer.hs
@@ -18,4 +21,4 @@ class Goal(object):
         return self.isMaximize + self.exp
     
     def toString(self, level):
-        print("A")
+        print("Goal")
