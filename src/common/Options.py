@@ -20,7 +20,7 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
     one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths, \
     AADL_simplified_with_lists, teststring, testunion, simple_real, Phone, \
-    int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max
+    int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max, ERS
 import argparse
 import sys
 
@@ -37,6 +37,7 @@ import sys
 * Fix quantifier symmetry breaker, if two locals FROM THE SAME QUANTIFIER are on the left and right of a func, not symmetric
 * Documentation
 * Need to treat ints and reals "the same" if in the same set.
+* Only add card constraints if necessary.
 '''
 
 '''
@@ -121,8 +122,9 @@ DIMACS_FILE="dimacs"
 #MODULE = Phone.getModule()
 #MODULE = check_unique_ref_names_with_inheritance.getModule()
 #MODULE = maximize.getModule()
-MODULE = two_objective_min.getModule()
+#MODULE = two_objective_min.getModule()
 #MODULE = two_objective_max.getModule()
+MODULE = ERS.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),

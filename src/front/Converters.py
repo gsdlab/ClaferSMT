@@ -14,6 +14,7 @@ from z3 import Tactic
 '''
 ####################################
 # CNF + DIMACS Abstraction of QFLIA
+# NOT EQUISATISFIABLE
 ####################################
 '''
 class DimacsConverter():

@@ -250,6 +250,7 @@ class Z3Instance(object):
         outfilename = str("giaoutput").strip()#"npGIA_" + str(sys.argv[1]).strip() + ".csv"
 
         ParetoFront = GIAAlgorithmNP.ExecuteGuidedImprovementAlgorithm(outfilename, desired_number_of_models)
+        print(ParetoFront)
         count = 0
         for i in ParetoFront:
             self.printVars(i, count)
