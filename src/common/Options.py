@@ -45,7 +45,7 @@ POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
 
 GLOBAL_SCOPE = 1#this obviously has to change
 
-ECLIPSE = True
+ECLIPSE = False
 
 MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
@@ -134,7 +134,6 @@ my_tests = [
           (union, 6),
           (simple_abstract, 0),
           (some, 1),
-          (simple_set, 6),
           (integer_refs, 1),
           (higher_inheritance, 1),
           (this_integer_relation, 2),

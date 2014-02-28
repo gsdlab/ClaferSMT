@@ -12,7 +12,11 @@ class SimpleTree():
         self.nodes = {}
         self.refs = {}
         self.roots = []
+        self.abstractRefs = {}
         
+    def addAbstractRef(self, node, abs):
+        self.abstractRefs[node] = abs
+    
     def addNode(self, node, parent):
         if parent:
             if not self.nodes.get(parent):  

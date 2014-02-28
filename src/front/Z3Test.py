@@ -33,35 +33,22 @@ def BitVecVector(prefix, sz, N):
   return [ BitVec('%s_%s' % (prefix, i), sz) for i in range(N) ]
 
 def main(args):
-    R = RealVal(1/3)
-    A = Bool("A")
-    B = Bool("B")
-    C = Bool("C")
-    D = Bool("D")
-    x = Int("x" )
-    y = Int("y")
+   
     s = Solver()
-    print(R.sexpr())
-    s.check()
-    print(s.model());
-    g = Goal()
-    g.add(x == 0, y >= x + 100000000000000000000)
-    
-    print(g.depth())
-    print(g)
-    s.add(g)
-    print(s.check())
-    r = Then('simplify', 'solve-eqs')(g)
-    # r has 1 subgoal
-    print(len(r))
-    print(r)
-    
-    f = Function('f', IntSort(), IntSort(), IntSort())
-    A = Array("A", IntSort(), IntSort())
-    B = Array("B", IntSort(), IntSort())
-    s = Solver()
+    s.set(unsat_core=True)
+    s.set(model_completion=True)
+    s.set(proof=True)
+    s.set('produce-proofs',True)
+    print(s.help())
     #c = IntSort()
+    a=Int('a')
+    s.add(a< 2)
+    s.add(a > 3)
     print(s.check())
+    s.proof()
+    print(s.unsat_core())
+    
+    print()
     '''
     
     m = s.model()
