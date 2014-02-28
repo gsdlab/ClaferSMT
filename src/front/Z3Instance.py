@@ -8,7 +8,7 @@ from ast.IntegerLiteral import IntegerLiteral
 from common import Common, Options, Clock
 from common.Common import debug_print, standard_print, mOr
 from common.Exceptions import UnusedAbstractException
-from constraints import Constraints, IsomorphismConstraint
+from constraints import Constraints, IsomorphismConstraint, Translator
 from front import Z3Str, Converters
 from front.Converters import DimacsConverter
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
@@ -21,7 +21,8 @@ from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real, Int, \
 from z3consts import Z3_UNINTERPRETED_SORT
 from z3types import Z3Exception
 import sys
-
+import time
+import z3
 
 class Z3Instance(object):
     
@@ -42,6 +43,7 @@ class Z3Instance(object):
         self.clock = Clock.Clock()
         self.objectives = []
         self.goal = Goal()
+        self.translator = Translator.Translator(self)
         #print(self.solver.help())
         #print(get_version_string())
         
@@ -103,6 +105,8 @@ class Z3Instance(object):
         """
         self.solver.set(unsat_core=True)
         self.solver.set(model_completion=True)
+        self.solver.set('qi.eager_threshold',100)
+        self.solver.set('qi.lazy_threshold',100)
         #self.solver.set(produce_models=True)
         #set_option(auto_config=False)
         #set_option(candidate_models=True)
@@ -135,12 +139,37 @@ class Z3Instance(object):
             debug_print("Mapping colon clafers.")
             self.mapColonClafers()
           
+            debug_print("Scopeless Initialization")
+            Visitor.visit(Initialize.Scopeless_Initialize(self), self.module)
+
+
+            debug_print("Asserting constraints.")
+            self.assertConstraints()  
+            start = time.clock()
+            print("Solving")
+            #print(self.solver.assertions())
+            #print(self.solver.param_descrs())
+            self.solver.check()
+            stop = time.clock()
+            print(stop - start)
+            m = self.solver.model()
+            #print(m)
+            for i in self.z3_sorts:
+                print(m[self.z3_sorts[i].card])
+                
+                print(m[self.z3_sorts[i].sort])
+                l = m[self.z3_sorts[i].sort]
+                if str(l[0]).startswith("c0_B"):
+                    for k in l:
+                        print(k)
+            """
             debug_print("Adjusting instances for scopes.")
             Visitor.visit(SetScopes.SetScopes(self), self.module)
           
             debug_print("Adjusting abstract scopes.")
             AdjustAbstracts.adjustAbstractsFixedPoint(self)
-            
+            """
+            '''
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
             
@@ -167,8 +196,7 @@ class Z3Instance(object):
                 Z3Str.clafer_to_z3str("z3str_in")
                 return 1
             
-            debug_print("Asserting constraints.")
-            self.assertConstraints()     
+               
             
             if Options.CNF:
                 debug_print("Outputting DIMACS.")
@@ -184,9 +212,11 @@ class Z3Instance(object):
             
             self.clock.printEvents()
             return len(models)
+        '''
         except UnusedAbstractException as e:
             print(str(e))
             return 0
+        
         
     def printVars(self, model, count):
         self.clock.tick("printing")

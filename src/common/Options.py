@@ -81,7 +81,7 @@ DIMACS_FILE="dimacs"
 #MODULE = some.getModule()
 #MODULE = paths.getModule()
 #MODULE = mypaths.getModule()
-#MODULE = simple_set.getModule()
+MODULE = simple_set.getModule()
 #MODULE = zoo.getModule()
 #MODULE = simple_zoo.getModule()
 #MODULE = integer_refs.getModule()
@@ -124,7 +124,7 @@ DIMACS_FILE="dimacs"
 #MODULE = maximize.getModule()
 #MODULE = two_objective_min.getModule()
 #MODULE = two_objective_max.getModule()
-MODULE = ERS.getModule()
+#MODULE = ERS.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),

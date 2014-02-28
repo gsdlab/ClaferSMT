@@ -7,9 +7,11 @@ from common import Common, Options
 from common.Common import mOr
 from constraints import Constraints
 from pip.backwardcompat import reduce
-from z3 import IntVector, If, Implies, And, Or, Sum, Not, RealVector
+from z3 import IntVector, If, Implies, And, Or, Sum, Not, RealVector, Int, Function, ForAll, Exists
 import operator
 import sys
+import z3
+
 
 
 
@@ -75,6 +77,8 @@ class  ClaferSort(object):
         self.instanceRanges = []
         self.indexInSuper = 0
         self.currentSubIndex = 0
+        self.myid = str(self.element)
+        self.T = None
         
         self.numInstances = int(self.element.glCard[1].value)
         if(self.numInstances == -1):
@@ -95,6 +99,46 @@ class  ClaferSort(object):
     
     def modifyAbstract(self):
         a= 0
+    
+    def scopeless_initialize(self):
+        #print(str(self.element))
+        
+        #see Alloy-SMT paper, Integer Fig
+        self.sort = z3.DeclareSort(str(self.element))
+        if self.superSort:
+            self.T = self.superSort.sort
+        else:
+            self.T = self.sort
+        self.consts = []
+        self.consts.append(z3.Const(str(self.element) + '_0', self.sort))
+        self.consts.append(z3.Const(str(self.element) + '_1', self.sort))
+        self.is_sort = Function('is_' + str(self.element), self.sort, z3.BoolSort())
+        self.card = Int('crd_' + str(self.element))
+        self.ord = Function('ord_' + str(self.element), self.sort, z3.IntSort())
+        self.inv = Function('inv_' + str(self.element), z3.IntSort(), self.sort)
+        self.trig = Function('trig_' + str(self.element), z3.IntSort(), z3.BoolSort())
+        xi = self.consts[0]
+        i = z3.Int('i')
+        self.constraints.addCardConstraint(And(self.card >= 0, Implies(self.card == 0, ForAll([xi], Not(self.is_sort(xi)))))) #5
+        self.constraints.addCardConstraint(ForAll([xi], And(1 <= self.ord(xi), self.ord(xi) <= self.card))) #6
+        self.constraints.addCardConstraint(ForAll([xi], self.inv(self.ord(xi)) == xi)) #7
+        self.constraints.addCardConstraint(ForAll([i], Implies(And(1 <= i, i <= self.card), self.ord(self.inv(i)) == i))) #8
+        self.constraints.addCardConstraint(ForAll([i], Implies(And(1 <= i, i <= self.card), self.is_sort(self.inv(i))), patterns=[self.trig(i)])) #9
+        for j in range(3):
+            k = max(1, 20*j)
+            self.constraints.addCardConstraint(ForAll([i], Implies(0 < self.card, self.trig(k)))) #10
+        self.constraints.addCardConstraint(ForAll([i], Implies(And(1 <= i, i < self.card), self.trig(i+1)),patterns=[self.trig(i)])) #11
+        if self.isTopLevel:
+            self.constraints.addCardConstraint(And(self.lowerCardConstraint <= self.card, self.card <= self.upperCardConstraint))
+        
+        #self.constraints.addCardConstraint(self.card == 28) #5
+        #no child wo/ parent
+        if self.parent:
+            #todo
+            #create card constraints for the relation...generalize alloysmt
+            self.z3.translator.addParentChildRelation(self, self.parent, self.lowerCardConstraint, self.upperCardConstraint, self.parent.sort, self.sort)
+            
+        
     
     def initialize(self):
         (_, upper) = self.element.glCard

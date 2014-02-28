@@ -6,8 +6,8 @@ Created on April 27, 2013
 testing method for the Z3 backend of Clafer
 '''
 from z3 import BitVec, Bool, Solver, Xor, Function, IntSort, Array, Int, sat, \
-    is_array, Or, Goal, Then, RealVal, Datatype, DeclareSort, Consts, ForAll, Exists, Distinct, \
-    Const, Implies, BoolSort, IntSort, And, Or, Not
+    is_array, Or, Goal, Then, RealVal, Datatype, DeclareSort, Consts, ForAll, Exists, \
+    Distinct, Const, Implies, BoolSort, IntSort, And, Or, Not, BitVecs, solve_using
 from z3consts import Z3_UNINTERPRETED_SORT
 from z3types import Z3Exception
 import sys
@@ -34,7 +34,15 @@ def BitVecVector(prefix, sz, N):
 
 def main(args):
     s = Solver()
-    
+    bv_solver = Then('simplify',
+                 'solve-eqs',
+                 'bit-blast',
+                 'sat').solver()
+
+    x, y = BitVecs('x y', 16)
+    solve_using(bv_solver, x | y == 13, x > y)
+
+    '''
     X = DeclareSort('X')
     C = DeclareSort('C')
     #B = DeclareSort('B')
@@ -65,6 +73,9 @@ def main(args):
     print(m.eval(inv_B(5)))
     print(m.eval(inv_B(1)))
     print(m[X])
+    '''
+    
+    
     '''
     R = RealVal(1/3)
     A = Bool("A")
