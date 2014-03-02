@@ -35,31 +35,79 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
         self.model = model
         self.tree = SimpleTree()
     
+    def findEndRef(self, node):
+        #print("A" + str(node))
+        while True:
+            #print(node)
+            ref = self.tree.findParentInList(node, self.tree.refs)
+            if ref:
+                #
+                #print("FOUND: ")
+                #print(ref)
+                #print(ref[1][0][1])#[1])
+                ref = ref[1][0]
+                #print("FOUND: ")
+                #print(ref)
+                (sort, val) = ref
+                if isinstance(sort, PrimitiveType):
+                    return str(ref[1])
+                else:
+                    #print("FOUND: ")
+                    #print(ref)
+                    for i in sort.subs:
+                        #print(str(i.indexInSuper) + " <= " + str(val) + " < " + str(i.indexInSuper + i.numInstances) + " " + str(i.indexInSuper <= val))
+                        if i.indexInSuper <= int(str(val)) and int(str(val)) < i.indexInSuper + i.numInstances:
+                            ref = str(i.instances[int(str(val)) - i.indexInSuper])
+                    #print("Done")
+                    return removePrefix(ref)
+            node = self.tree.findParentInList(node, self.tree.abstractRefs)
+            if not node:
+                return None
+            else:
+                (_, node) =  node
+            
+        
+    
     def recursivePrint(self, node, level, thisIsAbstract=False):
         #print(node)
         #print(self.tree.abstractRefs)
+        (sort, instance) = node
         indent = "  " * level
-        abs_ref = self.tree.abstractRefs.get(node)
+        abs_ref = self.tree.findParentInList(node, self.tree.abstractRefs)
+        #print(abs_ref)
         #if abs_ref:
         #    print("TRUE")
         if not thisIsAbstract:
-            nodeStr = removePrefix(node)
-            if self.tree.refs.get(node):
+            #print(node)
+            #print(self.findEndRef(node))
+            nodeStr = removePrefix(str(instance))
+            currRef = self.findEndRef(node)#self.tree.findParentInList(node, self.tree.refs)
+            if currRef: # self.tree.refs.get(node):
                 #print()
-                ref = " = " + self.tree.refs.get(node)[0] #removePrefix(str(self.tree.refs[node]))
+                #(_, refs) = currRefs
+                #refs = refs[0]
+                ref = " = " + str(currRef) #self.tree.refs.get(node)[0] #removePrefix(str(self.tree.refs[node]))
             else:
                 ref = ""
             print(indent + nodeStr + ref)
         if abs_ref:
-            self.recursivePrint(abs_ref, level, True)
-        for i in self.tree.nodes.get(node, []):
+            (_, real_abs_ref) = abs_ref
+            self.recursivePrint(real_abs_ref, level, True)
+        (_, children) = self.tree.findParentInList(node, self.tree.nodes)
+        #print(children)
+        for i in children:
             self.recursivePrint(i, level + 1)
         
     
     def printTree(self):
+        #print(self.tree.refs)
+        #print(self.tree.nodes)
+        #print(self.tree.roots)
         for i in self.tree.roots:
+            #print(i)
             self.recursivePrint(i, 1)
-    
+            pass
+        
     def claferVisit(self, element):
         sort = self.z3.z3_sorts[element.uid]
         if sort.parent:
@@ -72,25 +120,32 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
             isOn = str(self.model.eval(sort.instances[j])) != str(sort.parentInstances)
             if isOn:
                 if not parent and not element.isAbstract:
-                    self.tree.addRoot(str(sort.instances[j]))
+                    self.tree.addRoot((sort,sort.instances[j]))
                     parentInstance = None 
                 if parent:
-                    parentInstance = parent + "__" + str(self.model.eval(sort.instances[j])) 
+                    #print(self.model.eval(sort.instances[j]))
+                    #print(sort.parent.instances[int(str(self.model.eval(sort.instances[j])))])
+                    parentInstance = (sort.parent, sort.parent.instances[int(str(self.model.eval(sort.instances[j])))])
+                    
                 else:
                     parentInstance = None
                 if element.isAbstract:
-                    
+                    #print(element)
+                    #print(sort.subs)
                     for k in sort.subs:
                         if k.indexInSuper <= j and j < k.indexInSuper + k.numInstances:
                             #self.tree.addRef(str(sort.instances[j]), str(k.instances[j - k.indexInSuper]))
-                            self.tree.addAbstractRef(str(k.instances[j - k.indexInSuper]), str(sort.instances[j]))
-                self.tree.addNode(str(sort.instances[j]), parentInstance)
+                            #print(k)
+                            self.tree.addAbstractRef((k, k.instances[j - k.indexInSuper]), (sort, sort.instances[j]))
+                #print("-----------")
+                #print(str((sort, sort.instances[j])) + str(parentInstance))
+                self.tree.addNode((sort, sort.instances[j]), parentInstance)
                 if sort.refSort:
                     if isinstance(sort.refSort, PrimitiveType) and (sort.refSort == "integer" or sort.refSort == "string" or sort.refSort == "real"):
-                        self.tree.addRef(str(sort.instances[j]), str(self.model.eval(sort.refs[j])))
+                        self.tree.addRef((sort, sort.instances[j]), (sort.refSort, self.model.eval(sort.refs[j])))
                     else:
-                        self.tree.addRef(str(sort.instances[j]), str(sort.refSort.element.getNonUniqueID()) + 
-                                       "__"+ str(self.model.eval(sort.refs[j])))
+                        self.tree.addRef((sort, sort.instances[j]),(sort.refSort, self.model.eval(sort.refs[j]))) #str(sort.refSort.element.getNonUniqueID()) + 
+                        # "__"+ str(self.model.eval(sort.refs[j])))
 
         for i in element.elements:
             visitors.Visitor.visit(self, i)

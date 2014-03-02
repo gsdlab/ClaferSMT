@@ -1,2 +1,6 @@
-A 2..3
-  B 3..4
+abstract A -> B 1
+B
+C : A 1
+  D
+  E
+    F
