@@ -11,6 +11,7 @@ from common.Exceptions import UnusedAbstractException
 from constraints import Constraints, IsomorphismConstraint
 from front import Z3Str, Converters
 from front.Converters import DimacsConverter
+
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
@@ -21,7 +22,7 @@ from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real, Int, \
 from z3consts import Z3_UNINTERPRETED_SORT
 from z3types import Z3Exception
 import sys
-
+import fileinput
 
 class Z3Instance(object):
     
@@ -190,7 +191,9 @@ class Z3Instance(object):
         
     def printVars(self, model, count):
         self.clock.tick("printing")
-        if Options.DELIMETER == "":
+        if Common.MODE == Common.REPL:
+            pass
+        elif Options.DELIMETER == "":
             standard_print("=== Instance " + str(count+1) + " ===")
             standard_print("")
         else:
@@ -223,14 +226,72 @@ class Z3Instance(object):
             
     
     
-        
-    #this is not my method, some stackoverflow or z3.codeplex.com method. Can't remember, should find it.
-    # i no longer need this method if i implement the isomorphism detection
-    def get_models(self, desired_number_of_models):
+    def pick_loop(self, desired_number_of_models):
         if not self.objectives:
             return self.standard_get_models(desired_number_of_models)
         else:
             return self.GIA(desired_number_of_models)
+        
+    def print_repl_help(self):
+        print("n -- get next model")
+        print("r -- reset")
+        print("i [num] -- increase (or decrease) the global scope by num (default=+1)")
+        print("s num -- set scope to num")
+        print("h -- help")
+        print("q -- quit")
+        
+        
+    def check_repl_input(self, args):
+        if len(args) == 2 and args[0] in ['s', 'i'] and str(int(args[1])) == args[1]:
+            return True
+        else:
+            print("Type h for help")
+            return False
+    '''crude repl'''
+    def get_models(self, desired_number_of_models):
+        if Common.MODE == Common.REPL:
+            from front.Z3Run import load
+            if Common.FIRST_REPL_LOOP:
+                models = self.pick_loop(1)
+                if not models:
+                    print("No more instances")
+            while True:
+                ch = input("ClaferZ3 > ")
+                #print(ch)
+                ch = ch.strip()
+                if ch == 'n':
+                    models = self.pick_loop(1)
+                    if not models:
+                        print("No more instances")
+                elif ch == 'r':
+                    load(Options.FILE)
+                elif ch.startswith('i'):
+                    args = ch.split()
+                    if self.check_repl_input(args):
+                        inc = int(args[1])
+                        Options.GLOBAL_SCOPE = Options.GLOBAL_SCOPE + inc
+                        print("Global scope increased to " + str(Options.GLOBAL_SCOPE))
+                        Common.FIRST_REPL_LOOP = False
+                        load(Options.FILE)
+                elif ch.startswith('s'):
+                    args = ch.split()
+                    if self.check_repl_input(args):
+                        scope = int(args[1])
+                        Options.GLOBAL_SCOPE = scope
+                        print("Global scope set to " + str(Options.GLOBAL_SCOPE))
+                        Common.FIRST_REPL_LOOP = False
+                        load(Options.FILE)
+                elif ch == 'q':
+                    sys.exit()
+                elif ch == 'h':
+                    self.print_repl_help()
+                else:
+                    print("Type h for help")
+            
+            
+        else:
+            return self.pick_loop(desired_number_of_models)
+        
     
     def GIA(self, desired_number_of_models):
         metrics_objective_direction = []

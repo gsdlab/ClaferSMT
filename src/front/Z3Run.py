@@ -15,6 +15,13 @@ import imp
 
 
 
+def load(file):
+    if file.endswith(".cfr"):
+        sys.exit("Run 'clafer --mode=python " + str(file) + "' first.")
+    file = imp.load_source("module", str(file))
+    module = file.getModule()
+    z3 = Z3Instance(module)
+    z3.run()
 def main(args):
     '''
     :param args: Python output file of the Clafer compiler. Generated with argument "-m python".
@@ -32,15 +39,10 @@ def main(args):
         TestClafers.runForAll()
     elif Common.MODE == Common.MODELSTATS:
         ModelStats.run()
-    elif (not Options.ECLIPSE) and (Common.MODE in [Common.NORMAL, Common.EXPERIMENT, Common.DEBUG]):
+    elif (not Options.ECLIPSE) and (Common.MODE in [Common.NORMAL, Common.EXPERIMENT, Common.DEBUG, Common.REPL]):
         file = Options.FILE
         #print(file)
-        if file.endswith(".cfr"):
-            sys.exit("Run 'clafer --mode=python " + str(file) + "' first.")
-        file = imp.load_source("module", str(file))
-        module = file.getModule()
-        z3 = Z3Instance(module)
-        z3.run()
+        load(file)
     else:
         module = Options.MODULE
         

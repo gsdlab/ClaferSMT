@@ -11,7 +11,7 @@ TEST = 2
 ONE = 3
 ALL = 4
 MODELSTATS = 5 
-COMMANDLINE = 6
+REPL = 6
 EXPERIMENT = 7
 ECLIPSE = 8
 MODE = NORMAL
@@ -22,6 +22,7 @@ STRING_ID = 0
 FLAG = False
 string_map = {}
 STRCONS_SUB = "STRCONS_SUB"
+FIRST_REPL_LOOP = True
 
 def mAnd(*args):
     '''

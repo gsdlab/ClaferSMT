@@ -127,6 +127,7 @@ DELIMETER=""
 #MODULE = maximize.getModule()
 #MODULE = two_objective_min.getModule()
 #MODULE = two_objective_max.getModule()
+MODULE=""
 '''
 my_tests = [ 
           (multiple_joins, 1),
@@ -206,7 +207,7 @@ modeMap = {
            'test'       : Common.TEST,
            'one'        : Common.ONE,
            'all'        : Common.ALL,
-           'commandline': Common.COMMANDLINE
+           'repl'        : Common.REPL,
            }
 
 testMap = {
@@ -220,7 +221,7 @@ def setCommandLineOptions():
     parser = argparse.ArgumentParser(description='Process a clafer model with Z3.')
     parser.add_argument('file', help='the clafer python file', nargs='?')
     parser.add_argument('--mode', '-m', dest='mode', default='normal',
-                       choices=['experiment', 'modelstats', 'normal', 'debug', 'test', 'one', 'all'])
+                       choices=['experiment', 'modelstats', 'normal', 'debug', 'test', 'one', 'repl', 'all'])
     parser.add_argument('--printconstraints', '--pc', dest='printconstraints', default=False, const = True, action='store_const', help='print all Z3 constraints (for debugging)')
     parser.add_argument('--profiling', '-p', dest='profiling', action='store_const', default = False,  const=True,  help='basic profiling of phases of the solver')
     parser.add_argument('--cprofiling', dest='cprofiling',action='store_const', default=False, const=True,  help='uses cprofile for profiling functions of the translation')
