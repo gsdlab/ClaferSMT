@@ -5,6 +5,7 @@ Created on Oct 6, 2013
 '''
 from common import Common
 from optparse import OptionParser
+'''
 from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     this_dot_parent, arithmetic, relations, boolean_connectives, union, \
     simple_abstract, some, simple_set, integer_refs, higher_inheritance, \
@@ -21,6 +22,7 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths, \
     AADL_simplified_with_lists, teststring, testunion, simple_real, Phone, \
     int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max
+'''
 import argparse
 import sys
 
@@ -123,9 +125,9 @@ DELIMETER=""
 #MODULE = Phone.getModule()
 #MODULE = check_unique_ref_names_with_inheritance.getModule()
 #MODULE = maximize.getModule()
-MODULE = two_objective_min.getModule()
+#MODULE = two_objective_min.getModule()
 #MODULE = two_objective_max.getModule()
-
+'''
 my_tests = [ 
           (multiple_joins, 1),
           (bracketedconstraint_this, 6),
@@ -194,6 +196,7 @@ string_tests = [
                 (i40textequality, 1),
                 (subtypingprimitivetypes, 1)
                 ]
+'''
 
 modeMap = {
            'experiment' : Common.EXPERIMENT,
