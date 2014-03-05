@@ -1,6 +1,0 @@
-A 1
-  B -> integer 2
- 
-    [this > 0]
-  [sum(this.B) = 3]
-

@@ -65,7 +65,9 @@ POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
 STRING_TESTS = 3 #tests that involve strings / string constraints
 TEST_SET = MY_TESTS 
 DIMACS_FILE="dimacs"
-
+UNIQUE_NAMES = False
+SHOW_INHERITANCE = False
+DELIMETER=""
 
 
 #MODULE = bracketedconstraint_this.getModule()
@@ -226,6 +228,9 @@ def setCommandLineOptions():
     parser.add_argument('--stringconstraints' , '-s', default=False, dest='stringconstraints',action='store_const',  const=True,  help='Flag to output to Z3-Str format instead.')
     parser.add_argument('--cnf', default=False, dest='cnf',action='store_const',  const=True,  help='Outputs CNF of formula.')
     parser.add_argument('--dimacs', default="dimacs", dest='dimacs', help='Output DIMACS.')
+    parser.add_argument('--printuniquenames', '-u', default=False, dest='unique_names',action='store_const',  const=True,  help='Print clafers with unique prefixes.')
+    parser.add_argument('--showinheritance', default=False, dest='show_inheritance',action='store_const',  const=True,  help='Show super-clafers explicitly.')
+    parser.add_argument('--delimeter', default="", dest='delimeter', help='Output DIMACS.')
     
     args = parser.parse_args()
     global ECLIPSE
@@ -260,6 +265,11 @@ def setCommandLineOptions():
     CNF= args.cnf
     global DIMACS_FILE
     DIMACS_FILE = args.dimacs
-    
+    global UNIQUE_NAMES
+    UNIQUE_NAMES = args.unique_names
+    global SHOW_INHERITANCE
+    SHOW_INHERITANCE = args.show_inheritance
+    global DELIMETER
+    DELIMETER = args.delimeter
 
 

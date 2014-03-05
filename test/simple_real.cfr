@@ -1,4 +1,0 @@
-abstract double : integer
-
-A : double
-  [this = 78]

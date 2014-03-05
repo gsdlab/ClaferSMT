@@ -190,9 +190,12 @@ class Z3Instance(object):
         
     def printVars(self, model, count):
         self.clock.tick("printing")
-        standard_print("###########################")
-        standard_print("# Model: " + str(count+1))    
-        standard_print("###########################")
+        if Options.DELIMETER == "":
+            standard_print("###########################")
+            standard_print("# Model: " + str(count+1))    
+            standard_print("###########################")
+        else:
+            standard_print("=====")
         ph = PrintHierarchy.PrintHierarchy(self, model)
         Visitor.visit(ph, self.module)
         ph.printTree()

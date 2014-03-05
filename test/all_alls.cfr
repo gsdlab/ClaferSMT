@@ -1,4 +1,0 @@
-A 3
-  B : integer 3
-[all x : A | 
-     all y : x.B | y = 6]

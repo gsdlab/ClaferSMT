@@ -1,5 +1,0 @@
-abstract A 1
-   D ->> integer 1
-abstract B : A 1
-C : B 1
-  [this.D = 6]    

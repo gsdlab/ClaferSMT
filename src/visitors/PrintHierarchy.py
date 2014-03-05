@@ -4,6 +4,7 @@ Created on May 31, 2013
 @author: ezulkosk
 '''
 
+from common import Options
 from structures.ClaferSort import PrimitiveType
 from structures.SimpleTree import SimpleTree
 from visitors import VisitorTemplate
@@ -11,14 +12,23 @@ import visitors
 
 
 
+def hashtag(string):
+    if string.find("__"):
+        arr = string.split("__",1)
+        return(arr[0] + "#" + arr[1])
+    else:
+        return string
+
 def removePrefix(string):
     #print(string)
+    if Options.UNIQUE_NAMES:
+        return hashtag(string)
     if string.startswith("c"):
         newStr = string.split("_",1)
         newStr = newStr[1]
     else:
         newStr = string
-    return newStr
+    return hashtag(newStr)
 
 class PrintHierarchy(VisitorTemplate.VisitorTemplate):
     '''
@@ -54,11 +64,14 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                 else:
                     #print("FOUND: ")
                     #print(ref)
-                    for i in sort.subs:
-                        #print(str(i.indexInSuper) + " <= " + str(val) + " < " + str(i.indexInSuper + i.numInstances) + " " + str(i.indexInSuper <= val))
-                        if i.indexInSuper <= int(str(val)) and int(str(val)) < i.indexInSuper + i.numInstances:
-                            ref = str(i.instances[int(str(val)) - i.indexInSuper])
-                    #print("Done")
+                    if sort.subs:
+                        for i in sort.subs:
+                            #print(str(i.indexInSuper) + " <= " + str(val) + " < " + str(i.indexInSuper + i.numInstances) + " " + str(i.indexInSuper <= val))
+                            if i.indexInSuper <= int(str(val)) and int(str(val)) < i.indexInSuper + i.numInstances:
+                                ref = str(i.instances[int(str(val)) - i.indexInSuper])
+                        #print("Done")
+                    else:
+                        ref = str(sort.instances[int(str(val))])
                     return removePrefix(ref)
             node = self.tree.findParentInList(node, self.tree.abstractRefs)
             if not node:
@@ -67,7 +80,20 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                 (_, node) =  node
             
         
-    
+    def show_inheritance(self, sort):
+        '''
+        Displays the super clafer. Useful for ClaferIDE.
+        '''
+        if Options.SHOW_INHERITANCE:
+            if sort.superSort:
+                sup = str(sort.superSort)[:-5]
+            else:
+                sup = "#clafer#"
+            return " : " + sup + " "
+        else:
+            return ""
+        
+        
     def recursivePrint(self, node, level, thisIsAbstract=False):
         #print(node)
         #print(self.tree.abstractRefs)
@@ -89,7 +115,8 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                 ref = " = " + str(currRef) #self.tree.refs.get(node)[0] #removePrefix(str(self.tree.refs[node]))
             else:
                 ref = ""
-            print(indent + nodeStr + ref)
+            
+            print(indent + nodeStr + self.show_inheritance(sort) + ref)
         if abs_ref:
             (_, real_abs_ref) = abs_ref
             self.recursivePrint(real_abs_ref, level, True)

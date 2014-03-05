@@ -6,6 +6,7 @@ Created on Sep 15, 2013
 from common import Options
 from common.Clock import Clock
 from front.Z3Instance import Z3Instance
+import sys
 import traceback
 
 SEPARATOR = "========================================================" 
@@ -66,6 +67,7 @@ def run():
 def runAndOutputModels():
     clock = Clock()
     tests = getTestSet()
+    exc = 0
     for t in tests:
         (file, _) = t
         module = file.getModule()
@@ -75,10 +77,13 @@ def runAndOutputModels():
             z3 = Z3Instance(module)
             z3.run()
         except:
+            traceback.print_exc(file=sys.stdout)
             print("BUG IN TEST")
+            exc = exc + 1
         clock.tack("Total Z3 Run Time")
         clock = clock.combineClocks(z3.clock)
     print_separate("Results: ")  
+    print("Exceptions: " + str(exc))
     clock.printEvents()
         
 def runForOne():  

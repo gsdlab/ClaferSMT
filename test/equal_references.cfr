@@ -1,7 +1,0 @@
-R 1..2
-
-A -> R
-B -> R
-C -> R
-[A.ref = B.ref]
-[A.ref != C.ref]
