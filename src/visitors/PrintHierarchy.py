@@ -88,7 +88,7 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
             if sort.superSort:
                 sup = str(sort.superSort)[:-5]
             else:
-                sup = "#clafer#"
+                sup = "clafer"
             return " : " + sup + " "
         else:
             return ""
