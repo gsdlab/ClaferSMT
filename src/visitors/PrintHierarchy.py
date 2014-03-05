@@ -15,7 +15,7 @@ import visitors
 def hashtag(string):
     if string.find("__"):
         arr = string.split("__",1)
-        return(arr[0] + "#" + arr[1])
+        return(arr[0] + "$" + arr[1])
     else:
         return string
 
