@@ -234,9 +234,13 @@ def setCommandLineOptions():
     parser.add_argument('--dimacs', default="dimacs", dest='dimacs', help='Output DIMACS.')
     parser.add_argument('--printuniquenames', '-u', default=False, dest='unique_names',action='store_const',  const=True,  help='Print clafers with unique prefixes.')
     parser.add_argument('--showinheritance', default=False, dest='show_inheritance',action='store_const',  const=True,  help='Show super-clafers explicitly.')
+    parser.add_argument('--version', '-v', default=False, dest='version',action='store_const',  const=True,  help='Print version number.')
     parser.add_argument('--delimeter', default="", dest='delimeter', help='Output DIMACS.')
     
     args = parser.parse_args()
+    if args.version:
+        print("0.3.6")
+        sys.exit()
     global ECLIPSE
     if ECLIPSE:
         ECLIPSE = True 
@@ -275,5 +279,6 @@ def setCommandLineOptions():
     SHOW_INHERITANCE = args.show_inheritance
     global DELIMETER
     DELIMETER = args.delimeter
+    
 
 

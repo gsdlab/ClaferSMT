@@ -54,6 +54,9 @@ def main(args):
    
 if __name__ == '__main__':
     Options.setCommandLineOptions()
+    if Options.VERSION:
+        print("0.3.6")
+        sys.exit()
     if Options.CPROFILING:
         cProfile.run("main(sys.argv[1:])", sort=1)
     else:
