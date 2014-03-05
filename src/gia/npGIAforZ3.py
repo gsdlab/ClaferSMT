@@ -64,8 +64,8 @@ class GuidedImprovementAlgorithm(object):
         random.seed()
         z3_random_seed_val = random.randint(0, 500000000)
         z3_arith_random_seed_val = random.randint(0, 500000000)        
-        set_option(random_seed=z3_random_seed_val)
-        set_option(arith_random_seed=z3_arith_random_seed_val)
+        #set_option(random_seed=z3_random_seed_val)
+        #set_option(arith_random_seed=z3_arith_random_seed_val)
         
         self.options.randomSeedsFil =  open(self.options.writeRandomSeedsFilename, "a")            
         self.options.randomSeedsFil.write("%s, %s, %s\n" % \
