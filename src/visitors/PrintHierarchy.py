@@ -132,7 +132,7 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
         #print(self.tree.roots)
         for i in self.tree.roots:
             #print(i)
-            self.recursivePrint(i, 1)
+            self.recursivePrint(i, 0)
             pass
         
     def claferVisit(self, element):
