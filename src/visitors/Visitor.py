@@ -3,9 +3,22 @@ Created on Mar 26, 2013
 
 @author: ezulkosk
 '''
-import ast.Clafer, ast.Module, ast.ClaferId, ast.IRConstraint, ast.Declaration, ast.DeclPExp, ast.Exp, \
-      ast.FunExp, ast.GCard, ast.Goal, ast.LocalDeclaration, ast.Supers, ast.IntegerLiteral, ast.DoubleLiteral, \
-      ast.StringLiteral
+import ast.Clafer
+import ast.Module
+import ast.ClaferId
+import ast.IRConstraint
+import ast.Declaration
+import ast.DeclPExp
+import ast.Exp
+import ast.FunExp
+import ast.GCard
+import ast.Goal
+import ast.LocalDeclaration
+import ast.Supers
+import ast.IntegerLiteral
+import ast.DoubleLiteral
+import ast.StringLiteral
+import ast.RealLiteral
 
 
 
