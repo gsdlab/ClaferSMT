@@ -239,7 +239,7 @@ def setCommandLineOptions():
     
     args = parser.parse_args()
     if args.version:
-        print("0.3.6")
+        print("ClaferZ3 0.3.6.06-03-2014")
         sys.exit()
     global ECLIPSE
     if ECLIPSE:

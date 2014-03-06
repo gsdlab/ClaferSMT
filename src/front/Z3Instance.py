@@ -191,9 +191,9 @@ class Z3Instance(object):
         
     def printVars(self, model, count):
         self.clock.tick("printing")
-        if Common.MODE == Common.REPL:
-            pass
-        elif Options.DELIMETER == "":
+        #if Common.MODE == Common.REPL:
+        #    pass
+        if Options.DELIMETER == "":
             standard_print("=== Instance " + str(count+1) + " ===")
             standard_print("")
         else:
