@@ -4,10 +4,12 @@ Created on Nov 21, 2013
 @author: ezulkosk
 '''
 from common import Common, Options
+from structures.SimpleGraph import Graph
 from z3 import BoolRef, ArithRef, IntNumRef, Tactic
 from z3consts import *
 from z3core import *
 import io
+import operator
 import sys
 import z3
 '''
@@ -39,19 +41,57 @@ class DimacsConverter():
         for c in clause.children():
             variables = variables + self.toDimacs(c)
         return variables
+    
+def getAtoms(boolref, ret=[]):
+    for i in boolref.children():
+        ret = getAtoms(i, ret)
+    if len(boolref.children()) == 0 and isinstance(boolref, ArithRef) and not isinstance(boolref, IntNumRef):
+        #ret.append(boolref)#print(str(boolref) + " " + str(boolref.__class__) )
+        ret.append(boolref)
+    return ret
+        #return ret
+    #return ret
 
 def convertToDimacs(self):
         #print (self.goal)
         f_n = open(Options.DIMACS_FILE, 'w')
         d = DimacsConverter()
+        clauses = []
         t = Tactic("tseitin-cnf")
         cnf = t(self.goal)
+        blanks = []
         for i in cnf:
             for j in i:
                 for k in j.children():
-                    print(k)
-        clauses = []
+                    clause = getAtoms(k, [])
+                    clauses.append([str(i) for i in clause])
+        g = Graph()
+        for i in clauses:
+            g.addEdge(i)
+        for i in g.clauses.keys():
+            print(str(i) + " = " + str(g.clauses[i]))
+        print("\n\n===============================\n")
+        adjTotals = []
+        for i in g.adjacency.keys():
+            #print(str(i) + " = " + str(len(g.adjacency[i])))#str(g.adjacency[i]))
+            adjTotals.append((i, len(g.adjacency[i]), str(g.adjacency[i])))
+        adjTotals.sort(key=operator.itemgetter(1))
+        for i in adjTotals:
+            print(i)
+            print("\n")
+        #print(k)
+        
+                    #print(clause)
+                    #if not clause:
+                        #print("blank" + str(k))
+                    #    blanks.append(k)
+        #for i in clauses:
+        #    print(i)
+        #for i in blanks:
+        #    print(i)
+        #    print(i.__class__)
         #print(cnf)
+        '''
         for i in cnf:
             for j in i:
                 #print(j)
@@ -60,6 +100,7 @@ def convertToDimacs(self):
         for clause in clauses:
                 f_n.write(" ".join([str(i) for i in clause])  + " 0"+ "\n")
         f_n.close()
+        '''
 
 
 '''
