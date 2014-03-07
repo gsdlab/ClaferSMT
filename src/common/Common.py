@@ -23,6 +23,7 @@ FLAG = False
 string_map = {}
 STRCONS_SUB = "STRCONS_SUB"
 FIRST_REPL_LOOP = True
+DELIMETER_COUNT = 0
 
 def mAnd(*args):
     '''

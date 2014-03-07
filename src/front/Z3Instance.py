@@ -11,7 +11,6 @@ from common.Exceptions import UnusedAbstractException
 from constraints import Constraints, IsomorphismConstraint
 from front import Z3Str, Converters
 from front.Converters import DimacsConverter
-
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
@@ -21,8 +20,9 @@ from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real, Int, \
     Goal, tactics, tactic_description, Tactic, SolverFor
 from z3consts import Z3_UNINTERPRETED_SORT
 from z3types import Z3Exception
-import sys
 import fileinput
+import sys
+
 
 class Z3Instance(object):
     
@@ -210,12 +210,13 @@ class Z3Instance(object):
             print(str(e))
             return 0
         
-    def printVars(self, model, count):
+    def printVars(self, model):
         self.clock.tick("printing")
         #if Common.MODE == Common.REPL:
         #    pass
         if Options.DELIMETER == "":
-            standard_print("=== Instance " + str(count+1) + " ===")
+            standard_print("=== Instance " + str(Common.DELIMETER_COUNT+1) + " ===")
+            Common.DELIMETER_COUNT = Common.DELIMETER_COUNT + 1
             standard_print("")
         else:
             standard_print(Options.DELIMETER)
@@ -339,8 +340,8 @@ class Z3Instance(object):
         ParetoFront = GIAAlgorithmNP.ExecuteGuidedImprovementAlgorithm(outfilename, desired_number_of_models)
         count = 0
         for i in ParetoFront:
-            self.printVars(i, count)
-            count = count + 1
+            self.printVars(i)
+            #count = count + 1
         return ParetoFront
     
     def standard_get_models(self, desired_number_of_models):
@@ -362,7 +363,7 @@ class Z3Instance(object):
                 # Create a new constraint that blocks the current model
             
                 if not Common.MODE == Common.TEST and not Common.MODE == Common.EXPERIMENT:
-                    self.printVars(m, count)
+                    self.printVars(m)
                 if Options.GET_ISOMORPHISM_CONSTRAINT:
                     IsomorphismConstraint.IsomorphismConstraint(self, m).createIsomorphicConstraint()
                     isoConstraint = self.z3_bracketed_constraints.pop()
