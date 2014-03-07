@@ -77,7 +77,7 @@ class Z3Instance(object):
         for i in self.z3_sorts.values():
             if i.superSort:
                 i.superSort.addSubSortConstraints(i)     
-    
+
     def getScope(self, sort):
         if sort.element.isAbstract:
             summ = 0
@@ -114,6 +114,12 @@ class Z3Instance(object):
             set_option(max_args=1000)
             set_option(auto_config=False)
     
+    def isUsed(self, element):
+        ab = self.z3_sorts.get(str(element))
+        if (not ab.element.isAbstract) or ab.scope_summ != 0:# self.z3_sorts.get(str(element)):
+            return True
+        return False
+    
     def run(self):
         '''
         :param module: The Clafer AST
@@ -142,8 +148,21 @@ class Z3Instance(object):
             debug_print("Adjusting abstract scopes.")
             AdjustAbstracts.adjustAbstractsFixedPoint(self)
             
+            '''
+            remove_list = []
+            for i in self.z3_sorts.values():
+                if i.element.isAbstract:
+                    if i.scope_summ == 0:
+                        remove_list.append(str(i.element))
+            for i in remove_list:
+                self.z3_sorts.pop(i)
+            '''
+            
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
+            
+            #for i in self.z3_sorts.values():
+            #    print(str(i) + " " + str(len(i.instances)))
             
             debug_print("Creating cardinality constraints.")
             self.createCardinalityConstraints()
@@ -173,7 +192,9 @@ class Z3Instance(object):
             
             if Options.CNF:
                 debug_print("Outputting DIMACS.")
-                Converters.convertToDimacs()
+                for i in self.solver.assertions():
+                    self.goal.add(i)
+                Converters.convertToDimacs(self)
                 return 1
                 
             debug_print("Printing constraints.") 
@@ -215,9 +236,11 @@ class Z3Instance(object):
             i.assertConstraints(self)
     
     def printConstraints(self):
+        #print(Common.MODE)
         if not (Common.MODE == Common.DEBUG and Options.PRINT_CONSTRAINTS):
             return
         #print(self.solver.sexpr())
+        #print("in")
         for i in self.z3_sorts.values():
             i.constraints.debug_print()
         self.join_constraints.debug_print()

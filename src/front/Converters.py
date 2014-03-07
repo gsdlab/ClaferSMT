@@ -4,13 +4,12 @@ Created on Nov 21, 2013
 @author: ezulkosk
 '''
 from common import Common, Options
-from z3 import BoolRef, ArithRef, IntNumRef
+from z3 import BoolRef, ArithRef, IntNumRef, Tactic
 from z3consts import *
 from z3core import *
 import io
 import sys
 import z3
-from z3 import Tactic
 '''
 ####################################
 # CNF + DIMACS Abstraction of QFLIA
@@ -42,10 +41,15 @@ class DimacsConverter():
         return variables
 
 def convertToDimacs(self):
+        #print (self.goal)
         f_n = open(Options.DIMACS_FILE, 'w')
         d = DimacsConverter()
         t = Tactic("tseitin-cnf")
         cnf = t(self.goal)
+        for i in cnf:
+            for j in i:
+                for k in j.children():
+                    print(k)
         clauses = []
         #print(cnf)
         for i in cnf:

@@ -78,6 +78,8 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     
     
     def claferVisit(self, element):
+        if not self.z3.isUsed(str(element)):
+            return 
         visitors.Visitor.visit(self, element.supers)
         claferStack.append(self.z3.getSort(element.uid))
         for i in element.elements:
@@ -97,7 +99,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
                 self.currentConstraint.addArg([ExprArg([PrimitiveType("parent")])])
             elif element.claferSort:  
                 self.currentConstraint.addArg([ExprArg([(element.claferSort,
-                                                        Mask(element.claferSort, [i for i in range(element.claferSort.numInstances)]))])])
+                                                        Mask(element.claferSort, [i for i in range(element.claferSort.numInstances)],copy=False, potentiallyEmpty=True))])])
             else:
                 # localdecl case
                 expr = self.currentConstraint.locals[element.id]
@@ -165,7 +167,10 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             isSymmetric = False
         num_args = 0
         if element.declaration:
+             
             visitors.Visitor.visit(self, element.declaration.body.iExp[0])
+            if not self.currentConstraint.stack:
+                return
             arg = self.currentConstraint.stack.pop()
             isDisjunct = element.declaration.isDisjunct
             for i in range(len(arg)):

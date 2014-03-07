@@ -5,6 +5,9 @@ Created on Oct 6, 2013
 '''
 from common import Common
 from optparse import OptionParser
+import argparse
+import sys
+
 '''
 from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     this_dot_parent, arithmetic, relations, boolean_connectives, union, \
@@ -23,8 +26,6 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     AADL_simplified_with_lists, teststring, testunion, simple_real, Phone, \
     int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max
 '''
-import argparse
-import sys
 
 '''
 ========
@@ -135,7 +136,7 @@ my_tests = [
           (this_dot_parent, 2),
           (arithmetic, 2),
           (relations, 1),
-          (boolean_connectives, 1),
+          (boolean_connectives, 2),
           (union, 6),
           (simple_abstract, 0),
           (some, 1),
@@ -158,11 +159,11 @@ positive_tests = [
         (i121comments, 2),
         (i122CVL,INFINITE),
         (i126empty, 1),
-        (i131incorrectscope, 2),
+        (i131incorrectscope, 10),
         (i137_parsing, 1),
         (i147refdisambiguation, 3),
         (i14, 1),
-        (i17, 0),
+        (i17, 1),
         (i188sumquantifier,INFINITE),
         (i19,INFINITE),
         (i205refdisambiguationII,INFINITE),
@@ -175,13 +176,13 @@ positive_tests = [
         (i61cardinalities,INFINITE),
         (i70, 3),
         (i71,INFINITE),
-        (i72sharedreference, 4),
+        (i72sharedreference, 10),
         (i78_transitiveclosure, 0),
         (i83individualscope,INFINITE),
-        (i98_toplevelreferences, 0),
+        (i98_toplevelreferences, 1),
         (layout, 1),
         (negative, 1),
-        (paths, 3),
+        (paths, 10),
         (personRelatives,INFINITE),
         (person_tutorial,INFINITE),
         (resolution,INFINITE),

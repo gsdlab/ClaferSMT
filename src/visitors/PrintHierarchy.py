@@ -136,6 +136,8 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
             pass
         
     def claferVisit(self, element):
+        if not self.z3.isUsed(str(element)):
+            return 
         sort = self.z3.z3_sorts[element.uid]
         if sort.parent:
             parent = sort.parent.element.uid#getNonUniqueID()
@@ -159,7 +161,10 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                 if element.isAbstract:
                     #print(element)
                     #print(sort.subs)
+                    #print(element)
                     for k in sort.subs:
+                        if not self.z3.isUsed(str(k.element)):
+                            continue 
                         if k.indexInSuper <= j and j < k.indexInSuper + k.numInstances:
                             #self.tree.addRef(str(sort.instances[j]), str(k.instances[j - k.indexInSuper]))
                             #print(k)

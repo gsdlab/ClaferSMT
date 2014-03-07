@@ -93,8 +93,6 @@ class  ClaferSort(object):
             self.parent = self.parentStack[-1]
             self.parentInstances = self.parent.numInstances
     
-    def modifyAbstract(self):
-        a= 0
     
     def initialize(self):
         (_, upper) = self.element.glCard
@@ -179,6 +177,9 @@ class  ClaferSort(object):
         is true if the instance may be absent from the model, AND is
         not covered by the upper bound.
         '''
+        if not self.z3.isUsed(self.element):
+            return (0,0,False)
+        
         if self.lowerCardConstraint == 0:
             upper = self.parentInstances # this is new upper = self.numInstances
         else:
@@ -221,8 +222,8 @@ class  ClaferSort(object):
                 self.constraints.addInstanceConstraint(
                     Or(self.isOff(i),
                        self.instances[i] <= upper))
-            #sorted parent pointers
-            if(not self.element.isAbstract):
+            #sorted parent pointers (only consider things that are not part of an abstract)
+            if(not self.element.isAbstract and not (True in [p.element.isAbstract for p in self.parentStack])):
                 if i != self.numInstances - 1:
                     self.constraints.addInstanceConstraint(self.instances[i] <= self.instances[i+1])    
         if not self.parent:
@@ -234,6 +235,8 @@ class  ClaferSort(object):
         
     
     def createCardinalityConstraints(self):
+        if not self.z3.isUsed(self.element):
+            return
         self.summs = [[] for i in range(self.parentInstances+1)]
         for i in range(self.numInstances):
             (lower, upper, _) = self.getInstanceRange(i)
@@ -269,13 +272,15 @@ class  ClaferSort(object):
                 bigSumm = bigSumm +  j.summs[i]
             #**** LEAVE THIS CODE ****
             #don't include inherited fields for now 
-            if self.superSort:
-                for j in self.superSort.fields:
-                    bigSumm = bigSumm +  j.summs[i + self.indexInSuper]
+            #if self.superSort:
+            #    for j in self.superSort.fields:
+            #        print("found " + str(j))
+            #        bigSumm = bigSumm +  j.summs[i + self.indexInSuper]
             if lowerGCard != 0:
                 self.constraints.addGroupCardConstraint(bigSumm >= lowerGCard)
             if upperGCard != -1:
                 self.constraints.addGroupCardConstraint(bigSumm <= upperGCard)
+            #print(str(self) +  " " + str(lowerGCard) + " " + str(upperGCard) + str(bigSumm))
         
     
     def checkSuperAndRef(self):

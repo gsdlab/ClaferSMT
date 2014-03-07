@@ -187,6 +187,8 @@ class BracketedConstraint(Constraints.GenericConstraints):
         self.stack.append(finalExprs)
     
     def endProcessing(self):
+        if not self.stack:
+            return
         self.value = self.stack.pop()
         expr = self.value
         if(self.claferStack):

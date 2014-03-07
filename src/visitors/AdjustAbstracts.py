@@ -84,7 +84,9 @@ def setAbstractScopes(z3):
                 hasChanged = True
             #i.numInstances = summ#max(summ, Options.GLOBAL_SCOPE)#summ #temp
             #i.upperCardConstraint = summ
+            i.scope_summ = summ
             if summ == 0:
+                continue
                 raise UnusedAbstractException(i.element.uid)
     return hasChanged 
 

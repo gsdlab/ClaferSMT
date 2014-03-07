@@ -147,14 +147,15 @@ class Mask():
     '''
     Wrapper for AVLTree to keep track of which instances are *on*.
     '''
-    def __init__(self, sort=None, instances=[], copy=False):
+    def __init__(self, sort=None, instances=[], copy=False, potentiallyEmpty=False):
         if copy:
             #sort holds a copy of the AVLTree from the previous Mask
             self.tree = sort
         newInstances = []
+        
         if not sort:
             self.tree = AVLTree()
-        elif instances:
+        elif instances or potentiallyEmpty:
             newInstances = [(i, sort.instances[i]) for i in (instances)]
             self.tree = AVLTree(newInstances)
         elif sort:

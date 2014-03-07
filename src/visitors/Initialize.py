@@ -23,8 +23,8 @@ class Initialize(VisitorTemplate.VisitorTemplate):
 
     
     def claferVisit(self, element):
-        if element.isAbstract:
-            self.z3.z3_sorts[element.uid].modifyAbstract()
+        #if not self.z3.isUsed(str(element)):
+        #    return 
         self.z3.z3_sorts[element.uid].initialize()
         for i in element.elements:
             visitors.Visitor.visit(self, i)
