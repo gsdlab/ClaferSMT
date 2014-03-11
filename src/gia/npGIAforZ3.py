@@ -119,7 +119,7 @@ class GuidedImprovementAlgorithm(object):
 #             self.GIALogger.logStartCall(tmpNotDominatedByFirstParetoPoint)
             self.s.add(tmpNotDominatedByFirstParetoPoint)
             start_time = time()
-            while(self.s.check() == sat and len(ParetoFront) < max_models):
+            while(self.s.check() == sat and not(len(ParetoFront) == max_models)):
                 count_sat_calls += 1
 #                 self.GIALogger.logEndCall(True, model = self.s.model(), statistics = self.s.statistics())                              
                 prev_solution = self.s.model()
