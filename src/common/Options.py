@@ -6,6 +6,7 @@ Created on Oct 6, 2013
 
 from common import Common
 from optparse import OptionParser
+'''
 from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     this_dot_parent, arithmetic, relations, boolean_connectives, union, \
     simple_abstract, some, simple_set, integer_refs, higher_inheritance, \
@@ -23,6 +24,7 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     AADL_simplified_with_lists, teststring, testunion, simple_real, Phone, \
     int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max, \
     Cruise, small, cc_examplemod
+'''
 import argparse
 import sys
 
@@ -53,7 +55,7 @@ POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
 
 GLOBAL_SCOPE = 1#this obviously has to change
 
-ECLIPSE = False
+ECLIPSE = False 
 
 MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = False
@@ -135,6 +137,7 @@ INDENTATION="  "
 #MODULE = two_objective_min.getModule()
 #MODULE = two_objective_max.getModule()
 MODULE=""
+'''
 MODULE = cc_examplemod.getModule()
 
 my_tests = [ 
@@ -197,6 +200,7 @@ positive_tests = [
         (telematics, 1),
         (test_neg_typesystem,INFINITE)
                   ]
+            
 
 string_tests = [
                 (check_unique_ref_names_with_inheritance, 1),
@@ -205,7 +209,7 @@ string_tests = [
                 (i40textequality, 1),
                 (subtypingprimitivetypes, 1)
                 ]
-
+'''
 
 modeMap = {
            'experiment' : Common.EXPERIMENT,
