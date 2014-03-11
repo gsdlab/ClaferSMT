@@ -6,7 +6,6 @@ Created on Oct 6, 2013
 
 from common import Common
 from optparse import OptionParser
-
 from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     this_dot_parent, arithmetic, relations, boolean_connectives, union, \
     simple_abstract, some, simple_set, integer_refs, higher_inheritance, \
@@ -23,10 +22,11 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths, \
     AADL_simplified_with_lists, teststring, testunion, simple_real, Phone, \
     int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max, \
-    Cruise, small
-
+    Cruise, small, cc_examplemod
 import argparse
 import sys
+
+
 
 
 
@@ -135,7 +135,7 @@ INDENTATION="  "
 #MODULE = two_objective_min.getModule()
 #MODULE = two_objective_max.getModule()
 MODULE=""
-#MODULE = small.getModule()
+MODULE = cc_examplemod.getModule()
 
 my_tests = [ 
           (multiple_joins, 1),

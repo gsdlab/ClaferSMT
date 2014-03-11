@@ -276,10 +276,16 @@ class  ClaferSort(object):
             #    for j in self.superSort.fields:
             #        print("found " + str(j))
             #        bigSumm = bigSumm +  j.summs[i + self.indexInSuper]
-            if lowerGCard != 0:
-                self.constraints.addGroupCardConstraint(bigSumm >= lowerGCard)
-            if upperGCard != -1:
-                self.constraints.addGroupCardConstraint(bigSumm <= upperGCard)
+            if self.parent:
+                if lowerGCard != 0:
+                    self.constraints.addGroupCardConstraint(Implies(self.parent.isOn(i), bigSumm >= lowerGCard))
+                if upperGCard != -1:
+                    self.constraints.addGroupCardConstraint(Implies(self.parent.isOn(i), bigSumm <= upperGCard))
+            else:
+                if lowerGCard != 0:
+                    self.constraints.addGroupCardConstraint(bigSumm >= lowerGCard)
+                if upperGCard != -1:
+                    self.constraints.addGroupCardConstraint(bigSumm <= upperGCard)
             #print(str(self) +  " " + str(lowerGCard) + " " + str(upperGCard) + str(bigSumm))
         
     
