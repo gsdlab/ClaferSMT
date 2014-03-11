@@ -75,6 +75,7 @@ DIMACS_FILE="dimacs"
 UNIQUE_NAMES = False
 SHOW_INHERITANCE = False
 DELIMETER=""
+INDENTATION="  "
 
 
 #MODULE = bracketedconstraint_this.getModule()
@@ -241,8 +242,9 @@ def setCommandLineOptions():
     parser.add_argument('--printuniquenames', '-u', default=False, dest='unique_names',action='store_const',  const=True,  help='Print clafers with unique prefixes.')
     parser.add_argument('--showinheritance', default=False, dest='show_inheritance',action='store_const',  const=True,  help='Show super-clafers explicitly.')
     parser.add_argument('--version', '-v', default=False, dest='version',action='store_const',  const=True,  help='Print version number.')
-    parser.add_argument('--delimeter', default="", dest='delimeter', help='Output DIMACS.')
-    
+    parser.add_argument('--delimeter', default="", dest='delimeter', help='Delimeter between instances.')
+    parser.add_argument('--indentation', dest='indentation', default='doublespace',
+                       choices=['doublespace', 'tab'])
     args = parser.parse_args()
     if args.version:
         print("ClaferZ3 0.3.6.06-03-2014")
@@ -285,6 +287,9 @@ def setCommandLineOptions():
     SHOW_INHERITANCE = args.show_inheritance
     global DELIMETER
     DELIMETER = args.delimeter
+    global INDENTATION
+    if args.indentation == "tab":
+        INDENTATION = "\t"
     
 
 

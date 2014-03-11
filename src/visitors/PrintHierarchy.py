@@ -98,7 +98,7 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
         #print(node)
         #print(self.tree.abstractRefs)
         (sort, instance) = node
-        indent = "  " * level
+        indent = Options.INDENTATION * level
         abs_ref = self.tree.findParentInList(node, self.tree.abstractRefs)
         #print(abs_ref)
         #if abs_ref:
