@@ -70,10 +70,14 @@ def joinWithParent(arg):
     return ExprArg(newInstanceSorts)
 
 
-def addPrimitive(newSort, newMask, oldSort, oldMask, index):
+def addPrimitive(newSort, newMask, oldSort, oldMask, index, wasEmpty=False):
     newIndex = newSort.getNextIndex()
     cardinalityMask = newSort.getCardinalityMask()
-    constraint = And(oldSort.isOn(oldMask.get(index)), mAnd(*[oldSort.refs[index] != i for i in newMask.values()]))
+    if wasEmpty:
+        constraint = oldSort.isOn(oldMask.get(index))
+    else:
+        #only add this constraint if it is NOT the first set being added (needs to be modified to not look in the same set) (bag fix)
+        constraint = And(oldSort.isOn(oldMask.get(index)), mAnd(*[oldSort.refs[index] != i for i in newMask.values()]))
     cardinalityMask.put(newIndex, If(constraint, 1, 0))
     newMask.put(newIndex, If(constraint, oldSort.refs[index], 0))
     Assertions.nonEmptyMask(newMask)
@@ -85,9 +89,13 @@ def joinWithPrimitive(arg):
         (sort, mask) = i
         if sort.refSort == "integer" or (sort.refSort == "string" and not Options.STRING_CONSTRAINTS):  #change for string soon
             newMask = alreadyExists(IntSort(), newInstanceSorts) #check that this works!!!
+            if newMask.size() == 0:
+                wasEmpty = True
+            else:
+                wasEmpty = False
             newSort = IntSort()
-            for i in mask.keys():
-                addPrimitive(newSort, newMask, sort, mask, i)         
+            for j in mask.keys():
+                addPrimitive(newSort, newMask, sort, mask, j, wasEmpty)         
             newInstanceSorts.append((newSort, newMask)) #should change the "int", but not sure how yet
             Assertions.nonEmptyMask(newMask)
         elif sort.refSort == "string":

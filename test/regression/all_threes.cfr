@@ -1,5 +1,5 @@
-A : integer 2
+A ->> integer 2
 [all x : A | 
      x.ref = 3]
-[A.ref = 3]
-[#A.ref = 1]
+[A.ref = 6]
+[#A.ref = 2]

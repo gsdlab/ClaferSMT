@@ -6,7 +6,7 @@ Created on Oct 6, 2013
 
 from common import Common
 from optparse import OptionParser
-'''
+
 from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     this_dot_parent, arithmetic, relations, boolean_connectives, union, \
     simple_abstract, some, simple_set, integer_refs, higher_inheritance, \
@@ -24,7 +24,7 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     AADL_simplified_with_lists, teststring, testunion, simple_real, Phone, \
     int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max, \
     Cruise, small
-'''
+
 import argparse
 import sys
 
@@ -44,6 +44,7 @@ import sys
 * Fix quantifier symmetry breaker, if two locals FROM THE SAME QUANTIFIER are on the left and right of a func, not symmetric
 * Documentation
 * Need to treat ints and reals "the same" if in the same set.
+* Fix bag problem for everything, (look at ints for correct)
 '''
 
 '''
@@ -135,7 +136,7 @@ INDENTATION="  "
 #MODULE = two_objective_max.getModule()
 MODULE=""
 #MODULE = small.getModule()
-'''
+
 my_tests = [ 
           (multiple_joins, 1),
           (bracketedconstraint_this, 6),
@@ -205,7 +206,7 @@ string_tests = [
                 (subtypingprimitivetypes, 1)
                 ]
 
-'''
+
 modeMap = {
            'experiment' : Common.EXPERIMENT,
            'modelstats' : Common.MODELSTATS,
