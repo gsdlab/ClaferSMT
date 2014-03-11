@@ -3,11 +3,9 @@ Created on Oct 6, 2013
 
 @author: ezulkosk
 '''
+
 from common import Common
 from optparse import OptionParser
-import argparse
-import sys
-
 '''
 from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     this_dot_parent, arithmetic, relations, boolean_connectives, union, \
@@ -24,8 +22,14 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
     one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths, \
     AADL_simplified_with_lists, teststring, testunion, simple_real, Phone, \
-    int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max
+    int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max, \
+    Cruise, small
 '''
+import argparse
+import sys
+
+
+
 
 '''
 ========
@@ -129,6 +133,7 @@ DELIMETER=""
 #MODULE = two_objective_min.getModule()
 #MODULE = two_objective_max.getModule()
 MODULE=""
+#MODULE = small.getModule()
 '''
 my_tests = [ 
           (multiple_joins, 1),
@@ -198,8 +203,8 @@ string_tests = [
                 (i40textequality, 1),
                 (subtypingprimitivetypes, 1)
                 ]
-'''
 
+'''
 modeMap = {
            'experiment' : Common.EXPERIMENT,
            'modelstats' : Common.MODELSTATS,

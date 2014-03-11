@@ -6,10 +6,11 @@ Created on Jan 13, 2014
 from ast import IntegerLiteral
 from common import Options
 from constraints import Operations
+from gia import consts
 from structures.ExprArg import JoinArg
 from visitors import VisitorTemplate, Visitor, CreateBracketedConstraints
-import visitors
 from z3 import Sum
+import visitors
 
 class CheckForGoals(VisitorTemplate.VisitorTemplate):
     '''
@@ -30,12 +31,17 @@ class CheckForGoals(VisitorTemplate.VisitorTemplate):
     
     def goalVisit(self, element):
         bracketedConstraintsVisitor = CreateBracketedConstraints.CreateBracketedConstraints(self)
+        op = element.exp.iExp[0].operation
+        if op == "min":
+            op = consts.METRICS_MINIMIZE
+        else:
+            op = consts.METRICS_MAXIMIZE
         expr = bracketedConstraintsVisitor.objectiveVisit(element.exp.iExp[0].elements[0])
         if isinstance(expr[0], JoinArg):
             expr = Operations.computeJoin(expr)
         mask = expr[0][1]
         valueList = [i for i in mask.values()]
-        self.z3.objectives.append((element.isMaximize, Sum(valueList)))
+        self.z3.objectives.append((op, Sum(valueList)))
     
 
             

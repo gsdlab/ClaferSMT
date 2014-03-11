@@ -322,11 +322,13 @@ class Z3Instance(object):
         metrics_variables = []
         
         for i in self.objectives:
+            #print(i)
             (dir, var) = i
             metrics_objective_direction.append(dir)
             metrics_variables.append(var)
         
-        
+        #print(metrics_objective_direction)
+        #print(metrics_variables)
         # Non-Parallel    
         GIAOptionsNP = GuidedImprovementAlgorithmOptions(verbosity=0, \
             incrementallyWriteLog=False, \

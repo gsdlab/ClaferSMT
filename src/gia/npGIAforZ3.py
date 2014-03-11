@@ -377,4 +377,6 @@ class GuidedImprovementAlgorithm(object):
             i = 1 + i    
             dominationDisjunction.append(And(dominationConjunction))         
         constraintDominateX = Or(dominationDisjunction)
+        #print(constraintDominateX)
+        #sys.exit()
         return constraintDominateX

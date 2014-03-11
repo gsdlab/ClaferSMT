@@ -62,11 +62,14 @@ def convertToDimacs(self):
         blanks = []
         for i in cnf:
             for j in i:
-                for k in j.children():
-                    clause = getAtoms(k, [])
-                    clauses.append([str(i) for i in clause])
+                #print(j)
+                #for k in j.children():
+                clause = getAtoms(j, [])
+                
+                clauses.append([str(i) for i in clause])
         g = Graph()
         for i in clauses:
+            #creates adjacency matrix
             g.addEdge(i)
         for i in g.clauses.keys():
             print(str(i) + " = " + str(g.clauses[i]))
@@ -78,7 +81,16 @@ def convertToDimacs(self):
         adjTotals.sort(key=operator.itemgetter(1))
         for i in adjTotals:
             print(i)
-            print("\n")
+        print("\n\n===============================\n")
+        
+        adjcountsSorted = []
+        for i in g.adjacencycounts.keys():
+            #print(str(i) + " = " + str(len(g.adjacency[i])))#str(g.adjacency[i]))
+            adjcountsSorted.append((i, g.adjacencycounts[i]))
+        adjcountsSorted.sort(key=operator.itemgetter(1))
+        for i in adjcountsSorted:
+            print(i)
+            #print("\n")
         #print(k)
         
                     #print(clause)
