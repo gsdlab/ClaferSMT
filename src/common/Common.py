@@ -73,10 +73,11 @@ def preventSameModel(solver, model):
             raise Z3Exception("arrays and uninterpreted sorts are not supported")
         block.append(c != model[d])
         #print(str(d) + " = " + str(m[d]))
-    if not block:
+    if block == []:
         #input was an empty clafer model (no concretes)
-        return [[]]
-    solver.add(Or(block))
+        solver.add(False)
+    else:
+        solver.add(Or(block))
 
 def debug_print(string):
     '''

@@ -85,7 +85,6 @@ class GuidedImprovementAlgorithm(object):
         self.s.push()
         equalConstraint = self.ConstraintEqualToX(point)
         self.s.add(equalConstraint)
-        #print("in")
         #print(self.s.check()==sat)
         while(self.s.check() == sat and not(len(ParetoFront) == self.options.num_models)):
             #print("in")

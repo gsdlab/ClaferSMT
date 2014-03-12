@@ -4,7 +4,7 @@ Created on Apr 29, 2013
 @author: ezulkosk
 '''
 from common import Common, Options
-from common.Common import mOr
+from common.Common import mOr, mAnd
 from constraints import Constraints
 from pip.backwardcompat import reduce
 from z3 import IntVector, If, Implies, And, Or, Sum, Not, RealVector
@@ -123,6 +123,20 @@ class  ClaferSort(object):
                 self.constraints.addRefConstraint(self.refs[i] <= self.refSort.numInstances)
         #if integer refs, zero out refs that do not have live parents,
         #if clafer refs, set equal to ref.parentInstances if not live   
+        
+        
+        #reference symmetry breaking
+        
+        for i in range(self.numInstances - 1):
+            for j in range(i+1, self.numInstances):
+                if isinstance(self.refSort, PrimitiveType):
+                    self.constraints.addRefConstraint(Implies(self.instances[i] == self.instances[j],
+                                                          self.refs[i] <= self.refs[j]))
+                else:
+                    self.constraints.addRefConstraint(Implies(mAnd(self.refs[i] != self.refSort.numInstances, self.instances[i] == self.instances[j]),
+                                                          self.refs[i] <= self.refs[j]))
+                
+        
         for i in range(self.numInstances):
             if isinstance(self.refSort, PrimitiveType):
                 if self.refSort == "integer":
@@ -168,6 +182,8 @@ class  ClaferSort(object):
         except:
             return index == self.parentInstances
         
+       
+       
        
     def getInstanceRange(self, index):
         '''
@@ -222,8 +238,12 @@ class  ClaferSort(object):
                 self.constraints.addInstanceConstraint(
                     Or(self.isOff(i),
                        self.instances[i] <= upper))
+            
             #sorted parent pointers (only consider things that are not part of an abstract)
-            if(not self.element.isAbstract and not (True in [p.element.isAbstract for p in self.parentStack])):
+            #print(self.element)
+            #print(self.subs )
+            if(not self.element.isAbstract and not (True in [(p.element.isAbstract) for p in self.parentStack])):
+                #print(self.element)
                 if i != self.numInstances - 1:
                     self.constraints.addInstanceConstraint(self.instances[i] <= self.instances[i+1])    
         if not self.parent:
@@ -276,16 +296,10 @@ class  ClaferSort(object):
             #    for j in self.superSort.fields:
             #        print("found " + str(j))
             #        bigSumm = bigSumm +  j.summs[i + self.indexInSuper]
-            if self.parent:
-                if lowerGCard != 0:
-                    self.constraints.addGroupCardConstraint(Implies(self.parent.isOn(i), bigSumm >= lowerGCard))
-                if upperGCard != -1:
-                    self.constraints.addGroupCardConstraint(Implies(self.parent.isOn(i), bigSumm <= upperGCard))
-            else:
-                if lowerGCard != 0:
-                    self.constraints.addGroupCardConstraint(bigSumm >= lowerGCard)
-                if upperGCard != -1:
-                    self.constraints.addGroupCardConstraint(bigSumm <= upperGCard)
+            if lowerGCard != 0:
+                    self.constraints.addGroupCardConstraint(Implies(self.isOn(i), bigSumm >= lowerGCard))
+            if upperGCard != -1:
+                self.constraints.addGroupCardConstraint(Implies(self.isOn(i),bigSumm <= upperGCard))
             #print(str(self) +  " " + str(lowerGCard) + " " + str(upperGCard) + str(bigSumm))
         
     
