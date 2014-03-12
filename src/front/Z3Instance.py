@@ -6,7 +6,7 @@ Created on Apr 30, 2013
 
 from ast.IntegerLiteral import IntegerLiteral
 from common import Common, Options, Clock
-from common.Common import debug_print, standard_print, mOr
+from common.Common import debug_print, standard_print, mOr, preventSameModel
 from common.Exceptions import UnusedAbstractException
 from constraints import Constraints, IsomorphismConstraint
 from front import Z3Str, Converters
@@ -333,18 +333,21 @@ class Z3Instance(object):
         GIAOptionsNP = GuidedImprovementAlgorithmOptions(verbosity=0, \
             incrementallyWriteLog=False, \
             writeTotalTimeFilename="timefile.csv", \
-            writeRandomSeedsFilename="randomseed.csv", useCallLogs=False)    
+            writeRandomSeedsFilename="randomseed.csv", useCallLogs=False, num_models=desired_number_of_models, magnifying_glass=Options.MAGNIFYING_GLASS)    
         GIAAlgorithmNP = GuidedImprovementAlgorithm(self.solver, metrics_variables, \
                 metrics_objective_direction, [], options=GIAOptionsNP) 
         '''featurevars instead of []'''
         outfilename = str("giaoutput").strip()#"npGIA_" + str(sys.argv[1]).strip() + ".csv"
 
-        ParetoFront = GIAAlgorithmNP.ExecuteGuidedImprovementAlgorithm(outfilename, desired_number_of_models)
+        ParetoFront = GIAAlgorithmNP.ExecuteGuidedImprovementAlgorithm(outfilename)
         count = 0
         for i in ParetoFront:
             self.printVars(i)
             #count = count + 1
         return ParetoFront
+    
+    
+    
     
     def standard_get_models(self, desired_number_of_models):
         result = []
@@ -371,23 +374,7 @@ class Z3Instance(object):
                     isoConstraint = self.z3_bracketed_constraints.pop()
                     isoConstraint.assertConstraints(self)
                 else:
-                    block = []
-                    for d in m:
-                        # d is a declaration
-                        if d.arity() > 0:
-                            continue #raise Z3Exception("uninterpreted functions are not supported")
-                        # create a constant from declaration
-                        c = d()
-                        if (str(c)).startswith("z3name!") or is_real(c):
-                            continue
-                        if is_array(c) or c.sort().kind() == Z3_UNINTERPRETED_SORT:
-                            raise Z3Exception("arrays and uninterpreted sorts are not supported")
-                        block.append(c != m[d])
-                        #print(str(d) + " = " + str(m[d]))
-                    if not block:
-                        #input was an empty clafer model (no concretes)
-                        return [[]]
-                    self.solver.add(Or(block))
+                    preventSameModel(self.solver, m)
                 count += 1
             else:
                 

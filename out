@@ -1,7 +1,3024 @@
-###########################
-# Model: 1
-###########################
-[((c0_machine_sort, c0_machine__0), [(c0_Machine_sort, 2), (c0_Machine_sort, 2), (c0_Machine_sort, 2), (c0_Machine_sort, 2)]), ((c0_cpu_sort, c0_cpu__0), [(<structures.ClaferSort.PrimitiveType object at 0x2f2f890>, 3), (<structures.ClaferSort.PrimitiveType object at 0x2f2f890>, 2), (<structures.ClaferSort.PrimitiveType object at 0x2f2f890>, 1), (<structures.ClaferSort.PrimitiveType object at 0x2f2f890>, 4), (<structures.ClaferSort.PrimitiveType object at 0x2f2f890>, 0), (<structures.ClaferSort.PrimitiveType object at 0x2f2f890>, 0), (<structures.ClaferSort.PrimitiveType object at 0x2f2f890>, 10), (<structures.ClaferSort.PrimitiveType object at 0x2f2f890>, 10), (<structures.ClaferSort.PrimitiveType object at 0x2f2f890>, 16), (<structures.ClaferSort.PrimitiveType object at 0x2f2f890>, 14)]), ((c0_services_sort, c0_services__0), [(c0_Service_sort, 1), (c0_Service_sort, 0), (c0_Service_sort, 3), (c0_Service_sort, 2)]), ((c0_total_free_sort, c0_total_free__0), [(<structures.ClaferSort.PrimitiveType object at 0x2f2f8d0>, 2)])]
-[((c0_Service_sort, c0_Service__0), [(c0_requirements_sort, c0_requirements__0), (c0_requirements_sort, c0_requirements__1), (c0_requirements_sort, c0_requirements__2), (c0_requirements_sort, c0_requirements__3), (c0_machine_sort, c0_machine__0), (c0_machine_sort, c0_machine__1), (c0_machine_sort, c0_machine__2), (c0_machine_sort, c0_machine__3)]), ((c0_Service_sort, c0_Service__1), []), ((c0_Service_sort, c0_Service__2), []), ((c0_Service_sort, c0_Service__3), []), ((c0_requirements_sort, c0_requirements__0), []), ((c0_requirements_sort, c0_requirements__1), []), ((c0_requirements_sort, c0_requirements__2), []), ((c0_requirements_sort, c0_requirements__3), []), ((c0_machine_sort, c0_machine__0), []), ((c0_machine_sort, c0_machine__1), []), ((c0_machine_sort, c0_machine__2), []), ((c0_machine_sort, c0_machine__3), []), ((c0_Requirements_sort, c0_Requirements__0), [(c0_cpu_sort, c0_cpu__0), (c0_cpu_sort, c0_cpu__1), (c0_cpu_sort, c0_cpu__2), (c0_cpu_sort, c0_cpu__3), (c0_cpu_sort, c0_cpu__4), (c0_cpu_sort, c0_cpu__5), (c0_cpu_sort, c0_cpu__6), (c0_cpu_sort, c0_cpu__7), (c0_cpu_sort, c0_cpu__8), (c0_cpu_sort, c0_cpu__9)]), ((c0_Requirements_sort, c0_Requirements__1), []), ((c0_Requirements_sort, c0_Requirements__2), []), ((c0_Requirements_sort, c0_Requirements__3), []), ((c0_Requirements_sort, c0_Requirements__4), []), ((c0_Requirements_sort, c0_Requirements__5), []), ((c0_Requirements_sort, c0_Requirements__6), []), ((c0_Requirements_sort, c0_Requirements__7), []), ((c0_Requirements_sort, c0_Requirements__8), []), ((c0_Requirements_sort, c0_Requirements__9), []), ((c0_cpu_sort, c0_cpu__0), []), ((c0_cpu_sort, c0_cpu__1), []), ((c0_cpu_sort, c0_cpu__2), []), ((c0_cpu_sort, c0_cpu__3), []), ((c0_cpu_sort, c0_cpu__4), []), ((c0_cpu_sort, c0_cpu__5), []), ((c0_cpu_sort, c0_cpu__6), []), ((c0_cpu_sort, c0_cpu__7), []), ((c0_cpu_sort, c0_cpu__8), []), ((c0_cpu_sort, c0_cpu__9), []), ((c0_Resources_sort, c0_Resources__0), []), ((c0_Resources_sort, c0_Resources__1), []), ((c0_Resources_sort, c0_Resources__2), []), ((c0_Resources_sort, c0_Resources__3), []), ((c0_Resources_sort, c0_Resources__4), []), ((c0_Resources_sort, c0_Resources__5), []), ((c0_Machine_sort, c0_Machine__0), [(c0_services_sort, c0_services__0), (c0_services_sort, c0_services__1), (c0_services_sort, c0_services__2), (c0_services_sort, c0_services__3), (c0_isFree_sort, c0_isFree__0), (c0_isFree_sort, c0_isFree__1), (c0_limits_sort, c0_limits__0), (c0_limits_sort, c0_limits__1), (c0_limits_sort, c0_limits__2), (c0_utilization_sort, c0_utilization__0), (c0_utilization_sort, c0_utilization__1), (c0_utilization_sort, c0_utilization__2)]), ((c0_Machine_sort, c0_Machine__1), []), ((c0_Machine_sort, c0_Machine__2), []), ((c0_services_sort, c0_services__0), []), ((c0_services_sort, c0_services__1), []), ((c0_services_sort, c0_services__2), []), ((c0_services_sort, c0_services__3), []), ((c0_isFree_sort, c0_isFree__0), []), ((c0_isFree_sort, c0_isFree__1), []), ((c0_limits_sort, c0_limits__0), []), ((c0_limits_sort, c0_limits__1), []), ((c0_limits_sort, c0_limits__2), []), ((c0_utilization_sort, c0_utilization__0), []), ((c0_utilization_sort, c0_utilization__1), []), ((c0_utilization_sort, c0_utilization__2), []), ((c0_Task_sort, c0_Task__0), [(c0_total_free_sort, c0_total_free__0)]), ((c0_total_free_sort, c0_total_free__0), []), ((c0_MyTask_sort, c0_MyTask__0), []), ((c0_GoogleCA_sort, c0_GoogleCA__0), []), ((c0_GoogleNY_sort, c0_GoogleNY__0), []), ((c0_GoogleTX_sort, c0_GoogleTX__0), []), ((c0_MailService_sort, c0_MailService__0), []), ((c0_SearchService_sort, c0_SearchService__0), []), ((c0_CalendarService_sort, c0_CalendarService__0), []), ((c0_DriveService_sort, c0_DriveService__0), [])]
-[(c0_MyTask_sort, c0_MyTask__0), (c0_GoogleCA_sort, c0_GoogleCA__0), (c0_GoogleNY_sort, c0_GoogleNY__0), (c0_GoogleTX_sort, c0_GoogleTX__0), (c0_MailService_sort, c0_MailService__0), (c0_SearchService_sort, c0_SearchService__0), (c0_CalendarService_sort, c0_CalendarService__0), (c0_DriveService_sort, c0_DriveService__0)]
+=== Instance 1 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = DriveService$0
+  services$1 = SearchService$0
+  services$2 = CalendarService$0
+  services$3 = MailService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 2 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = DriveService$0
+  services$1 = SearchService$0
+  services$2 = CalendarService$0
+  services$3 = MailService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 3 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = CalendarService$0
+  services$1 = DriveService$0
+  services$2 = SearchService$0
+  services$3 = MailService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 4 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = DriveService$0
+  services$1 = SearchService$0
+  services$2 = CalendarService$0
+  services$3 = MailService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 5 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = MailService$0
+  services$1 = CalendarService$0
+  services$2 = DriveService$0
+  services$3 = SearchService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 6 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = CalendarService$0
+  services$1 = SearchService$0
+  services$2 = MailService$0
+  services$3 = DriveService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 7 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = SearchService$0
+  services$1 = CalendarService$0
+  services$2 = MailService$0
+  services$3 = DriveService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 8 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = SearchService$0
+  services$1 = CalendarService$0
+  services$2 = DriveService$0
+  services$3 = MailService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 9 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = SearchService$0
+  services$1 = CalendarService$0
+  services$2 = DriveService$0
+  services$3 = MailService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 10 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = SearchService$0
+  services$1 = CalendarService$0
+  services$2 = DriveService$0
+  services$3 = MailService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 11 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = SearchService$0
+  services$1 = MailService$0
+  services$2 = DriveService$0
+  services$3 = CalendarService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 12 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = SearchService$0
+  services$1 = MailService$0
+  services$2 = DriveService$0
+  services$3 = CalendarService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 13 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = SearchService$0
+  services$1 = MailService$0
+  services$2 = DriveService$0
+  services$3 = CalendarService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 14 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = SearchService$0
+  services$1 = DriveService$0
+  services$2 = MailService$0
+  services$3 = CalendarService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 15 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = SearchService$0
+  services$1 = DriveService$0
+  services$2 = MailService$0
+  services$3 = CalendarService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 16 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = SearchService$0
+  services$1 = DriveService$0
+  services$2 = CalendarService$0
+  services$3 = MailService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 17 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = SearchService$0
+  services$1 = CalendarService$0
+  services$2 = MailService$0
+  services$3 = DriveService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 18 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = SearchService$0
+  services$1 = MailService$0
+  services$2 = CalendarService$0
+  services$3 = DriveService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 19 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = SearchService$0
+  services$1 = DriveService$0
+  services$2 = CalendarService$0
+  services$3 = MailService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 20 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = SearchService$0
+  services$1 = MailService$0
+  services$2 = CalendarService$0
+  services$3 = DriveService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 21 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = SearchService$0
+  services$1 = CalendarService$0
+  services$2 = MailService$0
+  services$3 = DriveService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 22 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = SearchService$0
+  services$1 = DriveService$0
+  services$2 = CalendarService$0
+  services$3 = MailService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 23 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = SearchService$0
+  services$1 = MailService$0
+  services$2 = CalendarService$0
+  services$3 = DriveService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 24 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = SearchService$0
+  services$1 = DriveService$0
+  services$2 = MailService$0
+  services$3 = CalendarService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 25 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = CalendarService$0
+  services$1 = MailService$0
+  services$2 = SearchService$0
+  services$3 = DriveService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 26 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = MailService$0
+  services$1 = CalendarService$0
+  services$2 = SearchService$0
+  services$3 = DriveService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 27 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = MailService$0
+  services$1 = SearchService$0
+  services$2 = CalendarService$0
+  services$3 = DriveService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 28 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = MailService$0
+  services$1 = DriveService$0
+  services$2 = CalendarService$0
+  services$3 = SearchService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 29 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = MailService$0
+  services$1 = SearchService$0
+  services$2 = CalendarService$0
+  services$3 = DriveService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 30 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = MailService$0
+  services$1 = SearchService$0
+  services$2 = CalendarService$0
+  services$3 = DriveService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 31 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = CalendarService$0
+  services$1 = SearchService$0
+  services$2 = MailService$0
+  services$3 = DriveService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 32 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = CalendarService$0
+  services$1 = SearchService$0
+  services$2 = MailService$0
+  services$3 = DriveService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 33 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = CalendarService$0
+  services$1 = MailService$0
+  services$2 = SearchService$0
+  services$3 = DriveService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 34 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = CalendarService$0
+  services$1 = MailService$0
+  services$2 = SearchService$0
+  services$3 = DriveService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 35 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = CalendarService$0
+  services$1 = DriveService$0
+  services$2 = SearchService$0
+  services$3 = MailService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 36 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = MailService$0
+  services$1 = CalendarService$0
+  services$2 = SearchService$0
+  services$3 = DriveService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 37 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = MailService$0
+  services$1 = CalendarService$0
+  services$2 = SearchService$0
+  services$3 = DriveService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 38 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = MailService$0
+  services$1 = DriveService$0
+  services$2 = CalendarService$0
+  services$3 = SearchService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 39 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = MailService$0
+  services$1 = DriveService$0
+  services$2 = SearchService$0
+  services$3 = CalendarService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 40 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = MailService$0
+  services$1 = DriveService$0
+  services$2 = SearchService$0
+  services$3 = CalendarService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 41 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = DriveService$0
+  services$1 = CalendarService$0
+  services$2 = SearchService$0
+  services$3 = MailService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 42 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = DriveService$0
+  services$1 = CalendarService$0
+  services$2 = SearchService$0
+  services$3 = MailService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 43 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = DriveService$0
+  services$1 = MailService$0
+  services$2 = SearchService$0
+  services$3 = CalendarService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 44 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = DriveService$0
+  services$1 = MailService$0
+  services$2 = SearchService$0
+  services$3 = CalendarService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 45 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = DriveService$0
+  services$1 = MailService$0
+  services$2 = CalendarService$0
+  services$3 = SearchService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 46 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = DriveService$0
+  services$1 = MailService$0
+  services$2 = CalendarService$0
+  services$3 = SearchService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 47 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = MailService$0
+  services$1 = DriveService$0
+  services$2 = CalendarService$0
+  services$3 = SearchService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 48 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = CalendarService$0
+  services$1 = SearchService$0
+  services$2 = DriveService$0
+  services$3 = MailService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 49 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = CalendarService$0
+  services$1 = SearchService$0
+  services$2 = DriveService$0
+  services$3 = MailService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 50 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = MailService$0
+  services$1 = SearchService$0
+  services$2 = DriveService$0
+  services$3 = CalendarService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 51 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = CalendarService$0
+  services$1 = MailService$0
+  services$2 = DriveService$0
+  services$3 = SearchService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 52 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = DriveService$0
+  services$1 = CalendarService$0
+  services$2 = MailService$0
+  services$3 = SearchService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 53 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = CalendarService$0
+  services$1 = DriveService$0
+  services$2 = MailService$0
+  services$3 = SearchService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 54 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = DriveService$0
+  services$1 = SearchService$0
+  services$2 = MailService$0
+  services$3 = CalendarService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$2
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 55 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = CalendarService$0
+  services$1 = DriveService$0
+  services$2 = MailService$0
+  services$3 = SearchService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 56 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = DriveService$0
+  services$1 = CalendarService$0
+  services$2 = MailService$0
+  services$3 = SearchService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 57 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = DriveService$0
+  services$1 = SearchService$0
+  services$2 = MailService$0
+  services$3 = CalendarService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 58 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = MailService$0
+  services$1 = CalendarService$0
+  services$2 = DriveService$0
+  services$3 = SearchService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 59 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = CalendarService$0
+  services$1 = MailService$0
+  services$2 = DriveService$0
+  services$3 = SearchService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 60 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  services$0 = MailService$0
+  services$1 = SearchService$0
+  services$2 = DriveService$0
+  services$3 = CalendarService$0
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 10
+GoogleTX$0
+  isFree$1
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 0
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleNY$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleNY$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleNY$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleNY$0
+
+=== Instance 61 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = CalendarService$0
+  services$1 = DriveService$0
+  services$2 = SearchService$0
+  services$3 = MailService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 62 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = DriveService$0
+  services$1 = CalendarService$0
+  services$2 = SearchService$0
+  services$3 = MailService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 63 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = DriveService$0
+  services$1 = MailService$0
+  services$2 = SearchService$0
+  services$3 = CalendarService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 64 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = MailService$0
+  services$1 = DriveService$0
+  services$2 = SearchService$0
+  services$3 = CalendarService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 65 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = DriveService$0
+  services$1 = MailService$0
+  services$2 = CalendarService$0
+  services$3 = SearchService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 66 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = CalendarService$0
+  services$1 = DriveService$0
+  services$2 = MailService$0
+  services$3 = SearchService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 67 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = DriveService$0
+  services$1 = CalendarService$0
+  services$2 = MailService$0
+  services$3 = SearchService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 68 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = DriveService$0
+  services$1 = SearchService$0
+  services$2 = MailService$0
+  services$3 = CalendarService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 69 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = CalendarService$0
+  services$1 = SearchService$0
+  services$2 = DriveService$0
+  services$3 = MailService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 70 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = MailService$0
+  services$1 = CalendarService$0
+  services$2 = DriveService$0
+  services$3 = SearchService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 71 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = CalendarService$0
+  services$1 = MailService$0
+  services$2 = DriveService$0
+  services$3 = SearchService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
+
+=== Instance 72 ===
+
+MyTask$0
+  total_free$0 = 2
+GoogleCA$0
+  isFree$0
+  limits$0
+    cpu$7 = 10
+  utilization$0
+    cpu$4 = 0
+GoogleNY$0
+  isFree$1
+  limits$1
+    cpu$8 = 16
+  utilization$1
+    cpu$5 = 0
+GoogleTX$0
+  services$0 = MailService$0
+  services$1 = SearchService$0
+  services$2 = DriveService$0
+  services$3 = CalendarService$0
+  limits$2
+    cpu$9 = 14
+  utilization$2
+    cpu$6 = 10
+MailService$0
+  requirements$3
+    cpu$3 = 4
+  machine$3 = GoogleTX$0
+SearchService$0
+  requirements$0
+    cpu$0 = 3
+  machine$0 = GoogleTX$0
+CalendarService$0
+  requirements$2
+    cpu$2 = 1
+  machine$2 = GoogleTX$0
+DriveService$0
+  requirements$1
+    cpu$1 = 2
+  machine$1 = GoogleTX$0
 

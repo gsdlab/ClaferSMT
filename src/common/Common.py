@@ -3,7 +3,9 @@ Created on Apr 28, 2013
 
 @author: ezulkosk
 '''
-from z3 import If, And, Or, Int
+from z3 import If, And, Or, Int, is_array, is_real
+from z3consts import Z3_UNINTERPRETED_SORT
+from z3types import Z3Exception
 
 NORMAL = 0
 DEBUG = 1
@@ -56,6 +58,25 @@ def mOr(*args):
         return newArgs[0]
     else:
         return Or(*newArgs)
+
+def preventSameModel(solver, model):
+    block = []
+    for d in model:
+        # d is a declaration
+        if d.arity() > 0:
+            continue #raise Z3Exception("uninterpreted functions are not supported")
+        # create a constant from declaration
+        c = d()
+        if (str(c)).startswith("z3name!") or is_real(c):
+            continue
+        if is_array(c) or c.sort().kind() == Z3_UNINTERPRETED_SORT:
+            raise Z3Exception("arrays and uninterpreted sorts are not supported")
+        block.append(c != model[d])
+        #print(str(d) + " = " + str(m[d]))
+    if not block:
+        #input was an empty clafer model (no concretes)
+        return [[]]
+    solver.add(Or(block))
 
 def debug_print(string):
     '''

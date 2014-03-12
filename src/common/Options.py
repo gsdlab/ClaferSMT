@@ -79,6 +79,7 @@ UNIQUE_NAMES = False
 SHOW_INHERITANCE = False
 DELIMETER=""
 INDENTATION="  "
+MAGNIFYING_GLASS = False
 
 
 #MODULE = bracketedconstraint_this.getModule()
@@ -250,6 +251,7 @@ def setCommandLineOptions():
     parser.add_argument('--delimeter', default="", dest='delimeter', help='Delimeter between instances.')
     parser.add_argument('--indentation', dest='indentation', default='doublespace',
                        choices=['doublespace', 'tab'])
+    parser.add_argument('--magnifyingglass', default=False, dest='magnifying_glass',action='store_const',  const=True,  help='Print equally optimal solutions if optimizing.')
     args = parser.parse_args()
     if args.version:
         print("ClaferZ3 0.3.6.06-03-2014")
@@ -284,6 +286,8 @@ def setCommandLineOptions():
     STRING_CONSTRAINTS= args.stringconstraints
     global CNF
     CNF= args.cnf
+    global MAGNIFYING_GLASS
+    MAGNIFYING_GLASS= args.magnifying_glass
     global DIMACS_FILE
     DIMACS_FILE = args.dimacs
     global UNIQUE_NAMES

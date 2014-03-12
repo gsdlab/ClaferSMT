@@ -1,4 +1,5 @@
 
+from common.Common import preventSameModel
 from gia import consts
 from gia.GIALogs import GIALogging
 from time import time
@@ -30,7 +31,7 @@ class GuidedImprovementAlgorithmOptions(object):
          writeRandomSeedsFilename="randomseed.csv",  \
          exclude_variables_in_printout=[],\
          incrementallyprintparetopoints=False,
-         useCallLogs=False):
+         useCallLogs=False, num_models=-1, magnifying_glass=False):
         self.verbosity = verbosity
         self.useSummaryStatsFile = useSummaryStatsFile
         self.SummaryStatsFilename = SummaryStatsFilename
@@ -43,6 +44,8 @@ class GuidedImprovementAlgorithmOptions(object):
             self.logfile = open(self.writeLogFilename, "w")
         self.incrementallyprintparetopoints = incrementallyprintparetopoints
         self.writeRandomSeedsFilename = writeRandomSeedsFilename
+        self.magnifying_glass = magnifying_glass
+        self.num_models = num_models
         
         
                     
@@ -75,8 +78,38 @@ class GuidedImprovementAlgorithm(object):
         
         self.options.randomSeedsFil.close()
           
-        
-    def ExecuteGuidedImprovementAlgorithm(self, outfilename, max_models):
+    '''
+    CAUTION: REMOVED FUNCTIONALITY FOR OUTPUT E.G RECORDPOINT STUFF BELOW
+    '''
+    def genEquivalentSolutions(self, ParetoFront, point):
+        self.s.push()
+        equalConstraint = self.ConstraintEqualToX(point)
+        self.s.add(equalConstraint)
+        #print("in")
+        #print(self.s.check()==sat)
+        while(self.s.check() == sat and not(len(ParetoFront) == self.options.num_models)):
+            #print("in")
+            #count_sat_calls += 1
+#                 self.GIALogger.logEndCall(True, model = self.s.model(), statistics = self.s.statistics())                              
+            solution = self.s.model()
+            preventSameModel(self.s, solution)
+            ParetoFront.append(solution)
+            
+        self.s.pop()
+        return ParetoFront
+#           
+          
+
+    def addParetoPoints(self, ParetoFront, point):
+        if self.options.magnifying_glass:
+            self.s.pop()
+            self.genEquivalentSolutions(ParetoFront, point)
+            self.s.push()
+        else:
+            ParetoFront.append(point)
+        return ParetoFront
+
+    def ExecuteGuidedImprovementAlgorithm(self, outfilename):
         """ 
         Ran the Guided Improvement Algorithm.
         """
@@ -98,7 +131,9 @@ class GuidedImprovementAlgorithm(object):
             count_sat_calls += local_count_sat_calls
             count_unsat_calls += local_count_unsat_calls
             count_paretoPoints += 1
-            ParetoFront.append(FirstParetoPoint)
+            
+            ParetoFront = self.addParetoPoints(ParetoFront, FirstParetoPoint)
+            #ParetoFront.append(FirstParetoPoint)
             # RecordPoint
             strNextParetoPoint = list((d.name(), str(FirstParetoPoint[d])) for d in FirstParetoPoint.decls())
             if RECORDPOINT:
@@ -119,7 +154,7 @@ class GuidedImprovementAlgorithm(object):
 #             self.GIALogger.logStartCall(tmpNotDominatedByFirstParetoPoint)
             self.s.add(tmpNotDominatedByFirstParetoPoint)
             start_time = time()
-            while(self.s.check() == sat and not(len(ParetoFront) == max_models)):
+            while(self.s.check() == sat and not(len(ParetoFront) == self.options.num_models)):
                 count_sat_calls += 1
 #                 self.GIALogger.logEndCall(True, model = self.s.model(), statistics = self.s.statistics())                              
                 prev_solution = self.s.model()
@@ -129,7 +164,9 @@ class GuidedImprovementAlgorithm(object):
                 count_sat_calls += local_count_sat_calls
                 count_unsat_calls += local_count_unsat_calls
                 count_paretoPoints += 1
-                ParetoFront.append(NextParetoPoint)
+                #ParetoFront.append(NextParetoPoint)
+                ParetoFront = self.addParetoPoints(ParetoFront, NextParetoPoint)
+                
                 # RecordPoint
                 strNextParetoPoint = list((d.name(), str(FirstParetoPoint[d])) for d in FirstParetoPoint.decls())
                 if RECORDPOINT:
@@ -315,7 +352,7 @@ class GuidedImprovementAlgorithm(object):
 #             if self.verbosity > consts.VERBOSE_NONE:
 #                 self.print_solution(prev_solution)
             prev_solution = self.s.model()     
-            tmpConstraintMustDominateX = self.ConstraintMustDominatesX(prev_solution)      
+            tmpConstraintMustDominateX = self.ConstraintMustDominatesX(prev_solution)
             self.s.add(tmpConstraintMustDominateX)
             self.GIALogger.logStartCall(tmpConstraintMustDominateX)
         local_count_unsat_calls += 1
@@ -336,6 +373,18 @@ class GuidedImprovementAlgorithm(object):
             else :
                 DisjunctionOrLessMetrics.append(self.metrics_variables[i] <  model.eval(self.metrics_variables[i]))#model[self.metrics_variables[i]])
         return Or(DisjunctionOrLessMetrics)
+
+
+    def ConstraintEqualToX(self, model):
+        """
+        Returns a Constraint that a  new instance, can't be dominated by the instance represented by model. 
+        (it can't be worst in any objective).
+        """
+        EqualMetrics  = list()
+        for i in range(len(self.metrics_variables)):
+            EqualMetrics.append(self.metrics_variables[i] ==  model.eval(self.metrics_variables[i]))
+        return And(EqualMetrics)
+
 
     # add for EPOAL
 
