@@ -22,6 +22,7 @@ def load(file):
     module = file.getModule()
     z3 = Z3Instance(module)
     z3.run()
+    
 def main(args):
     '''
     :param args: Python output file of the Clafer compiler. Generated with argument "-m python".

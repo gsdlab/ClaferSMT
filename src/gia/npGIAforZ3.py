@@ -81,32 +81,40 @@ class GuidedImprovementAlgorithm(object):
     '''
     CAUTION: REMOVED FUNCTIONALITY FOR OUTPUT E.G RECORDPOINT STUFF BELOW
     '''
-    def genEquivalentSolutions(self, ParetoFront, point):
+    def genEquivalentSolutions(self, point, count):
         self.s.push()
+        equivalentSolutions = []
         equalConstraint = self.ConstraintEqualToX(point)
         self.s.add(equalConstraint)
+        #print(count)
+        preventSameModel(self.s, point)
         #print(self.s.check()==sat)
-        while(self.s.check() == sat and not(len(ParetoFront) == self.options.num_models)):
+        while(self.s.check() == sat and not(len(equivalentSolutions) + count == self.options.num_models)):
             #print("in")
             #count_sat_calls += 1
 #                 self.GIALogger.logEndCall(True, model = self.s.model(), statistics = self.s.statistics())                              
             solution = self.s.model()
             preventSameModel(self.s, solution)
-            ParetoFront.append(solution)
+            equivalentSolutions.append(solution)
             
         self.s.pop()
-        return ParetoFront
+        return equivalentSolutions
 #           
           
 
     def addParetoPoints(self, ParetoFront, point):
-        if self.options.magnifying_glass:
-            self.s.pop()
-            self.genEquivalentSolutions(ParetoFront, point)
-            self.s.push()
-        else:
-            ParetoFront.append(point)
+        ParetoFront.append(point)
         return ParetoFront
+
+
+    def replicateSolver(self, solver, num_consumers):
+        solvers = []
+        for i in range(num_consumers):
+            newSolver =Solver()
+            for j in solver.assertions():
+                newSolver.add(j)
+            solvers.append(newSolver)
+        return solvers   
 
     def ExecuteGuidedImprovementAlgorithm(self, outfilename):
         """ 
@@ -119,6 +127,8 @@ class GuidedImprovementAlgorithm(object):
         start_time = time()
         count_sat_calls = 0
         count_unsat_calls = 0
+        if self.options.magnifying_glass:
+            self.s.push()
         #self.GIALogger.logStartCall()
         if self.s.check() == sat:
             count_sat_calls += 1
@@ -193,57 +203,12 @@ class GuidedImprovementAlgorithm(object):
             #self.GIALogger.logEndCall(False, statistics = self.s.statistics())            
             
         end_time = time()
-        if OUTPUT_PARETO_FRONT:
-            #         print count_paretoPoints, count_sat_calls, count_sat_calls, end_time - start_time
-            outputFile2 = open("ERS_ParetoFront.csv", 'a')
-            ParetoPointsList2 = []
-            try:
-                for paretopoint in ParetoFront:
-                    strParetoPoint = list((d.name(), str(paretopoint[d])) for d in paretopoint.decls())
-                    dict = {}
-                    for item in strParetoPoint:
-                        if( item[0] == 'total_batteryusage' or item[0] == 'total_cost' or item[0] == 'total_deploymenttime' or
-                            item[0] == 'total_developmenttime' or item[0] == 'total_rampuptime' or item[0] == 'total_reliability' or
-                            item[0] == 'total_responsetime' ):
-                            # print item
-                            outputFile2.writelines(str(item) + ';')
-                            dict[str(item[0])] = str(item[1])
-                    ParetoPointsList2.append(dict)
-                    outputFile2.writelines('\n')
-            finally:
-                outputFile2.close()
-            
-            totalpoints = count_paretoPoints
-            for i in range(len(ParetoPointsList2)):
-                isDominated = False
-                for j in range(i+1, len(ParetoPointsList2)):
-                        strlist1 = ParetoPointsList2[i]['total_reliability'].split("/")
-                        #print strlist1
-                        strlist2 = ParetoPointsList2[j]['total_reliability'].split("/")
-                        #print strlist2
-                        if (int(ParetoPointsList2[i]['total_cost']) >= int(ParetoPointsList2[j]['total_cost']) and 
-                            int(ParetoPointsList2[i]['total_responsetime']) >= int(ParetoPointsList2[j]['total_responsetime']) and
-                            int(ParetoPointsList2[i]['total_batteryusage']) >= int(ParetoPointsList2[j]['total_batteryusage']) and 
-                            int(ParetoPointsList2[i]['total_deploymenttime']) >= int(ParetoPointsList2[j]['total_deploymenttime']) and 
-                            int(ParetoPointsList2[i]['total_developmenttime']) >= int(ParetoPointsList2[j]['total_developmenttime']) and
-                            int(ParetoPointsList2[i]['total_rampuptime']) >= int(ParetoPointsList2[j]['total_rampuptime']) and
-                            # precision of reliability is 1/1000 
-                            round(float(strlist1[0])/float(strlist1[1]),12) >= round(float(strlist2[0])/float(strlist2[1]), 12)):
-                            isDominated = True
-        #                     print str(i) + " dominated by " + str(j)
-        #                     print str(int(ParetoPointsList2[i]['total_cost'])) + " cost >=" + str(int(ParetoPointsList2[j]['total_cost']))
-        #                     print str(int(ParetoPointsList2[i]['total_responsetime'])) + "response >=" + str(int(ParetoPointsList2[j]['total_responsetime']))
-        #                     print str(int(ParetoPointsList2[i]['total_batteryusage'])) + "battery >=" + str(int(ParetoPointsList2[j]['total_batteryusage']))
-        #                     print str(int(ParetoPointsList2[i]['total_deploymenttime'])) + "deploy >=" + str(int(ParetoPointsList2[j]['total_deploymenttime']))
-        #                     print str(int(ParetoPointsList2[i]['total_developmenttime'])) + "develp >=" + str(int(ParetoPointsList2[j]['total_developmenttime']))
-        #                     print str(int(ParetoPointsList2[i]['total_rampuptime'])) + "rampup >=" + str(int(ParetoPointsList2[j]['total_rampuptime']))
-        #                     print str(strlist1[0]) + "/" + str(strlist1[1])  + "reliability >=" + str(strlist2[0]) + "/" + str(strlist2[1])
-        #                     print str(round(float(strlist1[0])/float(strlist1[1]),3)) +"reliability >=" + str(round(float(strlist2[0])/float(strlist2[1]), 3))
-                            break;
-                if isDominated == True: 
-                    totalpoints -= 1   
-            print(totalpoints)
         
+        if self.options.magnifying_glass:
+            self.s.pop()
+            for i in ParetoFront:
+                equivalentSolutions = self.genEquivalentSolutions(i, len(ParetoFront))
+                ParetoFront = ParetoFront + equivalentSolutions
         
         
 #         print count_paretoPoints, count_sat_calls, count_sat_calls, end_time - start_time

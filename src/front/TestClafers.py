@@ -37,7 +37,7 @@ SEPARATOR = "========================================================"
 def print_separate(x):
     print("\n" + SEPARATOR + "\n| " + x + "\n" +  SEPARATOR + "\n")
 
-def getTestSet():
+def getTestSet():   
     if Options.TEST_SET == Options.MY_TESTS:
         return my_tests
     elif Options.TEST_SET == Options.POSITIVE_TESTS:
