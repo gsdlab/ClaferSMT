@@ -349,7 +349,16 @@ class GuidedImprovementAlgorithm(object):
             EqualMetrics.append(self.metrics_variables[i] ==  model.eval(self.metrics_variables[i]))
         return And(EqualMetrics)
 
-
+    def get_metric_values(self, model):
+        metrics  = list()
+        for i in range(len(self.metrics_variables)):
+            strval = str(model.eval(self.metrics_variables[i]))
+            try:
+                val = int(strval)
+            except:
+                val = float(strval)
+            metrics.append(val)
+        return metrics
     # add for EPOAL
 
     def EtractConstraintListNotDominatedByX(self, model):

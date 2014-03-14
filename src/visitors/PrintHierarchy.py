@@ -44,6 +44,9 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
         self.z3 = z3
         self.model = model
         self.tree = SimpleTree()
+        self.pickledInstance = []
+    
+    
     
     def findEndRef(self, node):
         #print("A" + str(node))
@@ -78,7 +81,9 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                 return None
             else:
                 (_, node) =  node
-            
+       
+    def get_pickled(self):
+        return '\n'.join(self.pickledInstance)      
         
     def show_inheritance(self, sort):
         '''
@@ -93,6 +98,12 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
         else:
             return ""
         
+    def instance_print(self, str):
+        if Options.CORES == 1:
+            print(str)
+        else:
+            self.pickledInstance.append(str)
+            
         
     def recursivePrint(self, node, level, thisIsAbstract=False):
         #print(node)
@@ -116,7 +127,7 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
             else:
                 ref = ""
             
-            print(indent + nodeStr + self.show_inheritance(sort) + ref)
+            self.instance_print(indent + nodeStr + self.show_inheritance(sort) + ref)
         if abs_ref:
             (_, real_abs_ref) = abs_ref
             self.recursivePrint(real_abs_ref, level, True)

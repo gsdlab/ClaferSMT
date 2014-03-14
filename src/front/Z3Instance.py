@@ -11,6 +11,7 @@ from common.Exceptions import UnusedAbstractException
 from constraints import Constraints, IsomorphismConstraint
 from front import Z3Str, Converters
 from front.Converters import DimacsConverter
+from gia import SplitGIA
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
@@ -210,16 +211,20 @@ class Z3Instance(object):
             print(str(e))
             return 0
         
-    def printVars(self, model):
-        self.clock.tick("printing")
-        #if Common.MODE == Common.REPL:
-        #    pass
+        
+    def printDelimeter(self):
         if Options.DELIMETER == "":
             standard_print("=== Instance " + str(Common.DELIMETER_COUNT+1) + " ===")
             Common.DELIMETER_COUNT = Common.DELIMETER_COUNT + 1
             standard_print("")
         else:
             standard_print(Options.DELIMETER)
+            
+    def printVars(self, model):
+        self.clock.tick("printing")
+        #if Common.MODE == Common.REPL:
+        #    pass
+        self.printDelimeter()
             
         ph = PrintHierarchy.PrintHierarchy(self, model)
         Visitor.visit(ph, self.module)
@@ -334,17 +339,26 @@ class Z3Instance(object):
             incrementallyWriteLog=False, \
             writeTotalTimeFilename="timefile.csv", \
             writeRandomSeedsFilename="randomseed.csv", useCallLogs=False, num_models=desired_number_of_models, magnifying_glass=Options.MAGNIFYING_GLASS)    
-        GIAAlgorithmNP = GuidedImprovementAlgorithm(self.solver, metrics_variables, \
-                metrics_objective_direction, [], options=GIAOptionsNP) 
-        '''featurevars instead of []'''
-        outfilename = str("giaoutput").strip()#"npGIA_" + str(sys.argv[1]).strip() + ".csv"
-
-        ParetoFront = GIAAlgorithmNP.ExecuteGuidedImprovementAlgorithm(outfilename)
-        count = 0
-        for i in ParetoFront:
-            self.printVars(i)
+        if Options.CORES == 1:
+            GIAAlgorithmNP = GuidedImprovementAlgorithm(self.solver, metrics_variables, \
+                    metrics_objective_direction, [], options=GIAOptionsNP) 
+            '''featurevars instead of []'''
+            outfilename = str("giaoutput").strip()#"npGIA_" + str(sys.argv[1]).strip() + ".csv"
+    
+            ParetoFront = GIAAlgorithmNP.ExecuteGuidedImprovementAlgorithm(outfilename)
+            for i in ParetoFront:
+                self.printVars(i)
             #count = count + 1
-        return ParetoFront
+            return ParetoFront
+        else:
+            splitGIA = SplitGIA.SplitGIA(self, self.solver, metrics_variables, metrics_objective_direction)
+            ParetoFront = splitGIA.run()   
+            for i in ParetoFront:
+                self.printDelimeter()
+                print(i)
+            return ParetoFront
+            
+        
     
     
     

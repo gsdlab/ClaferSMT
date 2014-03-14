@@ -63,6 +63,14 @@ DELIMETER=""
 INDENTATION="  "
 MAGNIFYING_GLASS = False
 
+''' parallel options '''
+CORES=1
+
+SAP=1
+SPLIT=SAP
+SERVER=""
+SERVICE=""
+NUM_SPLIT=1
 
 #MODULE = bracketedconstraint_this.getModule()
 #MODULE = multiple_joins.getModule()
@@ -156,16 +164,22 @@ def setCommandLineOptions():
     parser.add_argument('--globalscope', '-g', dest='globalscope', type=int, default='1', help='the global scope for unbounded clafers (note that this does not match regular clafer)')
     parser.add_argument('--testset', '-t', dest='testset', default='edstests', help='The test set to be used for modes [experiment | test | one | all]',
                         choices=['edstests', 'positive', 'string'])
-    parser.add_argument('--stringconstraints' , '-s', default=False, dest='stringconstraints',action='store_const',  const=True,  help='Flag to output to Z3-Str format instead.')
+    parser.add_argument('--stringconstraints' , '-s', default=False, dest='stringconstraints',action='store_const',  const=True,  help='Flag to output to Z3-Str format instead')
     parser.add_argument('--cnf', default=False, dest='cnf',action='store_const',  const=True,  help='Outputs CNF of formula.')
-    parser.add_argument('--dimacs', default="dimacs", dest='dimacs', help='Output DIMACS.')
-    parser.add_argument('--printuniquenames', '-u', default=False, dest='unique_names',action='store_const',  const=True,  help='Print clafers with unique prefixes.')
-    parser.add_argument('--showinheritance', default=False, dest='show_inheritance',action='store_const',  const=True,  help='Show super-clafers explicitly.')
+    parser.add_argument('--dimacs', default="dimacs", dest='dimacs', help='Output DIMACS')
+    parser.add_argument('--printuniquenames', '-u', default=False, dest='unique_names',action='store_const',  const=True,  help='Print clafers with unique prefixes')
+    parser.add_argument('--showinheritance', default=False, dest='show_inheritance',action='store_const',  const=True,  help='Show super-clafers explicitly')
     parser.add_argument('--version', '-v', default=False, dest='version',action='store_const',  const=True,  help='Print version number.')
     parser.add_argument('--delimeter', default="", dest='delimeter', help='Delimeter between instances.')
-    parser.add_argument('--indentation', dest='indentation', default='doublespace',
-                       choices=['doublespace', 'tab'])
-    parser.add_argument('--magnifyingglass', default=False, dest='magnifying_glass',action='store_const',  const=True,  help='Print equally optimal solutions if optimizing.')
+    parser.add_argument('--indentation', dest='indentation', default='doublespace', choices=['doublespace', 'tab'])
+    parser.add_argument('--magnifyingglass', default=False, dest='magnifying_glass',action='store_const',  const=True,  help='Print equally optimal solutions if optimizing')
+    
+    parser.add_argument('--cores', '-c', dest='cores', type=int, default='1', help='the number of cores for parallel processing')
+    parser.add_argument('--server', default="Server", dest='server', help='The name of the Server clafer in SAP problems (used for parallelization)')
+    parser.add_argument('--service', default="Service", dest='service', help='The name of the Service clafer in SAP problems (used for parallelization)')
+    parser.add_argument('--split', dest='split', default='SAP', choices=['SAP'])
+    parser.add_argument('--numsplit', dest='numsplit', type=int, default='-1', help='The number of splits to perform (default = #cores)')
+    
     args = parser.parse_args()
     if args.version:
         print("ClaferZ3 0.3.6.06-03-2014")
@@ -210,9 +224,25 @@ def setCommandLineOptions():
     SHOW_INHERITANCE = args.show_inheritance
     global DELIMETER
     DELIMETER = args.delimeter
+    global CORES
+    CORES = args.cores
     global INDENTATION
     if args.indentation == "tab":
         INDENTATION = "\t"
+    global SERVER
+    SERVER = args.server
+    global SERVICE
+    SERVICE = args.service
+    global SPLIT
+    if args.split == "SAP":
+        SPLIT=SAP
+    global NUM_SPLIT
+    if args.numsplit == -1:
+        NUM_SPLIT = CORES
+    else:
+        NUM_SPLIT = args.numsplit
+        
+    
     
 
 
