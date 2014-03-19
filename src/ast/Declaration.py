@@ -20,3 +20,6 @@ class Declaration(object):
     
     def toString(self, level):
         print("A")
+        
+    def __repr__(self):
+        return self.__str__()

@@ -205,7 +205,7 @@ class Z3Instance(object):
             self.clock.tock("translation")
             models = self.get_models(Options.NUM_INSTANCES)
             
-            self.clock.printEvents()
+            #self.clock.printEvents()
             return len(models)
         except UnusedAbstractException as e:
             print(str(e))
@@ -351,7 +351,7 @@ class Z3Instance(object):
             #count = count + 1
             return ParetoFront
         else:
-            splitGIA = SplitGIA.SplitGIA(self, self.solver, metrics_variables, metrics_objective_direction)
+            splitGIA = SplitGIA.SplitGIA(self, self.module, self.solver, metrics_variables, metrics_objective_direction)
             ParetoFront = splitGIA.run()   
             for i in ParetoFront:
                 self.printDelimeter()

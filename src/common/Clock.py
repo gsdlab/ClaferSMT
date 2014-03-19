@@ -103,3 +103,11 @@ class Clock():
             return
         for i in self.completed_event_map.keys():
             self.printEvent(i)
+    
+    def __str__(self):
+        retstr = []
+        for i in self.completed_event_map.keys():
+            eventTime = self.completed_event_map[i]
+            retstr.append(i + ": " + str(eventTime))
+        return "\n".join(retstr)
+            

@@ -40,6 +40,9 @@ class Clafer(object):
     def __str__(self):
         return self.uid
     
+    def __repr__(self):
+        return self.__str__()
+    
     def toString(self, level):
         self.uid.split("_",1)[1]
         

@@ -22,3 +22,6 @@ class Goal(object):
     
     def toString(self, level):
         print("Goal")
+        
+    def __repr__(self):
+        return str(self)

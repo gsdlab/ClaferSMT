@@ -7,8 +7,10 @@ Created on Nov 21, 2013
 
 
 from common import Options
-from gia import consts
+from common.Clock import Clock
+from gia import consts, Consumer
 from gia.consts import METRICS_MINIMIZE, METRICS_MAXIMIZE
+from gia.heuristics.SAP import SAP
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from visitors import PrintHierarchy, Visitor
@@ -21,6 +23,7 @@ import math
 import multiprocessing
 import operator
 import os
+import random
 import sys
 import time
 
@@ -30,89 +33,7 @@ import time
 #from Z3ModelEmergencyResponseUpdateAllMin import *
 #from Z3ModelWebPortal import *
 
-RECORDPOINT = False
 
-class Consumer(multiprocessing.Process):
-    def __init__(self, task_queue, result_queue, z3, totalTime, index, outputFileParentName, num_consumers, s, metrics_variables, metrics_objective_direction, extraConstraint):
-        multiprocessing.Process.__init__(self)
-        self.task_queue = task_queue
-        self.result_queue = result_queue
-#         self.CurrentNotDomConstraints_queuelist = CurrentNotDomConstraints_queuelist
-        self.totalTime = totalTime 
-        self.z3 = z3
-        self.index = index
-        self.outputFileParentName = outputFileParentName
-        self.num_consumers = num_consumers
-        self.ParetoFront = []
-        self.GIAOptions = GuidedImprovementAlgorithmOptions(verbosity=0, \
-                        incrementallyWriteLog=False, \
-                        writeTotalTimeFilename="timefile.csv", \
-                        writeRandomSeedsFilename="randomseed.csv", useCallLogs=False)    
-        ''' add extra constraint'''
-        #print extraConstraint
-        s.add(extraConstraint)
-        
-        self.GIAAlgorithm = GuidedImprovementAlgorithm(s, metrics_variables, \
-                    metrics_objective_direction, [], options=self.GIAOptions)
-        
-        self.count_sat_calls = 0
-        self.count_unsat_calls = 0
-        self.count_paretoPoints = 0
-        self.startTime = time.time()
-        
-    def addParetoPoints(self, point):
-        self.ParetoFront.append(point)
-          
-    def model_to_string(self, model):
-        ph = PrintHierarchy.PrintHierarchy(self.z3, model)
-        Visitor.visit(ph, self.z3.module)
-        ph.printTree()
-        return ph.get_pickled()
-            
-    def run(self):
-        num_solutions = 0
-        while True:
-            if self.task_queue[self.index].empty() == True:
-                break
-            else:
-                next_task = self.task_queue[self.index].get(False)
-                if next_task is None or (num_solutions == self.options.num_models):
-                    self.task_queue[self.index].task_done()
-                    self.totalTime.put(str(time.time()-self.startTime))
-                    self.result_queue.put("Done")
-                    
-                    
-                    break
-                
-            
-                if self.GIAAlgorithm.s.check() != sat:
-                    self.count_unsat_calls += 1
-                    self.task_queue[self.index].put(None)
-                else:
-                    self.count_sat_calls += 1
-                    self.task_queue[self.index].put("Task")      
-                    prev_solution = self.GIAAlgorithm.s.model()
-                    self.GIAAlgorithm.s.push()
-                    NextParetoPoint, local_count_sat_calls, local_count_unsat_calls = self.GIAAlgorithm.ranToParetoFront(prev_solution)
-                    self.addParetoPoints(NextParetoPoint)
-                    metric_values = self.GIAAlgorithm.get_metric_values(NextParetoPoint)
-                    self.result_queue.put((self.model_to_string(NextParetoPoint), metric_values))
-                    #print(self.ParetoFront)
-                    
-                    end_time = time.time()
-                    self.count_sat_calls += local_count_sat_calls
-                    self.count_unsat_calls += local_count_unsat_calls
-                    self.count_paretoPoints += 1
-                 
-                    self.GIAAlgorithm.s.pop()
-                    tmpNotDominatedByNextParetoPoint = self.GIAAlgorithm.ConstraintNotDominatedByX(NextParetoPoint)
-                    self.GIAAlgorithm.s.add(tmpNotDominatedByNextParetoPoint)
-                    
-                    # picklize and store Pareto point and constraints
-                    strNextParetoPoint = list((d.name(), str(NextParetoPoint[d])) for d in NextParetoPoint.decls())
-                    self.task_queue[self.index].task_done()
-                    num_solutions = num_solutions +  1
-        return 0
 
 
 def replicateSolver(solver, num_consumers):
@@ -140,57 +61,50 @@ def getZ3Feature(feature, expr):
     return []
 
 class SplitGIA():
-    def __init__(self, z3, solver, metrics_variables, metrics_objective_direction):
-        self.consumerConstraints = self.splitter()
+    def __init__(self, z3, module, solver, metrics_variables, metrics_objective_direction):
+        self.z3 = z3
+        self.module = module
         self.solvers = replicateSolver(solver, Options.CORES)
         self.metrics_variables = metrics_variables
         self.metrics_objective_direction = metrics_objective_direction
-        self.z3 = z3
+        self.clock = Clock()
+        self.consumerConstraints = self.splitter()
     
     def run(self):
-        outfile = "out"
         mgr = multiprocessing.Manager()
-        taskQueue = []
-        for i in range(Options.CORES):
-            taskQueue.append(mgr.Queue())
+        taskQueue = mgr.Queue()
+        #for i in range(Options.CORES):
+        #    taskQueue.append(mgr.Queue())
         ParetoFront = mgr.Queue()
         totalTime = mgr.Queue()
         
         # Enqueue initial tasks
+        for i in range(Options.NUM_SPLIT):
+            taskQueue.put(i)
         for i in range(Options.CORES):
-            taskQueue[i].put("Task")
+            taskQueue.put("Poison")
         
         # Start consumers
-        self.consumers = [ Consumer(taskQueue, ParetoFront, self.z3, totalTime, i, "out", Options.CORES, j, self.metrics_variables, self.metrics_objective_direction, k)
-                        for i,j,k in zip(range(Options.CORES), self.solvers,  self.consumerConstraints)]
+        self.consumers = [ Consumer.Consumer(taskQueue, ParetoFront, self.z3, totalTime, i, "out", Options.CORES, j, self.metrics_variables, self.metrics_objective_direction, self.consumerConstraints)
+                        for i,j in zip(range(Options.CORES), self.solvers)]
         
+        self.clock.tick("SplitGIA")
         for w in self.consumers:
             w.start()            
         for w in self.consumers:
             w.join()  
-        
-        runningtime = 0.0
-        
-        while totalTime.qsize() > 0:
-            time = totalTime.get()
-            if (float(time) > runningtime): 
-                runningtime = float(time)
-        
         num_jobs = Options.CORES
-        
         results = []
-        while num_jobs != 0:
+        
+        
+        
+        while not ParetoFront.empty():
             result = ParetoFront.get()
-            try:
-                if result == "Done":
-                    num_jobs = num_jobs - 1
-                    continue
-            except:
-                pass
             results.append(result)
-            #print ("\n INSTANCE: \n\n" + str(result))
-        #print(results)
-        return self.merge(results)
+        merged_results = self.merge(results)
+        self.clock.tock("SplitGIA")
+        self.clock.printEvents()
+        return merged_results
         
         
     def merge(self, results):
@@ -234,13 +148,20 @@ class SplitGIA():
             if not i:
                 nonDominated.append(results[i])
         return nonDominated
-                    
+                 
     
     def splitter(self):
         if Options.SPLIT == Options.SAP:
-            return [True for _ in range(Options.CORES)]
+            
+            server =  self.z3.getSort("c0_" + Options.SERVER)
+            service = self.z3.getSort("c0_" + Options.SERVICE)
+            sap = SAP(self.solvers[0], server, service)
+            jobs = sap.random_unique_service_random_server()
+            jobs = sap.random_unique_service_random_server_range()
+            jobs = sap.turn_off_servers(self.module)
+            return jobs
         else: 
-            return [True for _ in Options.CORES]
+            return [True for _ in range(Options.NUM_SPLIT)]
     
     
     

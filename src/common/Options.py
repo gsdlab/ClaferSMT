@@ -6,9 +6,9 @@ Created on Oct 6, 2013
 
 from common import Common
 from optparse import OptionParser
-
 import argparse
 import sys
+
 
 
 
@@ -67,6 +67,7 @@ MAGNIFYING_GLASS = False
 CORES=1
 
 SAP=1
+NO_SPLIT=2
 SPLIT=SAP
 SERVER=""
 SERVICE=""
@@ -127,7 +128,6 @@ NUM_SPLIT=1
 #MODULE = maximize.getModule()
 #MODULE = two_objective_min.getModule()
 #MODULE = two_objective_max.getModule()
-MODULE=""
 '''
 MODULE = cc_examplemod.getModule()
 
@@ -177,7 +177,7 @@ def setCommandLineOptions():
     parser.add_argument('--cores', '-c', dest='cores', type=int, default='1', help='the number of cores for parallel processing')
     parser.add_argument('--server', default="Server", dest='server', help='The name of the Server clafer in SAP problems (used for parallelization)')
     parser.add_argument('--service', default="Service", dest='service', help='The name of the Service clafer in SAP problems (used for parallelization)')
-    parser.add_argument('--split', dest='split', default='SAP', choices=['SAP'])
+    parser.add_argument('--split', dest='split', default='NO_SPLIT', choices=['SAP', 'NO_SPLIT'])
     parser.add_argument('--numsplit', dest='numsplit', type=int, default='-1', help='The number of splits to perform (default = #cores)')
     
     args = parser.parse_args()
@@ -236,6 +236,8 @@ def setCommandLineOptions():
     global SPLIT
     if args.split == "SAP":
         SPLIT=SAP
+    else:
+        SPLIT=NO_SPLIT
     global NUM_SPLIT
     if args.numsplit == -1:
         NUM_SPLIT = CORES
