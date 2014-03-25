@@ -354,6 +354,7 @@ class Z3Instance(object):
             splitGIA = SplitGIA.SplitGIA(self, self.module, self.solver, metrics_variables, metrics_objective_direction)
             ParetoFront = splitGIA.run()   
             for i in ParetoFront:
+                print("A")
                 self.printDelimeter()
                 print(i)
             return ParetoFront
@@ -366,6 +367,7 @@ class Z3Instance(object):
     def standard_get_models(self, desired_number_of_models):
         result = []
         count = 0
+        print("A")
         #print(self.solver.sexpr())
         self.clock.tick("first model")
         while True:
@@ -380,8 +382,9 @@ class Z3Instance(object):
                 #print(m)
                 result.append(m)
                 # Create a new constraint that blocks the current model
-            
+                print(m)
                 if not Common.MODE == Common.TEST and not Common.MODE == Common.EXPERIMENT:
+                    print("B")
                     self.printVars(m)
                 if Options.GET_ISOMORPHISM_CONSTRAINT:
                     IsomorphismConstraint.IsomorphismConstraint(self, m).createIsomorphicConstraint()
