@@ -8,7 +8,7 @@ from common.Clock import Clock
 from common.Options import INFINITE
 from front.Z3Instance import Z3Instance
 
-from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
+'''from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     this_dot_parent, arithmetic, relations, boolean_connectives, union, \
     simple_abstract, some, simple_set, integer_refs, higher_inheritance, \
     this_integer_relation, equal_references, all_alls, all_threes, zoo, \
@@ -25,7 +25,7 @@ from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     AADL_simplified_with_lists, teststring, testunion, simple_real, Phone, \
     int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max, \
     Cruise, small, cc_examplemod
-
+'''
 import sys
 import traceback
 
@@ -124,7 +124,7 @@ def runForAll():
     and outputs all model for each, if satisfiable (limited if infinite models).
     '''
     runAndOutputModels()
-   
+'''
 my_tests = [ 
           (multiple_joins, 1),
           (bracketedconstraint_this, 6),
@@ -194,3 +194,4 @@ string_tests = [
                 (i40textequality, 1),
                 (subtypingprimitivetypes, 1)
                 ]
+'''
