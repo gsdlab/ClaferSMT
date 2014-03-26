@@ -8,11 +8,12 @@ Created on Nov 21, 2013
 
 from common import Options
 from common.Clock import Clock
-from gia import consts, Consumer
+from gia import consts
 from gia.consts import METRICS_MINIMIZE, METRICS_MAXIMIZE
-from gia.heuristics.SAP import SAP
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
+from parallel import Consumer
+from parallel.heuristics import SAP
 from visitors import PrintHierarchy, Visitor
 from z3 import *
 import argparse
@@ -26,6 +27,8 @@ import os
 import random
 import sys
 import time
+
+
 
 
 
@@ -60,7 +63,7 @@ def getZ3Feature(feature, expr):
     
     return []
 
-class SplitGIA():
+class ParSolver():
     def __init__(self, z3, module, solver, metrics_variables, metrics_objective_direction):
         self.z3 = z3
         self.module = module
@@ -75,7 +78,7 @@ class SplitGIA():
         taskQueue = mgr.Queue()
         #for i in range(Options.CORES):
         #    taskQueue.append(mgr.Queue())
-        ParetoFront = mgr.Queue()
+        solutions = mgr.Queue()
         totalTime = mgr.Queue()
         
         # Enqueue initial tasks
@@ -84,11 +87,18 @@ class SplitGIA():
         for i in range(Options.CORES):
             taskQueue.put("Poison")
         
-        # Start consumers
-        self.consumers = [ Consumer.Consumer(taskQueue, ParetoFront, self.z3, totalTime, i, "out", Options.CORES, j, self.metrics_variables, self.metrics_objective_direction, self.consumerConstraints)
-                        for i,j in zip(range(Options.CORES), self.solvers)]
+        # Start consumers 
+        #case: objectives
+        if self.metrics_variables:
+            self.consumers = [ Consumer.GIAConsumer(taskQueue, solutions, self.z3, totalTime, i, "out", Options.CORES, j, self.metrics_variables, self.metrics_objective_direction, self.consumerConstraints)
+                            for i,j in zip(range(Options.CORES), self.solvers)]
+        #case: no objectives
+        else:
+            self.consumers = [ Consumer.StandardConsumer(taskQueue, solutions, self.z3, totalTime, i, "out", Options.CORES, j, self.consumerConstraints)
+                            for i,j in zip(range(Options.CORES), self.solvers)]
         
-        self.clock.tick("SplitGIA")
+        
+        self.clock.tick("ParSolver")
         for w in self.consumers:
             w.start()            
         for w in self.consumers:
@@ -96,21 +106,23 @@ class SplitGIA():
         num_jobs = Options.CORES
         results = []
         
-        
-        
-        while not ParetoFront.empty():
-            result = ParetoFront.get()
+        while not solutions.empty():
+            result = solutions.get()
             results.append(result)
         merged_results = self.merge(results)
-        self.clock.tock("SplitGIA")
+        #print(merged_results)
+        self.clock.tock("ParSolver")
         self.clock.printEvents()
         return merged_results
         
         
     def merge(self, results):
+        if self.metrics_variables:
+            results = self.removeDominatedAndEqual(results)
+            return [i for (i,_) in results]
+        else:
+            return list(set(results))
         
-        results = self.removeDominatedAndEqual(results)
-        return [i for (i,_) in results]
         
     def checkDominated(self, l, r):
         worseInOne = False
@@ -148,6 +160,8 @@ class SplitGIA():
             if not i:
                 nonDominated.append(results[i])
         return nonDominated
+    
+            
                  
     
     def splitter(self):

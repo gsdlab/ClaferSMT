@@ -11,9 +11,9 @@ from common.Exceptions import UnusedAbstractException
 from constraints import Constraints, IsomorphismConstraint
 from front import Z3Str, Converters
 from front.Converters import DimacsConverter
-from gia import SplitGIA
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
+from parallel import ParSolver
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
     SetScopes, AdjustAbstracts, CheckForGoals
@@ -252,14 +252,6 @@ class Z3Instance(object):
         self.join_constraints.debug_print()
         for i in self.z3_bracketed_constraints:
             i.debug_print()
-            
-    
-    
-    def pick_loop(self, desired_number_of_models):
-        if not self.objectives:
-            return self.standard_get_models(desired_number_of_models)
-        else:
-            return self.GIA(desired_number_of_models)
         
     def print_repl_help(self):
         print("n -- get next model")
@@ -279,47 +271,11 @@ class Z3Instance(object):
     '''crude repl'''
     def get_models(self, desired_number_of_models):
         if Common.MODE == Common.REPL:
-            from front.Z3Run import load
-            if Common.FIRST_REPL_LOOP:
-                models = self.pick_loop(1)
-                if not models:
-                    print("No more instances")
-            while True:
-                ch = input("ClaferZ3 > ")
-                #print(ch)
-                ch = ch.strip()
-                if ch == 'n':
-                    models = self.pick_loop(1)
-                    if not models:
-                        print("No more instances")
-                elif ch == 'r':
-                    load(Options.FILE)
-                elif ch.startswith('i'):
-                    args = ch.split()
-                    if self.check_repl_input(args):
-                        inc = int(args[1])
-                        Options.GLOBAL_SCOPE = Options.GLOBAL_SCOPE + inc
-                        print("Global scope increased to " + str(Options.GLOBAL_SCOPE))
-                        Common.FIRST_REPL_LOOP = False
-                        load(Options.FILE)
-                elif ch.startswith('s'):
-                    args = ch.split()
-                    if self.check_repl_input(args):
-                        scope = int(args[1])
-                        Options.GLOBAL_SCOPE = scope
-                        print("Global scope set to " + str(Options.GLOBAL_SCOPE))
-                        Common.FIRST_REPL_LOOP = False
-                        load(Options.FILE)
-                elif ch == 'q':
-                    sys.exit()
-                elif ch == 'h':
-                    self.print_repl_help()
-                else:
-                    print("Type h for help")
-            
-            
+            self.repl()
+        elif Options.CORES == 1 and not self.objectives:
+            return self.standard_get_models(desired_number_of_models)
         else:
-            return self.pick_loop(desired_number_of_models)
+            return self.GIA(desired_number_of_models)
         
     
     def GIA(self, desired_number_of_models):
@@ -351,23 +307,17 @@ class Z3Instance(object):
             #count = count + 1
             return ParetoFront
         else:
-            splitGIA = SplitGIA.SplitGIA(self, self.module, self.solver, metrics_variables, metrics_objective_direction)
-            ParetoFront = splitGIA.run()   
+            parSolver = ParSolver.ParSolver(self, self.module, self.solver, metrics_variables, metrics_objective_direction)
+            ParetoFront = parSolver.run()   
             for i in ParetoFront:
-                print("A")
                 self.printDelimeter()
                 print(i)
             return ParetoFront
             
-        
-    
-    
-    
     
     def standard_get_models(self, desired_number_of_models):
         result = []
         count = 0
-        print("A")
         #print(self.solver.sexpr())
         self.clock.tick("first model")
         while True:
@@ -382,9 +332,8 @@ class Z3Instance(object):
                 #print(m)
                 result.append(m)
                 # Create a new constraint that blocks the current model
-                print(m)
+                #print(m)
                 if not Common.MODE == Common.TEST and not Common.MODE == Common.EXPERIMENT:
-                    print("B")
                     self.printVars(m)
                 if Options.GET_ISOMORPHISM_CONSTRAINT:
                     IsomorphismConstraint.IsomorphismConstraint(self, m).createIsomorphicConstraint()
@@ -394,7 +343,6 @@ class Z3Instance(object):
                     preventSameModel(self.solver, m)
                 count += 1
             else:
-                
                 if Common.MODE == Common.DEBUG and count == 0:
                     self.clock.tock("unsat")
                     debug_print(self.solver.check(self.unsat_core_trackers))
@@ -407,6 +355,46 @@ class Z3Instance(object):
                 if count == 0:
                     standard_print("UNSAT")
                 return result
+    
+    def repl(self):
+        from front.Z3Run import load
+        if Common.FIRST_REPL_LOOP:
+            models = self.get_models(1)
+            if not models:
+                print("No more instances")
+        while True:
+            ch = input("ClaferZ3 > ")
+            #print(ch)
+            ch = ch.strip()
+            if ch == 'n':
+                models = self.get_models(1)
+                if not models:
+                    print("No more instances")
+            elif ch == 'r':
+                load(Options.FILE)
+            elif ch.startswith('i'):
+                args = ch.split()
+                if self.check_repl_input(args):
+                    inc = int(args[1])
+                    Options.GLOBAL_SCOPE = Options.GLOBAL_SCOPE + inc
+                    print("Global scope increased to " + str(Options.GLOBAL_SCOPE))
+                    Common.FIRST_REPL_LOOP = False
+                    load(Options.FILE)
+            elif ch.startswith('s'):
+                args = ch.split()
+                if self.check_repl_input(args):
+                    scope = int(args[1])
+                    Options.GLOBAL_SCOPE = scope
+                    print("Global scope set to " + str(Options.GLOBAL_SCOPE))
+                    Common.FIRST_REPL_LOOP = False
+                    load(Options.FILE)
+            elif ch == 'q':
+                sys.exit()
+            elif ch == 'h':
+                self.print_repl_help()
+            else:
+                print("Type h for help")
+    
     
     def getSort(self, uid):
         return self.z3_sorts.get(uid)
