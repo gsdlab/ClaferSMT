@@ -214,9 +214,10 @@ class Z3Instance(object):
         
     def printDelimeter(self):
         if Options.DELIMETER == "":
-            standard_print("=== Instance " + str(Common.DELIMETER_COUNT+1) + " ===")
+            standard_print("=== Instance " + str(Common.DELIMETER_COUNT+1) + " Begin ===")
             Common.DELIMETER_COUNT = Common.DELIMETER_COUNT + 1
             standard_print("")
+            standard_print("--- Instance " + str(Common.DELIMETER_COUNT+1) + " End ---")
         else:
             standard_print(Options.DELIMETER)
             

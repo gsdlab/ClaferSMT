@@ -60,7 +60,6 @@ def getZ3Feature(feature, expr):
         result = getZ3Feature(feature, child)
         if result:
             return result
-    
     return []
 
 class ParSolver():
@@ -112,7 +111,7 @@ class ParSolver():
         merged_results = self.merge(results)
         #print(merged_results)
         self.clock.tock("ParSolver")
-        self.clock.printEvents()
+        self.clock.printParEvents()
         return merged_results
         
         
@@ -166,13 +165,19 @@ class ParSolver():
     
     def splitter(self):
         if Options.SPLIT == Options.SAP:
-            
+            print(self.z3.z3_sorts)
             server =  self.z3.getSort("c0_" + Options.SERVER)
             service = self.z3.getSort("c0_" + Options.SERVICE)
-            sap = SAP(self.solvers[0], server, service)
+            print(server)
+            print(service)
+            sap = SAP.SAP(self.solvers[0], server, service)
             jobs = sap.random_unique_service_random_server()
+            #print(jobs)
+            print(jobs)
             jobs = sap.random_unique_service_random_server_range()
-            jobs = sap.turn_off_servers(self.module)
+            #print(jobs)
+            #jobs = sap.turn_off_servers(self.module)
+            print(jobs)
             return jobs
         else: 
             return [True for _ in range(Options.NUM_SPLIT)]

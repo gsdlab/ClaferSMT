@@ -103,11 +103,23 @@ class Clock():
             return
         for i in self.completed_event_map.keys():
             self.printEvent(i)
+            
+    def printParEvents(self):
+        """
+        Prints out all completed events.
+        """
+        if self.isBroken:
+            return
+        if Common.MODE == Common.EXPERIMENT:
+            print(self.completed_event_map.get("first model"))  
+            return
+        for i in self.completed_event_map.keys():
+            self.printEvent(i)
     
     def __str__(self):
         retstr = []
         for i in self.completed_event_map.keys():
             eventTime = self.completed_event_map[i]
             retstr.append(i + ": " + str(eventTime))
-        return "\n".join(retstr)
+        return "\n".join(retstr)+"\n"
             

@@ -71,7 +71,7 @@ class SAP():
         return jobs
     
     def turn_off_servers(self, module):
-        Visitor.visit(SimplifyModule.SimplifyModule(), module)
+        #Visitor.visit(SimplifyModule.SimplifyModule(), module)
         
         for i in self.server.instances:
             for j in self.solver.assertions():

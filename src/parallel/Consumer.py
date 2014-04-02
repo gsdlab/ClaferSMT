@@ -120,7 +120,6 @@ class StandardConsumer(multiprocessing.Process):
             self.task_queue.task_done()                    
             self.clock.tock("Constraint " + str(next_task))
             self.solver.pop()
-            break
         self.clock.tock("Consumer " + str(self.index))
         print(self.clock)
         return 0
