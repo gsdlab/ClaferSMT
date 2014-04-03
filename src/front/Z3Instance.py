@@ -212,24 +212,30 @@ class Z3Instance(object):
             return 0
         
         
-    def printDelimeter(self):
+    def printStartDelimeter(self):
         if Options.DELIMETER == "":
             standard_print("=== Instance " + str(Common.DELIMETER_COUNT+1) + " Begin ===")
-            Common.DELIMETER_COUNT = Common.DELIMETER_COUNT + 1
+            
             standard_print("")
-            standard_print("--- Instance " + str(Common.DELIMETER_COUNT+1) + " End ---")
         else:
             standard_print(Options.DELIMETER)
+    
+    def printEndDelimeter(self):
+        if Options.DELIMETER == "":
+            standard_print("--- Instance " + str(Common.DELIMETER_COUNT+1) + " End ---")
+        Common.DELIMETER_COUNT = Common.DELIMETER_COUNT + 1
             
     def printVars(self, model):
         self.clock.tick("printing")
         #if Common.MODE == Common.REPL:
         #    pass
-        self.printDelimeter()
+        self.printStartDelimeter()
             
         ph = PrintHierarchy.PrintHierarchy(self, model)
         Visitor.visit(ph, self.module)
         ph.printTree()
+        standard_print("")
+        self.printEndDelimeter()
         standard_print("")
         self.clock.tack("printing")
     
