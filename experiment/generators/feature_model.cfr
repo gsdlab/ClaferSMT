@@ -1,0 +1,23 @@
+enum GCard = Xor | Some | Any
+enum Type = Optional | Mandatory
+enum ConType = Include | Exclude
+
+Feature 2
+  type -> Type
+  gcard -> GCard
+  level : int
+  parent_feature -> Feature ?
+    [ parent.level = parent_feature.level + 1 ]
+    [otherlevel = parent_feature.level ]
+  otherlevel : int
+  
+  [ level >= 0]
+  [ level >= 0 <=> parent_feature ]
+
+Constraint 2
+  conType -> ConType
+  left -> Feature
+  right -> Feature
+  [ left != right ]
+   
+[one f : Feature | f.level = 0]
