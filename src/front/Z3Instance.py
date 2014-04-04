@@ -9,7 +9,7 @@ from common import Common, Options, Clock
 from common.Common import debug_print, standard_print, mOr, preventSameModel
 from common.Exceptions import UnusedAbstractException
 from constraints import Constraints, IsomorphismConstraint
-from front import Z3Str, Converters
+from front import Z3Str, Converters, ModelStats
 from front.Converters import DimacsConverter
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
@@ -183,6 +183,10 @@ class Z3Instance(object):
             debug_print("Checking for goals.")
             Visitor.visit(CheckForGoals.CheckForGoals(self), self.module)
         
+            if Common.MODE == Common.MODELSTATS:
+                ModelStats.run(self, self.module)
+                sys.exit()
+        
             if Options.STRING_CONSTRAINTS:
                 Converters.printZ3StrConstraints(self)
                 Z3Str.clafer_to_z3str("z3str_in")
@@ -227,10 +231,7 @@ class Z3Instance(object):
             
     def printVars(self, model):
         self.clock.tick("printing")
-        #if Common.MODE == Common.REPL:
-        #    pass
         self.printStartDelimeter()
-            
         ph = PrintHierarchy.PrintHierarchy(self, model)
         Visitor.visit(ph, self.module)
         ph.printTree()
@@ -249,11 +250,9 @@ class Z3Instance(object):
             i.assertConstraints(self)
     
     def printConstraints(self):
-        #print(Common.MODE)
         if not (Common.MODE == Common.DEBUG and Options.PRINT_CONSTRAINTS):
             return
         #print(self.solver.sexpr())
-        #print("in")
         for i in self.z3_sorts.values():
             i.constraints.debug_print()
         self.join_constraints.debug_print()
@@ -347,7 +346,11 @@ class Z3Instance(object):
                     isoConstraint = self.z3_bracketed_constraints.pop()
                     isoConstraint.assertConstraints(self)
                 else:
-                    preventSameModel(self.solver, m)
+                    #print(m[self.z3_sorts.get("c0_Feature").instances[0]])
+                    #print(m[self.z3_sorts.get("c0_Feature").instances[1]])
+                    # print(m[self.z3_sorts.get("c0_parent_feature").refs[0]])
+                    # print(m[self.z3_sorts.get("c0_parent_feature").refs[1]])
+                    preventSameModel(self, self.solver, m)
                 count += 1
             else:
                 if Common.MODE == Common.DEBUG and count == 0:

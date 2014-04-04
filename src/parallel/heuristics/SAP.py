@@ -19,7 +19,9 @@ class SAP():
         self.numServices = self.service.numInstances
     
     def random_unique_service_random_server(self):
-        #so we don't choose the same one twice
+        '''
+        Choose a service that has not been assigned yet, and assign it to some server randomly.
+        '''
         services = [i for i in self.service.instances]
         random.shuffle(services)
         jobs = [True]

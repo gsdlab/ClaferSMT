@@ -116,7 +116,7 @@ class StandardConsumer(multiprocessing.Process):
                 model = self.solver.model()
                 self.result_queue.put(model_to_string(self.z3, model))
                 num_solutions = num_solutions +  1
-                preventSameModel(self.solver, model)
+                preventSameModel(self.z3, self.solver, model)
             self.task_queue.task_done()                    
             self.clock.tock("Constraint " + str(next_task))
             self.solver.pop()

@@ -6,8 +6,10 @@ Created on Oct 6, 2013
 
 from common import Common
 from optparse import OptionParser
+from test import simple_feature_model, all_threes, i147refdisambiguation, simp
 import argparse
 import sys
+
 
 
 
@@ -23,7 +25,6 @@ import sys
 * Real Numbers
 * Strings
 * Change DoubleLiteral to RealLiteral
-* Fix printer
 * Traversal of quantified formulas is exponential...
 * Fix quantifier symmetry breaker, if two locals FROM THE SAME QUANTIFIER are on the left and right of a func, not symmetric
 * Documentation
@@ -37,10 +38,10 @@ POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
 
 GLOBAL_SCOPE = 1#this obviously has to change
 
-ECLIPSE = False 
+ECLIPSE = True 
 
-MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
-PRINT_CONSTRAINTS = False
+MODE = Common.DEBUG # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
+PRINT_CONSTRAINTS = True
 STRING_CONSTRAINTS = False
 CNF = False
 GOAL = False
@@ -73,6 +74,7 @@ SERVER=""
 SERVICE=""
 NUM_SPLIT=1
 
+MODULE = ""
 #MODULE = bracketedconstraint_this.getModule()
 #MODULE = multiple_joins.getModule()
 #MODULE = this_dot_parent.getModule()
@@ -128,6 +130,9 @@ NUM_SPLIT=1
 #MODULE = maximize.getModule()
 #MODULE = two_objective_min.getModule()
 #MODULE = two_objective_max.getModule()
+MODULE = simple_feature_model.getModule()
+#MODULE = simp.getModule()
+#MODULE = i147refdisambiguation.getModule()
 '''
 MODULE = cc_examplemod.getModule()
 

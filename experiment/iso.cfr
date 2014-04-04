@@ -1,4 +1,0 @@
-AddsToSix 1
-  Digit -> int 3
-    [this.ref > 0]
-  [sum(Digit.ref) = 6]

@@ -3,7 +3,7 @@ Created on Mar 24, 2013
 
 @author: ezulkosk
 '''
-from constraints.BracketedConstraint import ClaferToZ3OperationsMap
+
 
 class FunExp(object):
     '''
@@ -17,6 +17,7 @@ class FunExp(object):
         
         
     def __str__(self):
+        from constraints.BracketedConstraint import ClaferToZ3OperationsMap
         arity = ClaferToZ3OperationsMap[self.operation][0]
         if arity == 1:
             return self.operation + str(self.elements[0])

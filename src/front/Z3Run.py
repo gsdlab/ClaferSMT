@@ -20,8 +20,7 @@ def load(file):
         sys.exit("Run 'clafer --mode=python " + str(file) + "' first.")
     file = imp.load_source("module", str(file))
     module = file.getModule()
-    z3 = Z3Instance(module)
-    z3.run()
+    return module
     
 def main(args):
     '''
@@ -38,12 +37,12 @@ def main(args):
         TestClafers.runForOne()
     elif Common.MODE == Common.ALL:
         TestClafers.runForAll()
-    elif Common.MODE == Common.MODELSTATS:
-        ModelStats.run()
-    elif (not Options.ECLIPSE) and (Common.MODE in [Common.NORMAL, Common.EXPERIMENT, Common.DEBUG, Common.REPL]):
+    elif (not Options.ECLIPSE) and (Common.MODE in [Common.NORMAL, Common.EXPERIMENT, Common.DEBUG, Common.REPL, Common.MODELSTATS]):
         file = Options.FILE
         #print(file)
-        load(file)
+        module = load(file)
+        z3 = Z3Instance(module)
+        z3.run()
     else:
         module = Options.MODULE
         

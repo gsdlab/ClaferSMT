@@ -51,7 +51,8 @@ class GuidedImprovementAlgorithmOptions(object):
                     
      
 class GuidedImprovementAlgorithm(object):
-    def __init__(self, s,  metrics_variables, metrics_objective_direction, decision_variables=[], options=GuidedImprovementAlgorithmOptions()):
+    def __init__(self, z3inst, s,  metrics_variables, metrics_objective_direction, decision_variables=[], options=GuidedImprovementAlgorithmOptions()):
+        self.z3 = z3inst
         self.s = s
         self.metrics_variables = metrics_variables
         self.metrics_objective_direction = metrics_objective_direction
@@ -87,14 +88,14 @@ class GuidedImprovementAlgorithm(object):
         equalConstraint = self.ConstraintEqualToX(point)
         self.s.add(equalConstraint)
         #print(count)
-        preventSameModel(self.s, point)
+        preventSameModel(self.z3, self.s, point)
         #print(self.s.check()==sat)
         while(self.s.check() == sat and not(len(equivalentSolutions) + count == self.options.num_models)):
             #print("in")
             #count_sat_calls += 1
 #                 self.GIALogger.logEndCall(True, model = self.s.model(), statistics = self.s.statistics())                              
             solution = self.s.model()
-            preventSameModel(self.s, solution)
+            preventSameModel(self.z3, self.s, solution)
             equivalentSolutions.append(solution)
             
         self.s.pop()

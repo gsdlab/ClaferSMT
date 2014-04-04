@@ -137,7 +137,9 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             else:
                 integer_combinations = list(itertools.permutations(my_range, len(localDecls))) + \
                                             [tuple([i] * len(localDecls)) for i in my_range]
-            
+            #delete the above???
+            integer_combinations = itertools.permutations(my_range, len(localDecls))
+    
         
         localInstances = []
         ifConstraints = []

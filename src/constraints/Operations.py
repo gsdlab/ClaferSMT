@@ -1240,17 +1240,22 @@ def quant_no(exprs, ifConstraints):
         condList = [And(i, j) for i,j in zip(ifConstraints, condList)]
     return Not(Or(*condList))
 
+EXPR = ""
+EXPR2 = ""
+
 def quant_one(exprs, ifConstraints):
     '''
     There's probably a better way to do this.
     '''
     condList = getQuantifierConditionList(exprs)
+    #print(ifConstraints)
+    #print(condList)
     if ifConstraints:
         condList = [And(i, j) for i,j in zip(ifConstraints, condList)]
-    indicatorVars = IntVector("one_" + str(Common.getConstraintUID()),len(condList))
     exprList = []
     for i in range(len(condList)):
-        exprList.append(If(condList[i], indicatorVars[i] == 1, indicatorVars[i] == 0))
+        #exprList.append(If(condList[i], indicatorVars[i] == 1, indicatorVars[i] == 0))
+        exprList.append(If(condList[i], 1, 0))
     return Sum(*exprList) == 1
     
 def quant_lone(exprs, ifConstraints):

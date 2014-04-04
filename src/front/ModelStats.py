@@ -8,49 +8,83 @@ from structures.ClaferSort import ClaferSort
 from visitors import VisitorTemplate, Visitor, CreateSorts
 import visitors
 
-def run():
-    module = Options.MODULE
-    
+def run(z3inst, module):
     ''' Get the number of clafers in the model. '''
-    numClafersVisitor = GetNumClafers()
-    Visitor.visit(numClafersVisitor, module)
-    numClafers = numClafersVisitor.count
-    print(numClafers)
     
-    ''' Get the number of constraints in the model. '''
-    numConstraintsVisitor = GetNumBracketedConstraints()
-    Visitor.visit(numConstraintsVisitor, module)
-    numConstraints = numConstraintsVisitor.count
-    print(numConstraints)
+    numClafers = getNumClafers(z3inst)
+    numBracketedConstraints = getNumBracketedConstraints(z3inst)
+    numBracketedConstraintOperatorsList = getNumBracketedConstraintsOperators(module)
+    numTopLevelClafers = getNumTopLevelClafers(z3inst)
+    (isObjectives, numObjectives) = getObjectiveStats(z3inst)
+    (maxCard, maxBoundedGroupCard) = getMaxCards(z3inst)
+    maxDepth = getMaxDepth(z3inst)
     
-    ''' Get stats about constraints. '''
+    
+    print("Num Clafers: " + str(numClafers))
+    print("Num Bracketed Constraints: " + str(numBracketedConstraints))
+    print("Num Bracketed Cosntraint Operators: " + str(numBracketedConstraintOperatorsList))
+    print("Num Top Level Clafers: " + str(numTopLevelClafers))
+    print("Objectives?: " + str(isObjectives))
+    print("Num Objectives: " + str(numObjectives))
+    print("Max Card: " + str(maxCard))
+    print("Max Bounded Group Card: " + str(maxBoundedGroupCard))
+    print("Max Depth: " + str(maxDepth))
+    
+    
+''' ---------------------------------------------------------------'''    
+    
+def getNumTopLevelClafers(z3inst):
+    tops = 0
+    for i in z3inst.z3_sorts.values():
+        if i.isTopLevel:
+            tops = tops + 1
+    return tops
+    
+''' ---------------------------------------------------------------'''    
+    
+def getMaxDepth(z3inst):
+    maxDepth = 0
+    for i in z3inst.z3_sorts.values():
+        if len(i.parentStack) > maxDepth:
+            maxDepth = len(i.parentStack)
+    return maxDepth
+    
+''' ---------------------------------------------------------------'''    
+
+def getObjectiveStats(z3inst):
+    isObjectives = True if z3inst.objectives else False
+    numObjectives = len(z3inst.objectives)
+    return (isObjectives, numObjectives)
+
+''' ---------------------------------------------------------------'''    
+
+def getMaxCards(z3inst):
+    maxCard = -1
+    maxBoundedGroupCard = -1
+    for i in z3inst.z3_sorts.values():
+        if i.upperCardConstraint > maxCard:
+            maxCard = i.upperCardConstraint
+        upperGCard = i.element.gcard.interval[1].value
+        if upperGCard > maxBoundedGroupCard:
+            maxBoundedGroupCard = upperGCard
+    return (maxCard, maxBoundedGroupCard)
+
+''' ---------------------------------------------------------------'''    
+
+def getNumClafers(z3inst):
+    return len(z3inst.z3_sorts)
+   
+''' ---------------------------------------------------------------'''    
+                
+def getNumBracketedConstraints(z3inst):
+    return len(z3inst.z3_bracketed_constraints)    
+    
+''' ---------------------------------------------------------------'''    
+def getNumBracketedConstraintsOperators(module):
     constraintsStatsVisitor = GetBracketedConstraintsStats()
     Visitor.visit(constraintsStatsVisitor, module)
     counts = sorted(constraintsStatsVisitor.counts)
-    print(str(counts))
-    
-    
-
-class GetNumClafers(VisitorTemplate.VisitorTemplate):
-    
-    def __init__(self):
-        self.count = 0
-    
-    def claferVisit(self, element):
-        self.count = self.count + 1
-        for i in element.elements:
-            visitors.Visitor.visit(self, i)
-            
-            
-class GetNumBracketedConstraints(VisitorTemplate.VisitorTemplate):
-    
-    def __init__(self):
-        self.count = 0
-    
-    def constraintVisit(self, element):
-        self.count = self.count + 1
-        visitors.Visitor.visit(self, element.exp)
-            
+    return counts
 
 class GetBracketedConstraintsStats(VisitorTemplate.VisitorTemplate):
     
@@ -71,4 +105,6 @@ class GetBracketedConstraintsStats(VisitorTemplate.VisitorTemplate):
         if(self.inConstraint):
             self.currCount = self.currCount + 1
             
+''' ---------------------------------------------------------------'''            
+    
     

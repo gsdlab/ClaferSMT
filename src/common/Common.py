@@ -3,6 +3,7 @@ Created on Apr 28, 2013
 
 @author: ezulkosk
 '''
+
 from z3 import If, And, Or, Int, is_array, is_real
 from z3consts import Z3_UNINTERPRETED_SORT
 from z3types import Z3Exception
@@ -59,7 +60,24 @@ def mOr(*args):
     else:
         return Or(*newArgs)
 
-def preventSameModel(solver, model):
+def preventSameModel(z3inst, solver, model):
+    #from constraints import Operations
+    #print(model.eval(Operations.EXPR))
+    #print(model.eval(Operations.EXPR2))
+    block = []
+    for i in z3inst.z3_sorts.values():
+        for j in i.instances:
+            block.append(j != model[j])
+        if i.refs:
+            for j in i.refs:
+                block.append(j != model[j])
+
+    if block == []:
+        #input was an empty clafer model (no concretes)
+        solver.add(False)
+    else:
+        solver.add(Or(block))
+    '''
     block = []
     for d in model:
         # d is a declaration
@@ -78,6 +96,7 @@ def preventSameModel(solver, model):
         solver.add(False)
     else:
         solver.add(Or(block))
+    '''
 
 def debug_print(string):
     '''
