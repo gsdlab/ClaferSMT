@@ -44,7 +44,7 @@ def main(args):
         z3 = Z3Instance(module)
         z3.run()
     else:
-        module = Options.MODULE
+        module = Options.MODULE()
         
         z3 = Z3Instance(module)
         z3.run()

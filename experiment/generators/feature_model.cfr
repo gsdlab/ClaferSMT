@@ -8,11 +8,9 @@ Feature 2
   level : int
   parent_feature -> Feature ?
     [ parent.level = parent_feature.level + 1 ]
-    [otherlevel = parent_feature.level ]
-  otherlevel : int
   
   [ level >= 0]
-  [ level >= 0 <=> parent_feature ]
+  [ level > 0 <=> parent_feature ]
 
 Constraint 2
   conType -> ConType

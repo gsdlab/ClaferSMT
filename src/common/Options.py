@@ -5,10 +5,11 @@ Created on Oct 6, 2013
 '''
 
 from common import Common
-from optparse import OptionParser
-#from test import simple_feature_model, all_threes, i147refdisambiguation, simp
+from optparse import OptionParser 
 import argparse
 import sys
+
+#
 
 
 
@@ -30,6 +31,7 @@ import sys
 * Documentation
 * Need to treat ints and reals "the same" if in the same set.
 * Fix bag problem for everything, (look at ints for correct)
+* MAJOR : FIX ops like op_add (compare to op_sum)
 '''
 
 '''
@@ -38,9 +40,9 @@ POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
 
 GLOBAL_SCOPE = 1#this obviously has to change
 
-ECLIPSE = True 
+ECLIPSE = False 
 
-MODE = Common.DEBUG # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
+MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = True
 STRING_CONSTRAINTS = False
 CNF = False
@@ -74,71 +76,72 @@ SERVER=""
 SERVICE=""
 NUM_SPLIT=1
 
-MODULE = ""
-#MODULE = bracketedconstraint_this.getModule()
-#MODULE = multiple_joins.getModule()
-#MODULE = this_dot_parent.getModule()
-#MODULE = arithmetic.getModule()
-#MODULE = relations.getModule()
-#MODULE = boolean_connectives.getModule()
-#MODULE = union.getModule()
-#MODULE = simple_abstract.getModule()
-#MODULE = phpscript.getModule()
-#MODULE = some.getModule()
-#MODULE = paths.getModule()
-#MODULE = mypaths.getModule()
-#MODULE = simple_set.getModule()
-#MODULE = zoo.getModule()
-#MODULE = simple_zoo.getModule()
-#MODULE = integer_refs.getModule()
-#MODULE = minimal_integer_refs.getModule()
-#MODULE = phone_feature_model.getModule()
-#MODULE = higher_inheritance.getModule()
-#MODULE = this_integer_relation.getModule()
-#MODULE = equal_references.getModule()
-#MODULE = dag_test.getModule()
-#MODULE = books_tutorial.getModule()
-#MODULE = simple_books.getModule()
-#MODULE = teststring.getModule()
-#MODULE = testunion.getModule()
-#MODULE = subbooks.getModule()
-#MODULE = int_ref_set.getModule()
-#MODULE = one_plus_one_equals_one.getModule()
-#MODULE = iso.getModule()
-#MODULE = isowithcons.getModule()
-#MODULE = all_alls.getModule()
-#MODULE = some_somes.getModule()
-#MODULE = constraints.getModule()
-#MODULE = constraintswithbounds.getModule()
-#MODULE = AADL_simplified_with_lists.getModule()
-#MODULE = all_threes.getModule()
-#MODULE = i101.getModule()
-#MODULE = top_level_constraints_with_relational_joins.getModule()
-#MODULE = telematics.getModule()
-#MODULE = i17.getModule()
-#MODULE = i188sumquantifier.getModule()
-#MODULE = i78_transitiveclosure.getModule()
-#MODULE = scope_test.getModule()
-#MODULE = i131incorrectscope.getModule()
-#MODULE = enforcingInverseReferences.getModule()
-#MODULE = trivial.getModule()
-#MODULE = i72sharedreference.getModule()
-#MODULE = trivial2.getModule()
-#MODULE = simple_real.getModule()
-#MODULE = Phone.getModule()
-#MODULE = check_unique_ref_names_with_inheritance.getModule()
-#MODULE = maximize.getModule()
-#MODULE = two_objective_min.getModule()
-#MODULE = two_objective_max.getModule()
-#MODULE = simple_feature_model.getModule()
-#MODULE = simp.getModule()
-#MODULE = i147refdisambiguation.getModule()
-MODULE = ""
-'''
-MODULE = cc_examplemod.getModule()
+def MODULE():
+    from test import simple_feature_model, cc_example, all_threes, i147refdisambiguation, simp
 
-
-'''
+    MODULE = ""
+    #MODULE = bracketedconstraint_this.getModule()
+    #MODULE = multiple_joins.getModule()
+    #MODULE = this_dot_parent.getModule()
+    #MODULE = arithmetic.getModule()
+    #MODULE = relations.getModule()
+    #MODULE = boolean_connectives.getModule()
+    #MODULE = union.getModule()
+    #MODULE = simple_abstract.getModule()
+    #MODULE = phpscript.getModule()
+    #MODULE = some.getModule()
+    #MODULE = paths.getModule()
+    #MODULE = mypaths.getModule()
+    #MODULE = simple_set.getModule()
+    #MODULE = zoo.getModule()
+    #MODULE = simple_zoo.getModule()
+    #MODULE = integer_refs.getModule()
+    #MODULE = minimal_integer_refs.getModule()
+    #MODULE = phone_feature_model.getModule()
+    #MODULE = higher_inheritance.getModule()
+    #MODULE = this_integer_relation.getModule()
+    #MODULE = equal_references.getModule()
+    #MODULE = dag_test.getModule()
+    #MODULE = books_tutorial.getModule()
+    #MODULE = simple_books.getModule()
+    #MODULE = teststring.getModule()
+    #MODULE = testunion.getModule()
+    #MODULE = subbooks.getModule()
+    #MODULE = int_ref_set.getModule()
+    #MODULE = one_plus_one_equals_one.getModule()
+    #MODULE = iso.getModule()
+    #MODULE = isowithcons.getModule()
+    #MODULE = all_alls.getModule()
+    #MODULE = some_somes.getModule()
+    #MODULE = constraints.getModule()
+    #MODULE = constraintswithbounds.getModule()
+    #MODULE = AADL_simplified_with_lists.getModule()
+    #MODULE = all_threes.getModule()
+    #MODULE = i101.getModule()
+    #MODULE = top_level_constraints_with_relational_joins.getModule()
+    #MODULE = telematics.getModule()
+    #MODULE = i17.getModule()
+    #MODULE = i188sumquantifier.getModule()
+    #MODULE = i78_transitiveclosure.getModule()
+    #MODULE = scope_test.getModule()
+    #MODULE = i131incorrectscope.getModule()
+    #MODULE = enforcingInverseReferences.getModule()
+    #MODULE = trivial.getModule()
+    #MODULE = i72sharedreference.getModule()
+    #MODULE = trivial2.getModule()
+    #MODULE = simple_real.getModule()
+    #MODULE = Phone.getModule()
+    #MODULE = check_unique_ref_names_with_inheritance.getModule()
+    #MODULE = maximize.getModule()
+    #MODULE = two_objective_min.getModule()
+    #MODULE = two_objective_max.getModule()
+    MODULE = simple_feature_model.getModule()
+    #MODULE = simp.getModule()
+    #MODULE = i147refdisambiguation.getModule()
+    #MODULE = "" 
+    
+    MODULE = cc_example.getModule()
+    return MODULE
 
 modeMap = {
            'experiment' : Common.EXPERIMENT,

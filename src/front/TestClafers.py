@@ -113,7 +113,6 @@ def getTestSet():
         (personRelatives,INFINITE),
         (person_tutorial,INFINITE),
         (resolution,INFINITE),
-        (simp, 1),
         (telematics, 1),
         (test_neg_typesystem,INFINITE)
                   ]

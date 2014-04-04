@@ -1,4 +1,4 @@
-Feature 2
+Feature 6
   level -> int
   parent_feature -> Feature ?
     [level = parent_feature.level.ref + 1] 
@@ -6,4 +6,4 @@ Feature 2
   [ level > 0 <=> parent_feature ]
 //  [ this = parent_feature.ref]
 [one f : Feature | f.level = 0]
-[some f : Feature | f.level = 1]
+[some f : Feature | f.level = 5]

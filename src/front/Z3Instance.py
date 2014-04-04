@@ -302,7 +302,7 @@ class Z3Instance(object):
             writeTotalTimeFilename="timefile.csv", \
             writeRandomSeedsFilename="randomseed.csv", useCallLogs=False, num_models=desired_number_of_models, magnifying_glass=Options.MAGNIFYING_GLASS)    
         if Options.CORES == 1:
-            GIAAlgorithmNP = GuidedImprovementAlgorithm(self.solver, metrics_variables, \
+            GIAAlgorithmNP = GuidedImprovementAlgorithm(self, self.solver, metrics_variables, \
                     metrics_objective_direction, [], options=GIAOptionsNP) 
             '''featurevars instead of []'''
             outfilename = str("giaoutput").strip()#"npGIA_" + str(sys.argv[1]).strip() + ".csv"

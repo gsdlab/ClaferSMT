@@ -114,6 +114,10 @@ def joinWithPrimitive(arg):
             Assertions.nonEmptyMask(newMask)
     return ExprArg(newInstanceSorts)
     
+    
+'''
+CLEAN : THERE IS PRIMITIVES STUFF IN HERE
+'''
 def joinWithClaferRef(arg):
     newInstanceSorts = []
     for i in arg.getInstanceSorts():
@@ -1024,6 +1028,19 @@ def op_range_restriction(l,r):
 #######################################################################
 ''' 
 
+def checkForAriths(instances):
+    for i in instances:
+        if not isinstance(i, int):
+            return True
+    return False
+
+def getArithValue(vals):
+    if checkForAriths(vals):
+        val = Sum(*vals)
+    else:
+        val = sum(vals)
+    return val
+
 def op_add(left,right):
     '''
     :param left:
@@ -1038,8 +1055,9 @@ def op_add(left,right):
     assert isinstance(right, ExprArg)
     (_, left_mask) = left.getInstanceSort(0)
     (_, right_mask) = right.getInstanceSort(0)
-    lval = left_mask.pop_value()
-    rval = right_mask.pop_value()
+    
+    lval = getArithValue(list(left_mask.values()))
+    rval = getArithValue(list(right_mask.values()))
     return IntArg([lval + rval])
 
 def op_sub(left,right):
@@ -1056,8 +1074,8 @@ def op_sub(left,right):
     assert isinstance(right, ExprArg)
     (_, left_mask) = left.getInstanceSort(0)
     (_, right_mask) = right.getInstanceSort(0)
-    lval = left_mask.pop_value()
-    rval = right_mask.pop_value()
+    lval = getArithValue(list(left_mask.values()))
+    rval = getArithValue(list(right_mask.values()))
     return IntArg([lval - rval])
 
 def op_mul(left,right):
@@ -1074,8 +1092,8 @@ def op_mul(left,right):
     assert isinstance(right, ExprArg)
     (_, left_mask) = left.getInstanceSort(0)
     (_, right_mask) = right.getInstanceSort(0)
-    lval = left_mask.pop_value()
-    rval = right_mask.pop_value()
+    lval = getArithValue(list(left_mask.values()))
+    rval = getArithValue(list(right_mask.values()))
     return IntArg([lval * rval])
 
 #integer division
@@ -1093,8 +1111,8 @@ def op_div(left,right):
     assert isinstance(right, ExprArg)
     (_, left_mask) = left.getInstanceSort(0)
     (_, right_mask) = right.getInstanceSort(0)
-    lval = left_mask.pop_value()
-    rval = right_mask.pop_value()
+    lval = getArithValue(list(left_mask.values()))
+    rval = getArithValue(list(right_mask.values()))
     return IntArg([lval / rval]
                    if((not isinstance(lval, int)) or (not isinstance(rval, int)))
                              else [lval // rval])
@@ -1110,7 +1128,7 @@ def op_un_minus(arg):
     '''
     assert isinstance(arg, ExprArg)
     (_, mask) = arg.getInstanceSort(0)
-    val = mask.pop_value()
+    val = getArithValue(list(mask.values()))
     return IntArg([-(val)])
    
 def op_sum(arg):
@@ -1122,12 +1140,11 @@ def op_sum(arg):
     Computes the sum of all integer instances in arg. May not match the semantics of the Alloy backend.
     '''
     assert isinstance(arg, ExprArg)
-    instances = []
+    all_vals = []
     for i in arg.getInstanceSorts():
         (_, mask) = i
-        for j in mask.values():
-            instances.append(j)
-    return IntArg([Sum(instances)])
+        all_vals.append(getArithValue(list(mask.values())))
+    return IntArg([getArithValue(all_vals)])
 
 ''' 
 #######################################################################
