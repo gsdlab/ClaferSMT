@@ -2,7 +2,7 @@ enum GCard = Xor | Some | Any
 enum Type = Optional | Mandatory
 enum ConType = Include | Exclude
 
-Feature 2
+Feature 2 //@NumFeatures
   type -> Type
   gcard -> GCard
   level : int
@@ -19,3 +19,5 @@ Constraint 2
   [ left != right ]
    
 [one f : Feature | f.level = 0]
+
+//[ no f : Feature | f.level = @MaxDepth]

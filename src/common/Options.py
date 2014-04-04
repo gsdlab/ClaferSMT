@@ -9,15 +9,6 @@ from optparse import OptionParser
 import argparse
 import sys
 
-#
-
-
-
-
-
-
-
-
 '''
 ========
 | TODO |
@@ -31,7 +22,6 @@ import sys
 * Documentation
 * Need to treat ints and reals "the same" if in the same set.
 * Fix bag problem for everything, (look at ints for correct)
-* MAJOR : FIX ops like op_add (compare to op_sum)
 '''
 
 '''

@@ -369,7 +369,7 @@ class Z3Instance(object):
     def repl(self):
         from front.Z3Run import load
         if Common.FIRST_REPL_LOOP:
-            models = self.get_models(1)
+            models = self.standard_get_models(1)
             if not models:
                 print("No more instances")
         while True:
