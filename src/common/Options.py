@@ -6,7 +6,7 @@ Created on Oct 6, 2013
 
 from common import Common
 from optparse import OptionParser
-from test import simple_feature_model, all_threes, i147refdisambiguation, simp
+#from test import simple_feature_model, all_threes, i147refdisambiguation, simp
 import argparse
 import sys
 
@@ -130,9 +130,10 @@ MODULE = ""
 #MODULE = maximize.getModule()
 #MODULE = two_objective_min.getModule()
 #MODULE = two_objective_max.getModule()
-MODULE = simple_feature_model.getModule()
+#MODULE = simple_feature_model.getModule()
 #MODULE = simp.getModule()
 #MODULE = i147refdisambiguation.getModule()
+MODULE = ""
 '''
 MODULE = cc_examplemod.getModule()
 
