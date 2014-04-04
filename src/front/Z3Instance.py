@@ -377,7 +377,7 @@ class Z3Instance(object):
             #print(ch)
             ch = ch.strip()
             if ch == 'n':
-                models = self.get_models(1)
+                models = self.standard_get_models(1)
                 if not models:
                     print("No more instances")
             elif ch == 'r':
