@@ -5,7 +5,8 @@ Created on Oct 6, 2013
 '''
 
 from common import Common
-from optparse import OptionParser 
+from optparse import OptionParser
+from parallel.heuristics import GeneralHeuristics
 import argparse
 import sys
 
@@ -65,6 +66,7 @@ SPLIT=SAP
 SERVER=""
 SERVICE=""
 NUM_SPLIT=1
+HEURISTICS = []
 
 def MODULE():
     from test import simple_feature_model, cc_example, all_threes, i147refdisambiguation, simp
@@ -151,6 +153,11 @@ testMap = {
            }
 
 
+def foo_callback(option, opt, value, parser):
+    print("A")
+    setattr(parser.values, option.dest, value.split(','))
+
+
 def setCommandLineOptions():
     parser = argparse.ArgumentParser(description='Process a clafer model with Z3.')
     parser.add_argument('file', help='the clafer python file', nargs='?')
@@ -176,12 +183,18 @@ def setCommandLineOptions():
     parser.add_argument('--cores', '-c', dest='cores', type=int, default='1', help='the number of cores for parallel processing')
     parser.add_argument('--server', default="Server", dest='server', help='The name of the Server clafer in SAP problems (used for parallelization)')
     parser.add_argument('--service', default="Service", dest='service', help='The name of the Service clafer in SAP problems (used for parallelization)')
-    parser.add_argument('--split', dest='split', default='NO_SPLIT', choices=['SAP', 'NO_SPLIT'])
+    parser.add_argument('--split', dest='split', default='NO_SPLIT', choices=list(GeneralHeuristics.HeuristicsMap.keys()) + ['NO_SPLIT'])
     parser.add_argument('--numsplit', dest='numsplit', type=int, default='-1', help='The number of splits to perform (default = #cores)')
+    parser.add_argument('--heuristics', dest='heuristics', default='NO_SPLIT', nargs='*', choices=list(GeneralHeuristics.HeuristicsMap.keys()) + ['NO_SPLIT'])
+    
+    
+    parser.add_argument('--classifier', dest='classifier', default='svm',
+                       choices=['svm', 'classtree'])
+    parser.add_argument('--learningiterations', dest='learning_iterations', type=int, default='10', help='the number of iterations through the learning process')
     
     args = parser.parse_args()
     if args.version:
-        print("ClaferZ3 0.3.6.06-03-2014")
+        print("ClaferZ3 0.3.6.04-04-2014")
         sys.exit()
     global ECLIPSE
     if ECLIPSE:
@@ -199,6 +212,8 @@ def setCommandLineOptions():
     MODE = modeMap[args.mode]
     global PRINT_CONSTRAINTS
     PRINT_CONSTRAINTS = args.printconstraints
+    global HEURISTICS
+    HEURISTICS = args.heuristics
     global PROFILING
     PROFILING = args.profiling
     global CPROFILING
@@ -242,6 +257,8 @@ def setCommandLineOptions():
         NUM_SPLIT = CORES
     else:
         NUM_SPLIT = args.numsplit
+    return args    
+    
         
     
     

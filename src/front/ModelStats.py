@@ -18,6 +18,7 @@ def run(z3inst, module):
     (isObjectives, numObjectives) = getObjectiveStats(z3inst)
     (maxCard, maxBoundedGroupCard) = getMaxCards(z3inst)
     maxDepth = getMaxDepth(z3inst)
+    numXors = getNumXors(z3inst)
     
     
     print("Num Clafers: " + str(numClafers))
@@ -29,6 +30,7 @@ def run(z3inst, module):
     print("Max Card: " + str(maxCard))
     print("Max Bounded Group Card: " + str(maxBoundedGroupCard))
     print("Max Depth: " + str(maxDepth))
+    print("Num Xors: " + str(numXors))
     
     
 ''' ---------------------------------------------------------------'''    
@@ -51,6 +53,15 @@ def getMaxDepth(z3inst):
     
 ''' ---------------------------------------------------------------'''    
 
+def getNumXors(z3inst):
+    numXors = 0
+    for i in z3inst.z3_sorts.values():
+        if i.lowerGCard == 1 and i.upperGCard == 1:
+            numXors = numXors + 1
+    return numXors
+
+''' ---------------------------------------------------------------'''    
+
 def getObjectiveStats(z3inst):
     isObjectives = True if z3inst.objectives else False
     numObjectives = len(z3inst.objectives)
@@ -64,9 +75,8 @@ def getMaxCards(z3inst):
     for i in z3inst.z3_sorts.values():
         if i.upperCardConstraint > maxCard:
             maxCard = i.upperCardConstraint
-        upperGCard = i.element.gcard.interval[1].value
-        if upperGCard > maxBoundedGroupCard:
-            maxBoundedGroupCard = upperGCard
+        if i.upperGCard > maxBoundedGroupCard:
+            maxBoundedGroupCard = i.upperGCard
     return (maxCard, maxBoundedGroupCard)
 
 ''' ---------------------------------------------------------------'''    

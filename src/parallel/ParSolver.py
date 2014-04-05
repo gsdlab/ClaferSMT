@@ -78,7 +78,7 @@ class ParSolver():
         #for i in range(Options.CORES):
         #    taskQueue.append(mgr.Queue())
         solutions = mgr.Queue()
-        totalTime = mgr.Queue()
+        timeQueue = mgr.Queue()
         
         # Enqueue initial tasks
         for i in range(Options.NUM_SPLIT):
@@ -89,11 +89,11 @@ class ParSolver():
         # Start consumers 
         #case: objectives
         if self.metrics_variables:
-            self.consumers = [ Consumer.GIAConsumer(taskQueue, solutions, self.z3, totalTime, i, "out", Options.CORES, j, self.metrics_variables, self.metrics_objective_direction, self.consumerConstraints)
+            self.consumers = [ Consumer.GIAConsumer(taskQueue, solutions, self.z3, timeQueue, i, "out", Options.CORES, j, self.metrics_variables, self.metrics_objective_direction, self.consumerConstraints)
                             for i,j in zip(range(Options.CORES), self.solvers)]
         #case: no objectives
         else:
-            self.consumers = [ Consumer.StandardConsumer(taskQueue, solutions, self.z3, totalTime, i, "out", Options.CORES, j, self.consumerConstraints)
+            self.consumers = [ Consumer.StandardConsumer(taskQueue, solutions, self.z3, timeQueue, i, "out", Options.CORES, j, self.consumerConstraints)
                             for i,j in zip(range(Options.CORES), self.solvers)]
         
         
@@ -108,10 +108,18 @@ class ParSolver():
         while not solutions.empty():
             result = solutions.get()
             results.append(result)
+        while not timeQueue.empty():
+            clock = timeQueue.get()
+            #print(clock)
+            self.clock = self.clock.combineClocks(clock)
+            #results.append(result)
+        
+        self.clock.tick("Merge")
         merged_results = self.merge(results)
+        self.clock.tock("Merge")
         #print(merged_results)
         self.clock.tock("ParSolver")
-        self.clock.printParEvents()
+        self.clock.printParallelStats()
         return merged_results
         
         
@@ -164,6 +172,7 @@ class ParSolver():
                  
     
     def splitter(self):
+        
         if Options.SPLIT == Options.SAP:
             print(self.z3.z3_sorts)
             server =  self.z3.getSort("c0_" + Options.SERVER)

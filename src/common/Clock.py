@@ -4,6 +4,7 @@ Created on Oct 10, 2013
 @author: ezulkosk
 '''
 from common import Options, Common
+from common.Common import standard_print, experiment_print
 import sys
 import time
 
@@ -99,22 +100,39 @@ class Clock():
         if self.isBroken:
             return
         if Common.MODE == Common.EXPERIMENT:
-            print(self.completed_event_map.get("first model"))  
-            return
+            sys.exit("Shouldn't get here")
         for i in self.completed_event_map.keys():
             self.printEvent(i)
             
-    def printParEvents(self):
+    def printParallelStats(self):
         """
         Prints out all completed events.
         """
         if self.isBroken:
             return
         if Common.MODE == Common.EXPERIMENT:
-            print(self.completed_event_map.get("first model"))  
+            longestConsumer = -1
+            longestTask = -1
+            merge = -1
+            longestConsumerPlusMerge = -1
+            
+            for key in self.completed_event_map.keys():
+                val = self.completed_event_map.get(key)
+                if "Consumer" in key and val > longestConsumer:
+                    longestConsumer = val
+                if "Task" in key and val > longestTask:
+                    longestTask = val
+                if "Merge" in key:
+                    merge = val
+                longestConsumerPlusMerge = longestConsumer + merge
+            experiment_print("Longest Consumer: " + str(longestConsumer))  
+            experiment_print("Longest Task: " + str(longestTask))  
+            experiment_print("Merge: " + str(merge))  
+            experiment_print("Longest Consumer Plus Merge: " + str(longestConsumerPlusMerge))  
+            experiment_print("")  
+            #experiment_print(self)  
             return
-        for i in self.completed_event_map.keys():
-            self.printEvent(i)
+        
     
     def __str__(self):
         retstr = []

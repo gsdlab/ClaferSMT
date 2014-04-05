@@ -5,11 +5,12 @@ Created on Mar 15, 2014
 '''
 from common import Options
 from common.Clock import Clock
-from common.Common import preventSameModel
+from common.Common import preventSameModel, standard_print
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from visitors import PrintHierarchy, Visitor
 import multiprocessing
+import sys
 import z3
 
 
@@ -22,12 +23,12 @@ def model_to_string(z3, model):
     return ph.get_pickled()
 
 class GIAConsumer(multiprocessing.Process):
-    def __init__(self, task_queue, result_queue, z3, totalTime, index, outputFileParentName, num_consumers, s, metrics_variables, metrics_objective_direction, consumerConstraints):
+    def __init__(self, task_queue, result_queue, z3, timeQueue, index, outputFileParentName, num_consumers, s, metrics_variables, metrics_objective_direction, consumerConstraints):
         multiprocessing.Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
 #         self.CurrentNotDomConstraints_queuelist = CurrentNotDomConstraints_queuelist
-        self.totalTime = totalTime 
+        self.timeQueue = timeQueue 
         self.z3 = z3
         self.solver = s
         self.consumerConstraints = consumerConstraints
@@ -59,12 +60,12 @@ class GIAConsumer(multiprocessing.Process):
                 pass    
             self.solver.push()
             self.solver.add(self.consumerConstraints[int(next_task)])
-            self.clock.tick("Constraint " + str(next_task))
+            self.clock.tick("Task " + str(next_task))
             while True:
                 if self.GIAAlgorithm.s.check() != z3.sat or num_solutions == Options.NUM_INSTANCES:
                     self.task_queue.task_done()
                     
-                    self.clock.tock("Constraint " + str(next_task))
+                    self.clock.tock("Task " + str(next_task))
                     self.solver.pop()
                     break
                 else:  
@@ -81,16 +82,15 @@ class GIAConsumer(multiprocessing.Process):
                     
                     num_solutions = num_solutions +  1
         self.clock.tock("Consumer " + str(self.index))
-        print(self.clock)
         return 0
     
 class StandardConsumer(multiprocessing.Process):
-    def __init__(self, task_queue, result_queue, z3, totalTime, index, outputFileParentName, num_consumers, s, consumerConstraints):
+    def __init__(self, task_queue, result_queue, z3, timeQueue, index, outputFileParentName, num_consumers, s, consumerConstraints):
         multiprocessing.Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
 #         self.CurrentNotDomConstraints_queuelist = CurrentNotDomConstraints_queuelist
-        self.totalTime = totalTime 
+        self.timeQueue = timeQueue 
         self.z3 = z3
         self.solver = s
         self.consumerConstraints = consumerConstraints
@@ -111,16 +111,16 @@ class StandardConsumer(multiprocessing.Process):
                 pass    
             self.solver.push()
             self.solver.add(self.consumerConstraints[int(next_task)])
-            self.clock.tick("Constraint " + str(next_task))
+            self.clock.tick("Task " + str(next_task))
             while self.solver.check() == z3.sat and num_solutions != Options.NUM_INSTANCES:
                 model = self.solver.model()
                 self.result_queue.put(model_to_string(self.z3, model))
                 num_solutions = num_solutions +  1
                 preventSameModel(self.z3, self.solver, model)
             self.task_queue.task_done()                    
-            self.clock.tock("Constraint " + str(next_task))
+            self.clock.tock("Task " + str(next_task))
             self.solver.pop()
         self.clock.tock("Consumer " + str(self.index))
-        print(self.clock)
+        self.timeQueue.put(self.clock)
         return 0
 

@@ -7,6 +7,9 @@ Created on Apr 28, 2013
 from z3 import If, And, Or, Int, is_array, is_real
 from z3consts import Z3_UNINTERPRETED_SORT
 from z3types import Z3Exception
+import imp
+import sys
+
 
 NORMAL = 0
 DEBUG = 1
@@ -26,7 +29,7 @@ FLAG = False
 string_map = {}
 STRCONS_SUB = "STRCONS_SUB"
 FIRST_REPL_LOOP = True
-DELIMETER_COUNT = 0
+
 
 def mAnd(*args):
     '''
@@ -111,6 +114,10 @@ def standard_print(string):
     '''
     if(MODE != TEST and MODE != EXPERIMENT):
         print(string)
+        
+def experiment_print(string):
+    if MODE == EXPERIMENT:
+        print(string)
 
 def getConstraintUID():
     '''
@@ -147,4 +154,11 @@ def max2(l,r):
     returns the min of two integers
     '''
     return If(l <= r, r, l)
+
+def load(file):
+    if file.endswith(".cfr"):
+        sys.exit("Run 'clafer --mode=python " + str(file) + "' first.")
+    file = imp.load_source("module", str(file))
+    module = file.getModule()
+    return module
     

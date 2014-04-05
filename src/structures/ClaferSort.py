@@ -278,12 +278,13 @@ class  ClaferSort(object):
                     self.constraints.addCardConstraint(self.summs[i] <= self.upperCardConstraint)
         
     def addGroupCardConstraints(self):
+        self.upperGCard = self.element.gcard.interval[1].value
+        self.lowerGCard = self.element.gcard.interval[0].value
         if(len(self.fields) == 0 and ((not self.superSort) or self.superSort.fields == 0)):
             return
         #lower bounds
-        upperGCard = self.element.gcard.interval[1].value
-        lowerGCard = self.element.gcard.interval[0].value
-        if lowerGCard == 0 and upperGCard == -1:
+        
+        if self.lowerGCard == 0 and self.upperGCard == -1:
             return
         for i in range(self.numInstances):
             
@@ -296,10 +297,10 @@ class  ClaferSort(object):
             #    for j in self.superSort.fields:
             #        print("found " + str(j))
             #        bigSumm = bigSumm +  j.summs[i + self.indexInSuper]
-            if lowerGCard != 0:
-                    self.constraints.addGroupCardConstraint(Implies(self.isOn(i), bigSumm >= lowerGCard))
-            if upperGCard != -1:
-                self.constraints.addGroupCardConstraint(Implies(self.isOn(i),bigSumm <= upperGCard))
+            if self.lowerGCard != 0:
+                    self.constraints.addGroupCardConstraint(Implies(self.isOn(i), bigSumm >= self.lowerGCard))
+            if self.upperGCard != -1:
+                self.constraints.addGroupCardConstraint(Implies(self.isOn(i),bigSumm <= self.upperGCard))
             #print(str(self) +  " " + str(lowerGCard) + " " + str(upperGCard) + str(bigSumm))
         
     

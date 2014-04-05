@@ -25,6 +25,8 @@ import fileinput
 import sys
 
 
+
+
 class Z3Instance(object):
     
     ''' 
@@ -44,6 +46,7 @@ class Z3Instance(object):
         self.clock = Clock.Clock()
         self.objectives = []
         self.goal = Goal()
+        self.delimeter_count = 0
         #print(self.solver.help())
         #print(get_version_string())
         
@@ -129,6 +132,7 @@ class Z3Instance(object):
         Converts Clafer constraints to Z3 constraints and computes models.
         '''
         try:
+            
             self.clock.tick("translation")
             
             """ Create a ClaferSort associated with each Clafer. """  
@@ -148,16 +152,6 @@ class Z3Instance(object):
           
             debug_print("Adjusting abstract scopes.")
             AdjustAbstracts.adjustAbstractsFixedPoint(self)
-            
-            '''
-            remove_list = []
-            for i in self.z3_sorts.values():
-                if i.element.isAbstract:
-                    if i.scope_summ == 0:
-                        remove_list.append(str(i.element))
-            for i in remove_list:
-                self.z3_sorts.pop(i)
-            '''
             
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
@@ -185,7 +179,7 @@ class Z3Instance(object):
         
             if Common.MODE == Common.MODELSTATS:
                 ModelStats.run(self, self.module)
-                sys.exit()
+                return 0
         
             if Options.STRING_CONSTRAINTS:
                 Converters.printZ3StrConstraints(self)
@@ -208,8 +202,6 @@ class Z3Instance(object):
             debug_print("Getting models.")  
             self.clock.tock("translation")
             models = self.get_models(Options.NUM_INSTANCES)
-            
-            #self.clock.printEvents()
             return len(models)
         except UnusedAbstractException as e:
             print(str(e))
@@ -218,7 +210,7 @@ class Z3Instance(object):
         
     def printStartDelimeter(self):
         if Options.DELIMETER == "":
-            standard_print("=== Instance " + str(Common.DELIMETER_COUNT+1) + " Begin ===")
+            standard_print("=== Instance " + str(self.delimeter_count+1) + " Begin ===")
             
             standard_print("")
         else:
@@ -226,8 +218,8 @@ class Z3Instance(object):
     
     def printEndDelimeter(self):
         if Options.DELIMETER == "":
-            standard_print("--- Instance " + str(Common.DELIMETER_COUNT+1) + " End ---")
-        Common.DELIMETER_COUNT = Common.DELIMETER_COUNT + 1
+            standard_print("--- Instance " + str(self.delimeter_count+1) + " End ---")
+        self.delimeter_count = self.delimeter_count + 1
             
     def printVars(self, model):
         self.clock.tick("printing")
@@ -316,8 +308,9 @@ class Z3Instance(object):
             parSolver = ParSolver.ParSolver(self, self.module, self.solver, metrics_variables, metrics_objective_direction)
             ParetoFront = parSolver.run()   
             for i in ParetoFront:
-                self.printDelimeter()
-                print(i)
+                self.printStartDelimeter()
+                standard_print(i)
+                self.printEndDelimeter()
             return ParetoFront
             
     
@@ -367,7 +360,7 @@ class Z3Instance(object):
                 return result
     
     def repl(self):
-        from front.Z3Run import load
+        from common.Common import load
         if Common.FIRST_REPL_LOOP:
             models = self.standard_get_models(1)
             if not models:
