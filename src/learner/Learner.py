@@ -27,11 +27,20 @@ class Learner():
         '''
         Options.MODE = Common.MODELSTATS
         Z3Run.run(self.options)
+        print()
         Options.MODE=Common.EXPERIMENT
+        Classifiers.test()
         for i in range(self.options.learning_iterations):
             for h in Options.HEURISTICS:
                 Options.SPLIT = h
-                Z3Run.run(self.options)
+                for s in Options.EXPERIMENT_NUM_SPLIT:
+                    Options.NUM_SPLIT = s
+                    print("===============================")
+                    print("| Iteration: " + str(i))
+                    print("| Heuristic: " + str(h))
+                    print("| num_split: " + str(s))
+                    print("===============================")
+                    Z3Run.run(self.options)
         print()
 
 

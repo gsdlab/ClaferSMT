@@ -67,6 +67,7 @@ SERVER=""
 SERVICE=""
 NUM_SPLIT=1
 HEURISTICS = []
+EXPERIMENT_NUM_SPLIT = []
 
 def MODULE():
     from test import simple_feature_model, cc_example, all_threes, i147refdisambiguation, simp
@@ -186,7 +187,7 @@ def setCommandLineOptions():
     parser.add_argument('--split', dest='split', default='NO_SPLIT', choices=list(GeneralHeuristics.HeuristicsMap.keys()) + ['NO_SPLIT'])
     parser.add_argument('--numsplit', dest='numsplit', type=int, default='-1', help='The number of splits to perform (default = #cores)')
     parser.add_argument('--heuristics', dest='heuristics', default='NO_SPLIT', nargs='*', choices=list(GeneralHeuristics.HeuristicsMap.keys()) + ['NO_SPLIT'])
-    
+    parser.add_argument('--experimentnumsplits', dest='experimentnumsplits', type=int, default='-1', nargs='*', help='List of the number of splits to perform (default = #cores)')
     
     parser.add_argument('--classifier', dest='classifier', default='svm',
                        choices=['svm', 'classtree'])
@@ -214,6 +215,7 @@ def setCommandLineOptions():
     PRINT_CONSTRAINTS = args.printconstraints
     global HEURISTICS
     HEURISTICS = args.heuristics
+    
     global PROFILING
     PROFILING = args.profiling
     global CPROFILING
@@ -257,6 +259,14 @@ def setCommandLineOptions():
         NUM_SPLIT = CORES
     else:
         NUM_SPLIT = args.numsplit
+    global EXPERIMENT_NUM_SPLIT
+    if args.experimentnumsplits == -1:
+        EXPERIMENT_NUM_SPLIT = [CORES]
+    elif isinstance(args.experimentnumsplits, int):
+        EXPERIMENT_NUM_SPLIT = [args.experimentnumsplits]
+    else:
+        EXPERIMENT_NUM_SPLIT = args.experimentnumsplits
+        
     return args    
     
         
