@@ -173,8 +173,8 @@ def setCommandLineOptions():
     parser.add_argument('--cprofiling', dest='cprofiling',action='store_const', default=False, const=True,  help='uses cprofile for profiling functions of the translation')
     parser.add_argument('--numinstances', '-n', dest='numinstances', type=int, default='1', help='the number of models to be displayed (-1 for all)')
     parser.add_argument('--globalscope', '-g', dest='globalscope', type=int, default='1', help='the global scope for unbounded clafers (note that this does not match regular clafer)')
-    parser.add_argument('--testset', '-t', dest='testset', default='edstests', help='The test set to be used for modes [experiment | test | one | all]',
-                        choices=['edstests', 'positive', 'string'])
+    parser.add_argument('--testset', '-t', dest='test_set', default='edstests', help='The test set to be used for modes [experiment | test | one | all], or the number of tests to generate')#,
+                        #choices=['edstests', 'positive', 'string'])
     parser.add_argument('--stringconstraints' , '-s', default=False, dest='stringconstraints',action='store_const',  const=True,  help='Flag to output to Z3-Str format instead')
     parser.add_argument('--cnf', default=False, dest='cnf',action='store_const',  const=True,  help='Outputs CNF of formula.')
     parser.add_argument('--dimacs', default="dimacs", dest='dimacs', help='Output DIMACS')
@@ -203,6 +203,7 @@ def setCommandLineOptions():
     parser.add_argument('--outputdirectory', default="./", dest='output_directory', help='The directory for any output.')
     parser.add_argument('--formatter', default="formatter", dest='formatter', help='File to format generated instances properly.')
     parser.add_argument('--verboseprint', default=False, dest='verbose_print',action='store_const',  const=True,  help='Prints extra output.')
+
     
     args = parser.parse_args()
     if args.version:
@@ -236,7 +237,10 @@ def setCommandLineOptions():
     global GLOBAL_SCOPE
     GLOBAL_SCOPE = args.globalscope
     global TEST_SET
-    TEST_SET = testMap[args.testset]
+    try:
+        TEST_SET = testMap[args.test_set]
+    except:
+        TEST_SET = args.test_set
     global STRING_CONSTRAINTS
     STRING_CONSTRAINTS= args.stringconstraints
     global CNF

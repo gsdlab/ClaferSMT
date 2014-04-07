@@ -22,7 +22,7 @@ class Learner():
         self.options = options
         self.features = self.loadFeatureFile()
         self.classifier = self.createClassifier(self.options)
-        self.numberHeuristics(Options.HEURISTICS, Options.EXPERIMENT_NUM_SPLIT)
+        self.heuristic_list = self.numberHeuristics(Options.HEURISTICS, Options.EXPERIMENT_NUM_SPLIT)
    
     def runZ3(self, module):
         z3 = Z3Instance.Z3Instance(module)
@@ -42,48 +42,74 @@ class Learner():
     def run(self):
         '''
         call Z3run a bunch
-        change options.mode
         change heuristic and heuristic variants as necessary
         '''
+        Common.MODE=Common.EXPERIMENT  
         
+        self.print_separator("Generating Test Set")
+        (test_set_parameters, test_set_labels) = self.createInstances(int(self.options.test_set))
+        print(test_set_parameters)
+        print(test_set_labels)
         
+        self.print_separator("Training")
+        (training_set_parameters, training_set_labels) =  self.createInstances(int(self.options.learning_iterations))
+        print(training_set_parameters)
+        print(training_set_labels)
+    
+        self.classifier.learn(training_set_parameters, training_set_labels)
+        coefficients = self.classifier.getCoefficients()
+        print(coefficients)
+    
+    
+    def createInstances(self, iterations):
+        list_of_parameters = []
+        list_of_labels = []
+        #try:
+        for i in range(iterations):
+            (parameters, best_heuristic_index) = self.getBestHeuristicForNewInstance(i, list_of_parameters)
+            print("TEST: " + str(parameters) + " " + str(best_heuristic_index))
+            list_of_parameters.append(parameters)
+            list_of_labels.append(best_heuristic_index)
+        #except:
+        #    sys.exit("Do not handle explicit test sets yet")
+        return (list_of_parameters, list_of_labels)
+    
+    def getBestHeuristicForNewInstance(self, instance_number, list_of_parameters):
+        (module, parameters)  = self.query(instance_number, list_of_parameters)
         
-        Common.MODE=Common.EXPERIMENT
-        for i in range(self.options.learning_iterations):
-            instance_file = self.query(i)
-            module = Common.load(instance_file)
-            parameters = self.getModelStats(instance_file)
-            #print(parameters)
-            best_metric = 99999999999999999
-            best_heuristic = ""
-            for h in Options.HEURISTICS:
-                Options.SPLIT = h
-                for s in Options.EXPERIMENT_NUM_SPLIT:
-                    Options.NUM_SPLIT = s
-                    z3 = self.runZ3(module)
-                    if Options.VERBOSE_PRINT:
-                        experiment_print("===============================")
-                        experiment_print("| Iteration: " + str(i))
-                        experiment_print("| Heuristic: " + str(h))
-                        experiment_print("| num_split: " + str(s))
-                        experiment_print("===============================")
-                        experiment_print(str(parameters) + "," + str(z3.metric))
-                    if z3.metric < best_metric: 
-                        best_metric = z3.metric
-                        best_heuristic = self.heuristic_split_to_str(h, s)
-            print(best_heuristic)
-            #print(self.heuristic_list.index(best_heuristic))
-            self.writeLabeledInstanceToFile(str(parameters) + "," + str(z3.metric), self.options.data_file)
-        print()
+        #print(parameters)
+        best_metric = 99999999999999999
+        best_heuristic = ""
+        for h in Options.HEURISTICS:
+            Options.SPLIT = h
+            for s in Options.EXPERIMENT_NUM_SPLIT:
+                Options.NUM_SPLIT = s
+                z3 = self.runZ3(module)
+                if Options.VERBOSE_PRINT:
+                    experiment_print("===============================")
+                    experiment_print("| Iteration: " + str(instance_number))
+                    experiment_print("| Heuristic: " + str(h))
+                    experiment_print("| num_split: " + str(s))
+                    experiment_print("===============================")
+                    experiment_print(str(parameters) + "," + str(z3.metric))
+                if z3.metric < best_metric: 
+                    best_metric = z3.metric
+                    best_heuristic = self.heuristic_split_to_str(h, s)
+        print(best_heuristic)
+        return (parameters, self.heuristic_list.index(best_heuristic))
 
-    def query(self, instance_number):
+    def query(self, instance_number, list_of_parameters):
         #self.classifier.learn(self.parameters, self.labels)
-        instance_file = self.generateNewInstance(instance_number)
+        instance_file = self.generateNewInstance(instance_number, list_of_parameters)
         return instance_file
 
-    ''' ----------- GENERATE NEW INSTANCE ------------ '''
+    ''' 
+    #######################################################################
+    # GENERATE NEW INSTANCE  
+    #######################################################################
+    '''
 
-    def generateNewInstance(self, instance_number=0):
+    def generateNewInstance(self, instance_number=0, list_of_parameters=[]):
         instance_parameters = self.generateInstanceParameters()
         print("Generating instance "+ str(instance_number) + " with parameters: " +str(instance_parameters))
         
@@ -93,7 +119,14 @@ class Learner():
         self.checkIfInstanceIsUnsat(instance, instance_number)
         formatted_instance = self.formatFile(instance, instance_number)
         py_instance = self.generateClaferPy(formatted_instance)
-        return py_instance
+        
+        module = Common.load(py_instance)
+        parameters = self.getModelStats(py_instance)
+        if parameters in list_of_parameters:
+            experiment_print("Duplicate input generated: " + str(parameters) + ", trying again.")
+            return self.generateNewInstance(instance_number, list_of_parameters)
+        else:
+            return (module, parameters)
 
     def checkIfInstanceIsUnsat(self, instance, instance_number):
         opened_instance = open(instance, 'r')
@@ -138,8 +171,12 @@ class Learner():
         subprocess.call(['ClaferZ3', '--delimeter=\"\"', claferpyfile], stdout=instance)
         return file_name
 
-    '''---------- END GENERATE NEW INSTANCE --------- '''
-
+    ''' 
+    #######################################################################
+    # END GENERATE NEW INSTANCE  
+    #######################################################################
+    '''
+    
     def writeLabeledInstanceToFile(self, string, file):
         pass
         
@@ -151,10 +188,11 @@ class Learner():
         return Classifiers.LDAC(options)
    
     def numberHeuristics(self, heuristics, splits):
-        self.heuristic_list = []
+        heuristic_list = []
         for h in heuristics:
             for s in splits:
-                self.heuristic_list.append(self.heuristic_split_to_str(h, s))
+                heuristic_list.append(self.heuristic_split_to_str(h, s))
+        return heuristic_list
                 
     def heuristic_split_to_str(self, heuristic, split):
         return str(heuristic) + "#" + str(split)
@@ -167,7 +205,15 @@ class Learner():
             line = i.split()
             features.append((line[0], int(line[1]), int(line[2])))
         return features
-   
+    
+    def print_separator(self, string):
+        experiment_print()
+        experiment_print("===============================")
+        experiment_print("| " + string)
+        experiment_print("===============================")
+        experiment_print()
+        
+        
 if __name__ == '__main__':
     options = Options.setCommandLineOptions() 
     learner = Learner(options)

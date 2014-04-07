@@ -116,7 +116,7 @@ def standard_print(string):
     if(MODE != TEST and MODE != EXPERIMENT):
         print(string)
         
-def experiment_print(string):
+def experiment_print(string=""):
     if MODE == EXPERIMENT:
         print(string)
 

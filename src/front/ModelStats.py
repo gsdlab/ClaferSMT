@@ -45,7 +45,7 @@ def run(z3inst, module, features=None):
     if features:
         for (feature,_,_) in features:
             stats.append(getFeature(feature, z3inst, module))
-        return ",".join([str(i) for i in stats])
+        return stats
     else:
         numClafers = getNumClafers(z3inst)
         numBracketedConstraints = getNumBracketedConstraints(z3inst)
