@@ -119,7 +119,7 @@ class ParSolver():
         self.clock.tock("Merge")
         #print(merged_results)
         self.clock.tock("ParSolver")
-        self.clock.printParallelStats()
+        self.clock.getParallelStats(self.z3)
         return merged_results
         
         

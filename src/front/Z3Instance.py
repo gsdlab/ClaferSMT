@@ -177,6 +177,9 @@ class Z3Instance(object):
             debug_print("Checking for goals.")
             Visitor.visit(CheckForGoals.CheckForGoals(self), self.module)
         
+            if Common.MODE == Common.PRELOAD:
+                return 0
+        
             if Common.MODE == Common.MODELSTATS:
                 ModelStats.run(self, self.module)
                 return 0
@@ -209,7 +212,7 @@ class Z3Instance(object):
         
         
     def printStartDelimeter(self):
-        if Options.DELIMETER == "":
+        if Options.DELIMETER == Common.STANDARD_DELIMETER:
             standard_print("=== Instance " + str(self.delimeter_count+1) + " Begin ===")
             
             standard_print("")
@@ -217,7 +220,7 @@ class Z3Instance(object):
             standard_print(Options.DELIMETER)
     
     def printEndDelimeter(self):
-        if Options.DELIMETER == "":
+        if Options.DELIMETER == Common.STANDARD_DELIMETER:
             standard_print("--- Instance " + str(self.delimeter_count+1) + " End ---")
         self.delimeter_count = self.delimeter_count + 1
             

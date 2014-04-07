@@ -104,7 +104,7 @@ class Clock():
         for i in self.completed_event_map.keys():
             self.printEvent(i)
             
-    def printParallelStats(self):
+    def getParallelStats(self, z3):
         """
         Prints out all completed events.
         """
@@ -125,11 +125,13 @@ class Clock():
                 if "Merge" in key:
                     merge = val
                 longestConsumerPlusMerge = longestConsumer + merge
-            experiment_print("Longest Consumer: " + str(longestConsumer))  
-            experiment_print("Longest Task: " + str(longestTask))  
-            experiment_print("Merge: " + str(merge))  
-            experiment_print("Longest Consumer Plus Merge: " + str(longestConsumerPlusMerge))  
-            experiment_print("")  
+            if Options.VERBOSE_PRINT:
+                experiment_print("Longest Consumer: " + str(longestConsumer))  
+                experiment_print("Longest Task: " + str(longestTask))  
+                experiment_print("Merge: " + str(merge))  
+                experiment_print("Longest Consumer Plus Merge: " + str(longestConsumerPlusMerge))  
+                experiment_print("")  
+            z3.metric = longestConsumerPlusMerge
             #experiment_print(self)  
             return
         

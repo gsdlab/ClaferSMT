@@ -2,7 +2,7 @@ enum GCard = Xor | Some | Any
 enum Type = Optional | Mandatory
 enum ConType = Include | Exclude
 
-Feature 2 //@NumFeatures
+Feature @numClafers
   type -> Type
   gcard -> GCard
   level : int
@@ -11,6 +11,7 @@ Feature 2 //@NumFeatures
   
   [ level >= 0]
   [ level > 0 <=> parent_feature ]
+  [ level = 0 <=> type.ref = Mandatory ]
 
 Constraint 2
   conType -> ConType
@@ -19,5 +20,9 @@ Constraint 2
   [ left != right ]
    
 [one f : Feature | f.level = 0]
+
+
+//No 2 of the same constraint
+[no x;y : Constraint | (x.left.ref = y.left.ref || x.left.ref = y.right.ref) && (x.right.ref = y.left.ref || x.right.ref = y.right.ref)]
 
 //[ no f : Feature | f.level = @MaxDepth]

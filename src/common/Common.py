@@ -20,6 +20,7 @@ MODELSTATS = 5
 REPL = 6
 EXPERIMENT = 7
 ECLIPSE = 8
+PRELOAD = 9
 MODE = NORMAL
 BREAK = False
 FUNCTION_ID = 0 
@@ -29,7 +30,7 @@ FLAG = False
 string_map = {}
 STRCONS_SUB = "STRCONS_SUB"
 FIRST_REPL_LOOP = True
-
+STANDARD_DELIMETER="=== Instance "
 
 def mAnd(*args):
     '''

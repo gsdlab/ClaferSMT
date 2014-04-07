@@ -6,31 +6,69 @@ Created on Nov 7, 2013
 from common import Options
 from structures.ClaferSort import ClaferSort
 from visitors import VisitorTemplate, Visitor, CreateSorts
+import sys
 import visitors
 
-def run(z3inst, module):
-    ''' Get the number of clafers in the model. '''
-    
+
+
+
+features = {
+            
+            
+            }
+
+
+def runForFeatureModel(z3inst, module):
+    '''
+    #Clafers, #BracketedConstraints, #NumXors
+    '''
     numClafers = getNumClafers(z3inst)
     numBracketedConstraints = getNumBracketedConstraints(z3inst)
-    numBracketedConstraintOperatorsList = getNumBracketedConstraintsOperators(module)
-    numTopLevelClafers = getNumTopLevelClafers(z3inst)
-    (isObjectives, numObjectives) = getObjectiveStats(z3inst)
-    (maxCard, maxBoundedGroupCard) = getMaxCards(z3inst)
-    maxDepth = getMaxDepth(z3inst)
     numXors = getNumXors(z3inst)
+    #maxDepth = getMaxDepth(z3inst)
+    return (str(numClafers) + "," + str(numBracketedConstraints) + "," + str(numXors))#+ "," + str(maxDepth))
+    
+
+
+
+def getFeature(feature, z3inst, module):
+    if feature == "numClafers":
+        return getNumClafers(z3inst)
+    elif feature == "numXors":
+        return getNumXors(z3inst)
+    else:
+        sys.exit("unimplimented feature")
+
+def run(z3inst, module, features=None):
+    ''' Get the number of clafers in the model. '''
+    stats = []
+    if features:
+        for (feature,_,_) in features:
+            stats.append(getFeature(feature, z3inst, module))
+        return ",".join([str(i) for i in stats])
+    else:
+        numClafers = getNumClafers(z3inst)
+        numBracketedConstraints = getNumBracketedConstraints(z3inst)
+        numBracketedConstraintOperatorsList = getNumBracketedConstraintsOperators(module)
+        numTopLevelClafers = getNumTopLevelClafers(z3inst)
+        (isObjectives, numObjectives) = getObjectiveStats(z3inst)
+        (maxCard, maxBoundedGroupCard) = getMaxCards(z3inst)
+        maxDepth = getMaxDepth(z3inst)
+        numXors = getNumXors(z3inst)
+        
+        
+        print("Num Clafers: " + str(numClafers))
+        print("Num Bracketed Constraints: " + str(numBracketedConstraints))
+        print("Num Bracketed Cosntraint Operators: " + str(numBracketedConstraintOperatorsList))
+        print("Num Top Level Clafers: " + str(numTopLevelClafers))
+        print("Objectives?: " + str(isObjectives))
+        print("Num Objectives: " + str(numObjectives))
+        print("Max Card: " + str(maxCard))
+        print("Max Bounded Group Card: " + str(maxBoundedGroupCard))
+        print("Max Depth: " + str(maxDepth))
+        print("Num Xors: " + str(numXors))
     
     
-    print("Num Clafers: " + str(numClafers))
-    print("Num Bracketed Constraints: " + str(numBracketedConstraints))
-    print("Num Bracketed Cosntraint Operators: " + str(numBracketedConstraintOperatorsList))
-    print("Num Top Level Clafers: " + str(numTopLevelClafers))
-    print("Objectives?: " + str(isObjectives))
-    print("Num Objectives: " + str(numObjectives))
-    print("Max Card: " + str(maxCard))
-    print("Max Bounded Group Card: " + str(maxBoundedGroupCard))
-    print("Max Depth: " + str(maxDepth))
-    print("Num Xors: " + str(numXors))
     
     
 ''' ---------------------------------------------------------------'''    

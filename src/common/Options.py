@@ -61,6 +61,7 @@ MAGNIFYING_GLASS = False
 CORES=1
 
 SAP=1
+FEATURE_MODEL= 2
 NO_SPLIT=2
 SPLIT=SAP
 SERVER=""
@@ -68,6 +69,9 @@ SERVICE=""
 NUM_SPLIT=1
 HEURISTICS = []
 EXPERIMENT_NUM_SPLIT = []
+MODEL_CLASS = FEATURE_MODEL
+VERBOSE_PRINT=False
+
 
 def MODULE():
     from test import simple_feature_model, cc_example, all_threes, i147refdisambiguation, simp
@@ -177,21 +181,28 @@ def setCommandLineOptions():
     parser.add_argument('--printuniquenames', '-u', default=False, dest='unique_names',action='store_const',  const=True,  help='Print clafers with unique prefixes')
     parser.add_argument('--showinheritance', default=False, dest='show_inheritance',action='store_const',  const=True,  help='Show super-clafers explicitly')
     parser.add_argument('--version', '-v', default=False, dest='version',action='store_const',  const=True,  help='Print version number.')
-    parser.add_argument('--delimeter', default="", dest='delimeter', help='Delimeter between instances.')
+    parser.add_argument('--delimeter', default=Common.STANDARD_DELIMETER, dest='delimeter', help='Delimeter between instances.')
     parser.add_argument('--indentation', dest='indentation', default='doublespace', choices=['doublespace', 'tab'])
     parser.add_argument('--magnifyingglass', default=False, dest='magnifying_glass',action='store_const',  const=True,  help='Print equally optimal solutions if optimizing')
     
+    ''' parallel '''
     parser.add_argument('--cores', '-c', dest='cores', type=int, default='1', help='the number of cores for parallel processing')
     parser.add_argument('--server', default="Server", dest='server', help='The name of the Server clafer in SAP problems (used for parallelization)')
     parser.add_argument('--service', default="Service", dest='service', help='The name of the Service clafer in SAP problems (used for parallelization)')
     parser.add_argument('--split', dest='split', default='NO_SPLIT', choices=list(GeneralHeuristics.HeuristicsMap.keys()) + ['NO_SPLIT'])
     parser.add_argument('--numsplit', dest='numsplit', type=int, default='-1', help='The number of splits to perform (default = #cores)')
-    parser.add_argument('--heuristics', dest='heuristics', default='NO_SPLIT', nargs='*', choices=list(GeneralHeuristics.HeuristicsMap.keys()) + ['NO_SPLIT'])
+    parser.add_argument('--heuristics', dest='heuristics', default=['NO_SPLIT'], nargs='*', choices=list(GeneralHeuristics.HeuristicsMap.keys()) + ['NO_SPLIT'])
     parser.add_argument('--experimentnumsplits', dest='experimentnumsplits', type=int, default='-1', nargs='*', help='List of the number of splits to perform (default = #cores)')
-    
-    parser.add_argument('--classifier', dest='classifier', default='svm',
-                       choices=['svm', 'classtree'])
+    parser.add_argument('--modelclass', dest='model_class', default='featuremodel', choices=['featuremodel'])
+    parser.add_argument('--classifier', dest='classifier', default='ldac', choices=['ldac', 'svm', 'classtree'])
     parser.add_argument('--learningiterations', dest='learning_iterations', type=int, default='10', help='the number of iterations through the learning process')
+    
+    parser.add_argument('--datafile', default="data", dest='data_file', help='File to output learned instances.')
+    parser.add_argument('--featuresfile', default="features", dest='features_file', help='The features to use for learning, as well as inclusive ranges.')
+    parser.add_argument('--generatorfile', default="generator", dest='generator_file', help='File to output learned instances.')
+    parser.add_argument('--outputdirectory', default="./", dest='output_directory', help='The directory for any output.')
+    parser.add_argument('--formatter', default="formatter", dest='formatter', help='File to format generated instances properly.')
+    parser.add_argument('--verboseprint', default=False, dest='verbose_print',action='store_const',  const=True,  help='Prints extra output.')
     
     args = parser.parse_args()
     if args.version:
@@ -239,6 +250,8 @@ def setCommandLineOptions():
     global SHOW_INHERITANCE
     SHOW_INHERITANCE = args.show_inheritance
     global DELIMETER
+    if args.delimeter =="\"\"":
+        args.delimeter = ""
     DELIMETER = args.delimeter
     global CORES
     CORES = args.cores
@@ -254,6 +267,11 @@ def setCommandLineOptions():
         SPLIT=SAP
     else:
         SPLIT=NO_SPLIT
+    
+    global MODEL_CLASS
+    if args.model_class == "featuremodel":
+        MODEL_CLASS=FEATURE_MODEL
+        
     global NUM_SPLIT
     if args.numsplit == -1:
         NUM_SPLIT = CORES
@@ -266,6 +284,9 @@ def setCommandLineOptions():
         EXPERIMENT_NUM_SPLIT = [args.experimentnumsplits]
     else:
         EXPERIMENT_NUM_SPLIT = args.experimentnumsplits
+        
+    global VERBOSE_PRINT
+    VERBOSE_PRINT = args.verbose_print
         
     return args    
     
