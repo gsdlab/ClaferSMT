@@ -6,14 +6,16 @@ Created on Nov 21, 2013
 
 
 
-from common import Options
+from common import Options, Common
 from common.Clock import Clock
 from gia import consts
 from gia.consts import METRICS_MINIMIZE, METRICS_MAXIMIZE
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from parallel import Consumer
-from parallel.heuristics import SAP
+from parallel.heuristics import SAP, GeneralHeuristics
+from parallel.heuristics.GeneralHeuristics import no_split, \
+    random_optional_clafer_toggle
 from visitors import PrintHierarchy, Visitor
 from z3 import *
 import argparse
@@ -73,6 +75,10 @@ class ParSolver():
         self.consumerConstraints = self.splitter()
     
     def run(self):
+        if not self.consumerConstraints:
+            self.z3.metric = Common.INFINITE
+            return []
+            
         mgr = multiprocessing.Manager()
         taskQueue = mgr.Queue()
         #for i in range(Options.CORES):
@@ -171,15 +177,20 @@ class ParSolver():
             
                  
     
-    def splitter(self):
-        
-        if Options.SPLIT == Options.SAP:
+    def splitter(self): 
+        heuristic = GeneralHeuristics.heuristics[Options.SPLIT]
+        return heuristic(self.z3, self.module, Options.NUM_SPLIT)
+    
+    
+        if Options.SPLIT == "random_optional_clafer_toggle":
+            return random_optional_clafer_toggle(self.z3, Options.NUM_SPLIT)
+        elif Options.SPLIT == Options.SAP:
             print(self.z3.z3_sorts)
             server =  self.z3.getSort("c0_" + Options.SERVER)
             service = self.z3.getSort("c0_" + Options.SERVICE)
             print(server)
             print(service)
-            sap = SAP.SAP(self.solvers[0], server, service)
+            sap = SAP(self.solvers[0], server, service)
             jobs = sap.random_unique_service_random_server()
             #print(jobs)
             print(jobs)
@@ -189,7 +200,8 @@ class ParSolver():
             print(jobs)
             return jobs
         else: 
-            return [True for _ in range(Options.NUM_SPLIT)]
+            print("Warning, fell through to no_split")
+            return no_split(Options.NUM_SPLIT)
     
     
     

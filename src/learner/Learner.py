@@ -59,49 +59,27 @@ class Learner():
         self.classifier.learn(training_set_parameters, training_set_labels)
         coefficients = self.classifier.getCoefficients()
         print(coefficients)
-    
-    
-    def createInstances(self, iterations):
-        list_of_parameters = []
-        list_of_labels = []
-        #try:
-        for i in range(iterations):
-            (parameters, best_heuristic_index) = self.getBestHeuristicForNewInstance(i, list_of_parameters)
-            print("TEST: " + str(parameters) + " " + str(best_heuristic_index))
-            list_of_parameters.append(parameters)
-            list_of_labels.append(best_heuristic_index)
-        #except:
-        #    sys.exit("Do not handle explicit test sets yet")
-        return (list_of_parameters, list_of_labels)
-    
-    def getBestHeuristicForNewInstance(self, instance_number, list_of_parameters):
-        (module, parameters)  = self.query(instance_number, list_of_parameters)
         
-        #print(parameters)
-        best_metric = 99999999999999999
-        best_heuristic = ""
-        for h in Options.HEURISTICS:
-            Options.SPLIT = h
-            for s in Options.EXPERIMENT_NUM_SPLIT:
-                Options.NUM_SPLIT = s
-                z3 = self.runZ3(module)
-                if Options.VERBOSE_PRINT:
-                    experiment_print("===============================")
-                    experiment_print("| Iteration: " + str(instance_number))
-                    experiment_print("| Heuristic: " + str(h))
-                    experiment_print("| num_split: " + str(s))
-                    experiment_print("===============================")
-                    experiment_print(str(parameters) + "," + str(z3.metric))
-                if z3.metric < best_metric: 
-                    best_metric = z3.metric
-                    best_heuristic = self.heuristic_split_to_str(h, s)
-        print(best_heuristic)
-        return (parameters, self.heuristic_list.index(best_heuristic))
-
-    def query(self, instance_number, list_of_parameters):
-        #self.classifier.learn(self.parameters, self.labels)
-        instance_file = self.generateNewInstance(instance_number, list_of_parameters)
-        return instance_file
+        self.print_separator("Testing")
+        correct_ratio = self.test(test_set_parameters, test_set_labels)
+        print("Ratio of correct labels: " + str(correct_ratio))
+    
+    
+    def test(self, test_set_parameters, test_set_labels):
+        num_correct = 0
+        for params,best_label in zip(test_set_parameters, test_set_labels):
+            predicted_label = self.classifier.predict(params)
+            if predicted_label == best_label:
+                experiment_print("Correctly Labeled Instance: " + str(params) + " " + str(best_label))
+                num_correct = num_correct + 1
+            else:
+                experiment_print("Incorrectly Labeled Instance: " + str(params) 
+                      + ", Predicted: " + str(predicted_label)
+                      + ", Best: " + str(best_label))
+        return num_correct / len(test_set_labels)
+            
+        
+    
 
     ''' 
     #######################################################################
@@ -127,6 +105,47 @@ class Learner():
             return self.generateNewInstance(instance_number, list_of_parameters)
         else:
             return (module, parameters)
+
+    def createInstances(self, iterations):
+        list_of_parameters = []
+        list_of_labels = []
+        #try:
+        for i in range(iterations):
+            (parameters, best_heuristic_index) = self.getBestHeuristicForNewInstance(i, list_of_parameters)
+            experiment_print("TEST: " + str(parameters) + " " + str(best_heuristic_index))
+            list_of_parameters.append(parameters)
+            list_of_labels.append(best_heuristic_index)
+        #except:
+        #    sys.exit("Do not handle explicit test sets yet")
+        return (list_of_parameters, list_of_labels)
+    
+    def getBestHeuristicForNewInstance(self, instance_number, list_of_parameters):
+        (module, parameters)  = self.query(instance_number, list_of_parameters)
+        #print(parameters)
+        best_metric = Common.INFINITE
+        best_heuristic = ""
+        for h in Options.HEURISTICS:
+            Options.SPLIT = h
+            for s in Options.EXPERIMENT_NUM_SPLIT:
+                Options.NUM_SPLIT = s
+                z3 = self.runZ3(module)
+                if Options.VERBOSE_PRINT:
+                    experiment_print("===============================")
+                    experiment_print("| Iteration: " + str(instance_number))
+                    experiment_print("| Heuristic: " + str(h))
+                    experiment_print("| num_split: " + str(s))
+                    experiment_print("===============================")
+                    experiment_print(str(parameters) + "," + str(z3.metric))
+                if z3.metric < best_metric: 
+                    best_metric = z3.metric
+                    best_heuristic = self.heuristic_split_to_str(h, s)
+        print(best_heuristic)
+        return (parameters, self.heuristic_list.index(best_heuristic))
+
+    def query(self, instance_number, list_of_parameters):
+        #self.classifier.learn(self.parameters, self.labels)
+        instance_file = self.generateNewInstance(instance_number, list_of_parameters)
+        return instance_file
 
     def checkIfInstanceIsUnsat(self, instance, instance_number):
         opened_instance = open(instance, 'r')
@@ -202,6 +221,10 @@ class Learner():
         features = []
         f = open(file)
         for i in f:
+            if "//" in i:
+                i = i.split("//", 1)[0]
+            if i.strip() == "":
+                continue
             line = i.split()
             features.append((line[0], int(line[1]), int(line[2])))
         return features

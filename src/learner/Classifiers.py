@@ -40,7 +40,7 @@ class LDAC(Classifier):
         super().__init__()
     
     def getCoefficients(self):
-        if self.single_label < 0:
+        if self.single_label >= 0:
             return [0]
         return self.classifier.w()
     

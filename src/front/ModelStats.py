@@ -32,15 +32,19 @@ def runForFeatureModel(z3inst, module):
 
 
 def getFeature(feature, z3inst, module):
+    print(feature)
     if feature == "numClafers":
         return getNumClafers(z3inst)
     elif feature == "numXors":
         return getNumXors(z3inst)
+    elif feature == "numOpts":
+        return getNumOpts(z3inst)
+    elif feature == "numBracketedConstraints":
+        return getNumBracketedConstraints(z3inst)
     else:
         sys.exit("unimplimented feature")
 
 def run(z3inst, module, features=None):
-    ''' Get the number of clafers in the model. '''
     stats = []
     if features:
         for (feature,_,_) in features:
@@ -97,6 +101,13 @@ def getNumXors(z3inst):
         if i.lowerGCard == 1 and i.upperGCard == 1:
             numXors = numXors + 1
     return numXors
+
+def getNumOpts(z3inst):
+    numOpts = 0
+    for i in z3inst.z3_sorts.values():
+        if i.lowerGCard == 1:
+            numOpts = numOpts + 1
+    return numOpts
 
 ''' ---------------------------------------------------------------'''    
 

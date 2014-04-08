@@ -31,6 +31,7 @@ string_map = {}
 STRCONS_SUB = "STRCONS_SUB"
 FIRST_REPL_LOOP = True
 STANDARD_DELIMETER="=== Instance "
+INFINITE = 9999999999999999999999999999
 
 def mAnd(*args):
     '''
@@ -143,6 +144,8 @@ def reset():
     CONSTRAINT_ID = 0
     STRING_ID = 0
 
+def is_power2(num):
+    return num != 0 and ((num & (num - 1)) == 0)
 
 def min2(l,r):
     '''

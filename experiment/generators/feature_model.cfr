@@ -4,16 +4,21 @@ enum ConType = Include | Exclude
 
 Feature @numClafers
   type -> Type
+  [type = Optional => this in OptFeatures
   gcard -> GCard
+  [gcard = Xor => this in XorFeatures]
   level : int
   parent_feature -> Feature ?
     [ parent.level = parent_feature.level + 1 ]
   
-  [ level >= 0]
+  [ level >= 0 ]
   [ level > 0 <=> parent_feature ]
   [ level = 0 <=> type.ref = Mandatory ]
 
-Constraint 2
+XorFeatures -> Feature 0..@numXors
+OptFeatures -> Feature 0..@numOpts
+
+Constraint @numBracketedConstraints
   conType -> ConType
   left -> Feature
   right -> Feature
@@ -21,8 +26,8 @@ Constraint 2
    
 [one f : Feature | f.level = 0]
 
-
 //No 2 of the same constraint
 [no x;y : Constraint | (x.left.ref = y.left.ref || x.left.ref = y.right.ref) && (x.right.ref = y.left.ref || x.right.ref = y.right.ref)]
 
 //[ no f : Feature | f.level = @MaxDepth]
+
