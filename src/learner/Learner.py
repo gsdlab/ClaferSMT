@@ -7,6 +7,7 @@ from common import Options, Common
 from common.Common import experiment_print
 from front import Z3Instance, ModelStats
 from learner import Classifiers
+from parallel.heuristics.GeneralHeuristics import HeuristicFailureException
 import numpy as np
 import os
 import random
@@ -47,20 +48,28 @@ class Learner():
         Common.MODE=Common.EXPERIMENT  
         
         self.print_separator("Generating Test Set")
+        self.mode = "test"
         (test_set_parameters, test_set_labels) = self.createInstances(int(self.options.test_set))
-        print(test_set_parameters)
-        print(test_set_labels)
+        
         
         self.print_separator("Training")
+        self.mode = "training"
         (training_set_parameters, training_set_labels) =  self.createInstances(int(self.options.learning_iterations))
-        print(training_set_parameters)
-        print(training_set_labels)
+        
     
+        self.print_separator("Learning")
+        print()
+        print("Test parameters: " + str(test_set_parameters))
+        print("Test labels: " + str(test_set_labels))
+        print()
+        print("Training parameters: " + str(training_set_parameters))
+        print("Training labels: " + str(training_set_labels))
         self.classifier.learn(training_set_parameters, training_set_labels)
         coefficients = self.classifier.getCoefficients()
-        print(coefficients)
+        print("Coefficients: " + str(coefficients))
         
         self.print_separator("Testing")
+        print()
         correct_ratio = self.test(test_set_parameters, test_set_labels)
         print("Ratio of correct labels: " + str(correct_ratio))
     
@@ -89,15 +98,13 @@ class Learner():
 
     def generateNewInstance(self, instance_number=0, list_of_parameters=[]):
         instance_parameters = self.generateInstanceParameters()
-        print("Generating instance "+ str(instance_number) + " with parameters: " +str(instance_parameters))
-        
+        print("\nGenerating " + self.mode + " instance "+ str(instance_number) + " with parameters: " +str(instance_parameters))
         cfr_file = self.plugIntoGenerator(instance_parameters)
         generated_clafer_file = self.generateClaferPy(cfr_file)
         instance = self.generateInstance(generated_clafer_file, instance_number)
         self.checkIfInstanceIsUnsat(instance, instance_number)
         formatted_instance = self.formatFile(instance, instance_number)
         py_instance = self.generateClaferPy(formatted_instance)
-        
         module = Common.load(py_instance)
         parameters = self.getModelStats(py_instance)
         if parameters in list_of_parameters:
@@ -128,7 +135,12 @@ class Learner():
             Options.SPLIT = h
             for s in Options.EXPERIMENT_NUM_SPLIT:
                 Options.NUM_SPLIT = s
-                z3 = self.runZ3(module)
+                try:
+                    z3 = self.runZ3(module)
+                except HeuristicFailureException as e:
+                    experiment_print(e.value)
+                    continue
+                experiment_print("Number of models: "  + str(z3.num_models))
                 if Options.VERBOSE_PRINT:
                     experiment_print("===============================")
                     experiment_print("| Iteration: " + str(instance_number))
@@ -174,18 +186,18 @@ class Learner():
         return new_file
     
     def formatFile(self, file, instance_number):
-        file_name = self.options.output_directory + "inst" + str(instance_number) + ".cfr"
+        file_name = self.options.output_directory + self.mode + str(instance_number) + ".cfr"
         opened_temp_file = open(file_name, "w")
         subprocess.call(['python3', self.options.formatter, file], stdout=opened_temp_file)
         return file_name
-
+    
     def generateClaferPy(self, file):
         fnull = open(os.devnull, "w")
         subprocess.call(['clafer', '-m', 'python', file], stdout=fnull)
         return file.split(".")[0] + ".py"
     
     def generateInstance(self, claferpyfile, instance_number=0):
-        file_name = self.options.output_directory + "temp" + str(instance_number) + ".cfr"
+        file_name = self.options.output_directory + self.mode + "_unformatted" + str(instance_number) + ".cfr"
         instance = open(file_name, "w")
         subprocess.call(['ClaferZ3', '--delimeter=\"\"', claferpyfile], stdout=instance)
         return file_name
@@ -234,15 +246,10 @@ class Learner():
         experiment_print("===============================")
         experiment_print("| " + string)
         experiment_print("===============================")
-        experiment_print()
         
         
 if __name__ == '__main__':
     options = Options.setCommandLineOptions() 
     learner = Learner(options)
     learner.run()
-    
-
-    
-        
         

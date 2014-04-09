@@ -24,7 +24,7 @@ def runForFeatureModel(z3inst, module):
     '''
     numClafers = getNumClafers(z3inst)
     numBracketedConstraints = getNumBracketedConstraints(z3inst)
-    numXors = getNumXors(z3inst)
+    numXors = getNumXorGCard(z3inst)
     #maxDepth = getMaxDepth(z3inst)
     return (str(numClafers) + "," + str(numBracketedConstraints) + "," + str(numXors))#+ "," + str(maxDepth))
     
@@ -32,13 +32,12 @@ def runForFeatureModel(z3inst, module):
 
 
 def getFeature(feature, z3inst, module):
-    print(feature)
     if feature == "numClafers":
         return getNumClafers(z3inst)
-    elif feature == "numXors":
-        return getNumXors(z3inst)
-    elif feature == "numOpts":
-        return getNumOpts(z3inst)
+    elif feature == "numXorGCard":
+        return getNumXorGCard(z3inst)
+    elif feature == "numOptionalGCard":
+        return getNumOptionalGCard(z3inst)
     elif feature == "numBracketedConstraints":
         return getNumBracketedConstraints(z3inst)
     else:
@@ -58,19 +57,20 @@ def run(z3inst, module, features=None):
         (isObjectives, numObjectives) = getObjectiveStats(z3inst)
         (maxCard, maxBoundedGroupCard) = getMaxCards(z3inst)
         maxDepth = getMaxDepth(z3inst)
-        numXors = getNumXors(z3inst)
-        
+        numXors = getNumXorGCard(z3inst)
+        numOptionalGCard = getNumOptionalGCard(z3inst)
         
         print("Num Clafers: " + str(numClafers))
         print("Num Bracketed Constraints: " + str(numBracketedConstraints))
-        print("Num Bracketed Cosntraint Operators: " + str(numBracketedConstraintOperatorsList))
+        print("Num Bracketed Constraint Operators: " + str(numBracketedConstraintOperatorsList))
         print("Num Top Level Clafers: " + str(numTopLevelClafers))
         print("Objectives?: " + str(isObjectives))
         print("Num Objectives: " + str(numObjectives))
         print("Max Card: " + str(maxCard))
         print("Max Bounded Group Card: " + str(maxBoundedGroupCard))
         print("Max Depth: " + str(maxDepth))
-        print("Num Xors: " + str(numXors))
+        print("Num Xors GCard: " + str(numXors))
+        print("Num Optional GCard: " + str(numOptionalGCard))
     
     
     
@@ -95,20 +95,22 @@ def getMaxDepth(z3inst):
     
 ''' ---------------------------------------------------------------'''    
 
-def getNumXors(z3inst):
+def getNumXorGCard(z3inst):
     numXors = 0
     for i in z3inst.z3_sorts.values():
         if i.lowerGCard == 1 and i.upperGCard == 1:
             numXors = numXors + 1
     return numXors
 
-def getNumOpts(z3inst):
+def getNumOptionalGCard(z3inst):
     numOpts = 0
     for i in z3inst.z3_sorts.values():
+        #print(str(i) + str(i.lowerGCard))
         if i.lowerGCard == 1:
             numOpts = numOpts + 1
     return numOpts
 
+#get a better version of clafer (maybe), fix the FM generator to actually work for gcards
 ''' ---------------------------------------------------------------'''    
 
 def getObjectiveStats(z3inst):

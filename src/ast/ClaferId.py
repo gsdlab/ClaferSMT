@@ -12,11 +12,11 @@ class ClaferId(object):
     '''
 
 
-    def __init__(self, moduleName, my_id, isTop):
+    def __init__(self, moduleName, my_id, isTop, claferSort = None):
         self.moduleName = moduleName
         self.id = my_id
         self.isTop = isTop
-        self.claferSort = None #Z3Clafer
+        self.claferSort = claferSort #Z3Clafer
         
         
     def __str__(self):

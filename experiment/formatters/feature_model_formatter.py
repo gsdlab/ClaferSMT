@@ -21,9 +21,13 @@ def run(fname):
     currConLeft = ""
     currConRight = ""
     currConOp = ""
-    
+
+    mostRecentFeature = ""
+    currParent = ""
+
     features = []
     constraints = []
+    parentConstraints = []
     
     while content:
         i = content.pop(0)
@@ -36,11 +40,11 @@ def run(fname):
                 currCard = " "
         elif "gcard" in i:
             if "Xor" in i:
-                currGCard = "1..1"
+                currGCard = "xor" #"1..1"
             elif "Some" in i:
-                currGCard = "1..*"
+                currGCard = "some" #"1..*"
             else:
-                currGCard = "0..*"
+                currGCard = "" #"0..*"
         elif "conType" in i:
             if "Include" in i:
                 currConPrefix = ""
@@ -68,14 +72,23 @@ def run(fname):
         
         if(currCard != "" and currGCard != "" and currFeature != ""):
             constraints.append(currGCard + " " + currFeature + currCard)
+            mostRecentFeature = currFeature
             currFeature = ""
             currCard = ""
             currGCard = ""
+        if currParent != "":
+            parentConstraints.append("[" + mostRecentFeature + " => " + currParent + "]") 
+            currParent = ""
             
+    print("// Features")
     for i in features:
         print(i)
+    print("\n// Constraints")
     for i in constraints:
         print(i) 
+    print("\n// Parent Constraints")
+    for i in parentConstraints:
+        print(i)
    
 if __name__ == '__main__':
     run(sys.argv[1])

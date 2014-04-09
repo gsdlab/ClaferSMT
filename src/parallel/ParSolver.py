@@ -14,8 +14,6 @@ from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from parallel import Consumer
 from parallel.heuristics import SAP, GeneralHeuristics
-from parallel.heuristics.GeneralHeuristics import no_split, \
-    random_optional_clafer_toggle
 from visitors import PrintHierarchy, Visitor
 from z3 import *
 import argparse
@@ -29,6 +27,7 @@ import os
 import random
 import sys
 import time
+
 
 
 
@@ -183,7 +182,7 @@ class ParSolver():
     
     
         if Options.SPLIT == "random_optional_clafer_toggle":
-            return random_optional_clafer_toggle(self.z3, Options.NUM_SPLIT)
+            return GeneralHeuristics.random_optional_gcard_clafer_toggle(self.z3, Options.NUM_SPLIT)
         elif Options.SPLIT == Options.SAP:
             print(self.z3.z3_sorts)
             server =  self.z3.getSort("c0_" + Options.SERVER)
@@ -201,7 +200,7 @@ class ParSolver():
             return jobs
         else: 
             print("Warning, fell through to no_split")
-            return no_split(Options.NUM_SPLIT)
+            return GeneralHeuristics.no_split(Options.NUM_SPLIT)
     
     
     

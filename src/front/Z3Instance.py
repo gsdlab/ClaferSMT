@@ -205,7 +205,8 @@ class Z3Instance(object):
             debug_print("Getting models.")  
             self.clock.tock("translation")
             models = self.get_models(Options.NUM_INSTANCES)
-            return len(models)
+            self.num_models = len(models)
+            return self.num_models
         except UnusedAbstractException as e:
             print(str(e))
             return 0

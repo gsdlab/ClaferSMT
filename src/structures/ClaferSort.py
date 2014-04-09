@@ -278,6 +278,7 @@ class  ClaferSort(object):
                     self.constraints.addCardConstraint(self.summs[i] <= self.upperCardConstraint)
         
     def addGroupCardConstraints(self):
+        #print(str(self) + str(self.element.gcard.interval))
         self.upperGCard = self.element.gcard.interval[1].value
         self.lowerGCard = self.element.gcard.interval[0].value
         if(len(self.fields) == 0 and ((not self.superSort) or self.superSort.fields == 0)):

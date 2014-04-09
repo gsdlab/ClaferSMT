@@ -1,5 +1,5 @@
 numClafers 5 10
-numBracketedConstraints 1 10
-numXors 1 10
-numOpts 1 10
+numBracketedConstraints 1 3 //denotes the number of CTCs, NOT bracketed constraints, due to parent-child constraints
+numXorGCard 1 10
+numOptionalGCard 1 10
 // numMands 1 10

@@ -1,6 +1,2 @@
-A ->> int 3
-  [this.ref > 0 && this.ref < 2]
-C -> int
-[C = 1]
-B : int
-[B = sum (A.ref ++ C.ref)]
+A 1..2
+[#A =1]

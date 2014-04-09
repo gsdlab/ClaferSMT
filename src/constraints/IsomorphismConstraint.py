@@ -19,8 +19,6 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
     :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
     '''
     
-    zero_pos = ((IntegerLiteral.IntegerLiteral(0),IntegerLiteral.IntegerLiteral(0)), (IntegerLiteral.IntegerLiteral(0),IntegerLiteral.IntegerLiteral(0)))
-    
     def __init__(self, z3, model):
         '''
         :param z3: The Z3 instance.
@@ -127,58 +125,12 @@ class IsomorphismConstraint(VisitorTemplate.VisitorTemplate):
         
         createBracketed = CreateBracketedConstraints.CreateBracketedConstraints(self.z3, True)
         #print(bigConstraint)
-        createBracketed.isomorphismVisit(bigConstraint)
+        createBracketed.generatedConstraintVisit(bigConstraint)
         self.z3.clock.tock("isomorphism visiting")
         
         #self.createConstraint(topCardStrings, someStrings, otherConstraints)
         
-    def createArg(self, arg_id):
-        #Exp.Exp()), ( iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="c14_F_sort_0", isTop=True)]
-        return Exp.Exp(expType="Argument", exptype="Set", parentId="", pos=self.zero_pos, \
-                       iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id=arg_id, isTop=False)]) 
     
-    def createLocalDecl(self, arg):
-        return LocalDeclaration.LocalDeclaration(arg)
-    
-    def createInteger(self, arg):
-        return IntegerLiteral.IntegerLiteral(int(arg))
-    
-    def createDeclaration(self, locals, sort):
-        return Declaration.Declaration(isDisjunct=False, localDeclarations=locals,  body=
-        Exp.Exp(expType="Body", exptype="Set", parentId="", pos=self.zero_pos, iExpType="IClaferId", \
-                iExp=[ClaferId.ClaferId(moduleName="", my_id=sort, isTop=True)]))
-    
-    def createFunExpr(self, op, elems):
-        return FunExp.FunExp(operation = op, elements=elems) 
-    
-    def createJoin(self, left, right):
-        return self.createFunExpr(".", [left,right])
-     
-    def createCard(self, arg):
-        return self.createFunExpr("#", [arg])  
-    
-    def createEquals(self, left, right):
-        return self.createFunExpr("=", [left,right])  
-    
-    def createIn(self, left, right):
-        return self.createFunExpr("in", [left,right])   
-    
-    def createNotEquals(self, left, right):
-        return self.createFunExpr("!=", [left,right])   
-    
-    def createAnd(self, left, right):
-        return self.createFunExpr("&&", [left,right])   
-    
-    def createNot(self, arg):
-        return self.createFunExpr("!", [arg])  
-    
-    def createSome(self, decl):
-        some =  DeclPExp.DeclPExp(quantifier="Some", declaration=decl, bodyParentExp=None)
-        if not self.topSome:
-            self.topSome = some
-        if self.currSome:
-            self.currSome.bodyParentExp = some
-        self.currSome = some
     
     def addConstraint(self, other):
         if self.constraint:

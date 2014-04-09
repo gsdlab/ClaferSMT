@@ -6,7 +6,6 @@ Created on Oct 6, 2013
 
 from common import Common
 from optparse import OptionParser
-from parallel.heuristics import GeneralHeuristics
 import argparse
 import sys
 
@@ -164,6 +163,7 @@ def foo_callback(option, opt, value, parser):
 
 
 def setCommandLineOptions():
+    from parallel.heuristics import GeneralHeuristics
     parser = argparse.ArgumentParser(description='Process a clafer model with Z3.')
     parser.add_argument('file', help='the clafer python file', nargs='?')
     parser.add_argument('--mode', '-m', dest='mode', default='normal',

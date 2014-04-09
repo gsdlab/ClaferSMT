@@ -46,7 +46,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.z3 = z3
         self.BRACKETEDCONSCOUNT = 1
     
-    def isomorphismVisit(self, element):
+    def generatedConstraintVisit(self, element):
         '''
         :param element: The isomorphism constraint to be added to the solver. 
         :type element: :class:`~ast.FunExp`
@@ -57,9 +57,9 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.inConstraint = True
         self.currentConstraint = BracketedConstraint.BracketedConstraint(self.z3, [])
         self.funexpVisit(element)
-        self.currentConstraint.endProcessing()
-        self.currentConstraint = None
-        self.inConstraint = False
+        #return self.currentConstraint.stack.pop()
+        self.currentConstraint.endProcessing(addToZ3=False)
+        return self.currentConstraint.constraints.pop()
         
     
     def objectiveVisit(self, element):

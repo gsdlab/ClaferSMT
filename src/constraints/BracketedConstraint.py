@@ -4,7 +4,6 @@ Created on Apr 29, 2013
 @author: ezulkosk
 '''
 from common import Assertions
-from common.Common import debug_print
 from constraints import Constraints
 from constraints.Constraints import GenericConstraints
 from structures.ExprArg import BoolArg
@@ -186,7 +185,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
         Assertions.nonEmpty(finalExprs)
         self.stack.append(finalExprs)
     
-    def endProcessing(self):
+    def endProcessing(self, addToZ3 = True):
         if not self.stack:
             return
         self.value = self.stack.pop()
@@ -204,7 +203,8 @@ class BracketedConstraint(Constraints.GenericConstraints):
                 for j in i.getInstanceSorts():
                     (_, mask) = j
                     self.addConstraint(mask.pop_value())
-        self.z3.z3_bracketed_constraints.append(self)
+        if addToZ3:
+            self.z3.z3_bracketed_constraints.append(self)
         
     
     def __str__(self):
