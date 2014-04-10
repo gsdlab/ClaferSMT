@@ -162,7 +162,7 @@ def foo_callback(option, opt, value, parser):
     setattr(parser.values, option.dest, value.split(','))
 
 
-def setCommandLineOptions():
+def setCommandLineOptions(learner = False):
     from parallel.heuristics import GeneralHeuristics
     parser = argparse.ArgumentParser(description='Process a clafer model with Z3.')
     parser.add_argument('file', help='the clafer python file', nargs='?')
@@ -191,18 +191,18 @@ def setCommandLineOptions():
     parser.add_argument('--service', default="Service", dest='service', help='The name of the Service clafer in SAP problems (used for parallelization)')
     parser.add_argument('--split', dest='split', default='NO_SPLIT', choices=list(GeneralHeuristics.heuristics) + ['NO_SPLIT'])
     parser.add_argument('--numsplit', dest='numsplit', type=int, default='-1', help='The number of splits to perform (default = #cores)')
-    parser.add_argument('--heuristics', dest='heuristics', default=['NO_SPLIT'], nargs='*', choices=list(GeneralHeuristics.heuristics.keys()) + ['NO_SPLIT'])
+    parser.add_argument('--heuristicsfile', dest='heuristics_file', default='heuristics', help='File containing the heuristics to be tested')
     parser.add_argument('--experimentnumsplits', dest='experimentnumsplits', type=int, default='-1', nargs='*', help='List of the number of splits to perform (default = #cores)')
     parser.add_argument('--modelclass', dest='model_class', default='featuremodel', choices=['featuremodel'])
     parser.add_argument('--classifier', dest='classifier', default='ldac', choices=['ldac', 'svm', 'classtree'])
     parser.add_argument('--learningiterations', dest='learning_iterations', type=int, default='10', help='the number of iterations through the learning process')
     
     parser.add_argument('--datafile', default="data", dest='data_file', help='File to output learned instances.')
-    parser.add_argument('--featuresfile', default="features", dest='features_file', help='The features to use for learning, as well as inclusive ranges.')
-    parser.add_argument('--generatorfile', default="generator", dest='generator_file', help='File to output learned instances.')
-    parser.add_argument('--outputdirectory', default="./", dest='output_directory', help='The directory for any output.')
-    parser.add_argument('--formatter', default="formatter", dest='formatter', help='File to format generated instances properly.')
-    parser.add_argument('--verboseprint', default=False, dest='verbose_print',action='store_const',  const=True,  help='Prints extra output.')
+    parser.add_argument('--parametersfile', default="", dest='parameters_file', help='File containing the parameters to use for learning, as well as inclusive ranges')
+    parser.add_argument('--generatorfile', default="", dest='generator_file', help='File to output learned instances.')
+    parser.add_argument('--outputdirectory', default="./", dest='output_directory', help='The directory for any output')
+    parser.add_argument('--formatter', default="", dest='formatter', help='File to format generated instances properly')
+    parser.add_argument('--verboseprint', default=False, dest='verbose_print',action='store_const',  const=True,  help='Prints extra output    ')
 
     
     args = parser.parse_args()
@@ -215,7 +215,7 @@ def setCommandLineOptions():
         return
     else:
         ECLIPSE = False
-    if not args.file and not (args.mode in ['experiment', 'test', 'one', 'all']):
+    if not args.file and not (args.mode in ['experiment', 'test', 'one', 'all'] or learner):
         parser.print_help()
         sys.exit("\nERROR: If no file is given, mode must be set to [experiment | test | one | all].")
     else:
@@ -225,11 +225,9 @@ def setCommandLineOptions():
     MODE = modeMap[args.mode]
     global PRINT_CONSTRAINTS
     PRINT_CONSTRAINTS = args.printconstraints
-    global HEURISTICS
-    HEURISTICS = args.heuristics
     
     global PROFILING
-    PROFILING = args.profiling
+    PROFILING = (args.profiling or learner) 
     global CPROFILING
     CPROFILING = args.cprofiling
     global NUM_INSTANCES

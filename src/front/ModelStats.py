@@ -110,7 +110,6 @@ def getNumOptionalGCard(z3inst):
             numOpts = numOpts + 1
     return numOpts
 
-#get a better version of clafer (maybe), fix the FM generator to actually work for gcards
 ''' ---------------------------------------------------------------'''    
 
 def getObjectiveStats(z3inst):
@@ -141,6 +140,7 @@ def getNumBracketedConstraints(z3inst):
     return len(z3inst.z3_bracketed_constraints)    
     
 ''' ---------------------------------------------------------------'''    
+
 def getNumBracketedConstraintsOperators(module):
     constraintsStatsVisitor = GetBracketedConstraintsStats()
     Visitor.visit(constraintsStatsVisitor, module)

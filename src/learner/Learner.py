@@ -21,9 +21,10 @@ class Learner():
     
     def __init__(self, options):
         self.options = options
-        self.features = self.loadFeatureFile()
+        self.parameters = self.loadParametersFile()
+        self.heuristics = self.loadHeuristicsFile()
         self.classifier = self.createClassifier(self.options)
-        self.heuristic_list = self.numberHeuristics(Options.HEURISTICS, Options.EXPERIMENT_NUM_SPLIT)
+        self.heuristic_list = self.numberHeuristics(self.heuristics, Options.EXPERIMENT_NUM_SPLIT)
    
     def runZ3(self, module):
         z3 = Z3Instance.Z3Instance(module)
@@ -36,7 +37,7 @@ class Learner():
         Common.MODE = Common.PRELOAD
         module = Common.load(file)
         z3 = self.runZ3(module)
-        parameters = ModelStats.run(z3, module, self.features)
+        parameters = ModelStats.run(z3, module, self.parameters)
         Common.MODE = currMode
         return parameters
   
@@ -59,6 +60,10 @@ class Learner():
     
         self.print_separator("Learning")
         print()
+        print("Label map:")
+        for i in range(len(self.heuristic_list)):
+            print("    " + str(i) + " -- " + str(self.heuristic_list[i]))
+        print()
         print("Test parameters: " + str(test_set_parameters))
         print("Test labels: " + str(test_set_labels))
         print()
@@ -79,12 +84,12 @@ class Learner():
         for params,best_label in zip(test_set_parameters, test_set_labels):
             predicted_label = self.classifier.predict(params)
             if predicted_label == best_label:
-                experiment_print("Correctly Labeled Instance: " + str(params) + " " + str(best_label))
+                experiment_print("Correctly Labeled Instance: " + str(params) + " " + str(self.heuristic_list[best_label]))
                 num_correct = num_correct + 1
             else:
                 experiment_print("Incorrectly Labeled Instance: " + str(params) 
-                      + ", Predicted: " + str(predicted_label)
-                      + ", Best: " + str(best_label))
+                      + ", Predicted: " + str(self.heuristic_list[predicted_label])
+                      + ", Best: " + str(self.heuristic_list[best_label]))
         return num_correct / len(test_set_labels)
             
         
@@ -119,7 +124,8 @@ class Learner():
         #try:
         for i in range(iterations):
             (parameters, best_heuristic_index) = self.getBestHeuristicForNewInstance(i, list_of_parameters)
-            experiment_print("TEST: " + str(parameters) + " " + str(best_heuristic_index))
+            experiment_print("Instantiated parameters: " + str(parameters))
+            experiment_print("Best heuristic: " + str(self.heuristic_list[best_heuristic_index]))
             list_of_parameters.append(parameters)
             list_of_labels.append(best_heuristic_index)
         #except:
@@ -131,7 +137,8 @@ class Learner():
         #print(parameters)
         best_metric = Common.INFINITE
         best_heuristic = ""
-        for h in Options.HEURISTICS:
+        num_models_list = []
+        for h in self.heuristics:
             Options.SPLIT = h
             for s in Options.EXPERIMENT_NUM_SPLIT:
                 Options.NUM_SPLIT = s
@@ -140,7 +147,7 @@ class Learner():
                 except HeuristicFailureException as e:
                     experiment_print(e.value)
                     continue
-                experiment_print("Number of models: "  + str(z3.num_models))
+                num_models_list.append(z3.num_models)
                 if Options.VERBOSE_PRINT:
                     experiment_print("===============================")
                     experiment_print("| Iteration: " + str(instance_number))
@@ -151,7 +158,9 @@ class Learner():
                 if z3.metric < best_metric: 
                     best_metric = z3.metric
                     best_heuristic = self.heuristic_split_to_str(h, s)
-        print(best_heuristic)
+        experiment_print("Number of instances List: "  + str(num_models_list))
+        if len(set(num_models_list)) > 1:
+            experiment_print("WARNING: NUMBER OF INSTANCES DIFFERS BETWEEN TWO HEURISTICS.")
         return (parameters, self.heuristic_list.index(best_heuristic))
 
     def query(self, instance_number, list_of_parameters):
@@ -169,7 +178,7 @@ class Learner():
 
     def generateInstanceParameters(self):
         instance_parameters = []
-        for (f, low,high) in self.features:
+        for (f, low,high) in self.parameters:
             instance_parameters.append((f, random.randint(low, high)))
         return instance_parameters
 
@@ -228,8 +237,8 @@ class Learner():
     def heuristic_split_to_str(self, heuristic, split):
         return str(heuristic) + "#" + str(split)
    
-    def loadFeatureFile(self):
-        file = self.options.features_file
+    def loadParametersFile(self):
+        file = self.options.parameters_file
         features = []
         f = open(file)
         for i in f:
@@ -241,6 +250,19 @@ class Learner():
             features.append((line[0], int(line[1]), int(line[2])))
         return features
     
+    def loadHeuristicsFile(self):
+        file = self.options.heuristics_file
+        heuristics = []
+        f = open(file)
+        for i in f:
+            if "//" in i:
+                i = i.split("//", 1)[0]
+            if i.strip() == "":
+                continue
+            line = i.split()
+            heuristics.append(line[0])
+        return heuristics
+    
     def print_separator(self, string):
         experiment_print()
         experiment_print("===============================")
@@ -249,7 +271,7 @@ class Learner():
         
         
 if __name__ == '__main__':
-    options = Options.setCommandLineOptions() 
+    options = Options.setCommandLineOptions(learner=True) 
     learner = Learner(options)
     learner.run()
         
