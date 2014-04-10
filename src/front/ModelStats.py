@@ -12,15 +12,10 @@ import visitors
 
 
 
-features = {
-            
-            
-            }
-
 
 def runForFeatureModel(z3inst, module):
     '''
-    #Clafers, #BracketedConstraints, #NumXors
+    #Clafers, #BracketedConstraints, #NumXorGCard, #NumOptGCard, #NumAnyGCard 
     '''
     numClafers = getNumClafers(z3inst)
     numBracketedConstraints = getNumBracketedConstraints(z3inst)
@@ -31,23 +26,32 @@ def runForFeatureModel(z3inst, module):
 
 
 
-def getFeature(feature, z3inst, module):
-    if feature == "numClafers":
+def getParameter(parameter, z3inst, module):
+    if parameter == "numClafers":
         return getNumClafers(z3inst)
-    elif feature == "numXorGCard":
-        return getNumXorGCard(z3inst)
-    elif feature == "numOptionalGCard":
-        return getNumOptionalGCard(z3inst)
-    elif feature == "numBracketedConstraints":
+    elif parameter == "numBracketedConstraints":
         return getNumBracketedConstraints(z3inst)
+    
+    elif parameter == "numMandatoryCard":
+        return getNumMandatoryCard(z3inst)
+    elif parameter == "numOptionalCard":
+        return getNumOptionalCard(z3inst)
+    
+    elif parameter == "numXorGCard":
+        return getNumXorGCard(z3inst)
+    elif parameter == "numOptionalGCard":
+        return getNumOptionalGCard(z3inst)
+    elif parameter == "numAnyGCard":
+        return getNumAnyGCard(z3inst)
+    
     else:
-        sys.exit("unimplimented feature")
+        sys.exit("Unimplimented parameter: " + parameter)
 
-def run(z3inst, module, features=None):
+def run(z3inst, module, parameters=None):
     stats = []
-    if features:
-        for (feature,_,_) in features:
-            stats.append(getFeature(feature, z3inst, module))
+    if parameters:
+        for (parameter,_,_) in parameters:
+            stats.append(getParameter(parameter, z3inst, module))
         return stats
     else:
         numClafers = getNumClafers(z3inst)
@@ -109,6 +113,34 @@ def getNumOptionalGCard(z3inst):
         if i.lowerGCard == 1:
             numOpts = numOpts + 1
     return numOpts
+
+def getNumAnyGCard(z3inst):
+    numAnys = 0
+    for i in z3inst.z3_sorts.values():
+        #print(str(i) + str(i.lowerGCard))
+        if i.lowerGCard == 0 and i.upperGCard == -1:
+            numAnys = numAnys + 1
+    return numAnys
+
+
+''' ---------------------------------------------------------------''' 
+
+def getNumMandatoryCard(z3inst):
+    numMandatory = 0
+    for i in z3inst.z3_sorts.values():
+        #print(str(i) + str(i.lowerGCard))
+        if i.lowerGCard == 1 and i.upperGCard == 1:
+            numMandatory = numMandatory + 1
+    return numMandatory
+
+def getNumOptionalCard(z3inst):
+    numOptional = 0
+    for i in z3inst.z3_sorts.values():
+        #print(str(i) + str(i.lowerGCard))
+        if i.lowerGCard == 0 and i.upperGCard == 1:
+            numOptional = numOptional + 1
+    return numOptional
+
 
 ''' ---------------------------------------------------------------'''    
 

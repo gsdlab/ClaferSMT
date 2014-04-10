@@ -8,6 +8,7 @@ from common.Common import experiment_print
 from front import Z3Instance, ModelStats
 from learner import Classifiers
 from parallel.heuristics.GeneralHeuristics import HeuristicFailureException
+import itertools
 import numpy as np
 import os
 import random
@@ -21,7 +22,8 @@ class Learner():
     
     def __init__(self, options):
         self.options = options
-        self.parameters = self.loadParametersFile()
+        (self.parameters, self.parameter_constraints) = self.loadParametersFile()
+        (self.constrained_parameters, self.constrained_parameters_and_ranges) = self.getConstrainedParameterRanges()
         self.heuristics = self.loadHeuristicsFile()
         self.classifier = self.createClassifier(self.options)
         self.heuristic_list = self.numberHeuristics(self.heuristics, Options.EXPERIMENT_NUM_SPLIT)
@@ -176,11 +178,45 @@ class Learner():
                 print("Produced an UNSAT instance, trying again.")
                 self.generateNewInstance(instance_number)
 
+
+    def getConstrainedParameterRanges(self):
+        constrained_parameters = []
+        involved_range_parameters = []
+        final_ranges = []
+        
+        for (involved_parameters, lam) in self.parameter_constraints:
+            constrained_parameters = constrained_parameters + involved_parameters
+            for (p, low, high) in self.parameters:
+                if p in involved_parameters:
+                    involved_range_parameters.append((p,low,high))
+            ranges = [range(low, high+1) for (_, low, high) in involved_range_parameters]
+            new_range = list(filter(lambda x : self.applyLambda(lam, x), itertools.product(*ranges)))
+            
+            final_ranges.append((involved_parameters, new_range))
+            #print(final_ranges)
+        return (constrained_parameters, final_ranges)
+
     def generateInstanceParameters(self):
         instance_parameters = []
         for (f, low,high) in self.parameters:
+            if f in self.constrained_parameters:
+                continue
             instance_parameters.append((f, random.randint(low, high)))
-        return instance_parameters
+        
+        for (parameters, valid_tuples) in self.constrained_parameters_and_ranges:
+            tup = random.choice(valid_tuples)
+            for param,val in zip(parameters, tup):
+                instance_parameters.append((param, val))
+        
+        #stupid sort
+        sorted_instance_parameters = []
+        for (i,_,_) in self.parameters:
+            for (j, val) in instance_parameters:
+                if i == j:
+                    sorted_instance_parameters.append((j,val))
+                    break
+        
+        return sorted_instance_parameters
 
     def plugIntoGenerator(self, instanceParameters):
         new_file = self.options.output_directory + "temp.cfr"
@@ -239,16 +275,21 @@ class Learner():
    
     def loadParametersFile(self):
         file = self.options.parameters_file
-        features = []
+        parameters = []
+        parameter_constraints = []
         f = open(file)
         for i in f:
             if "//" in i:
                 i = i.split("//", 1)[0]
-            if i.strip() == "":
+            i = i.strip()
+            if i == "":
                 continue
-            line = i.split()
-            features.append((line[0], int(line[1]), int(line[2])))
-        return features
+            if i.startswith("@Constraint"):
+                parameter_constraints.append(self.produce_lambda(i.split("@Constraint",1)[1], parameters))
+            else:
+                line = i.split()
+                parameters.append((line[0], int(line[1]), int(line[2])))
+        return (parameters, parameter_constraints)
     
     def loadHeuristicsFile(self):
         file = self.options.heuristics_file
@@ -268,8 +309,31 @@ class Learner():
         experiment_print("===============================")
         experiment_print("| " + string)
         experiment_print("===============================")
+    
+    ''' 
+    #######################################################################
+    # LAMBDA PARAMETER CONSTRAINT 
+    #######################################################################
+    '''    
         
+    def produce_lambda(self, constraint, parameters):
+        involved_parameters = []
+        for (param, _, _) in parameters:
+            if param in constraint:
+                involved_parameters.append(param)
+        lam_str = "lambda " + ", ".join(involved_parameters) + ":" + constraint
+        lam = eval(lam_str)
+        return (involved_parameters, lam)
+            
+    def applyLambda(self, lam, tuple):
+        return lam(*tuple)
         
+    ''' 
+    #######################################################################
+    # END LAMBDA PARAMETER CONSTRAINT 
+    #######################################################################
+    '''
+    
 if __name__ == '__main__':
     options = Options.setCommandLineOptions(learner=True) 
     learner = Learner(options)
