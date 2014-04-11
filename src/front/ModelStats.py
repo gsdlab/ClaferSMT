@@ -64,6 +64,9 @@ def run(z3inst, module, parameters=None):
         numXors = getNumXorGCard(z3inst)
         numOptionalGCard = getNumOptionalGCard(z3inst)
         
+        numOptionalCard = getNumOptionalCard(z3inst)
+        numMandatoryCard = getNumMandatoryCard(z3inst)
+        
         print("Num Clafers: " + str(numClafers))
         print("Num Bracketed Constraints: " + str(numBracketedConstraints))
         print("Num Bracketed Constraint Operators: " + str(numBracketedConstraintOperatorsList))
@@ -75,7 +78,8 @@ def run(z3inst, module, parameters=None):
         print("Max Depth: " + str(maxDepth))
         print("Num Xors GCard: " + str(numXors))
         print("Num Optional GCard: " + str(numOptionalGCard))
-    
+        print("Num Optional Card: " + str(numOptionalCard))
+        print("Num Mandatory Card: " + str(numMandatoryCard))
     
     
     
@@ -110,7 +114,7 @@ def getNumOptionalGCard(z3inst):
     numOpts = 0
     for i in z3inst.z3_sorts.values():
         #print(str(i) + str(i.lowerGCard))
-        if i.lowerGCard == 1:
+        if i.lowerGCard == 1 and i.upperGCard == -1:
             numOpts = numOpts + 1
     return numOpts
 
@@ -128,8 +132,8 @@ def getNumAnyGCard(z3inst):
 def getNumMandatoryCard(z3inst):
     numMandatory = 0
     for i in z3inst.z3_sorts.values():
-        #print(str(i) + str(i.lowerGCard))
-        if i.lowerGCard == 1 and i.upperGCard == 1:
+        #print(str(i) + str(i.lowerCardConstraint) + " " + str(i.upperCardConstraint))
+        if i.lowerCardConstraint == 1 and i.upperCardConstraint == 1:
             numMandatory = numMandatory + 1
     return numMandatory
 
@@ -137,7 +141,7 @@ def getNumOptionalCard(z3inst):
     numOptional = 0
     for i in z3inst.z3_sorts.values():
         #print(str(i) + str(i.lowerGCard))
-        if i.lowerGCard == 0 and i.upperGCard == 1:
+        if i.lowerCardConstraint == 0 and i.upperCardConstraint == 1:
             numOptional = numOptional + 1
     return numOptional
 

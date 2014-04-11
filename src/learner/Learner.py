@@ -193,7 +193,6 @@ class Learner():
             new_range = list(filter(lambda x : self.applyLambda(lam, x), itertools.product(*ranges)))
             
             final_ranges.append((involved_parameters, new_range))
-            #print(final_ranges)
         return (constrained_parameters, final_ranges)
 
     def generateInstanceParameters(self):
@@ -215,7 +214,6 @@ class Learner():
                 if i == j:
                     sorted_instance_parameters.append((j,val))
                     break
-        
         return sorted_instance_parameters
 
     def plugIntoGenerator(self, instanceParameters):
@@ -242,7 +240,7 @@ class Learner():
         return file.split(".")[0] + ".py"
     
     def generateInstance(self, claferpyfile, instance_number=0):
-        file_name = self.options.output_directory + self.mode + "_unformatted" + str(instance_number) + ".cfr"
+        file_name = self.options.output_directory + self.mode  + str(instance_number) + "_unformatted" + ".cfr"
         instance = open(file_name, "w")
         subprocess.call(['ClaferZ3', '--delimeter=\"\"', claferpyfile], stdout=instance)
         return file_name
@@ -324,7 +322,7 @@ class Learner():
         lam_str = "lambda " + ", ".join(involved_parameters) + ":" + constraint
         lam = eval(lam_str)
         return (involved_parameters, lam)
-            
+
     def applyLambda(self, lam, tuple):
         return lam(*tuple)
         

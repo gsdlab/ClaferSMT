@@ -50,16 +50,16 @@ def run(fname):
             currFeature = i
         elif "type" in i:
             if "Optional" in i:
-                currCard = " ?"
+                currCard = " 0..1"
             else:
-                currCard = " "
+                currCard = " 1..1"
         elif "gcard" in i:
             if "Xor" in i:
                 currGCard = "1..1"
             elif "Some" in i:
                 currGCard = "1..*"
             else:
-                currGCard = " " #"0..*"
+                currGCard = "0..*" #"0..*"
         elif "conType" in i:
             if "Include" in i:
                 currConPrefix = ""

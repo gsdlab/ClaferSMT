@@ -14,4 +14,4 @@ numAnyGCard 1 10
 
 
 //Constraints
-@Constraint numClafers == numOptionalGCard + numXorGCard + numAnyGCard and numClafers == numOptionalCard + numMandatoryCard
+@Constraint (numClafers == numOptionalGCard + numXorGCard + numAnyGCard) and (numClafers == numOptionalCard + numMandatoryCard)
