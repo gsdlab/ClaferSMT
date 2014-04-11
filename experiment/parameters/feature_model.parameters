@@ -11,7 +11,10 @@ numXorGCard 1 10
 numOptionalGCard 1 10
 numAnyGCard 1 10
 
-
+//depth
+maxDepth 1 10
 
 //Constraints
-@Constraint (numClafers == numOptionalGCard + numXorGCard + numAnyGCard) and (numClafers == numOptionalCard + numMandatoryCard)
+@Constraint (numClafers == numOptionalGCard + numXorGCard + numAnyGCard) and (numClafers == numOptionalCard + numMandatoryCard) and (maxDepth < numClafers) 
+
+

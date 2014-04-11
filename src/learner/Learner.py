@@ -183,7 +183,7 @@ class Learner():
         constrained_parameters = []
         involved_range_parameters = []
         final_ranges = []
-        
+        print("Beginning Constrained Parameter Ranges")
         for (involved_parameters, lam) in self.parameter_constraints:
             constrained_parameters = constrained_parameters + involved_parameters
             for (p, low, high) in self.parameters:
@@ -193,6 +193,7 @@ class Learner():
             new_range = list(filter(lambda x : self.applyLambda(lam, x), itertools.product(*ranges)))
             
             final_ranges.append((involved_parameters, new_range))
+        print("Finished Constrained Parameter Ranges")
         return (constrained_parameters, final_ranges)
 
     def generateInstanceParameters(self):

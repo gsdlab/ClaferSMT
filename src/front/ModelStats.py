@@ -44,6 +44,9 @@ def getParameter(parameter, z3inst, module):
     elif parameter == "numAnyGCard":
         return getNumAnyGCard(z3inst)
     
+    elif parameter == "maxDepth":
+        return getMaxDepth(z3inst)
+    
     else:
         sys.exit("Unimplimented parameter: " + parameter)
 

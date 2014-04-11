@@ -44,4 +44,5 @@ Constraint @numBracketedConstraints
 //No 2 of the same constraint
 [no disj x;y : Constraint | (x.left.ref = y.left.ref || x.left.ref = y.right.ref) && (x.right.ref = y.left.ref || x.right.ref = y.right.ref)]
 
-//[ no f : Feature | f.level = @MaxDepth ]
+[ some f : Feature | f.level = @maxDepth ]
+[ no   f : Feature | f.level > @maxDepth ]
