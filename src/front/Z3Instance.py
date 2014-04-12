@@ -209,7 +209,7 @@ class Z3Instance(object):
             
             if Options.LEARNING_ENVIRONMENT == "sharcnet":
                 print(Options.SPLIT + str(Options.NUM_SPLIT))
-                
+                sys.exit("FIX SHARCNET")
             
             return self.num_models
         except UnusedAbstractException as e:

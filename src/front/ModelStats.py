@@ -3,7 +3,8 @@ Created on Nov 7, 2013
 
 @author: ezulkosk
 '''
-from common import Options
+from common import Options, Common
+from gia import consts
 from structures.ClaferSort import ClaferSort
 from visitors import VisitorTemplate, Visitor, CreateSorts
 import sys
@@ -43,6 +44,13 @@ def getParameter(parameter, z3inst, module):
         return getNumOptionalGCard(z3inst)
     elif parameter == "numAnyGCard":
         return getNumAnyGCard(z3inst)
+    
+    elif parameter == "numObjective":
+        return getNumObjectives(z3inst)
+    elif parameter == "numMaximizeObjective":
+        return getNumMaximizeObjectives(z3inst)
+    elif parameter == "numMinimizeObjective":
+        return getNumMinimizeObjectives(z3inst)
     
     elif parameter == "maxDepth":
         return getMaxDepth(z3inst)
@@ -155,6 +163,27 @@ def getObjectiveStats(z3inst):
     isObjectives = True if z3inst.objectives else False
     numObjectives = len(z3inst.objectives)
     return (isObjectives, numObjectives)
+
+def getNumObjectives(z3inst):
+    return len(z3inst.objectives)
+
+def getNumMaximizeObjectives(z3inst):
+    numObjectives = 0
+    for i in z3inst.objectives:
+        (polarity,_) = i
+        if polarity == consts.METRICS_MAXIMIZE:
+            numObjectives = numObjectives + 1
+    sys.exit("YAYAY" + str(numObjectives))
+    return numObjectives
+
+def getNumMinimizeObjectives(z3inst):
+    numObjectives = 0
+    for i in z3inst.objectives:
+        (polarity,_) = i
+        if polarity == consts.METRICS_MINIMIZE:
+            numObjectives = numObjectives + 1
+    sys.exit("YAYAY" + str(numObjectives))
+    return numObjectives
 
 ''' ---------------------------------------------------------------'''    
 

@@ -22,7 +22,7 @@ class Learner():
     
     def __init__(self, options):
         self.options = options
-        (self.parameters, self.parameter_constraints) = self.loadParametersFile()
+        (self.parameters, self.parameter_constraints, self.attribute_constraints) = self.loadParametersFile()
         (self.constrained_parameters, self.constrained_parameters_and_ranges) = self.getConstrainedParameterRanges()
         self.heuristics = self.loadHeuristicsFile()
         self.classifier = self.createClassifier(self.options)
@@ -181,10 +181,10 @@ class Learner():
 
     def getConstrainedParameterRanges(self):
         constrained_parameters = []
-        involved_range_parameters = []
         final_ranges = []
         print("Beginning Constrained Parameter Ranges")
         for (involved_parameters, lam) in self.parameter_constraints:
+            involved_range_parameters = []
             constrained_parameters = constrained_parameters + involved_parameters
             for (p, low, high) in self.parameters:
                 if p in involved_parameters:
@@ -276,6 +276,7 @@ class Learner():
         file = self.options.parameters_file
         parameters = []
         parameter_constraints = []
+        attribute_constraints = []
         f = open(file)
         for i in f:
             if "//" in i:
@@ -285,10 +286,13 @@ class Learner():
                 continue
             if i.startswith("@Constraint"):
                 parameter_constraints.append(self.produce_lambda(i.split("@Constraint",1)[1], parameters))
+            elif i.startswith("@Attribute"):
+                line = i.split()
+                attribute_constraints.append(self.produce_attribute_lambda(line[1], line[2], line[3]))
             else:
                 line = i.split()
                 parameters.append((line[0], int(line[1]), int(line[2])))
-        return (parameters, parameter_constraints)
+        return (parameters, parameter_constraints, attribute_constraints)
     
     def loadHeuristicsFile(self):
         file = self.options.heuristics_file
@@ -323,10 +327,18 @@ class Learner():
         lam_str = "lambda " + ", ".join(involved_parameters) + ":" + constraint
         lam = eval(lam_str)
         return (involved_parameters, lam)
-
+    
+    def produce_attribute_lambda(self, attribute, lowerBound, upperBound):
+        print(attribute)
+        sys.exit("Attribute Lambda is broken")
+        lam_str = "lambda : random.randint(" + str(lowerBound) + "," + str(upperBound) + ")"
+        print(lam_str)
+        lam = eval(lam_str)
+        sys.exit()
+        pass
+    
     def applyLambda(self, lam, tuple):
         return lam(*tuple)
-        
     ''' 
     #######################################################################
     # END LAMBDA PARAMETER CONSTRAINT 
