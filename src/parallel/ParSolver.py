@@ -75,7 +75,7 @@ class ParSolver():
     
     def run(self):
         if not self.consumerConstraints:
-            self.z3.metric = Common.INFINITE
+            self.z3.metric = Common.BOUND
             return []
             
         mgr = multiprocessing.Manager()

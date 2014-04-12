@@ -137,7 +137,7 @@ class Learner():
     def getBestHeuristicForNewInstance(self, instance_number, list_of_parameters):
         (module, parameters)  = self.query(instance_number, list_of_parameters)
         #print(parameters)
-        best_metric = Common.INFINITE
+        best_metric = Common.BOUND
         best_heuristic = ""
         num_models_list = []
         for h in self.heuristics:
@@ -175,7 +175,7 @@ class Learner():
         for i in opened_instance.readlines():
             if i.startswith("UNSAT"):
                 opened_instance.close()
-                print("Produced an UNSAT instance, trying again.")
+                experiment_print("Produced an UNSAT instance, trying again.")
                 self.generateNewInstance(instance_number)
 
 

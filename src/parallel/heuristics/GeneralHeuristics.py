@@ -3,7 +3,7 @@ Created on Apr 4, 2014
 
 @author: ezulkosk
 '''
-from common import Common, API
+from common import Common, API, Options
 from common.Common import mAnd
 from parallel.heuristics.SAP import random_unique_service_random_server
 from visitors import CreateBracketedConstraints
@@ -43,7 +43,8 @@ def random_optional_gcard_clafer_toggle(z3inst, module,  num_split):
                 newConstraints.append(mAnd(i, currSort.instances[0] == 1))
             constraints = newConstraints
     except:
-        raise HeuristicFailureException("Not enough optionals gcards for heuristic random_optional_gcard_clafer_toggle")
+        return safe_raise_heuristic_failure_exception("Not enough optionals gcards for heuristic random_optional_gcard_clafer_toggle") 
+        
     return constraints
 
 def biggest_range_split(z3inst, module, num_split):
@@ -70,10 +71,7 @@ def biggest_range_split(z3inst, module, num_split):
             sys.exit()
             pass
         num_split = num_split - glRange
-    raise HeuristicFailureException("biggest_range_split failed")
-        
-    print(constraints)
-    return constraints
+    return safe_raise_heuristic_failure_exception("biggest_range_split failed")
     
 def divide_biggest_ranges_in_two(z3inst, module, num_split):
     pass
@@ -85,8 +83,19 @@ heuristics = {
               "divide_biggest_ranges_in_two" : divide_biggest_ranges_in_two
              }
 
+def safe_raise_heuristic_failure_exception(msg):
+    '''
+    Do not want to raise this exception on sharcnet.
+    '''
+    if Options.LEARNING_ENVIRONMENT == "sharcnet":
+        return []
+    else:
+        raise HeuristicFailureException(msg)
+
 class HeuristicFailureException(Exception):
     def __init__(self, value):
         self.value = value
     def __str__(self):
         return repr(self.value)
+    
+        

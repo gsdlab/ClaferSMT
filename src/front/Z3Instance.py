@@ -206,6 +206,11 @@ class Z3Instance(object):
             self.clock.tock("translation")
             models = self.get_models(Options.NUM_INSTANCES)
             self.num_models = len(models)
+            
+            if Options.LEARNING_ENVIRONMENT == "sharcnet":
+                print(Options.SPLIT + str(Options.NUM_SPLIT))
+                
+            
             return self.num_models
         except UnusedAbstractException as e:
             print(str(e))

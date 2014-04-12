@@ -31,7 +31,7 @@ string_map = {}
 STRCONS_SUB = "STRCONS_SUB"
 FIRST_REPL_LOOP = True
 STANDARD_DELIMETER="=== Instance "
-INFINITE = 9999999999999999999999999999
+BOUND = 60
 
 def mAnd(*args):
     '''

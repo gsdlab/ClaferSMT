@@ -70,6 +70,7 @@ HEURISTICS = []
 EXPERIMENT_NUM_SPLIT = []
 MODEL_CLASS = FEATURE_MODEL
 VERBOSE_PRINT=False
+LEARNING_ENVIRONMENT="local"
 
 
 def MODULE():
@@ -194,7 +195,7 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--heuristicsfile', dest='heuristics_file', default='heuristics', help='File containing the heuristics to be tested')
     parser.add_argument('--experimentnumsplits', dest='experimentnumsplits', type=int, default='-1', nargs='*', help='List of the number of splits to perform (default = #cores)')
     parser.add_argument('--modelclass', dest='model_class', default='featuremodel', choices=['featuremodel'])
-    parser.add_argument('--classifier', dest='classifier', default='ldac', choices=['ldac', 'svm', 'classtree'])
+    parser.add_argument('--classifier', dest='classifier', default='ldac', choices=['ldac', 'svm', 'classtree'], help='The learning technique to be applied')
     parser.add_argument('--learningiterations', dest='learning_iterations', type=int, default='10', help='the number of iterations through the learning process')
     
     parser.add_argument('--datafile', default="data", dest='data_file', help='File to output learned instances.')
@@ -203,7 +204,7 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--outputdirectory', default="./", dest='output_directory', help='The directory for any output')
     parser.add_argument('--formatter', default="", dest='formatter', help='File to format generated instances properly')
     parser.add_argument('--verboseprint', default=False, dest='verbose_print',action='store_const',  const=True,  help='Prints extra output    ')
-
+    parser.add_argument('--learningenvironment', dest='learning_environment', default='local', choices=['local', 'sharcnet'], help='Where the experiments will be run')
     
     args = parser.parse_args()
     if args.version:
@@ -289,6 +290,8 @@ def setCommandLineOptions(learner = False):
         
     global VERBOSE_PRINT
     VERBOSE_PRINT = args.verbose_print
+    global LEARNING_ENVIRONMENT
+    LEARNING_ENVIRONMENT = args.learning_environment
         
     return args    
     
