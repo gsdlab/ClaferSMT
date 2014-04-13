@@ -62,7 +62,7 @@ CORES=1
 SAP=1
 FEATURE_MODEL= 2
 NO_SPLIT=2
-SPLIT=SAP
+SPLIT="NO_SPLIT"
 SERVER=""
 SERVICE=""
 NUM_SPLIT=1
@@ -266,10 +266,7 @@ def setCommandLineOptions(learner = False):
     global SERVICE
     SERVICE = args.service
     global SPLIT
-    if args.split == "SAP":
-        SPLIT=SAP
-    else:
-        SPLIT=NO_SPLIT
+    SPLIT = args.split
     
     global MODEL_CLASS
     if args.model_class == "featuremodel":

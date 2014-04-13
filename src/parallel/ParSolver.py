@@ -107,7 +107,6 @@ class ParSolver():
             w.start()            
         for w in self.consumers:
             w.join()  
-        num_jobs = Options.CORES
         results = []
         
         while not solutions.empty():
@@ -182,7 +181,7 @@ class ParSolver():
     
     
         if Options.SPLIT == "random_optional_clafer_toggle":
-            return GeneralHeuristics.random_optional_gcard_clafer_toggle(self.z3, Options.NUM_SPLIT)
+            return GeneralHeuristics.random_optional_clafer_toggle(self.z3, Options.NUM_SPLIT)
         elif Options.SPLIT == Options.SAP:
             print(self.z3.z3_sorts)
             server =  self.z3.getSort("c0_" + Options.SERVER)

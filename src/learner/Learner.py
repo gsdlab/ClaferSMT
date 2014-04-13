@@ -19,7 +19,7 @@ import sys
 
 
 class Learner():
-    
+
     def __init__(self, options):
         self.options = options
         (self.parameters, self.parameter_constraints, self.attribute_constraints) = self.loadParametersFile()
