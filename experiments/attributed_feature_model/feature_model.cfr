@@ -1,0 +1,79 @@
+enum GCard = Xor | Some | Any
+enum Type = Optional | Mandatory
+enum ConType = Include | Exclude
+
+
+Metric @numObjective
+
+abstract AbsFeature @numClafers
+  metric -> Metric @numObjective
+
+Feature : AbsFeature @numClafers
+  type -> Type
+  [type = Optional <=> this in OptionalCardFeatures]
+  [type = Mandatory <=> this in MandatoryCardFeatures]
+
+  gcard -> GCard
+  [gcard = Xor  <=> this in XorGCardFeatures ]
+  [gcard = Some <=> this in OptionalGCardFeatures ]
+  [gcard = Any  <=> this in AnyGCardFeatures ]
+
+  //metric -> int @numObjective
+  //  [ @lowerAttributeBound <= this ]
+  //  [ this <= @upperAttributeBound ]
+
+  level : int
+  parent_feature -> Feature ?
+    [ parent.level = parent_feature.level + 1 ]
+  
+  [ level >= 0 ]
+  [ level > 0 <=> parent_feature ]
+  [ level = 0 => type.ref = Mandatory ]
+
+///////////////////////////////////////////////////
+//              Card Constraints                 //
+///////////////////////////////////////////////////
+
+//constraints on the number of each card
+OptionalCardFeatures -> Feature @numOptionalCard
+MandatoryCardFeatures -> Feature @numMandatoryCard
+
+//constraints on the number of each global card
+XorGCardFeatures -> Feature @numXorGCard
+OptionalGCardFeatures -> Feature @numOptionalGCard
+AnyGCardFeatures -> Feature @numAnyGCard
+
+///////////////////////////////////////////////////
+//                 Objectives                    //
+///////////////////////////////////////////////////
+
+enum ObjType = Maximize | Minimize
+
+Objective @numObjective
+  objType -> ObjType
+  [objType = Maximize <=> this in MaximizeObjectives ]
+  [objType = Minimize <=> this in MinimizeObjectives ]
+  metric -> Metric
+
+[no disj x;y : Objective | x.metric.ref = y.metric.ref]
+
+MaximizeObjectives -> Objective @numMaximizeObjective
+MinimizeObjectives -> Objective @numMinimizeObjective
+
+///////////////////////////////////////////////////
+//                 Constraints                   //
+///////////////////////////////////////////////////
+
+Constraint @numBracketedConstraints
+  conType -> ConType
+  left -> Feature
+  right -> Feature
+  [ left.ref != right.ref ]
+   
+[one f : Feature | f.level = 0]
+
+//No 2 of the same constraint
+[no disj x;y : Constraint | (x.left.ref = y.left.ref || x.left.ref = y.right.ref) && (x.right.ref = y.left.ref || x.right.ref = y.right.ref)]
+
+[ some f : Feature | f.level = @maxDepth ]
+[ no   f : Feature | f.level > @maxDepth ]

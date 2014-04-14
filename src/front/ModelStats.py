@@ -58,10 +58,12 @@ def getParameter(parameter, z3inst, module):
     else:
         sys.exit("Unimplimented parameter: " + parameter)
 
-def run(z3inst, module, parameters=None):
+def run(z3inst, module, parameters=None, non_modelstats=[]):
     stats = []
     if parameters:
         for (parameter,_,_) in parameters:
+            if parameter in non_modelstats:
+                continue 
             stats.append(getParameter(parameter, z3inst, module))
         return stats
     else:
@@ -173,7 +175,6 @@ def getNumMaximizeObjectives(z3inst):
         (polarity,_) = i
         if polarity == consts.METRICS_MAXIMIZE:
             numObjectives = numObjectives + 1
-    sys.exit("YAYAY" + str(numObjectives))
     return numObjectives
 
 def getNumMinimizeObjectives(z3inst):
@@ -182,7 +183,6 @@ def getNumMinimizeObjectives(z3inst):
         (polarity,_) = i
         if polarity == consts.METRICS_MINIMIZE:
             numObjectives = numObjectives + 1
-    sys.exit("YAYAY" + str(numObjectives))
     return numObjectives
 
 ''' ---------------------------------------------------------------'''    

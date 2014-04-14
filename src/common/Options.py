@@ -62,7 +62,7 @@ CORES=1
 SAP=1
 FEATURE_MODEL= 2
 NO_SPLIT=2
-SPLIT="NO_SPLIT"
+SPLIT="no_split"
 SERVER=""
 SERVICE=""
 NUM_SPLIT=1
@@ -190,7 +190,7 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--cores', '-c', dest='cores', type=int, default='1', help='the number of cores for parallel processing')
     parser.add_argument('--server', default="Server", dest='server', help='The name of the Server clafer in SAP problems (used for parallelization)')
     parser.add_argument('--service', default="Service", dest='service', help='The name of the Service clafer in SAP problems (used for parallelization)')
-    parser.add_argument('--split', dest='split', default='NO_SPLIT', choices=list(GeneralHeuristics.heuristics) + ['NO_SPLIT'])
+    parser.add_argument('--split', dest='split', default='no_split', choices=list(GeneralHeuristics.heuristics) + ['NO_SPLIT'])
     parser.add_argument('--numsplit', dest='numsplit', type=int, default='-1', help='The number of splits to perform (default = #cores)')
     parser.add_argument('--heuristicsfile', dest='heuristics_file', default='heuristics', help='File containing the heuristics to be tested')
     parser.add_argument('--experimentnumsplits', dest='experimentnumsplits', type=int, default='-1', nargs='*', help='List of the number of splits to perform (default = #cores)')

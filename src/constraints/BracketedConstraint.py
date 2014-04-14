@@ -163,7 +163,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
         for i in args:
             if len(i) != maxInstances:
                 if len(i) != 1:
-                    sys.exit("Bug in BracketedConstraint.")
+                    sys.exit("Bug in BracketedConstraint." + str(i))
                 extendedArgs.append([i[0].clone() for _ in range(maxInstances)])
             else:
                 extendedArgs.append(i)

@@ -22,7 +22,7 @@ class Learner():
 
     def __init__(self, options):
         self.options = options
-        (self.parameters, self.parameter_constraints, self.attribute_constraints) = self.loadParametersFile()
+        (self.parameters, self.parameter_constraints, self.attribute_constraints, self.non_modelstats) = self.loadParametersFile()
         (self.constrained_parameters, self.constrained_parameters_and_ranges) = self.getConstrainedParameterRanges()
         self.heuristics = self.loadHeuristicsFile()
         self.classifier = self.createClassifier(self.options)
@@ -39,7 +39,7 @@ class Learner():
         Common.MODE = Common.PRELOAD
         module = Common.load(file)
         z3 = self.runZ3(module)
-        parameters = ModelStats.run(z3, module, self.parameters)
+        parameters = ModelStats.run(z3, module, self.parameters, self.non_modelstats)
         Common.MODE = currMode
         return parameters
   
@@ -111,7 +111,8 @@ class Learner():
         instance = self.generateInstance(generated_clafer_file, instance_number)
         self.checkIfInstanceIsUnsat(instance, instance_number)
         formatted_instance = self.formatFile(instance, instance_number)
-        py_instance = self.generateClaferPy(formatted_instance)
+        attributed_instance = self.plugInAttributes(formatted_instance, instance_parameters, instance_number)
+        py_instance = self.generateClaferPy(attributed_instance)
         module = Common.load(py_instance)
         parameters = self.getModelStats(py_instance)
         if parameters in list_of_parameters:
@@ -215,6 +216,7 @@ class Learner():
                 if i == j:
                     sorted_instance_parameters.append((j,val))
                     break
+        
         return sorted_instance_parameters
 
     def plugIntoGenerator(self, instanceParameters):
@@ -230,9 +232,30 @@ class Learner():
         return new_file
     
     def formatFile(self, file, instance_number):
-        file_name = self.options.output_directory + self.mode + str(instance_number) + ".cfr"
+        file_name = self.options.output_directory + self.mode + str(instance_number) + "_noattributes.cfr"
         opened_temp_file = open(file_name, "w")
         subprocess.call(['python3', self.options.formatter, file], stdout=opened_temp_file)
+        return file_name
+    
+    def plugInAttributes(self, file, instance_parameters, instance_number):
+        file_name = self.options.output_directory + self.mode + str(instance_number) + ".cfr"
+        opened_temp_file = open(file_name, "w")
+        
+        with open(file) as f:
+            content = f.readlines()
+        
+        attributes = [ "@" + i for (i, _, _, _) in self.attribute_constraints]
+        
+        for i in content:
+            for a in attributes:
+                if a in i:
+                    for (attr, l, h, lam) in self.attribute_constraints:
+                        if a == "@" + attr:
+                            low = [val for (param, val) in instance_parameters if param == l][0]
+                            high = [val for (param, val) in instance_parameters if param == h][0]
+                    i = i.replace(a, str(lam(low,high)))
+            opened_temp_file.write(i)
+        
         return file_name
     
     def generateClaferPy(self, file):
@@ -277,6 +300,7 @@ class Learner():
         parameters = []
         parameter_constraints = []
         attribute_constraints = []
+        non_modelstats = []
         f = open(file)
         for i in f:
             if "//" in i:
@@ -288,11 +312,15 @@ class Learner():
                 parameter_constraints.append(self.produce_lambda(i.split("@Constraint",1)[1], parameters))
             elif i.startswith("@Attribute"):
                 line = i.split()
-                attribute_constraints.append(self.produce_attribute_lambda(line[1], line[2], line[3]))
+                attribute_constraints.append((line[1], line[2], line[3], self.produce_attribute_lambda()))
+            elif i.startswith("@NonModelStats"):
+                line = i.split()
+                non_modelstats.append(line[1])
+                parameters.append((line[1], int(line[2]), int(line[3])))
             else:
                 line = i.split()
                 parameters.append((line[0], int(line[1]), int(line[2])))
-        return (parameters, parameter_constraints, attribute_constraints)
+        return (parameters, parameter_constraints, attribute_constraints, non_modelstats)
     
     def loadHeuristicsFile(self):
         file = self.options.heuristics_file
@@ -328,14 +356,12 @@ class Learner():
         lam = eval(lam_str)
         return (involved_parameters, lam)
     
-    def produce_attribute_lambda(self, attribute, lowerBound, upperBound):
-        print(attribute)
-        sys.exit("Attribute Lambda is broken")
-        lam_str = "lambda : random.randint(" + str(lowerBound) + "," + str(upperBound) + ")"
-        print(lam_str)
+    def produce_attribute_lambda(self):
+        lam_str = "lambda lowerBound, upperBound: random.randint(lowerBound, upperBound)"
+        #print(lam_str)
         lam = eval(lam_str)
-        sys.exit()
-        pass
+        return lam
+        
     
     def applyLambda(self, lam, tuple):
         return lam(*tuple)

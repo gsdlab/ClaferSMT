@@ -120,7 +120,8 @@ def optional_clafer_toggle(z3inst, module,  num_split, order="random"):
             constraints = newConstraints
     except:
         return safe_raise_heuristic_failure_exception("Not enough optionals clafers for heuristic optional_clafer_toggle") 
-        
+    if num_split != 1:
+        return safe_raise_heuristic_failure_exception("Not enough optionals clafers for heuristic optional_clafer_toggle") 
     return constraints
 
 
@@ -129,7 +130,8 @@ def range_split(z3inst, module, num_split, order="biggest"):
     pairs = []
     for i in z3inst.z3_sorts.values():
         glCardRange = i.numInstances - i.element.glCard[0].value + 1
-        pairs.append((i, glCardRange))
+        if glCardRange > 1:
+            pairs.append((i, glCardRange))
     if order == "random":
         random.shuffle(pairs)
     else:
@@ -167,10 +169,46 @@ def range_split(z3inst, module, num_split, order="biggest"):
     return safe_raise_heuristic_failure_exception("biggest_range_split failed")
     
 def divide_biggest_ranges_in_two(z3inst, module, num_split):
+    pairs = []
+    for i in z3inst.z3_sorts.values():
+        glCardRange = i.numInstances - i.element.glCard[0].value + 1
+        if glCardRange > 1:
+            pairs.append((i, glCardRange))
+        pairs.append((i, glCardRange))
+    pairs.reverse()
+    constraints = [True]
+    try:
+        while num_split != 1:
+            num_split = num_split // 2
+            (currSort,currRange) = pairs.pop(0)
+            
+            left1 = API.createCard(API.createArg(currSort.element.uid, currSort))
+            right1 = API.createInteger(currSort.element.glCard[0].value + (currRange//2))
+            bc1 = CreateBracketedConstraints.CreateBracketedConstraints(z3inst, True)
+            constraint1 = bc1.generatedConstraintVisit(API.createLT(left1, right1))
+            
+            left2 = API.createCard(API.createArg(currSort.element.uid, currSort))
+            right2 = API.createInteger(currSort.element.glCard[0].value + (currRange//2))
+            bc2 = CreateBracketedConstraints.CreateBracketedConstraints(z3inst, True)
+            constraint2 = bc2.generatedConstraintVisit(API.createLE(right2, left2))
+            
+            newConstraints = []
+            for i in constraints:
+                newConstraints.append(mAnd(i, constraint1))
+            for i in constraints:
+                newConstraints.append(mAnd(i, constraint2))
+            constraints = newConstraints
+    except:
+        return safe_raise_heuristic_failure_exception("Not enough clafers with ranges for heuristic divide_biggest_ranges_in_two") 
+    if num_split != 1:
+        return safe_raise_heuristic_failure_exception("Not enough clafers with ranges for heuristic divide_biggest_ranges_in_two") 
+    return constraints
+    
+    
     sys.exit("INCOMPLETE: need to figure out what to do when run out of splits")
     
 heuristics = {
-              "NO_SPLIT" : no_split,
+              "no_split" : no_split,
               "random_optional_clafer_toggle" : lambda z, m, n: optional_clafer_toggle(z,m,n,order="random"),
               "top_optional_clafer_toggle" : lambda z, m, n: optional_clafer_toggle(z,m,n,order="top"),
               "bottom_optional_clafer_toggle" : lambda z, m, n: optional_clafer_toggle(z,m,n,order="bottom"),

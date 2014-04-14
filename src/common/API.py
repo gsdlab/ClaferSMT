@@ -38,6 +38,12 @@ def createCard(arg):
 def createEquals(left, right):
     return createFunExpr("=", [left,right])  
 
+def createLE(left, right):
+    return createFunExpr("<=", [left,right])  
+
+def createLT(left, right):
+    return createFunExpr("<", [left,right])  
+
 def createIn(left, right):
     return createFunExpr("in", [left,right])   
 

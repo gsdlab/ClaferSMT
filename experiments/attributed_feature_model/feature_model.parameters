@@ -1,0 +1,31 @@
+//general
+numClafers 5 12
+numBracketedConstraints 1 5 //denotes the number of CTCs
+
+//card
+numMandatoryCard 1 10
+numOptionalCard 1 10
+
+//global card
+numXorGCard 1 10
+numOptionalGCard 1 10
+numAnyGCard 1 10
+
+//depth
+maxDepth 1 5
+
+//Objectives and Attributes
+numObjective 2 4
+numMaximizeObjective 0 4
+numMinimizeObjective 0 4
+
+@NonModelStats lowerAttributeBound 0 10
+@NonModelStats upperAttributeBound 1 100
+
+//Constraints
+@Constraint (numClafers == numOptionalGCard + numXorGCard + numAnyGCard) and (numClafers == numOptionalCard + numMandatoryCard) and (maxDepth < numClafers) 
+@Constraint (lowerAttributeBound <= upperAttributeBound)
+@Constraint (numObjective == numMaximizeObjective + numMinimizeObjective)
+
+//Attribute Bounds
+@Attribute metric lowerAttributeBound upperAttributeBound
