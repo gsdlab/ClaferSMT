@@ -65,9 +65,8 @@ class GIAConsumer(multiprocessing.Process):
             self.clock.tick("Task " + str(next_task))
             while True:
                 if self.GIAAlgorithm.s.check() != z3.sat or num_solutions == Options.NUM_INSTANCES:
-                    
-                    self.task_queue.task_done()
                     self.clock.tock("Task " + str(next_task))
+                    self.task_queue.task_done()
                     self.solver.pop()
                     break
                 else:  
@@ -83,6 +82,7 @@ class GIAConsumer(multiprocessing.Process):
                     self.GIAAlgorithm.s.add(tmpNotDominatedByNextParetoPoint)
                     num_solutions = num_solutions +  1
         self.clock.tock("Consumer " + str(self.index))
+        self.timeQueue.put(self.clock)
         return 0
     
 class StandardConsumer(multiprocessing.Process):

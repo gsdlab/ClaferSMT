@@ -68,7 +68,12 @@ def random_xor_gcard_clafer_toggle(z3inst, module,  num_split):
                 curr_range = []
                 for j in i.fields:
                     curr_range.append(j.instances[0] == 0)
-                if i.lowerCardConstraint == 0 and i.upperCardConstraint == 1 and i.numInstances == 1:
+                #print(i)
+                #print(i.element.glCard[0])
+                #print(i.element.glCard[1])
+                #print(i.element.glCard)
+                (l, r, _) = i.instanceRanges[0]
+                if l == 0 and r == 1 and i.numInstances == 1:
                     # the xor parent is off
                     curr_range.append(i.instances[0] == 1)
                 ranges.append(curr_range)

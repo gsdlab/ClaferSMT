@@ -117,13 +117,23 @@ class ParSolver():
             #print(clock)
             self.clock = self.clock.combineClocks(clock)
             #results.append(result)
+        #print(results[0])
+        #print(results[1])
+        #print(results[2])
         
         self.clock.tick("Merge")
         merged_results = self.merge(results)
+        #print(len(merged_results))
         self.clock.tock("Merge")
         #print(merged_results)
         self.clock.tock("ParSolver")
         self.clock.getParallelStats(self.z3)
+        
+        #print(merged_results[0])
+        #print(merged_results[1])
+        #print(merged_results[2])
+        #print(len(merged_results))
+        #sys.exit()
         return merged_results
         
         
@@ -141,18 +151,17 @@ class ParSolver():
         for i in range(len(l)):
             ml = l[i]
             mr = r[i]
-
-            if self.metrics_objective_direction == consts.METRICS_MAXIMIZE:
+            if self.metrics_objective_direction[i] == consts.METRICS_MAXIMIZE:
                 if  ml < mr:
                     worseInOne = True
                 elif ml > mr:
                     betterInOne = True
-            elif self.metrics_objective_direction == consts.METRICS_MINIMIZE:
+            elif self.metrics_objective_direction[i] == consts.METRICS_MINIMIZE:
                 if  ml > mr:
                     worseInOne = True
                 elif ml < mr:
                     betterInOne = True
-        if worseInOne and not betterInOne:
+        if (worseInOne and not betterInOne): 
             return True
         return False
     
@@ -161,14 +170,15 @@ class ParSolver():
         removalList = [False for _ in range(count)]
         for i in range(count):
             for j in range(count):
-                if i < j:
+                if i != j:
                     if self.checkDominated(results[i][1], results[j][1]):
                         removalList[i] = True
-                    elif results[i][0] == results[j][0]:
+                    elif i < j and (results[i][0] == results[j][0] or results[i][1] == results[j][1]):
                         removalList[i] = True
+                    
         nonDominated = []
-        for i in removalList:
-            if not i:
+        for i in range(len(removalList)):
+            if not removalList[i]:
                 nonDominated.append(results[i])
         return nonDominated
     
