@@ -305,7 +305,6 @@ class GuidedImprovementAlgorithm(object):
         """
 #         if self.verbosity > consts.VERBOSE_NONE:
 #             self.print_solution(prev_solution)
-
         local_count_sat_calls = 0
         local_count_unsat_calls = 0
         tmpConstraintMustDominateX= self.ConstraintMustDominatesX(prev_solution)
@@ -385,7 +384,7 @@ class GuidedImprovementAlgorithm(object):
         for dominatedByMetric in self.metrics_variables:        
             dominationConjunction = []
             j = 0
-            if  self.metrics_objective_direction[i] == consts.METRICS_MAXIMIZE :
+            if  self.metrics_objective_direction[i] == consts.METRICS_MAXIMIZE:
                 #print(model.eval(dominatedByMetric))
                 dominationConjunction.append(dominatedByMetric > model.eval(dominatedByMetric))#[dominatedByMetric])             
             else:

@@ -41,7 +41,7 @@ class GIAConsumer(multiprocessing.Process):
                         writeTotalTimeFilename="timefile.csv", \
                         writeRandomSeedsFilename="randomseed.csv", useCallLogs=False)    
         
-        self.GIAAlgorithm = GuidedImprovementAlgorithm(s, metrics_variables, \
+        self.GIAAlgorithm = GuidedImprovementAlgorithm(self.z3, self.solver, metrics_variables, \
                     metrics_objective_direction, [], options=self.GIAOptions)
         
     def addParetoPoints(self, point):
@@ -59,12 +59,14 @@ class GIAConsumer(multiprocessing.Process):
             except:
                 pass    
             self.solver.push()
+            
             self.solver.add(self.consumerConstraints[int(next_task)])
+            self.consumerConstraints[int(next_task)]
             self.clock.tick("Task " + str(next_task))
             while True:
                 if self.GIAAlgorithm.s.check() != z3.sat or num_solutions == Options.NUM_INSTANCES:
-                    self.task_queue.task_done()
                     
+                    self.task_queue.task_done()
                     self.clock.tock("Task " + str(next_task))
                     self.solver.pop()
                     break
@@ -79,7 +81,6 @@ class GIAConsumer(multiprocessing.Process):
                     self.GIAAlgorithm.s.pop()
                     tmpNotDominatedByNextParetoPoint = self.GIAAlgorithm.ConstraintNotDominatedByX(NextParetoPoint)
                     self.GIAAlgorithm.s.add(tmpNotDominatedByNextParetoPoint)
-                    
                     num_solutions = num_solutions +  1
         self.clock.tock("Consumer " + str(self.index))
         return 0

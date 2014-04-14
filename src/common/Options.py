@@ -192,7 +192,7 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--service', default="Service", dest='service', help='The name of the Service clafer in SAP problems (used for parallelization)')
     parser.add_argument('--split', dest='split', default='no_split', choices=list(GeneralHeuristics.heuristics) + ['NO_SPLIT'])
     parser.add_argument('--numsplit', dest='numsplit', type=int, default='-1', help='The number of splits to perform (default = #cores)')
-    parser.add_argument('--heuristicsfile', dest='heuristics_file', default='heuristics', help='File containing the heuristics to be tested')
+    parser.add_argument('--heuristicsfile', dest='heuristics_file', default='all', help='File containing the heuristics to be tested. If none given, all will be used')
     parser.add_argument('--experimentnumsplits', dest='experimentnumsplits', type=int, default='-1', nargs='*', help='List of the number of splits to perform (default = #cores)')
     parser.add_argument('--modelclass', dest='model_class', default='featuremodel', choices=['featuremodel'])
     parser.add_argument('--classifier', dest='classifier', default='ldac', choices=['ldac', 'svm', 'classtree'], help='The learning technique to be applied')

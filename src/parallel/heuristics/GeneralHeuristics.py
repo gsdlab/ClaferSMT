@@ -35,6 +35,7 @@ def random_xor_gcard_clafer_toggle(z3inst, module,  num_split):
     '''
     only considers clafers with gcard = [0,1], AND numInstances = 1
     '''
+    initial_num_split = num_split
     xors = []
     for i in z3inst.z3_sorts:
         claferSort = z3inst.z3_sorts[i]
@@ -79,7 +80,7 @@ def random_xor_gcard_clafer_toggle(z3inst, module,  num_split):
             
     except Exception as e:
         print(e)
-        return safe_raise_heuristic_failure_exception("Not enough xor options for heuristic random_xor_gcard_clafer_toggle#" + str(num_split)) 
+        return safe_raise_heuristic_failure_exception("random_xor_gcard_clafer_toggle#" + str(initial_num_split) + " failed.") 
         
     return constraints
 
@@ -90,6 +91,7 @@ def optional_clafer_toggle(z3inst, module,  num_split, order="random"):
     num_split must be a power of 2
     '''
     assert(Common.is_power2(num_split))
+    initial_num_split = num_split
     opts = []
     for i in z3inst.z3_sorts:
         claferSort = z3inst.z3_sorts[i]
@@ -119,13 +121,14 @@ def optional_clafer_toggle(z3inst, module,  num_split, order="random"):
                 newConstraints.append(mAnd(i, currSort.instances[0] == 1))
             constraints = newConstraints
     except:
-        return safe_raise_heuristic_failure_exception("Not enough optionals clafers for heuristic optional_clafer_toggle") 
+        return safe_raise_heuristic_failure_exception(order + "_optional_clafer_toggle#" + str(initial_num_split) + " failed.") 
     if num_split != 1:
-        return safe_raise_heuristic_failure_exception("Not enough optionals clafers for heuristic optional_clafer_toggle") 
+        return safe_raise_heuristic_failure_exception(order + "_optional_clafer_toggle#" + str(initial_num_split) + " failed.") 
     return constraints
 
 
 def range_split(z3inst, module, num_split, order="biggest"):
+    initial_num_split = num_split
     #only consider ranges of top level abstracts that are referring to the same type of concretes
     pairs = []
     for i in z3inst.z3_sorts.values():
@@ -166,9 +169,10 @@ def range_split(z3inst, module, num_split, order="biggest"):
         products = condense(products, num_split)
         return products
     
-    return safe_raise_heuristic_failure_exception("biggest_range_split failed")
+    return safe_raise_heuristic_failure_exception(order + "_range_split" + str(initial_num_split) + " failed." )
     
 def divide_biggest_ranges_in_two(z3inst, module, num_split):
+    initial_num_split = num_split
     pairs = []
     for i in z3inst.z3_sorts.values():
         glCardRange = i.numInstances - i.element.glCard[0].value + 1
@@ -199,9 +203,9 @@ def divide_biggest_ranges_in_two(z3inst, module, num_split):
                 newConstraints.append(mAnd(i, constraint2))
             constraints = newConstraints
     except:
-        return safe_raise_heuristic_failure_exception("Not enough clafers with ranges for heuristic divide_biggest_ranges_in_two") 
+        return safe_raise_heuristic_failure_exception("divide_biggest_ranges_in_two#" + str(initial_num_split) + "failed.") 
     if num_split != 1:
-        return safe_raise_heuristic_failure_exception("Not enough clafers with ranges for heuristic divide_biggest_ranges_in_two") 
+        return safe_raise_heuristic_failure_exception("divide_biggest_ranges_in_two#" + str(initial_num_split) + "failed.") 
     return constraints
     
     

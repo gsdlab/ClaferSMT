@@ -7,6 +7,7 @@ from common import Options, Common
 from common.Common import experiment_print
 from front import Z3Instance, ModelStats
 from learner import Classifiers
+from parallel.heuristics import GeneralHeuristics
 from parallel.heuristics.GeneralHeuristics import HeuristicFailureException
 import itertools
 import numpy as np
@@ -22,11 +23,13 @@ class Learner():
 
     def __init__(self, options):
         self.options = options
-        (self.parameters, self.parameter_constraints, self.attribute_constraints, self.non_modelstats) = self.loadParametersFile()
-        (self.constrained_parameters, self.constrained_parameters_and_ranges) = self.getConstrainedParameterRanges()
         self.heuristics = self.loadHeuristicsFile()
-        self.classifier = self.createClassifier(self.options)
         self.heuristic_list = self.numberHeuristics(self.heuristics, Options.EXPERIMENT_NUM_SPLIT)
+        if not Options.FILE:
+            (self.parameters, self.parameter_constraints, self.attribute_constraints, self.non_modelstats) = self.loadParametersFile()
+            (self.constrained_parameters, self.constrained_parameters_and_ranges) = self.getConstrainedParameterRanges()
+            self.classifier = self.createClassifier(self.options)
+        
    
     def runZ3(self, module):
         z3 = Z3Instance.Z3Instance(module)
@@ -49,6 +52,9 @@ class Learner():
         change heuristic and heuristic variants as necessary
         '''
         Common.MODE=Common.EXPERIMENT  
+        if Options.FILE:
+            self.getBestHeuristicForNewInstance(0, [], single_instance_mode=True)
+            return
         
         self.print_separator("Generating Test Set")
         self.mode = "test"
@@ -135,12 +141,17 @@ class Learner():
         #    sys.exit("Do not handle explicit test sets yet")
         return (list_of_parameters, list_of_labels)
     
-    def getBestHeuristicForNewInstance(self, instance_number, list_of_parameters):
-        (module, parameters)  = self.query(instance_number, list_of_parameters)
+    def getBestHeuristicForNewInstance(self, instance_number, list_of_parameters, single_instance_mode=False):
+        if single_instance_mode:
+            parameters = []
+            module = Common.load(Options.FILE)
+        else:
+            (module, parameters)  = self.query(instance_number, list_of_parameters)
         #print(parameters)
         best_metric = Common.BOUND
         best_heuristic = ""
         num_models_list = []
+        all_metrics = []
         for h in self.heuristics:
             Options.SPLIT = h
             for s in Options.EXPERIMENT_NUM_SPLIT:
@@ -158,10 +169,12 @@ class Learner():
                     experiment_print("| num_split: " + str(s))
                     experiment_print("===============================")
                     experiment_print(str(parameters) + "," + str(z3.metric))
+                all_metrics.append(z3.metric)
                 if z3.metric < best_metric: 
                     best_metric = z3.metric
                     best_heuristic = self.heuristic_split_to_str(h, s)
         experiment_print("Number of instances List: "  + str(num_models_list))
+        experiment_print("All metrics: "  + str(all_metrics))
         if len(set(num_models_list)) > 1:
             experiment_print("WARNING: NUMBER OF INSTANCES DIFFERS BETWEEN TWO HEURISTICS.")
         return (parameters, self.heuristic_list.index(best_heuristic))
@@ -324,6 +337,9 @@ class Learner():
     
     def loadHeuristicsFile(self):
         file = self.options.heuristics_file
+        if file == "all":
+            return list(GeneralHeuristics.heuristics.keys())
+        
         heuristics = []
         f = open(file)
         for i in f:
