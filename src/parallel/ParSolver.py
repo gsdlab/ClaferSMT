@@ -104,9 +104,18 @@ class ParSolver():
         
         self.clock.tick("ParSolver")
         for w in self.consumers:
-            w.start()            
+            w.start()          
+        TERMINATED = False
         for w in self.consumers:
-            w.join()  
+            if Options.TIME_OUT != 0:
+                w.join(Options.TIME_OUT) 
+            else:
+                w.join()
+            if w.is_alive():
+                TERMINATED = True
+                w.terminate() 
+        if TERMINATED:
+            GeneralHeuristics.safe_raise_heuristic_failure_exception("Heuristic Timed Out")
         results = []
         
         while not solutions.empty():
@@ -191,7 +200,7 @@ class ParSolver():
     
     
         if Options.SPLIT == "random_optional_clafer_toggle":
-            return GeneralHeuristics.random_optional_clafer_toggle(self.z3, Options.NUM_SPLIT)
+            return GeneralHeuristics.optional_clafer_toggle(self.z3, Options.NUM_SPLIT)
         elif Options.SPLIT == Options.SAP:
             print(self.z3.z3_sorts)
             server =  self.z3.getSort("c0_" + Options.SERVER)

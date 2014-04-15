@@ -1,0 +1,33 @@
+Longest Consumer: 246.13
+Longest Task: 243.89000000000001
+Merge: 0.0
+Longest Consumer Plus Merge: 246.13
+
+===============================
+| Iteration: 0
+| Heuristic: smallest_range_split
+| num_split: 4
+===============================
+[],246.13
+Longest Consumer: 287.24
+Longest Task: 285.04
+Merge: 0.0
+Longest Consumer Plus Merge: 287.24
+
+===============================
+| Iteration: 0
+| Heuristic: smallest_range_split
+| num_split: 8
+===============================
+[],287.24
+Longest Consumer: 318.93
+Longest Task: 316.65000000000003
+Merge: 0.0
+Longest Consumer Plus Merge: 318.93
+
+===============================
+| Iteration: 0
+| Heuristic: smallest_range_split
+| num_split: 16
+===============================
+[],318.93

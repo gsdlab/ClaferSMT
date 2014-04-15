@@ -166,7 +166,7 @@ class Learner():
                     z3 = self.runZ3(module)
                     metric = z3.metric
                     num_models_list.append(z3.num_models)
-                except HeuristicFailureException as e:
+                except (HeuristicFailureException, RuntimeError) as e:
                     experiment_print(e.value)
                     metric = Common.BOUND
                 

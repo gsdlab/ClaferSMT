@@ -1,0 +1,203 @@
+Longest Consumer: 3.56
+Longest Task: 3.4899999999999998
+Merge: 0.0
+Longest Consumer Plus Merge: 3.56
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 4
+===============================
+[],3.56
+Longest Consumer: 3.9
+Longest Task: 3.84
+Merge: 0.0
+Longest Consumer Plus Merge: 3.9
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 8
+===============================
+[],3.9
+Longest Consumer: 4.1
+Longest Task: 4.029999999999999
+Merge: 0.0
+Longest Consumer Plus Merge: 4.1
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 16
+===============================
+[],4.1
+Longest Consumer: 4.9
+Longest Task: 3.38
+Merge: 0.009999999999999787
+Longest Consumer Plus Merge: 4.91
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 32
+===============================
+[],4.91
+Longest Consumer: 4.6
+Longest Task: 2.9899999999999993
+Merge: 0.009999999999999787
+Longest Consumer Plus Merge: 4.609999999999999
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 64
+===============================
+[],4.609999999999999
+Longest Consumer: 4.73
+Longest Task: 2.9099999999999997
+Merge: 0.009999999999999787
+Longest Consumer Plus Merge: 4.74
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 128
+===============================
+[],4.74
+Longest Consumer: 4.83
+Longest Task: 3.1000000000000005
+Merge: 0.010000000000000675
+Longest Consumer Plus Merge: 4.840000000000001
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 256
+===============================
+[],4.840000000000001
+Longest Consumer: 3.9
+Longest Task: 3.8400000000000003
+Merge: 0.009999999999999787
+Longest Consumer Plus Merge: 3.9099999999999997
+
+===============================
+| Iteration: 0
+| Heuristic: bottom_optional_clafer_toggle
+| num_split: 4
+===============================
+[],3.9099999999999997
+Longest Consumer: 3.38
+Longest Task: 3.32
+Merge: 0.009999999999999787
+Longest Consumer Plus Merge: 3.3899999999999997
+
+===============================
+| Iteration: 0
+| Heuristic: bottom_optional_clafer_toggle
+| num_split: 8
+===============================
+[],3.3899999999999997
+Longest Consumer: 3.27
+Longest Task: 2.2399999999999998
+Merge: 0.0
+Longest Consumer Plus Merge: 3.27
+
+===============================
+| Iteration: 0
+| Heuristic: bottom_optional_clafer_toggle
+| num_split: 16
+===============================
+[],3.27
+Longest Consumer: 3.64
+Longest Task: 1.76
+Merge: 0.019999999999999574
+Longest Consumer Plus Merge: 3.6599999999999997
+
+===============================
+| Iteration: 0
+| Heuristic: bottom_optional_clafer_toggle
+| num_split: 32
+===============================
+[],3.6599999999999997
+Longest Consumer: 3.93
+Longest Task: 1.09
+Merge: 0.009999999999999787
+Longest Consumer Plus Merge: 3.94
+
+===============================
+| Iteration: 0
+| Heuristic: bottom_optional_clafer_toggle
+| num_split: 64
+===============================
+[],3.94
+Longest Consumer: 3.99
+Longest Task: 1.14
+Merge: 0.019999999999999574
+Longest Consumer Plus Merge: 4.01
+
+===============================
+| Iteration: 0
+| Heuristic: bottom_optional_clafer_toggle
+| num_split: 128
+===============================
+[],4.01
+Longest Consumer: 6.69
+Longest Task: 1.0099999999999998
+Merge: 0.019999999999999574
+Longest Consumer Plus Merge: 6.71
+
+===============================
+| Iteration: 0
+| Heuristic: bottom_optional_clafer_toggle
+| num_split: 256
+===============================
+[],6.71
+Number of instances List: [18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 17]
+All metrics: [3.56, 3.9, 4.1, 4.91, 4.609999999999999, 4.74, 4.840000000000001, 3.9099999999999997, 3.3899999999999997, 3.27, 3.6599999999999997, 3.94, 4.01, 6.71]
+WARNING: NUMBER OF INSTANCES DIFFERS BETWEEN TWO HEURISTICS.
+
+
+===============================
+| Unsorted
+===============================
+divide_biggest_ranges_in_two#4 : 3.56
+divide_biggest_ranges_in_two#8 : 3.9
+divide_biggest_ranges_in_two#16 : 4.1
+divide_biggest_ranges_in_two#32 : 4.91
+divide_biggest_ranges_in_two#64 : 4.609999999999999
+divide_biggest_ranges_in_two#128 : 4.74
+divide_biggest_ranges_in_two#256 : 4.840000000000001
+bottom_optional_clafer_toggle#4 : 3.9099999999999997
+bottom_optional_clafer_toggle#8 : 3.3899999999999997
+bottom_optional_clafer_toggle#16 : 3.27
+bottom_optional_clafer_toggle#32 : 3.6599999999999997
+bottom_optional_clafer_toggle#64 : 3.94
+bottom_optional_clafer_toggle#128 : 4.01
+bottom_optional_clafer_toggle#256 : 6.71
+
+
+===============================
+| Sorted
+===============================
+bottom_optional_clafer_toggle#16 : 3.27
+bottom_optional_clafer_toggle#8 : 3.3899999999999997
+divide_biggest_ranges_in_two#4 : 3.56
+bottom_optional_clafer_toggle#32 : 3.6599999999999997
+divide_biggest_ranges_in_two#8 : 3.9
+bottom_optional_clafer_toggle#4 : 3.9099999999999997
+bottom_optional_clafer_toggle#64 : 3.94
+bottom_optional_clafer_toggle#128 : 4.01
+divide_biggest_ranges_in_two#16 : 4.1
+divide_biggest_ranges_in_two#64 : 4.609999999999999
+divide_biggest_ranges_in_two#128 : 4.74
+divide_biggest_ranges_in_two#256 : 4.840000000000001
+divide_biggest_ranges_in_two#32 : 4.91
+bottom_optional_clafer_toggle#256 : 6.71
+Iteration divide_biggest_ranges_in_two bottom_optional_clafer_toggle
+1 3.56 3.91
+2 3.90 3.39
+3 4.10 3.27
+4 4.91 3.66
+5 4.61 3.94
+6 4.74 4.01
+7 4.84 6.71

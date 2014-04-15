@@ -58,7 +58,7 @@ MAGNIFYING_GLASS = False
 
 ''' parallel options '''
 CORES=1
-
+TIME_OUT = 0
 SAP=1
 FEATURE_MODEL= 2
 NO_SPLIT=2
@@ -206,6 +206,7 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--verboseprint', default=False, dest='verbose_print',action='store_const',  const=True,  help='Prints extra output    ')
     parser.add_argument('--learningenvironment', dest='learning_environment', default='local', choices=['local', 'sharcnet'], help='Where the experiments will be run')
     parser.add_argument('--generategraphs', default=False, dest='generate_graphs',action='store_const',  const=True,  help='Generate GnuPlot graphs (only for LearnerZ3 and single test)')
+    parser.add_argument('--timeout', dest='time_out', type=float, default='0', help='The time out for consumers')
     
     args = parser.parse_args()
     if args.version:
@@ -268,7 +269,8 @@ def setCommandLineOptions(learner = False):
     SERVICE = args.service
     global SPLIT
     SPLIT = args.split
-    
+    global TIME_OUT
+    TIME_OUT = args.time_out
     global MODEL_CLASS
     if args.model_class == "featuremodel":
         MODEL_CLASS=FEATURE_MODEL
