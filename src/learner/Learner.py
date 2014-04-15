@@ -11,6 +11,7 @@ from parallel.heuristics import GeneralHeuristics
 from parallel.heuristics.GeneralHeuristics import HeuristicFailureException
 import itertools
 import numpy as np
+import operator
 import os
 import random
 import shutil
@@ -151,9 +152,14 @@ class Learner():
         best_metric = Common.BOUND
         best_heuristic = ""
         num_models_list = []
+        heuristics = []
         all_metrics = []
+        unsorted_chart_headers = []
+        unsorted_chart = []
         for h in self.heuristics:
             Options.SPLIT = h
+            unsorted_chart_headers.append(h)
+            chart_col = []
             for s in Options.EXPERIMENT_NUM_SPLIT:
                 Options.NUM_SPLIT = s
                 try:
@@ -169,14 +175,48 @@ class Learner():
                     experiment_print("| num_split: " + str(s))
                     experiment_print("===============================")
                     experiment_print(str(parameters) + "," + str(z3.metric))
+                heuristics.append(self.heuristic_split_to_str(h, s))
                 all_metrics.append(z3.metric)
+                chart_col.append("%.2f" % z3.metric)
                 if z3.metric < best_metric: 
                     best_metric = z3.metric
                     best_heuristic = self.heuristic_split_to_str(h, s)
+            unsorted_chart.append(chart_col)
         experiment_print("Number of instances List: "  + str(num_models_list))
         experiment_print("All metrics: "  + str(all_metrics))
-        if len(set(num_models_list)) > 1:
+        if len(set(num_models_list)) > 1 and Options.NUM_INSTANCES >= 0:
             experiment_print("WARNING: NUMBER OF INSTANCES DIFFERS BETWEEN TWO HEURISTICS.")
+        if single_instance_mode:
+            experiment_print()
+            results = list(zip(heuristics, all_metrics))
+            
+            sorted_file = open("sorted", "w")
+            unsorted_file = open("unsorted", "w")
+            chart_file = open("chart", "w")
+            
+            self.print_separator("Unsorted")
+            for (i,j) in results:
+                experiment_print(i + " : " + str(j)) 
+                unsorted_file.write(i + " " + str(j) + "\n")
+            experiment_print()
+            results.sort(key=operator.itemgetter(1))
+            self.print_separator("Sorted")
+            for (i,j) in results:
+                experiment_print(i + " : " + str(j)) 
+                sorted_file.write(i + " " + str(j) + "\n")
+            
+            #chart
+            print("Iteration " + " ".join(unsorted_chart_headers))
+            count = 1
+            for tup in zip(*unsorted_chart):
+                print(str(count) + " " + " ".join([str(i) for i in list(tup)]))
+                count = count + 1
+            
+            
+            
+            if self.options.generate_graphs:
+                pass
+        
         return (parameters, self.heuristic_list.index(best_heuristic))
 
     def query(self, instance_number, list_of_parameters):
@@ -337,8 +377,10 @@ class Learner():
     
     def loadHeuristicsFile(self):
         file = self.options.heuristics_file
+        if Options.SPLIT != "no_split":
+            return [Options.SPLIT]
         if file == "all":
-            return list(GeneralHeuristics.heuristics.keys())
+            return GeneralHeuristics.heuristics_list
         
         heuristics = []
         f = open(file)

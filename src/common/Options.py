@@ -205,6 +205,7 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--formatter', default="", dest='formatter', help='File to format generated instances properly')
     parser.add_argument('--verboseprint', default=False, dest='verbose_print',action='store_const',  const=True,  help='Prints extra output    ')
     parser.add_argument('--learningenvironment', dest='learning_environment', default='local', choices=['local', 'sharcnet'], help='Where the experiments will be run')
+    parser.add_argument('--generategraphs', default=False, dest='generate_graphs',action='store_const',  const=True,  help='Generate GnuPlot graphs (only for LearnerZ3 and single test)')
     
     args = parser.parse_args()
     if args.version:

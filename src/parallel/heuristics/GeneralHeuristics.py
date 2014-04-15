@@ -228,6 +228,18 @@ heuristics = {
               "divide_biggest_ranges_in_two" : divide_biggest_ranges_in_two
              }
 
+heuristics_list = [
+              "random_optional_clafer_toggle" ,
+              "top_optional_clafer_toggle" ,
+              "bottom_optional_clafer_toggle" ,
+              "random_xor_gcard_clafer_toggle" ,
+              "biggest_range_split" ,
+              "smallest_range_split",
+              "random_range_split" ,
+              "divide_biggest_ranges_in_two",
+              "no_split" 
+             ]
+
 def safe_raise_heuristic_failure_exception(msg):
     '''
     Do not want to raise this exception on sharcnet.

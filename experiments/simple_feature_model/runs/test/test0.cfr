@@ -1,0 +1,18 @@
+// Features
+
+Feature__0 1..1
+  Feature__8 1..1
+    Feature__6 1..1
+      Feature__7 0..1
+        Feature__10 0..1
+          Feature__11 0..1
+            Feature__9 0..1
+            Feature__2 0..1
+              Feature__3 1..1
+            Feature__1 0..1
+  Feature__5 0..1
+  Feature__4 1..1
+
+// Constraints
+
+[Feature__10 => Feature__11]

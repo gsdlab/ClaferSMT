@@ -1,0 +1,21 @@
+set term png
+#set size 1, 1
+#set key at 100,100
+set key outside
+set key top
+set key autotitle columnhead
+set termoption lw 2
+set title mytitle
+set output outfile
+set xrange [1:xr]
+set xtics 0,1,xr
+#set yrange [0:100000]
+set xlabel "#Splits"
+set ylabel myylabel
+#set logscale x
+#format x "log2{L}"
+
+
+#plot file using 1:2 title 'IGIA' with lines,file using 1:3 title 'Red. Consts, Red. Formulas' with lines
+#plot file  with lines
+plot for [col=2:numheuristics] file using 1:col with lines
