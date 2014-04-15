@@ -1,16 +1,17 @@
 set term png
 #set size 1, 1
 #set key at 100,100
-set key outside
-set key top
-set key autotitle columnhead
+#set key outside
+#set key top
+#set key autotitle columnhead
+unset key
 set termoption lw 2
 set title mytitle
 set output outfile
 set xrange [1:xr]
 set xtics 0,1,xr
 #set yrange [0:100000]
-set xlabel "#Splits"
+set xlabel "lg(#Splits)"
 set ylabel myylabel
 #set logscale x
 #format x "log2{L}"

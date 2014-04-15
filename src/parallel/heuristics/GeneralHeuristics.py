@@ -157,7 +157,7 @@ def range_split(z3inst, module, num_split, order="biggest"):
         if curr_count >= num_split:
             break
     if curr_count < num_split:
-        raise Exception
+        return safe_raise_heuristic_failure_exception(order + "_range_split" + str(initial_num_split) + " failed." )
     else:
         ranges = []
         for i in splitters:

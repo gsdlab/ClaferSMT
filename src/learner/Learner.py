@@ -164,22 +164,24 @@ class Learner():
                 Options.NUM_SPLIT = s
                 try:
                     z3 = self.runZ3(module)
+                    metric = z3.metric
+                    num_models_list.append(z3.num_models)
                 except HeuristicFailureException as e:
                     experiment_print(e.value)
-                    continue
-                num_models_list.append(z3.num_models)
+                    metric = Common.BOUND
+                
                 if Options.VERBOSE_PRINT:
                     experiment_print("===============================")
                     experiment_print("| Iteration: " + str(instance_number))
                     experiment_print("| Heuristic: " + str(h))
                     experiment_print("| num_split: " + str(s))
                     experiment_print("===============================")
-                    experiment_print(str(parameters) + "," + str(z3.metric))
+                    experiment_print(str(parameters) + "," + str(metric))
                 heuristics.append(self.heuristic_split_to_str(h, s))
-                all_metrics.append(z3.metric)
-                chart_col.append("%.2f" % z3.metric)
-                if z3.metric < best_metric: 
-                    best_metric = z3.metric
+                all_metrics.append(metric)
+                chart_col.append("%.2f" % metric)
+                if metric < best_metric: 
+                    best_metric = metric
                     best_heuristic = self.heuristic_split_to_str(h, s)
             unsorted_chart.append(chart_col)
         experiment_print("Number of instances List: "  + str(num_models_list))
