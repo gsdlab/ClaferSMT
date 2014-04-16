@@ -4,4 +4,4 @@
 
 #gnuplot -e "myylabel='time(s)'" -e "mytitle='Effect of #Splits on Solving Time'" -e "file='$1'"  -e "outfile='$2.png'" -e "xr='$3'" -e "numheuristics='$4'" linesplot
 
-gnuplot -e "myylabel='time(s)'" -e "mytitle='Comparison of Partitioning Schemes'" -e "file='$1'"  -e "outfile='$2.png'" -e "xr='$3'" -e "numheuristics='$4'" linesplot
+gnuplot -e "myylabel='time(s)'" -e "mytitle='Effect of #Splits on Solving Time'" -e "file='$1'"  -e "outfile='$2.png'" -e "xr='$3'" -e "numheuristics='$4'" linesplot
