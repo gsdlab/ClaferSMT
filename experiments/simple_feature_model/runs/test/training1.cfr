@@ -1,15 +1,14 @@
 // Features
 
-Feature__1 1..1
-  Feature__8 1..1
-    Feature__5 0..1
-    Feature__4 0..1
-    Feature__3 1..1
-    Feature__0 1..1
+Feature__0 1..1
+  Feature__7 1..1
   Feature__6 1..1
-    Feature__7 1..1
-    Feature__2 1..1
+  Feature__5 1..1
+  Feature__4 1..1
+  Feature__3 0..1
+  Feature__2 1..1
+  Feature__1 0..1
 
 // Constraints
 
-[Feature__7 => Feature__8]
+[Feature__6 => Feature__7]

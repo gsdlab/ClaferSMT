@@ -2,72 +2,39 @@
 Optional$0
 Mandatory$0
 Feature$0
-  type$0 = Mandatory$0
-  level$0 = 2
-  parent_feature$0 = Feature$1
+  type$0 = Optional$0
+  level$0 = 1
+  parent_feature$0 = Feature$5
 Feature$1
   type$1 = Optional$0
   level$1 = 1
-  parent_feature$1 = Feature$10
+  parent_feature$1 = Feature$5
 Feature$2
   type$2 = Optional$0
-  level$2 = 2
-  parent_feature$2 = Feature$1
+  level$2 = 1
+  parent_feature$2 = Feature$5
 Feature$3
-  type$3 = Mandatory$0
-  level$3 = 2
-  parent_feature$3 = Feature$1
+  type$3 = Optional$0
+  level$3 = 1
+  parent_feature$3 = Feature$5
 Feature$4
-  type$4 = Mandatory$0
-  level$4 = 2
-  parent_feature$4 = Feature$1
+  type$4 = Optional$0
+  level$4 = 1
+  parent_feature$4 = Feature$5
 Feature$5
-  type$5 = Optional$0
-  level$5 = 3
-  parent_feature$5 = Feature$4
-Feature$6
-  type$6 = Optional$0
-  level$6 = 3
-  parent_feature$6 = Feature$2
-Feature$7
-  type$7 = Optional$0
-  level$7 = 3
-  parent_feature$7 = Feature$3
-Feature$8
-  type$8 = Optional$0
-  level$8 = 3
-  parent_feature$8 = Feature$0
-Feature$9
-  type$9 = Mandatory$0
-  level$9 = 3
-  parent_feature$9 = Feature$0
-Feature$10
-  type$10 = Mandatory$0
-  level$10 = 0
-OptionalCardFeatures$0 = Feature$1
-OptionalCardFeatures$1 = Feature$2
-OptionalCardFeatures$2 = Feature$5
-OptionalCardFeatures$3 = Feature$6
-OptionalCardFeatures$4 = Feature$7
-OptionalCardFeatures$5 = Feature$8
-MandatoryCardFeatures$0 = Feature$0
-MandatoryCardFeatures$1 = Feature$3
-MandatoryCardFeatures$2 = Feature$4
-MandatoryCardFeatures$3 = Feature$9
-MandatoryCardFeatures$4 = Feature$10
+  type$5 = Mandatory$0
+  level$5 = 0
+OptionalCardFeatures$0 = Feature$0
+OptionalCardFeatures$1 = Feature$1
+OptionalCardFeatures$2 = Feature$2
+OptionalCardFeatures$3 = Feature$3
+OptionalCardFeatures$4 = Feature$4
+MandatoryCardFeatures$0 = Feature$5
 Include$0
 Exclude$0
 Constraint$0
   conType$0 = Include$0
-  left$0 = Feature$6
-  right$0 = Feature$8
-Constraint$1
-  conType$1 = Include$0
-  left$1 = Feature$3
-  right$1 = Feature$5
-Constraint$2
-  conType$2 = Exclude$0
-  left$2 = Feature$9
-  right$2 = Feature$10
+  left$0 = Feature$4
+  right$0 = Feature$5
 
 

@@ -14,8 +14,8 @@ Feature @numClafers
   [ level = 0 => type.ref = Mandatory ]
 
 //constraints on the number of each card
-OptionalCardFeatures -> Feature @numOptionalCard
-MandatoryCardFeatures -> Feature @numMandatoryCard
+OptionalCardFeatures -> Feature @numOptionalCards
+MandatoryCardFeatures -> Feature @numMandatoryCards
 
 enum ConType = Include | Exclude
 
