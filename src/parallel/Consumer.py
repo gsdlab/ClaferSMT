@@ -5,7 +5,7 @@ Created on Mar 15, 2014
 '''
 from common import Options
 from common.Clock import Clock
-from common.Common import preventSameModel, standard_print
+from common.Common import preventSameModel
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from visitors import PrintHierarchy, Visitor

@@ -301,34 +301,24 @@ class GuidedImprovementAlgorithm(object):
     
     def ranToParetoFront(self, prev_solution):
         """
-        It iterates getting close and closer to the pareto front.
+        Iterates until a pareto optimal solution is found.
         """
-#         if self.verbosity > consts.VERBOSE_NONE:
-#             self.print_solution(prev_solution)
         local_count_sat_calls = 0
         local_count_unsat_calls = 0
         tmpConstraintMustDominateX= self.ConstraintMustDominatesX(prev_solution)
-#         self.GIALogger.logStartCall(tmpConstraintMustDominateX)
         self.s.add(tmpConstraintMustDominateX)
         while (self.s.check() == sat):
             local_count_sat_calls += 1
-#             self.GIALogger.logEndCall(True, model = self.s.model(), statistics = self.s.statistics())              
-#             if self.verbosity > consts.VERBOSE_NONE:
-#                 self.print_solution(prev_solution)
             prev_solution = self.s.model()     
             tmpConstraintMustDominateX = self.ConstraintMustDominatesX(prev_solution)
             self.s.add(tmpConstraintMustDominateX)
             self.GIALogger.logStartCall(tmpConstraintMustDominateX)
         local_count_unsat_calls += 1
-#         self.GIALogger.logEndCall(False, statistics = self.s.statistics())  
-#         if self.verbosity > consts.VERBOSE_NONE:
-#             self.print_solution(prev_solution)
         return prev_solution, local_count_sat_calls, local_count_unsat_calls
 
     def ConstraintNotDominatedByX(self, model):
         """
-        Returns a Constraint that a  new instance, can't be dominated by the instance represented by model. 
-        (it can't be worst in any objective).
+        Creates a constraint preventing search in dominated regions.
         """
         DisjunctionOrLessMetrics  = list()
         for i in range(len(self.metrics_variables)):
@@ -386,9 +376,9 @@ class GuidedImprovementAlgorithm(object):
             j = 0
             if  self.metrics_objective_direction[i] == consts.METRICS_MAXIMIZE:
                 #print(model.eval(dominatedByMetric))
-                dominationConjunction.append(dominatedByMetric > model.eval(dominatedByMetric))#[dominatedByMetric])             
+                dominationConjunction.append(dominatedByMetric > model.eval(dominatedByMetric))             
             else:
-                dominationConjunction.append(dominatedByMetric < model.eval(dominatedByMetric))#model[dominatedByMetric]) 
+                dominationConjunction.append(dominatedByMetric < model.eval(dominatedByMetric)) 
             for AtLeastEqualInOtherMetric in self.metrics_variables:
                 if j != i:
                     if self.metrics_objective_direction[j] == consts.METRICS_MAXIMIZE:

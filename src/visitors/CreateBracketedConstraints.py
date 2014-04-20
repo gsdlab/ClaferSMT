@@ -5,14 +5,15 @@ Created on Mar 26, 2013
 '''
 
 from common import Common, Options
-from common.Common import mAnd, debug_print
+from common.Common import mAnd
+from common.Options import debug_print
 from constraints import BracketedConstraint
 from structures.ClaferSort import PrimitiveType
 from structures.ExprArg import ExprArg, Mask, BoolArg, IntArg, RealArg, \
     StringArg
 from visitors import VisitorTemplate
-from z3 import Int
 from visitors.CheckFunctionSymmetry import CheckFunctionSymmetry
+from z3 import Int
 import itertools
 import sys
 import visitors.Visitor

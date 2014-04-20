@@ -4,7 +4,7 @@ Created on Oct 10, 2013
 @author: ezulkosk
 '''
 from common import Options, Common
-from common.Common import standard_print, experiment_print
+from common.Options import experiment_print
 import sys
 import time
 
@@ -99,7 +99,7 @@ class Clock():
         """
         if self.isBroken:
             return
-        if Common.MODE == Common.EXPERIMENT:
+        if Options.MODE == Common.EXPERIMENT:
             sys.exit("Shouldn't get here")
         for i in self.completed_event_map.keys():
             self.printEvent(i)
@@ -110,7 +110,7 @@ class Clock():
         """
         if self.isBroken:
             return
-        if Common.MODE == Common.EXPERIMENT:
+        if Options.MODE == Common.EXPERIMENT:
             longestConsumer = -1
             longestTask = -1
             merge = -1

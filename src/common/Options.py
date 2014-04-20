@@ -48,6 +48,8 @@ FILE = ""
 MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
 STRING_TESTS = 3 #tests that involve strings / string constraints
+OPTIMIZATION_TESTS = 4
+ALL_TESTS = 5
 TEST_SET = MY_TESTS 
 DIMACS_FILE="dimacs"
 UNIQUE_NAMES = False
@@ -72,74 +74,6 @@ MODEL_CLASS = FEATURE_MODEL
 VERBOSE_PRINT=False
 LEARNING_ENVIRONMENT="local"
 
-
-def MODULE():
-    from test import simple_feature_model, cc_example, all_threes, i147refdisambiguation, simp
-
-    MODULE = ""
-    #MODULE = bracketedconstraint_this.getModule()
-    #MODULE = multiple_joins.getModule()
-    #MODULE = this_dot_parent.getModule()
-    #MODULE = arithmetic.getModule()
-    #MODULE = relations.getModule()
-    #MODULE = boolean_connectives.getModule()
-    #MODULE = union.getModule()
-    #MODULE = simple_abstract.getModule()
-    #MODULE = phpscript.getModule()
-    #MODULE = some.getModule()
-    #MODULE = paths.getModule()
-    #MODULE = mypaths.getModule()
-    #MODULE = simple_set.getModule()
-    #MODULE = zoo.getModule()
-    #MODULE = simple_zoo.getModule()
-    #MODULE = integer_refs.getModule()
-    #MODULE = minimal_integer_refs.getModule()
-    #MODULE = phone_feature_model.getModule()
-    #MODULE = higher_inheritance.getModule()
-    #MODULE = this_integer_relation.getModule()
-    #MODULE = equal_references.getModule()
-    #MODULE = dag_test.getModule()
-    #MODULE = books_tutorial.getModule()
-    #MODULE = simple_books.getModule()
-    #MODULE = teststring.getModule()
-    #MODULE = testunion.getModule()
-    #MODULE = subbooks.getModule()
-    #MODULE = int_ref_set.getModule()
-    #MODULE = one_plus_one_equals_one.getModule()
-    #MODULE = iso.getModule()
-    #MODULE = isowithcons.getModule()
-    #MODULE = all_alls.getModule()
-    #MODULE = some_somes.getModule()
-    #MODULE = constraints.getModule()
-    #MODULE = constraintswithbounds.getModule()
-    #MODULE = AADL_simplified_with_lists.getModule()
-    #MODULE = all_threes.getModule()
-    #MODULE = i101.getModule()
-    #MODULE = top_level_constraints_with_relational_joins.getModule()
-    #MODULE = telematics.getModule()
-    #MODULE = i17.getModule()
-    #MODULE = i188sumquantifier.getModule()
-    #MODULE = i78_transitiveclosure.getModule()
-    #MODULE = scope_test.getModule()
-    #MODULE = i131incorrectscope.getModule()
-    #MODULE = enforcingInverseReferences.getModule()
-    #MODULE = trivial.getModule()
-    #MODULE = i72sharedreference.getModule()
-    #MODULE = trivial2.getModule()
-    #MODULE = simple_real.getModule()
-    #MODULE = Phone.getModule()
-    #MODULE = check_unique_ref_names_with_inheritance.getModule()
-    #MODULE = maximize.getModule()
-    #MODULE = two_objective_min.getModule()
-    #MODULE = two_objective_max.getModule()
-    MODULE = simple_feature_model.getModule()
-    #MODULE = simp.getModule()
-    #MODULE = i147refdisambiguation.getModule()
-    #MODULE = "" 
-    
-    MODULE = cc_example.getModule()
-    return MODULE
-
 modeMap = {
            'experiment' : Common.EXPERIMENT,
            'modelstats' : Common.MODELSTATS,
@@ -152,16 +86,30 @@ modeMap = {
            }
 
 testMap = {
-           'edstests'   : MY_TESTS,
-           'positive'   : POSITIVE_TESTS,
-           'string'     : STRING_TESTS
+           'edstests'     : MY_TESTS,
+           'positive'     : POSITIVE_TESTS,
+           'string'       : STRING_TESTS,
+           'optimization' : OPTIMIZATION_TESTS,
+           'all'          : ALL_TESTS
            }
 
-
-def foo_callback(option, opt, value, parser):
-    print("A")
-    setattr(parser.values, option.dest, value.split(','))
-
+def debug_print(string):
+    '''
+    Only prints the string if in DEBUG mode.
+    '''
+    if(MODE == Common.DEBUG):
+        print(string)
+        
+def standard_print(string):
+    '''
+    Prints the string if **not** in TEST mode.
+    '''
+    if(MODE != Common.TEST and MODE != Common.EXPERIMENT):
+        print(string)
+        
+def experiment_print(string=""):
+    if MODE == Common.EXPERIMENT:
+        print(string)
 
 def setCommandLineOptions(learner = False):
     from parallel.heuristics import GeneralHeuristics

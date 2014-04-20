@@ -4,7 +4,7 @@ Created on Apr 4, 2014
 @author: ezulkosk
 '''
 from common import Options, Common
-from common.Common import experiment_print
+from common.Options import experiment_print
 from front import Z3Instance, ModelStats
 from learner import Classifiers
 from parallel.heuristics import GeneralHeuristics
@@ -30,20 +30,12 @@ class Learner():
             (self.parameters, self.parameter_constraints, self.attribute_constraints, self.non_modelstats) = self.loadParametersFile()
             (self.constrained_parameters, self.constrained_parameters_and_ranges) = self.getConstrainedParameterRanges()
             self.classifier = self.createClassifier(self.options)
-        
-   
-    def runZ3(self, module):
-        z3 = Z3Instance.Z3Instance(module)
-        z3.run()
-        return z3
-  
     
     def getModelStats(self, file):
-        currMode = Common.MODE
-        Common.MODE = Common.PRELOAD
+        currMode = Options.MODE
         module = Common.load(file)
-        z3 = self.runZ3(module)
-        parameters = ModelStats.run(z3, module, self.parameters, self.non_modelstats)
+        z3 = Z3Instance.Z3Instance(module)
+        parameters = ModelStats.run(z3, self.parameters, self.non_modelstats)
         Common.MODE = currMode
         return parameters
   

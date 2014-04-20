@@ -4,31 +4,25 @@ Created on Apr 30, 2013
 @author: ezulkosk
 '''
 
-from ast.IntegerLiteral import IntegerLiteral
 from common import Common, Options, Clock
-from common.Common import debug_print, standard_print, mOr, preventSameModel
+from common.Common import preventSameModel, load
 from common.Exceptions import UnusedAbstractException
+from common.Options import debug_print, standard_print
 from constraints import Constraints, IsomorphismConstraint
 from front import Z3Str, Converters, ModelStats
-from front.Converters import DimacsConverter
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from parallel import ParSolver
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
     SetScopes, AdjustAbstracts, CheckForGoals
-from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real, Int, \
-    Goal, tactics, tactic_description, Tactic, SolverFor
-from z3consts import Z3_UNINTERPRETED_SORT
-from z3types import Z3Exception
-import fileinput
+from z3 import Solver, set_option, sat, Int, Goal
 import sys
 
 
 
 
 class Z3Instance(object):
-    
     ''' 
     :var module: The Clafer AST
 
@@ -40,7 +34,6 @@ class Z3Instance(object):
         self.module = module
         self.z3_bracketed_constraints = []
         self.z3_sorts = {}
-        #self.solver = SolverFor("QF_LIA")
         self.solver = Solver()
         self.setOptions()
         self.clock = Clock.Clock()
@@ -59,6 +52,8 @@ class Z3Instance(object):
         """
         self.unsat_core_trackers = []
         self.unsat_map = {}
+        self.translate()
+        
     
     def createGroupCardConstraints(self):
         for i in self.z3_sorts.values():
@@ -111,7 +106,7 @@ class Z3Instance(object):
         #self.solver.set(produce_models=True)
         #set_option(auto_config=False)
         #set_option(candidate_models=True)
-        if Common.MODE == Common.DEBUG:
+        if Options.MODE == Common.DEBUG:
             #these may not be necessary
             set_option(max_width=100)
             set_option(max_depth=1000)
@@ -124,15 +119,12 @@ class Z3Instance(object):
             return True
         return False
     
-    def run(self):
+    
+    def translate(self):
         '''
-        :param module: The Clafer AST
-        :type module: Module
-        
-        Converts Clafer constraints to Z3 constraints and computes models.
+        Converts Clafer constraints to Z3 constraints.
         '''
         try:
-            
             self.clock.tick("translation")
             
             """ Create a ClaferSort associated with each Clafer. """  
@@ -156,9 +148,6 @@ class Z3Instance(object):
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
             
-            #for i in self.z3_sorts.values():
-            #    print(str(i) + " " + str(len(i.instances)))
-            
             debug_print("Creating cardinality constraints.")
             self.createCardinalityConstraints()
             
@@ -176,45 +165,55 @@ class Z3Instance(object):
             
             debug_print("Checking for goals.")
             Visitor.visit(CheckForGoals.CheckForGoals(self), self.module)
-        
-            if Common.MODE == Common.PRELOAD:
-                return 0
-        
-            if Common.MODE == Common.MODELSTATS:
-                ModelStats.run(self, self.module)
-                return 0
-        
-            if Options.STRING_CONSTRAINTS:
-                Converters.printZ3StrConstraints(self)
-                Z3Str.clafer_to_z3str("z3str_in")
-                return 1
             
-            debug_print("Asserting constraints.")
-            self.assertConstraints()     
-            
-            if Options.CNF:
-                debug_print("Outputting DIMACS.")
-                for i in self.solver.assertions():
-                    self.goal.add(i)
-                Converters.convertToDimacs(self)
-                return 1
-                
-            debug_print("Printing constraints.") 
-            self.printConstraints()
-            
-            debug_print("Getting models.")  
             self.clock.tock("translation")
-            models = self.get_models(Options.NUM_INSTANCES)
-            self.num_models = len(models)
-            
-            if Options.LEARNING_ENVIRONMENT == "sharcnet":
-                print(Options.SPLIT + str(Options.NUM_SPLIT))
-                sys.exit("FIX SHARCNET")
-            
-            return self.num_models
         except UnusedAbstractException as e:
             print(str(e))
             return 0
+    
+    def run(self):
+        '''
+        :param module: The Clafer AST
+        :type module: Module
+        
+         and computes models.
+        '''
+        if Options.MODE == Common.PRELOAD:
+            return 0
+    
+        if Options.MODE == Common.MODELSTATS:
+            ModelStats.run(self, self.module)
+            return 0
+    
+        if Options.STRING_CONSTRAINTS:
+            Converters.printZ3StrConstraints(self)
+            Z3Str.clafer_to_z3str("z3str_in")
+            return 1
+        
+        debug_print("Asserting constraints.")
+        self.assertConstraints()     
+        
+        if Options.CNF:
+            debug_print("Outputting DIMACS.")
+            for i in self.solver.assertions():
+                self.goal.add(i)
+            Converters.convertToDimacs(self)
+            return 1
+            
+        debug_print("Printing constraints.") 
+        self.printConstraints()
+        
+        debug_print("Getting models.")  
+        
+        models = self.get_models(Options.NUM_INSTANCES)
+        self.num_models = len(models)
+        
+        if Options.LEARNING_ENVIRONMENT == "sharcnet":
+            print(Options.SPLIT + str(Options.NUM_SPLIT))
+            sys.exit("FIX SHARCNET")
+        
+        return self.num_models
+        
         
         
     def printStartDelimeter(self):
@@ -241,8 +240,6 @@ class Z3Instance(object):
         standard_print("")
         self.clock.tack("printing")
     
-    
-    
     def assertConstraints(self):
         for i in self.z3_sorts.values():
             i.constraints.assertConstraints(self)
@@ -251,7 +248,7 @@ class Z3Instance(object):
             i.assertConstraints(self)
     
     def printConstraints(self):
-        if not (Common.MODE == Common.DEBUG and Options.PRINT_CONSTRAINTS):
+        if not (Options.MODE == Common.DEBUG and Options.PRINT_CONSTRAINTS):
             return
         #print(self.solver.sexpr())
         for i in self.z3_sorts.values():
@@ -260,7 +257,7 @@ class Z3Instance(object):
         for i in self.z3_bracketed_constraints:
             i.debug_print()
         
-    def print_repl_help(self):
+    def print_repl_help(self): 
         print("n -- get next model")
         print("r -- reset")
         print("i [num] -- increase (or decrease) the global scope by num (default=+1)")
@@ -275,9 +272,8 @@ class Z3Instance(object):
         else:
             print("Type h for help")
             return False
-    '''crude repl'''
     def get_models(self, desired_number_of_models):
-        if Common.MODE == Common.REPL:
+        if Options.MODE == Common.REPL:
             self.repl()
         elif Options.CORES == 1 and not self.objectives:
             return self.standard_get_models(desired_number_of_models)
@@ -290,13 +286,10 @@ class Z3Instance(object):
         metrics_variables = []
         
         for i in self.objectives:
-            #print(i)
-            (dir, var) = i
-            metrics_objective_direction.append(dir)
+            (pol, var) = i
+            metrics_objective_direction.append(pol)
             metrics_variables.append(var)
-        
-        #print(metrics_objective_direction)
-        #print(metrics_variables)
+
         # Non-Parallel    
         GIAOptionsNP = GuidedImprovementAlgorithmOptions(verbosity=0, \
             incrementallyWriteLog=False, \
@@ -331,8 +324,8 @@ class Z3Instance(object):
         while True:
             self.clock.tick("unsat")
             
-            if (Common.MODE != Common.DEBUG and self.solver.check() == sat and count != desired_number_of_models) or \
-                (Common.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == sat and count != desired_number_of_models):
+            if (Options.MODE != Common.DEBUG and self.solver.check() == sat and count != desired_number_of_models) or \
+                (Options.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == sat and count != desired_number_of_models):
                 if count == 0:
                     self.clock.tock("first model")
                 m = self.solver.model()
@@ -341,21 +334,17 @@ class Z3Instance(object):
                 result.append(m)
                 # Create a new constraint that blocks the current model
                 #print(m)
-                if not Common.MODE == Common.TEST and not Common.MODE == Common.EXPERIMENT:
+                if not Options.MODE == Common.TEST and not Options.MODE == Common.EXPERIMENT:
                     self.printVars(m)
                 if Options.GET_ISOMORPHISM_CONSTRAINT:
                     IsomorphismConstraint.IsomorphismConstraint(self, m).createIsomorphicConstraint()
                     isoConstraint = self.z3_bracketed_constraints.pop()
                     isoConstraint.assertConstraints(self)
                 else:
-                    #print(m[self.z3_sorts.get("c0_Feature").instances[0]])
-                    #print(m[self.z3_sorts.get("c0_Feature").instances[1]])
-                    # print(m[self.z3_sorts.get("c0_parent_feature").refs[0]])
-                    # print(m[self.z3_sorts.get("c0_parent_feature").refs[1]])
                     preventSameModel(self, self.solver, m)
                 count += 1
             else:
-                if Common.MODE == Common.DEBUG and count == 0:
+                if Options.MODE == Common.DEBUG and count == 0:
                     self.clock.tock("unsat")
                     debug_print(self.solver.check(self.unsat_core_trackers))
                     core = self.solver.unsat_core()
@@ -369,7 +358,6 @@ class Z3Instance(object):
                 return result
     
     def repl(self):
-        from common.Common import load
         if Common.FIRST_REPL_LOOP:
             models = self.standard_get_models(1)
             if not models:

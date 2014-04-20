@@ -10,73 +10,24 @@ from visitors import VisitorTemplate, Visitor, CreateSorts
 import sys
 import visitors
 
-
-
-
-
-def runForFeatureModel(z3inst, module):
-    '''
-    #Clafers, #BracketedConstraints, #NumXorGCard, #NumOptGCard, #NumAnyGCard 
-    '''
-    numClafers = getNumClafers(z3inst)
-    numBracketedConstraints = getNumBracketedConstraints(z3inst)
-    numXors = getNumXorGCard(z3inst)
-    #maxDepth = getMaxDepth(z3inst)
-    return (str(numClafers) + "," + str(numBracketedConstraints) + "," + str(numXors))#+ "," + str(maxDepth))
-    
-
-
-
-def getParameter(parameter, z3inst, module):
-    if parameter == "numClafers":
-        return getNumClafers(z3inst)
-    elif parameter == "numBracketedConstraints":
-        return getNumBracketedConstraints(z3inst)
-    
-    elif parameter == "numMandatoryCard":
-        return getNumMandatoryCard(z3inst)
-    elif parameter == "numOptionalCard":
-        return getNumOptionalCard(z3inst)
-    
-    elif parameter == "numXorGCard":
-        return getNumXorGCard(z3inst)
-    elif parameter == "numOptionalGCard":
-        return getNumOptionalGCard(z3inst)
-    elif parameter == "numAnyGCard":
-        return getNumAnyGCard(z3inst)
-    
-    elif parameter == "numObjective":
-        return getNumObjectives(z3inst)
-    elif parameter == "numMaximizeObjective":
-        return getNumMaximizeObjectives(z3inst)
-    elif parameter == "numMinimizeObjective":
-        return getNumMinimizeObjectives(z3inst)
-    
-    elif parameter == "maxDepth":
-        return getMaxDepth(z3inst)
-    
-    else:
-        sys.exit("Unimplimented parameter: " + parameter)
-
-def run(z3inst, module, parameters=None, non_modelstats=[]):
+def run(z3inst, parameters=None, non_modelstats=[]):
     stats = []
     if parameters:
         for (parameter,_,_) in parameters:
             if parameter in non_modelstats:
                 continue 
-            stats.append(getParameter(parameter, z3inst, module))
+            stats.append(getParameter(parameter, z3inst))
         return stats
     else:
         numClafers = getNumClafers(z3inst)
         numBracketedConstraints = getNumBracketedConstraints(z3inst)
-        numBracketedConstraintOperatorsList = getNumBracketedConstraintsOperators(module)
+        numBracketedConstraintOperatorsList = getNumBracketedConstraintsOperators(z3inst)
         numTopLevelClafers = getNumTopLevelClafers(z3inst)
         (isObjectives, numObjectives) = getObjectiveStats(z3inst)
         (maxCard, maxBoundedGroupCard) = getMaxCards(z3inst)
         maxDepth = getMaxDepth(z3inst)
         numXors = getNumXorGCard(z3inst)
         numOptionalGCard = getNumOptionalGCard(z3inst)
-        
         numOptionalCard = getNumOptionalCard(z3inst)
         numMandatoryCard = getNumMandatoryCard(z3inst)
         
@@ -158,7 +109,6 @@ def getNumOptionalCard(z3inst):
             numOptional = numOptional + 1
     return numOptional
 
-
 ''' ---------------------------------------------------------------'''    
 
 def getObjectiveStats(z3inst):
@@ -209,7 +159,8 @@ def getNumBracketedConstraints(z3inst):
     
 ''' ---------------------------------------------------------------'''    
 
-def getNumBracketedConstraintsOperators(module):
+def getNumBracketedConstraintsOperators(z3inst):
+    module = z3inst.module
     constraintsStatsVisitor = GetBracketedConstraintsStats()
     Visitor.visit(constraintsStatsVisitor, module)
     counts = sorted(constraintsStatsVisitor.counts)
@@ -235,5 +186,27 @@ class GetBracketedConstraintsStats(VisitorTemplate.VisitorTemplate):
             self.currCount = self.currCount + 1
             
 ''' ---------------------------------------------------------------'''            
+
+def getParameter(parameter, z3inst):
+    if parameter in parameter_functions.keys():
+        function = parameter_functions[parameter]
+        return function(z3inst)
+    else:
+        sys.exit("Unimplimented parameter: " + parameter)
+    
+parameter_functions = {
+                       "numClafers"                : getNumClafers, 
+                       "numBracketedConstraints"   : getNumBracketedConstraints,
+                       "numMandatoryCards"         : getNumMandatoryCard,
+                       "numOptionalCards"          : getNumOptionalCard,
+                       "numXorGCards"              : getNumXorGCard,
+                       "numOptionalGCards"         : getNumOptionalGCard,
+                       "numAnyGCards"              : getNumAnyGCard,
+                       "numObjectives"             : getNumObjectives,
+                       "numMaximizeObjectives"     : getNumMaximizeObjectives,
+                       "numMinimizeObjectives"     : getNumMinimizeObjectives,
+                       "maxDepth"                  : getMaxDepth 
+                       
+                       }
     
     

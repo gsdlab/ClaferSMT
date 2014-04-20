@@ -24,29 +24,19 @@ def run(args):
     
     Starting point for ClaferZ3.
     '''
- 
-    Common.MODE = Options.MODE 
-    if Common.MODE == Common.TEST:
+    if Options.MODE == Common.TEST:
         TestClafers.run()
-    elif Common.MODE == Common.ONE:
+    elif Options.MODE == Common.ONE:
         TestClafers.runForOne()
-    elif Common.MODE == Common.ALL:
+    elif Options.MODE == Common.ALL:
         TestClafers.runForAll()
-    elif (not Options.ECLIPSE) and (Common.MODE in [Common.NORMAL, Common.EXPERIMENT, Common.DEBUG, Common.REPL, Common.MODELSTATS]):
+    elif Options.MODE in [Common.NORMAL, Common.EXPERIMENT, Common.DEBUG, Common.REPL, Common.MODELSTATS]:
         file = Options.FILE
         #print(file)
         module = Common.load(file)
         z3 = Z3Instance(module)
         z3.run()
-    else:
-        module = Options.MODULE()
         
-        z3 = Z3Instance(module)
-        z3.run()
-        #z3.run()
-        
-        
-   
 if __name__ == '__main__':
     Options.setCommandLineOptions()
     if Options.CPROFILING:

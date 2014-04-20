@@ -3,10 +3,12 @@ Created on Sep 15, 2013
 
 @author: ezulkosk
 '''
-from common import Options
+from common import Options, Common
 from common.Clock import Clock
 from common.Options import INFINITE
 from front.Z3Instance import Z3Instance
+import sys
+import traceback
 
 '''from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
     this_dot_parent, arithmetic, relations, boolean_connectives, union, \
@@ -26,8 +28,6 @@ from front.Z3Instance import Z3Instance
     int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max, \
     Cruise, small, cc_examplemod
 '''
-import sys
-import traceback
 
 
 
@@ -54,7 +54,7 @@ def getTestSet():
         one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths, \
         AADL_simplified_with_lists, teststring, testunion, simple_real, Phone, \
         int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max, \
-        Cruise, small, cc_examplemod
+        Cruise, small, cc_examplemod, minmax, cc_example, optimization_ssap
     
     
     my_tests = [ 
@@ -86,7 +86,7 @@ def getTestSet():
         (i121comments, 2),
         (i122CVL,INFINITE),
         (i126empty, 1),
-        (i131incorrectscope, 10),
+        (i131incorrectscope, 16),
         (i137_parsing, 1),
         (i147refdisambiguation, INFINITE),
         (i14, 1),
@@ -103,13 +103,13 @@ def getTestSet():
         (i61cardinalities,INFINITE),
         (i70, 3),
         (i71,INFINITE),
-        (i72sharedreference, 10),
+        (i72sharedreference, 90),
         (i78_transitiveclosure, 0),
         (i83individualscope,INFINITE),
         (i98_toplevelreferences, 1),
         (layout, 1),
         (negative, 1),
-        (paths, 10),
+        (paths, 724),
         (personRelatives,INFINITE),
         (person_tutorial,INFINITE),
         (resolution,INFINITE),
@@ -117,6 +117,11 @@ def getTestSet():
         (test_neg_typesystem,INFINITE)
                   ]
             
+    optimization_tests = [
+                    (minmax, 1),
+                    (cc_example, 18),
+                    (optimization_ssap, 1)
+                    ]
 
     string_tests = [
                 (check_unique_ref_names_with_inheritance, 1),
@@ -130,6 +135,10 @@ def getTestSet():
         return my_tests
     elif Options.TEST_SET == Options.POSITIVE_TESTS:
         return positive_tests
+    elif Options.TEST_SET == Options.OPTIMIZATION_TESTS:
+        return optimization_tests
+    elif Options.TEST_SET == Options.ALL_TESTS:
+        return my_tests + positive_tests + optimization_tests
         
 def run():
     '''
@@ -148,7 +157,7 @@ def run():
         try:
             if expected_model_count == Options.INFINITE and Options.NUM_INSTANCES < 0:
                 #will change it back after the test runs
-                Options.NUM_INSTANCES = 3
+                Options.NUM_INSTANCES = 5
             module = file.getModule()
             print_separate("Attempting: " + str(file.__name__))
             clock.tick("Total Z3 Run Time")
@@ -175,43 +184,22 @@ def run():
                    "Exception List: " + str(exception_list))
     clock.printEvents()
        
-       
-def runAndOutputModels():
-    clock = Clock()
-    tests = getTestSet()
-    exc = 0
-    for t in tests:
-        (file, _) = t
-        module = file.getModule()
-        print_separate("Attempting: " + str(file.__name__))
-        clock.tick("Total Z3 Run Time")
-        try:
-            z3 = Z3Instance(module)
-            z3.run()
-        except:
-            traceback.print_exc(file=sys.stdout)
-            print("BUG IN TEST")
-            exc = exc + 1
-        clock.tack("Total Z3 Run Time")
-        clock = clock.combineClocks(z3.clock)
-    print_separate("Results: ")  
-    print("Exceptions: " + str(exc))
-    clock.printEvents()
-        
 def runForOne():  
     '''
     Runs the Z3-translator on each pair file in tests, 
     and outputs one model for each, if satisfiable.
     '''  
     Options.NUM_INSTANCES = 1
-    runAndOutputModels()
+    Options.MODE = Common.NORMAL
+    run()
     
 def runForAll():
     '''
     Runs the Z3-translator on each pair file in tests, 
     and outputs all model for each, if satisfiable (limited if infinite models).
     '''
-    runAndOutputModels()
+    Options.MODE = Common.NORMAL
+    run()
 '''
 
 '''

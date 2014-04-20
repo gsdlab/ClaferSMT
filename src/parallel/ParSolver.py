@@ -9,36 +9,10 @@ Created on Nov 21, 2013
 from common import Options, Common
 from common.Clock import Clock
 from gia import consts
-from gia.consts import METRICS_MINIMIZE, METRICS_MAXIMIZE
-from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
-    GuidedImprovementAlgorithm
 from parallel import Consumer
 from parallel.heuristics import SAP, GeneralHeuristics
-from visitors import PrintHierarchy, Visitor
-from z3 import *
-import argparse
-import csv
-import importlib
-import itertools
-import math
+from z3 import Solver
 import multiprocessing
-import operator
-import os
-import random
-import sys
-import time
-
-
-
-
-
-
-
-#from Z3ModelEmergencyResponseUpdateAllMin import *
-#from Z3ModelWebPortal import *
-
-
-
 
 def replicateSolver(solver, num_consumers):
     solvers = []
@@ -80,8 +54,6 @@ class ParSolver():
             
         mgr = multiprocessing.Manager()
         taskQueue = mgr.Queue()
-        #for i in range(Options.CORES):
-        #    taskQueue.append(mgr.Queue())
         solutions = mgr.Queue()
         timeQueue = mgr.Queue()
         
@@ -123,26 +95,13 @@ class ParSolver():
             results.append(result)
         while not timeQueue.empty():
             clock = timeQueue.get()
-            #print(clock)
             self.clock = self.clock.combineClocks(clock)
-            #results.append(result)
-        #print(results[0])
-        #print(results[1])
-        #print(results[2])
         
         self.clock.tick("Merge")
         merged_results = self.merge(results)
-        #print(len(merged_results))
         self.clock.tock("Merge")
-        #print(merged_results)
         self.clock.tock("ParSolver")
         self.clock.getParallelStats(self.z3)
-        
-        #print(merged_results[0])
-        #print(merged_results[1])
-        #print(merged_results[2])
-        #print(len(merged_results))
-        #sys.exit()
         return merged_results
         
         
@@ -209,11 +168,8 @@ class ParSolver():
             print(service)
             sap = SAP(self.solvers[0], server, service)
             jobs = sap.random_unique_service_random_server()
-            #print(jobs)
             print(jobs)
             jobs = sap.random_unique_service_random_server_range()
-            #print(jobs)
-            #jobs = sap.turn_off_servers(self.module)
             print(jobs)
             return jobs
         else: 

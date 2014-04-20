@@ -6,7 +6,6 @@ Created on Oct 7, 2013
 
 from ast import IntegerLiteral, FunExp, Exp, ClaferId, DeclPExp, \
     LocalDeclaration, Declaration
-from common.Common import standard_print
 from structures.ClaferSort import PrimitiveType
 from visitors import VisitorTemplate, Visitor, CreateBracketedConstraints, \
     ResolveClaferIds
