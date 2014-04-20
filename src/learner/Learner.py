@@ -140,7 +140,6 @@ class Learner():
             module = Common.load(Options.FILE)
         else:
             (module, parameters)  = self.query(instance_number, list_of_parameters)
-        #print(parameters)
         best_metric = Common.BOUND
         best_heuristic = ""
         num_models_list = []
@@ -148,6 +147,7 @@ class Learner():
         all_metrics = []
         unsorted_chart_headers = []
         unsorted_chart = []
+        Options.MODE = Common.EXPERIMENT
         for h in self.heuristics:
             Options.SPLIT = h
             unsorted_chart_headers.append(h)
@@ -155,7 +155,8 @@ class Learner():
             for s in Options.EXPERIMENT_NUM_SPLIT:
                 Options.NUM_SPLIT = s
                 try:
-                    z3 = self.runZ3(module)
+                    z3 = Z3Instance.Z3Instance(module)
+                    z3.run()
                     metric = z3.metric
                     num_models_list.append(z3.num_models)
                 except (HeuristicFailureException, RuntimeError) as e:

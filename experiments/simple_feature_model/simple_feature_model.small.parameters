@@ -3,13 +3,13 @@ numClafers 5 12
 numBracketedConstraints 1 4 //denotes the number of CTCs
 
 //card
-numMandatoryCard 1 12
-numOptionalCard 1 12
+numMandatoryCards 1 12
+numOptionalCards 1 12
 
 //depth
 maxDepth 1 7
 
 //Constraints
-@Constraint (numClafers == numOptionalCard + numMandatoryCard) and (maxDepth < numClafers) 
+@Constraint (numClafers == numOptionalCards + numMandatoryCards) and (maxDepth < numClafers) 
 
 

@@ -1,6 +1,6 @@
 enum Type = Optional | Mandatory
 
-Feature 10
+Feature 8
   type -> Type
   [type = Optional <=> this in OptionalCardFeatures]
   [type = Mandatory <=> this in MandatoryCardFeatures]
@@ -14,12 +14,12 @@ Feature 10
   [ level = 0 => type.ref = Mandatory ]
 
 //constraints on the number of each card
-OptionalCardFeatures -> Feature 5
-MandatoryCardFeatures -> Feature 5
+OptionalCardFeatures -> Feature @numOptionalCard
+MandatoryCardFeatures -> Feature @numMandatoryCard
 
 enum ConType = Include | Exclude
 
-Constraint 4
+Constraint 1
   conType -> ConType
   left -> Feature
   right -> Feature
@@ -30,5 +30,5 @@ Constraint 4
    
 //Depth Constraints
 [one f : Feature | f.level = 0]
-[ some f : Feature | f.level = 3 ]
-[ no   f : Feature | f.level > 3 ]
+[ some f : Feature | f.level = 6 ]
+[ no   f : Feature | f.level > 6 ]
