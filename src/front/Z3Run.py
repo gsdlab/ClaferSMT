@@ -8,8 +8,8 @@ from common import Common, Options
 from front import TestClafers, ModelStats
 from front.Z3Instance import Z3Instance
 import cProfile
-import sys
 import imp
+import sys
 
 
 
@@ -32,7 +32,6 @@ def run(args):
         TestClafers.runForAll()
     elif Options.MODE in [Common.NORMAL, Common.EXPERIMENT, Common.DEBUG, Common.REPL, Common.MODELSTATS]:
         file = Options.FILE
-        #print(file)
         module = Common.load(file)
         z3 = Z3Instance(module)
         z3.run()

@@ -10,6 +10,7 @@ from common.Exceptions import UnusedAbstractException
 from common.Options import debug_print, standard_print
 from constraints import Constraints, IsomorphismConstraint
 from front import Z3Str, Converters, ModelStats
+from gia.consts import METRICS_MAXIMIZE
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from parallel import ParSolver
@@ -167,6 +168,7 @@ class Z3Instance(object):
             Visitor.visit(CheckForGoals.CheckForGoals(self), self.module)
             
             self.clock.tock("translation")
+            
         except UnusedAbstractException as e:
             print(str(e))
             return 0
@@ -192,6 +194,16 @@ class Z3Instance(object):
         
         debug_print("Asserting constraints.")
         self.assertConstraints()     
+        
+        if Options.OUTPUT_MODE == "smt2":
+            print(Converters.convertToSMTLib(self.solver))
+            for (pol, obj) in self.objectives:
+                if pol == METRICS_MAXIMIZE:
+                    print("(maximize\n   " + str(obj) + ")")
+                else:
+                    print("(minimize\n   " + str(obj) + ")")
+                    
+            sys.exit()
         
         if Options.CNF:
             debug_print("Outputting DIMACS.")
@@ -302,8 +314,9 @@ class Z3Instance(object):
             outfilename = str("giaoutput").strip()#"npGIA_" + str(sys.argv[1]).strip() + ".csv"
     
             ParetoFront = GIAAlgorithmNP.ExecuteGuidedImprovementAlgorithm(outfilename)
-            for i in ParetoFront:
-                self.printVars(i)
+            if not Options.MODE == Common.TEST and not Options.MODE == Common.EXPERIMENT:
+                for i in ParetoFront:
+                    self.printVars(i)
             #count = count + 1
             return ParetoFront
         else:

@@ -63,6 +63,8 @@ class GIAConsumer(multiprocessing.Process):
             self.solver.add(self.consumerConstraints[int(next_task)])
             self.consumerConstraints[int(next_task)]
             self.clock.tick("Task " + str(next_task))
+            total_sat_calls = 0
+            total_unsat_time = 0
             while True:
                 if self.GIAAlgorithm.s.check() != z3.sat or num_solutions == Options.NUM_INSTANCES:
                     self.clock.tock("Task " + str(next_task))
@@ -73,6 +75,8 @@ class GIAConsumer(multiprocessing.Process):
                     prev_solution = self.GIAAlgorithm.s.model()
                     self.GIAAlgorithm.s.push()
                     NextParetoPoint, local_count_sat_calls, local_count_unsat_calls = self.GIAAlgorithm.ranToParetoFront(prev_solution)
+                    #print(local_count_sat_calls)
+                    #print(local_count_unsat_calls)
                     self.addParetoPoints(NextParetoPoint)
                     metric_values = self.GIAAlgorithm.get_metric_values(NextParetoPoint)
                     self.result_queue.put((model_to_string(self.z3, NextParetoPoint), metric_values))
@@ -82,6 +86,8 @@ class GIAConsumer(multiprocessing.Process):
                     self.GIAAlgorithm.s.add(tmpNotDominatedByNextParetoPoint)
                     num_solutions = num_solutions +  1
         self.clock.tock("Consumer " + str(self.index))
+        print("Total Sat Calls: " + total_sat_calls)
+        print("Total Unsat Time: " + total_unsat_time)
         self.timeQueue.put(self.clock)
         return 0
     

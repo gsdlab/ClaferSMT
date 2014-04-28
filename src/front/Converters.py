@@ -12,6 +12,23 @@ import io
 import operator
 import sys
 import z3
+
+
+def convertToSMTLib(f, status="unknown", name="benchmark", logic=""):
+    '''
+    SMTLIB
+    '''
+    assertions = f.assertions()
+    #for i in assertions:
+    #    print(i)
+    num_assertions = len(assertions)
+    v = (Ast * num_assertions)()
+    for i in range(num_assertions):
+        v[i] = assertions[i].as_ast()
+    return Z3_benchmark_to_smtlib_string(f.ctx.ref(), name, logic, status, "", num_assertions, v, z3.BoolVal(True).as_ast())
+
+
+
 '''
 ####################################
 # CNF + DIMACS Abstraction of QFLIA

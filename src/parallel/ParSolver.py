@@ -150,31 +150,10 @@ class ParSolver():
                 nonDominated.append(results[i])
         return nonDominated
     
-            
-                 
     
     def splitter(self): 
         heuristic = GeneralHeuristics.heuristics[Options.SPLIT]
         return heuristic(self.z3, self.module, Options.NUM_SPLIT)
-    
-    
-        if Options.SPLIT == "random_optional_clafer_toggle":
-            return GeneralHeuristics.optional_clafer_toggle(self.z3, Options.NUM_SPLIT)
-        elif Options.SPLIT == Options.SAP:
-            print(self.z3.z3_sorts)
-            server =  self.z3.getSort("c0_" + Options.SERVER)
-            service = self.z3.getSort("c0_" + Options.SERVICE)
-            print(server)
-            print(service)
-            sap = SAP(self.solvers[0], server, service)
-            jobs = sap.random_unique_service_random_server()
-            print(jobs)
-            jobs = sap.random_unique_service_random_server_range()
-            print(jobs)
-            return jobs
-        else: 
-            print("Warning, fell through to no_split")
-            return GeneralHeuristics.no_split(Options.NUM_SPLIT)
     
     
     

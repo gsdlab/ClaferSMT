@@ -57,6 +57,7 @@ SHOW_INHERITANCE = False
 DELIMETER=""
 INDENTATION="  "
 MAGNIFYING_GLASS = False
+OUTPUT_MODE=""
 
 ''' parallel options '''
 CORES=1
@@ -125,8 +126,7 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--testset', '-t', dest='test_set', default='edstests', help='The test set to be used for modes [experiment | test | one | all], or the number of tests to generate')#,
                         #choices=['edstests', 'positive', 'string'])
     parser.add_argument('--stringconstraints' , '-s', default=False, dest='stringconstraints',action='store_const',  const=True,  help='Flag to output to Z3-Str format instead')
-    parser.add_argument('--cnf', default=False, dest='cnf',action='store_const',  const=True,  help='Outputs CNF of formula.')
-    parser.add_argument('--dimacs', default="dimacs", dest='dimacs', help='Output DIMACS')
+    parser.add_argument('--outputmode', dest='output_mode', default='', choices=['cnf', 'dimacs', 'smt2'], help='Type of output to dump (for conversions)')
     parser.add_argument('--printuniquenames', '-u', default=False, dest='unique_names',action='store_const',  const=True,  help='Print clafers with unique prefixes')
     parser.add_argument('--showinheritance', default=False, dest='show_inheritance',action='store_const',  const=True,  help='Show super-clafers explicitly')
     parser.add_argument('--version', '-v', default=False, dest='version',action='store_const',  const=True,  help='Print version number.')
@@ -192,12 +192,8 @@ def setCommandLineOptions(learner = False):
         TEST_SET = args.test_set
     global STRING_CONSTRAINTS
     STRING_CONSTRAINTS= args.stringconstraints
-    global CNF
-    CNF= args.cnf
     global MAGNIFYING_GLASS
     MAGNIFYING_GLASS= args.magnifying_glass
-    global DIMACS_FILE
-    DIMACS_FILE = args.dimacs
     global UNIQUE_NAMES
     UNIQUE_NAMES = args.unique_names
     global SHOW_INHERITANCE
@@ -240,6 +236,8 @@ def setCommandLineOptions(learner = False):
     VERBOSE_PRINT = args.verbose_print
     global LEARNING_ENVIRONMENT
     LEARNING_ENVIRONMENT = args.learning_environment
+    global OUTPUT_MODE
+    OUTPUT_MODE = args.output_mode
         
     return args    
     

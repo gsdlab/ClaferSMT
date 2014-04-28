@@ -134,7 +134,10 @@ class Clock():
             z3.metric = longestConsumerPlusMerge
             #experiment_print(self)  
             return
-        
+     
+    def hackUnsat(self, starttime):
+        #print("B")
+        self.completed_event_map["unsattime"] = time.clock() - starttime   
     
     def __str__(self):
         retstr = []
