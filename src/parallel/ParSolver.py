@@ -8,7 +8,7 @@ Created on Nov 21, 2013
 
 from common import Options, Common
 from common.Clock import Clock
-from gia import consts
+from common.Common import METRICS_MAXIMIZE, METRICS_MINIMIZE
 from parallel import Consumer
 from parallel.heuristics import SAP, GeneralHeuristics
 from z3 import Solver
@@ -119,12 +119,12 @@ class ParSolver():
         for i in range(len(l)):
             ml = l[i]
             mr = r[i]
-            if self.metrics_objective_direction[i] == consts.METRICS_MAXIMIZE:
+            if self.metrics_objective_direction[i] == METRICS_MAXIMIZE:
                 if  ml < mr:
                     worseInOne = True
                 elif ml > mr:
                     betterInOne = True
-            elif self.metrics_objective_direction[i] == consts.METRICS_MINIMIZE:
+            elif self.metrics_objective_direction[i] == METRICS_MINIMIZE:
                 if  ml > mr:
                     worseInOne = True
                 elif ml < mr:

@@ -10,29 +10,6 @@ from front.Z3Instance import Z3Instance
 import sys
 import traceback
 
-'''from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
-    this_dot_parent, arithmetic, relations, boolean_connectives, union, \
-    simple_abstract, some, simple_set, integer_refs, higher_inheritance, \
-    this_integer_relation, equal_references, all_alls, all_threes, zoo, \
-    books_tutorial, check_unique_ref_names_with_inheritance, constraints, \
-    enforcingInverseReferences, i101, i10, i121comments, i122CVL, i126empty, \
-    i131incorrectscope, i137_parsing, i147refdisambiguation, i14, i17, i18, i19, \
-    i205refdisambiguationII, i23, i40_integers_strings_assignment, i40textequality, \
-    i49_parentReduce, i49_resolve_ancestor, i50_stop_following_references, i55, \
-    i57navParent, i61cardinalities, i70, i71, i72sharedreference, \
-    i78_transitiveclosure, i83individualscope, i98_toplevelreferences, layout, \
-    negative, paths, personRelatives, person_tutorial, resolution, simp, \
-    subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
-    one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths, \
-    AADL_simplified_with_lists, teststring, testunion, simple_real, Phone, \
-    int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max, \
-    Cruise, small, cc_examplemod
-'''
-
-
-
-
-
 SEPARATOR = "========================================================" 
 def print_separate(x):
     print("\n" + SEPARATOR + "\n| " + x + "\n" +  SEPARATOR + "\n")

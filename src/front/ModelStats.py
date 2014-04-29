@@ -4,7 +4,7 @@ Created on Nov 7, 2013
 @author: ezulkosk
 '''
 from common import Options, Common
-from gia import consts
+from common.Common import METRICS_MAXIMIZE, METRICS_MINIMIZE
 from structures.ClaferSort import ClaferSort
 from visitors import VisitorTemplate, Visitor, CreateSorts
 import sys
@@ -123,7 +123,7 @@ def getNumMaximizeObjectives(z3inst):
     numObjectives = 0
     for i in z3inst.objectives:
         (polarity,_) = i
-        if polarity == consts.METRICS_MAXIMIZE:
+        if polarity == METRICS_MAXIMIZE:
             numObjectives = numObjectives + 1
     return numObjectives
 
@@ -131,7 +131,7 @@ def getNumMinimizeObjectives(z3inst):
     numObjectives = 0
     for i in z3inst.objectives:
         (polarity,_) = i
-        if polarity == consts.METRICS_MINIMIZE:
+        if polarity == METRICS_MINIMIZE:
             numObjectives = numObjectives + 1
     return numObjectives
 

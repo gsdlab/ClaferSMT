@@ -4,9 +4,8 @@ Created on Jan 13, 2014
 @author: ezulkosk
 '''
 from ast import IntegerLiteral
-from common import Options
+from common import Options, Common
 from constraints import Operations
-from gia import consts
 from structures.ExprArg import JoinArg
 from visitors import VisitorTemplate, Visitor, CreateBracketedConstraints
 from z3 import Sum
@@ -33,9 +32,9 @@ class CheckForGoals(VisitorTemplate.VisitorTemplate):
         bracketedConstraintsVisitor = CreateBracketedConstraints.CreateBracketedConstraints(self)
         op = element.exp.iExp[0].operation
         if op == "min":
-            op = consts.METRICS_MINIMIZE
+            op = Common.METRICS_MINIMIZE
         else:
-            op = consts.METRICS_MAXIMIZE
+            op = Common.METRICS_MAXIMIZE
         expr = bracketedConstraintsVisitor.objectiveVisit(element.exp.iExp[0].elements[0])
         if isinstance(expr[0], JoinArg):
             expr = Operations.computeJoin(expr)

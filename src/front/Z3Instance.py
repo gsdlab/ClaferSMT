@@ -5,12 +5,11 @@ Created on Apr 30, 2013
 '''
 
 from common import Common, Options, Clock
-from common.Common import preventSameModel, load
+from common.Common import preventSameModel, load, METRICS_MAXIMIZE
 from common.Exceptions import UnusedAbstractException
 from common.Options import debug_print, standard_print
-from constraints import Constraints, IsomorphismConstraint
+from constraints import Constraints
 from front import Z3Str, Converters, ModelStats
-from gia.consts import METRICS_MAXIMIZE
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from parallel import ParSolver
@@ -205,12 +204,14 @@ class Z3Instance(object):
                     
             sys.exit()
         
+        
         if Options.CNF:
             debug_print("Outputting DIMACS.")
             for i in self.solver.assertions():
                 self.goal.add(i)
             Converters.convertToDimacs(self)
             return 1
+            
             
         debug_print("Printing constraints.") 
         self.printConstraints()
@@ -225,8 +226,6 @@ class Z3Instance(object):
             sys.exit("FIX SHARCNET")
         
         return self.num_models
-        
-        
         
     def printStartDelimeter(self):
         if Options.DELIMETER == Common.STANDARD_DELIMETER:
@@ -284,6 +283,7 @@ class Z3Instance(object):
         else:
             print("Type h for help")
             return False
+        
     def get_models(self, desired_number_of_models):
         if Options.MODE == Common.REPL:
             self.repl()
@@ -349,12 +349,7 @@ class Z3Instance(object):
                 #print(m)
                 if not Options.MODE == Common.TEST and not Options.MODE == Common.EXPERIMENT:
                     self.printVars(m)
-                if Options.GET_ISOMORPHISM_CONSTRAINT:
-                    IsomorphismConstraint.IsomorphismConstraint(self, m).createIsomorphicConstraint()
-                    isoConstraint = self.z3_bracketed_constraints.pop()
-                    isoConstraint.assertConstraints(self)
-                else:
-                    preventSameModel(self, self.solver, m)
+                preventSameModel(self, self.solver, m)
                 count += 1
             else:
                 if Options.MODE == Common.DEBUG and count == 0:

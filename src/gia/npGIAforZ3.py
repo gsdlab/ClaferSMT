@@ -1,15 +1,10 @@
 
-from common import Clock
+from common import Common
 from common.Common import preventSameModel
-from gia import consts
-from gia.GIALogs import GIALogging
 from time import time
 from z3 import *
-import inspect
-import multiprocessing
 import random
-import string
-import sys
+
 
 
 #Modified by Jianmei for EPOAL
@@ -60,7 +55,6 @@ class GuidedImprovementAlgorithm(object):
         self.decision_variables = decision_variables
         self.options = options
         self.verbosity = self.options.verbosity
-        self.GIALogger = GIALogging(self.options, self.metrics_variables, self.decision_variables)
 
     def _setAndLogZ3RandomSeeds(self):
         """ 
@@ -224,56 +218,7 @@ class GuidedImprovementAlgorithm(object):
         finally:
             outputFile.close()
         return ParetoFront
-        
-#         TotalUniqueParetoFront = len(ParetoFront)
-#         print TotalUniqueParetoFront
-#         ParetoPointsList = []
-#         for i in xrange(len(ParetoFront)):
-#             point = ParetoFront[i]
-#             strPoint = list((d.name(), str(point[d])) for d in point.decls())
-#             dict = {}
-#             for item in strPoint:
-#                 dict[str(item[0])] = str(item[1])
-#             ParetoPointsList.append(dict)
-#             
-#         for i in xrange(len(ParetoPointsList)):
-#             isDominated = False
-#             for j in xrange(i+1, len(ParetoPointsList)):
-#                     strlist1 = ParetoPointsList[i]['total_reliability'].split("/")
-#                     #print strlist1
-#                     strlist2 = ParetoPointsList[j]['total_reliability'].split("/")
-#                     #print strlist2
-#                     if (int(ParetoPointsList[i]['total_cost']) < int(ParetoPointsList[j]['total_cost']) and 
-#                         int(ParetoPointsList[i]['total_responsetime']) < int(ParetoPointsList[j]['total_responsetime']) and
-#                         int(ParetoPointsList[i]['total_batteryusage']) < int(ParetoPointsList[j]['total_batteryusage']) and 
-#                         int(ParetoPointsList[i]['total_deploymenttime']) < int(ParetoPointsList[j]['total_deploymenttime']) and 
-#                         int(ParetoPointsList[i]['total_developmenttime']) < int(ParetoPointsList[j]['total_developmenttime']) and
-#                         int(ParetoPointsList[i]['total_rampuptime']) < int(ParetoPointsList[j]['total_rampuptime']) and 
-#                         float(int(strlist1[0])/int(strlist1[1])) < float(int(strlist2[0])/int(strlist2[1]))):
-#                         isDominated = True
-#             if isDominated == True: 
-#                 TotalUniqueParetoFront = TotalUniqueParetoFront - 1
-#         print TotalUniqueParetoFront
-
-             
-#         if self.verbosity > consts.VERBOSE_NONE:
-#             print "ParetoFront has size of %s " % len(ParetoFront)
-#             print "Time taken is %s " % (end_time - start_time)
-#         
-#             for ParetoPoint in ParetoFront:
-#                 self.print_solution(ParetoPoint)
-#        
-#         if  self.options.useSummaryStatsFile == True:        
-#             self.print_stats_info(end_time, start_time, ParetoFront)
-# 
-#         self.options.timefilelog =  open(self.options.writeTotalTimeFilename, "a")            
-#         self.options.timefilelog.write("%s, %s\n" %  ( self.options.writeLogFilename , (end_time - start_time)))
-#         self.options.timefilelog.close()
-        
-        #for entry in self.GIALogger.getLog():
-        #    print entry.statistics
-
-        
+              
     def print_stats_info(self, end_time, start_time, ParetoFront):
         statsfile_fd = open(self.args.statsfile, "a")   
         self.print_header_if_file_is_empty(statsfile_fd)   
@@ -313,7 +258,6 @@ class GuidedImprovementAlgorithm(object):
             prev_solution = self.s.model()     
             tmpConstraintMustDominateX = self.ConstraintMustDominatesX(prev_solution)
             self.s.add(tmpConstraintMustDominateX)
-            self.GIALogger.logStartCall(tmpConstraintMustDominateX)
         local_count_unsat_calls += 1
         return prev_solution, local_count_sat_calls, local_count_unsat_calls
 
@@ -323,7 +267,7 @@ class GuidedImprovementAlgorithm(object):
         """
         DisjunctionOrLessMetrics  = list()
         for i in range(len(self.metrics_variables)):
-            if self.metrics_objective_direction[i] == consts.METRICS_MAXIMIZE:
+            if self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
                 DisjunctionOrLessMetrics.append(self.metrics_variables[i] >  model.eval(self.metrics_variables[i]))#model[self.metrics_variables[i]])
             else :
                 DisjunctionOrLessMetrics.append(self.metrics_variables[i] <  model.eval(self.metrics_variables[i]))#model[self.metrics_variables[i]])
@@ -359,7 +303,7 @@ class GuidedImprovementAlgorithm(object):
         """
         DisjunctionOrLessMetrics  = list()
         for i in range(len(self.metrics_variables)):
-            if self.metrics_objective_direction[i] == consts.METRICS_MAXIMIZE:
+            if self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
                 DisjunctionOrLessMetrics.append(self.metrics_variables[i] >  model[self.metrics_variables[i]])
             else :
                 DisjunctionOrLessMetrics.append(self.metrics_variables[i] <  model[self.metrics_variables[i]])
@@ -375,14 +319,14 @@ class GuidedImprovementAlgorithm(object):
         for dominatedByMetric in self.metrics_variables:        
             dominationConjunction = []
             j = 0
-            if  self.metrics_objective_direction[i] == consts.METRICS_MAXIMIZE:
+            if  self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
                 #print(model.eval(dominatedByMetric))
                 dominationConjunction.append(dominatedByMetric > model.eval(dominatedByMetric))             
             else:
                 dominationConjunction.append(dominatedByMetric < model.eval(dominatedByMetric)) 
             for AtLeastEqualInOtherMetric in self.metrics_variables:
                 if j != i:
-                    if self.metrics_objective_direction[j] == consts.METRICS_MAXIMIZE:
+                    if self.metrics_objective_direction[j] == Common.METRICS_MAXIMIZE:
                         dominationConjunction.append(AtLeastEqualInOtherMetric >= model.eval(AtLeastEqualInOtherMetric))#[AtLeastEqualInOtherMetric])
                     else:
                         dominationConjunction.append(AtLeastEqualInOtherMetric <= model.eval(AtLeastEqualInOtherMetric))               

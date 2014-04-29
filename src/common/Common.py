@@ -32,6 +32,10 @@ FIRST_REPL_LOOP = True
 STANDARD_DELIMETER = "=== Instance "
 BOUND = 600
 
+METRICS_MAXIMIZE = 1
+METRICS_MINIMIZE = 2
+
+
 def mAnd(*args):
     '''
     Short for MaybeAnd.

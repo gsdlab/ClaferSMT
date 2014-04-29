@@ -30,8 +30,6 @@ POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
 
 GLOBAL_SCOPE = 1#this obviously has to change
 
-ECLIPSE = False 
-
 MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 PRINT_CONSTRAINTS = True
 STRING_CONSTRAINTS = False
@@ -41,7 +39,6 @@ NUM_INSTANCES = 10 # -1 to produce all instances
 INFINITE = -1 #best variable name.
 PROFILING = True # True to output the translation time, and time to get first model
 CPROFILING = False #invokes the standard python profiling method (see Z3Run.py)
-GET_ISOMORPHISM_CONSTRAINT = False #efficiency bugs in quantified formulas are preventing this from working
 BREAK_QUANTIFIER_SYMMETRY = False
 EXTEND_ABSTRACT_SCOPES = True
 FILE = ""
@@ -160,12 +157,6 @@ def setCommandLineOptions(learner = False):
     if args.version:
         print("ClaferZ3 0.3.6.04-04-2014")
         sys.exit()
-    global ECLIPSE
-    if ECLIPSE:
-        ECLIPSE = True 
-        return
-    else:
-        ECLIPSE = False
     if not args.file and not (args.mode in ['experiment', 'test', 'one', 'all'] or learner):
         parser.print_help()
         sys.exit("\nERROR: If no file is given, mode must be set to [experiment | test | one | all].")
