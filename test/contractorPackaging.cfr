@@ -1,0 +1,115 @@
+// ------------------
+// Contractor prototype
+// ------------------
+
+abstract Contractor
+    methods -> ContractorMethod*       // methods of particular contractor
+        [this.contractor = Contractor]
+
+// ----------------------------------
+// Contractor Method
+// ----------------------------------
+
+abstract ContractorMethod
+    methodVUs -> MethodVU*
+    contractor ->> Contractor
+    [ContractorMethod in contractor.methods]
+
+    [all disj m1; m2 : methodVUs | m1.valueUnit.ref != m2.valueUnit.ref] 
+    // not allowed to repeat definitions for the same valueUnits
+
+// ----------------------------------
+// Method / Value Unit relation prototype
+// ----------------------------------
+
+abstract MethodVU
+    cost ->> integer
+    time ->> integer
+    valueUnit ->> ValueUnit
+
+// ------------------
+// ValueUnit prototype
+// ------------------
+
+abstract ValueUnit
+
+    appliedContractorMethod -> ContractorMethod     // the method assigned to this value unit
+
+    appliedMethodVU -> MethodVU              // applied to this ValueUnit part of contractor Method
+        [this in appliedContractorMethod.methodVUs.ref]
+        [this.valueUnit = ValueUnit]
+
+    assignedContractor ->> Contractor                // just a reference to contractor
+        [this = appliedContractorMethod.contractor]
+        
+// -----------------------------------
+// Optimization goals and constraints
+// -----------------------------------
+
+abstract Problem 
+    // optimization with respect to criteria
+    total_criterion1 : integer = sum ValueUnit.appliedMethodVU.time
+    total_criterion2 : integer = sum ValueUnit.appliedMethodVU.cost
+
+<<min MyProblem.total_criterion1>> // minimize criterion1
+<<max MyProblem.total_criterion2>> // maximize criterion2
+
+MyProblem: Problem
+
+//=======================================================
+// Particular data
+//=======================================================
+
+VU1 : ValueUnit
+VU2 : ValueUnit
+VU3 : ValueUnit
+VU4 : ValueUnit
+VU5 : ValueUnit
+
+ContractorA : Contractor
+    ContractorMethodA1 : ContractorMethod
+        methodVU1 : MethodVU
+            [valueUnit = VU1]
+            [cost = 1]
+            [time = 2]
+        methodVU2 : MethodVU
+            [valueUnit = VU2]
+            [cost = 2]
+            [time = 3]
+        methodVU3 : MethodVU
+            [valueUnit = VU3]
+            [cost = 3]
+            [time = 4]
+        methodVU4 : MethodVU
+            [valueUnit = VU4]
+            [cost = 4]
+            [time = 5]
+        methodVU5 : MethodVU
+            [valueUnit = VU5]
+            [cost = 5]
+            [time = 6]
+        [methodVUs = methodVU1, methodVU2, methodVU3, methodVU4, methodVU5] 
+    ContractorMethodA2 : ContractorMethod
+        methodVU1 : MethodVU
+            [valueUnit = VU1]
+            [cost = 2]
+            [time = 1]
+        methodVU2 : MethodVU
+            [valueUnit = VU2]
+            [cost = 3]
+            [time = 2]
+        methodVU3 : MethodVU
+            [valueUnit = VU3]
+            [cost = 4]
+            [time = 3]
+        methodVU4 : MethodVU
+            [valueUnit = VU4]
+            [cost = 5]
+            [time = 4]
+        methodVU5 : MethodVU
+            [valueUnit = VU5]
+            [cost = 6]
+            [time = 5]
+        [methodVUs = methodVU1, methodVU2, methodVU3, methodVU4, methodVU5]
+
+    [methods = ContractorMethodA1, ContractorMethodA2]

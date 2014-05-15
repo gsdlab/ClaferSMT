@@ -1,0 +1,20 @@
+total -> int = sum F.c
+
+abstract F
+  c: int
+
+abstract G : F
+
+
+A : F 
+  [c = 1]
+
+B : F
+  [c = 2]
+  C : F
+    [c = 3]
+
+D : G
+  [c = 4]
+  E : G
+    [c = 5]

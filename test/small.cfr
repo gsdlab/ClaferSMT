@@ -1,0 +1,44 @@
+/*
+Example from <a href="http://t3-necsis.cs.uwaterloo.ca:8091/NECSIS-Workshop/Modeling%20Quality%204" target="exampleSource">wiki</a>
+*/
+
+abstract Feature
+    cost ->> integer
+abstract ComfortFeature : Feature
+
+abstract FuelFeature : ComfortFeature
+    
+abstract Car
+    ABS : ComfortFeature ?
+        [cost = 2]
+    xor Transmission : Feature
+        [cost = 0]
+        Automatic : FuelFeature
+            [cost = 4]     
+        Manual : FuelFeature
+            [cost = 3]
+    FCA : FuelFeature ?
+        [cost = 5]        
+        xor Sensor : Feature
+            [cost = 0]
+            Radar : Feature
+                [cost = 3]
+            Lidar : Feature
+                [cost = 5]
+        xor Alert : Feature ?
+            [cost = 0]
+            Haptic : ComfortFeature
+                [cost = 2]
+            Audible : ComfortFeature
+                [cost = 1]
+    CC : FuelFeature ?
+        [cost = 4]
+        ACC : FuelFeature ?
+            [cost = 3]
+    [ ACC => FCA]
+    
+    total_cost ->> integer  = sum Feature.cost
+    //[total_cost = ACC.cost + CC.cost + Alert.cost + Haptic.cost + Audible.cost + FCA.cost + Radar.cost + Lidar.cost+ Sensor.cost + ABS.cost + Transmission.cost+Automatic.cost + Manual.cost]
+optimalCar : Car
+
+<< max optimalCar.total_cost >>

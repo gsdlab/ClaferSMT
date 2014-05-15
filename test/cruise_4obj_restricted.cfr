@@ -1,0 +1,44 @@
+/*
+Example from <a href="http://t3-necsis.cs.uwaterloo.ca:8091/NECSIS-Workshop/Modeling%20Quality%204" target="exampleSource">wiki</a>
+*/
+
+abstract Feature
+    cost ->> integer
+    mass ->> integer
+
+abstract ComfortFeature : Feature
+    comfort ->> integer
+
+abstract FuelFeature : ComfortFeature
+    fuel ->> integer
+    
+abstract Car
+    ABS : ComfortFeature ?
+        [cost = 2]
+        [mass = 1]
+        [comfort = 1]        
+    xor Transmission
+        Automatic : FuelFeature
+            [fuel = 2]
+            [mass = 1]            
+            [comfort = 2]
+            [cost = 4]     
+        Manual : FuelFeature
+            [fuel = 0]
+            [mass = 1]            
+            [comfort = 1]
+            [cost = 2]
+    
+    total_cost ->> integer = sum Feature.cost
+    total_comfort ->> integer = sum ComfortFeature.cost
+    total_fuel ->> integer = sum FuelFeature.cost
+    total_mass ->> integer = sum FuelFeature.mass
+//    [total_cost = 4]
+//    [total_fuel = 16]
+//    [total_comfort = 20]
+//    [total_mass = 6]
+    
+    
+optimalCar : Car
+
+<< max optimalCar.total_cost >>
