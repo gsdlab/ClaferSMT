@@ -7,7 +7,7 @@ from common import Assertions
 from constraints import Constraints
 from constraints.Constraints import GenericConstraints
 from structures.ExprArg import BoolArg
-from z3 import Implies, And, Or
+from common import SMTLib
 import constraints.Operations as Ops
 import sys
 
@@ -194,10 +194,10 @@ class BracketedConstraint(Constraints.GenericConstraints):
             thisClafer = self.claferStack[-1]
             for i in range(thisClafer.numInstances):
                 if thisClafer.numInstances == len(expr):
-                    self.addConstraint(Implies(thisClafer.isOn(thisClafer.instances[i]), expr[i].finish()))
+                    self.addConstraint(SMTLib.SMT_Implies(thisClafer.isOn(thisClafer.instances[i]), expr[i].finish()))
                 #hack for now
                 else:
-                    self.addConstraint(Implies(thisClafer.isOn(thisClafer.instances[i]), expr[0].finish()))
+                    self.addConstraint(SMTLib.SMT_Implies(thisClafer.isOn(thisClafer.instances[i]), expr[0].finish()))
         else:
             for i in expr:
                 for j in i.getInstanceSorts():

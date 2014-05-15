@@ -55,6 +55,7 @@ DELIMETER=""
 INDENTATION="  "
 MAGNIFYING_GLASS = False
 OUTPUT_MODE=""
+PRODUCE_UNSAT_CORE = False
 
 ''' parallel options '''
 CORES=1
@@ -130,6 +131,8 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--delimeter', default=Common.STANDARD_DELIMETER, dest='delimeter', help='Delimeter between instances.')
     parser.add_argument('--indentation', dest='indentation', default='doublespace', choices=['doublespace', 'tab'])
     parser.add_argument('--magnifyingglass', default=False, dest='magnifying_glass',action='store_const',  const=True,  help='Print equally optimal solutions if optimizing')
+    parser.add_argument('--produceunsatcore', dest='produceunsatcore', default=False, const = True, action='store_const', help='produce unsat core for UNSAT specifications')
+    
     
     ''' parallel '''
     parser.add_argument('--cores', '-c', dest='cores', type=int, default='1', help='the number of cores for parallel processing')
@@ -229,7 +232,10 @@ def setCommandLineOptions(learner = False):
     LEARNING_ENVIRONMENT = args.learning_environment
     global OUTPUT_MODE
     OUTPUT_MODE = args.output_mode
-        
+    
+    global PRODUCE_UNSAT_CORE
+    PRODUCE_UNSAT_CORE = args.produceunsatcore    
+    
     return args    
     
         

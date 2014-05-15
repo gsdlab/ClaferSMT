@@ -4,9 +4,7 @@ Created on Apr 28, 2013
 @author: ezulkosk
 '''
 
-from z3 import If, And, Or, Int, is_array, is_real
-from z3consts import Z3_UNINTERPRETED_SORT
-from z3types import Z3Exception
+from common import SMTLib
 import imp
 import sys
 
@@ -51,7 +49,7 @@ def mAnd(*args):
     elif len(newArgs) == 1:
         return newArgs[0]
     else:
-        return And(*newArgs)
+        return SMTLib.SMT_And(*newArgs)
 
 def mOr(*args):
     '''
@@ -66,7 +64,7 @@ def mOr(*args):
     elif len(newArgs) == 1:
         return newArgs[0]
     else:
-        return Or(*newArgs)
+        return SMTLib.SMT_Or(*newArgs)
 
 def preventSameModel(z3inst, solver, model):
     #from constraints import Operations
@@ -84,27 +82,7 @@ def preventSameModel(z3inst, solver, model):
         #input was an empty clafer model (no concretes)
         solver.add(False)
     else:
-        solver.add(Or(block))
-    '''
-    block = []
-    for d in model:
-        # d is a declaration
-        if d.arity() > 0:
-            continue #raise Z3Exception("uninterpreted functions are not supported")
-        # create a constant from declaration
-        c = d()
-        if (str(c)).startswith("z3name!") or is_real(c):
-            continue
-        if is_array(c) or c.sort().kind() == Z3_UNINTERPRETED_SORT:
-            raise Z3Exception("arrays and uninterpreted sorts are not supported")
-        block.append(c != model[d])
-        #print(str(d) + " = " + str(m[d]))
-    if block == []:
-        #input was an empty clafer model (no concretes)
-        solver.add(False)
-    else:
-        solver.add(Or(block))
-    '''
+        solver.add(SMTLib.SMT_Or(block))
 
 def getConstraintUID():
     '''
@@ -136,13 +114,13 @@ def min2(l,r):
     '''
     returns the min of two integers
     '''
-    return If(l <= r, l, r)
+    return SMTLib.SMT_If(l <= r, l, r)
 
 def max2(l,r):
     '''
     returns the min of two integers
     '''
-    return If(l <= r, r, l)
+    return SMTLib.SMT_If(l <= r, r, l)
 
 def load(file):
     if file.endswith(".cfr"):

@@ -1,4 +1,4 @@
-abstract A 2
+abstract A 5
   B
 
-C : A 2
+C : A 5

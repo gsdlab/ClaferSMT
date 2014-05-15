@@ -4,11 +4,11 @@ Created on Jan 13, 2014
 @author: ezulkosk
 '''
 from ast import IntegerLiteral
-from common import Options, Common
+from common import Options, Common, SMTLib
 from constraints import Operations
 from structures.ExprArg import JoinArg
 from visitors import VisitorTemplate, Visitor, CreateBracketedConstraints
-from z3 import Sum
+
 import visitors
 
 class CheckForGoals(VisitorTemplate.VisitorTemplate):
@@ -40,7 +40,7 @@ class CheckForGoals(VisitorTemplate.VisitorTemplate):
             expr = Operations.computeJoin(expr)
         mask = expr[0][1]
         valueList = [i for i in mask.values()]
-        self.z3.objectives.append((op, Sum(valueList)))
+        self.z3.objectives.append((op, SMTLib.SMT_Sum(valueList)))
     
 
             

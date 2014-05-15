@@ -4,12 +4,13 @@ Created on Apr 30, 2013
 @author: ezulkosk
 '''
 
-from common import Common, Options, Clock
+from common import Common, Options, Clock, SMTLib
 from common.Common import preventSameModel, load, METRICS_MAXIMIZE
 from common.Exceptions import UnusedAbstractException
 from common.Options import debug_print, standard_print
 from constraints import Constraints
-from front import Z3Str, Converters, ModelStats
+from converters import Z3Converter, Converters
+from front import Z3Str, ModelStats
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from parallel import ParSolver
@@ -40,6 +41,7 @@ class Z3Instance(object):
         self.objectives = []
         self.goal = Goal()
         self.delimeter_count = 0
+        self.solver_converter = Z3Converter.Z3Converter()
         #print(self.solver.help())
         #print(get_version_string())
         
@@ -337,7 +339,8 @@ class Z3Instance(object):
         while True:
             self.clock.tick("unsat")
             
-            if (Options.MODE != Common.DEBUG and self.solver.check() == sat and count != desired_number_of_models) or \
+            if (Options.MODE != Common.DEBUG and not(Options.PRODUCE_UNSAT_CORE) and self.solver.check() == sat and count != desired_number_of_models) or \
+                (Options.MODE != Common.DEBUG and Options.PRODUCE_UNSAT_CORE and self.solver.check(self.unsat_core_trackers) == sat and count != desired_number_of_models) or \
                 (Options.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == sat and count != desired_number_of_models):
                 if count == 0:
                     self.clock.tock("first model")
@@ -352,7 +355,7 @@ class Z3Instance(object):
                 preventSameModel(self, self.solver, m)
                 count += 1
             else:
-                if Options.MODE == Common.DEBUG and count == 0:
+                if count == 0 and Options.PRODUCE_UNSAT_CORE:# Options.MODE == Common.DEBUG and count == 0:
                     self.clock.tock("unsat")
                     debug_print(self.solver.check(self.unsat_core_trackers))
                     core = self.solver.unsat_core()
@@ -361,7 +364,7 @@ class Z3Instance(object):
                         print(str(i) + " ==> " + str(self.unsat_map[str(i)]))
                         print()
                     return result
-                if count == 0:
+                elif count == 0:
                     standard_print("UNSAT")
                 return result
     

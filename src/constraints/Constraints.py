@@ -3,9 +3,9 @@ Created on Oct 3, 2013
 
 @author: ezulkosk
 '''
-from common import Common, Options
-from front import Converters
-from z3 import Bool, Implies, simplify
+from common import Common, Options, SMTLib
+from converters import Converters
+
 
 
 
@@ -14,24 +14,28 @@ class Constraints():
     Adds a generated constraint to the solver.
     If in debug mode, add a Boolean tracker for the constraint, to obtain possible UNSAT cores.
     """
+    
     def assertConstraint(self, constraint, z3):
         if Common.FLAG:
             #z3.solver.add(And(constraint, Not(constraint)))
+            from z3 import simplify
             print(simplify(constraint))
-        if Options.MODE != Common.DEBUG: 
-            if Options.GOAL:
-                z3.goal.add(constraint)
-            else:
-                z3.solver.add(constraint)
-        if Options.MODE == Common.DEBUG:
-            p = Bool(str(self.assertID) + "_" + str(Common.getConstraintUID()))
+        
+        if Options.PRODUCE_UNSAT_CORE:
+            p = SMTLib.SMT_Bool(str(self.assertID) + "_" + str(Common.getConstraintUID()))
             z3.unsat_core_trackers.append(p)
             z3.unsat_map[str(p)] = constraint
             if Options.GOAL:
-                z3.goal.add(Implies(p, constraint))
+                z3.goal.add(SMTLib.SMT_Implies(p, constraint).convert(z3.solver_converter))
             else:
-                z3.solver.add(Implies(p, constraint))
-            
+                z3.solver.add(SMTLib.SMT_Implies(p, constraint).convert(z3.solver_converter))
+        else: 
+            if Options.GOAL:
+                z3.goal.add(constraint.convert(z3.solver_converter))
+            else:
+                print(constraint)
+                z3.solver.add(constraint.convert(z3.solver_converter))    
+        
     def convert(self, f_n, constraint):
         #print("#####")
         #print(constraint)
