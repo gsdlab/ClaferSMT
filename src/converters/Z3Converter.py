@@ -11,13 +11,37 @@ class Z3Converter():
         pass
     
     def implies_expr(self, expr):
-        pass
+        try:
+            l = expr.left.convert(self)
+        except:
+            l = expr.left
+        try:
+            r = expr.right.convert(self)
+        except:
+            r = expr.right    
+        return Implies(l, r)
     
     def le_expr(self, expr):
-        pass
+        try:
+            l = expr.left.convert(self)
+        except:
+            l = expr.left
+        try:
+            r = expr.right.convert(self)
+        except:
+            r = expr.right    
+        return l <= r
     
     def lt_expr(self, expr):
-        pass
+        try:
+            l = expr.left.convert(self)
+        except:
+            l = expr.left
+        try:
+            r = expr.right.convert(self)
+        except:
+            r = expr.right    
+        return l < r
     
     def xor_expr(self, expr):
         pass
@@ -32,7 +56,7 @@ class Z3Converter():
         pass
     
     def int_var(self, expr):
-        pass
+        return Int(expr.id)
     
     def bool_expr(self, expr):
         pass
