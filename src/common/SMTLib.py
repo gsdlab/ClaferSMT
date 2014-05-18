@@ -38,13 +38,14 @@ class SMT_Xor():
         
     def convert(self, converter):
         return converter.xor_expr(self)
-        
+
 class SMT_Not():
     def __init__(self, e):
         self.expr = e
         
     def convert(self, converter):
-        return converter.not_expr(self)    
+        return converter.not_expr(self)
+
     
 class SMT_LE():
     def __init__(self, l, r):
@@ -107,6 +108,13 @@ class SMT_Int():
     
     def convert(self, converter):
         return converter.int_var(self)
+
+class SMT_IntConst():
+    def __init__(self, val):
+        self.value = val
+
+    def convert(self, converter):
+        return converter.int_const(self)
     
 class SMT_Real():
     def __init__(self, uid):

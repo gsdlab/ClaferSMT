@@ -59,7 +59,7 @@ def joinWithParent(arg):
                 if k >= sort.parentInstances:
                     break
                 prevClause = newMask.get(k)
-                newMask.put(k, mOr(prevClause, mask.get(j) == k))
+                newMask.put(k, mOr(prevClause, SMTLib.SMT_EQ(mask.get(j), SMTLib.SMT_IntConst(k))))
         newInstanceSorts.append((sort.parent, newMask))
         Assertions.nonEmptyMask(newMask)
     for i in newInstanceSorts:
@@ -136,11 +136,11 @@ def joinWithClaferRef(arg):
                                    sort.refs[j], sort.refSort.numInstances))
         if isinstance(sort.refSort, PrimitiveType):
             for j in range(sort.numInstances):
-                clause = mOr(*[k == j for k in tempRefs])
+                clause = mOr(*[SMTLib.SMT_EQ(k, SMTLib.SMT_IntConst(j)) for k in tempRefs])
                 newMask.put(j, mOr(newMask.get(j), clause))
         else:
             for j in range(sort.refSort.numInstances):
-                clause = mOr(*[k == j for k in tempRefs])
+                clause = mOr(*[SMTLib.SMT_EQ(k, SMTLib.SMT_IntConst(j)) for k in tempRefs])
                 newMask.put(j, mOr(newMask.get(j), clause))
         newInstanceSorts.append((sort.refSort, newMask))
         Assertions.nonEmptyMask(newMask)
@@ -186,7 +186,7 @@ def joinWithClafer(left, right):
                     if left_mask.get(j):
                         prevClause = newMask.get(i)
                         newMask.put(i, mOr(prevClause, SMTLib.SMT_And(left_sort.isOn(left_mask.get(j)), 
-                                                        right_sort.instances[i] == j)))
+                                                    SMTLib.SMT_EQ(right_sort.instances[i], SMTLib.SMT_IntConst(j)))))
             '''CAREFUL!!! '''
             if newMask.size() == 0:
                 #print(left)
@@ -570,39 +570,7 @@ def op_implies(left,right):
             for j in mask.keys():
                 cond.append(sort.isOff(mask.get(j)))
         return BoolArg([mAnd(*cond)])
-    '''
-    #integer equality case
-    (left_sort, left_mask) = left.getInstanceSort(0)
-    (right_sort, right_mask) = right.getInstanceSort(0)
-    if isinstance(left_sort, BoolSort) or isinstance(right_sort, BoolSort):
-        return BoolArg([Implies(left_mask.pop_value(), right_mask.pop_value())])
-    #clafer-set equality case
-    else:
-        cond = []
-        while True:
-            nextSorts = getNextInstanceSort(sortedL, sortedR)
-            if not nextSorts:
-                break
-            if len(nextSorts) == 1:
-                (side, (sort, l)) = nextSorts[0]
-                #if only left side of the equation has elements of a sort,
-                #make sure none are on.
-                if side == "l":
-                    for i in l.values():
-                        cond.append(sort.isOff(i))
-                    
-            else:
-                (_, (sort, l)) = nextSorts[0]
-                (_, (_, r)) = nextSorts[1]
-                for i in l.difference(r.getTree()):
-                    cond.append(sort.isOff(l.get(i)))
-                for i in l.intersection(r.getTree()):
-                    cond.append(Implies(sort.isOn(l.get(i)),
-                                              sort.isOn(r.get(i))))
-        Assertions.nonEmpty(cond)
-        return BoolArg([And(*cond)])
-    #return BoolArg([mAnd(*[Implies(i,j) for i,j in zip(left.instances, right.instances)])])
-    '''
+
 
 def op_equivalence(left,right):
     '''

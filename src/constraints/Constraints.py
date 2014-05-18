@@ -17,7 +17,8 @@ class Constraints():
     
     def assertConstraint(self, constraint, z3):
         if Common.FLAG:
-            #z3.solver.add(And(constraint, Not(constraint)))
+            #z3.solver.add(And(con
+        # straint, Not(constraint)))
             from z3 import simplify
             print(simplify(constraint))
         
@@ -34,7 +35,7 @@ class Constraints():
                 z3.goal.add(constraint.convert(z3.solver_converter))
             else:
                 print(constraint)
-                z3.solver.add(constraint.convert(z3.solver_converter))    
+                z3.solver.add(constraint.convert(z3.solver_converter))
         
     def convert(self, f_n, constraint):
         #print("#####")
