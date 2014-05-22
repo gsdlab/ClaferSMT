@@ -130,25 +130,6 @@ class BracketedConstraint(Constraints.GenericConstraints):
                 ifConstraints = []
         localStack.reverse()
         ifConstraints.reverse()
-        '''
-        for _ in range(num_combinations):
-            currExpr = localStack.pop(0)
-            if ifConstraints:
-                currIfConstraint = ifConstraints.pop(0)
-            else:
-                currIfConstraint = None
-                
-            quantFunction = getQuantifier(quantifier)
-            cond = quantFunction(currExpr)
-            
-            if currIfConstraint:
-                cond = Implies(currIfConstraint, cond)
-            condList.append(cond)
-        self.stack.append([BoolArg([And(*condList)])])
-        '''
-        #for _ in range(num_combinations):
-        #    currExpr = localStack.pop(0)
-        #    condList.append(currExpr)
         quantFunction = getQuantifier(quantifier)
         cond = quantFunction(localStack, ifConstraints)
         Assertions.nonEmpty(cond)

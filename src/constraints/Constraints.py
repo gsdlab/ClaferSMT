@@ -21,7 +21,7 @@ class Constraints():
         # straint, Not(constraint)))
             from z3 import simplify
             print(simplify(constraint))
-        
+
         if Options.PRODUCE_UNSAT_CORE:
             p = SMTLib.SMT_Bool(str(self.assertID) + "_" + str(Common.getConstraintUID()))
             z3.unsat_core_trackers.append(p)
@@ -30,11 +30,11 @@ class Constraints():
                 z3.goal.add(SMTLib.SMT_Implies(p, constraint).convert(z3.solver_converter))
             else:
                 z3.solver.add(SMTLib.SMT_Implies(p, constraint).convert(z3.solver_converter))
-        else: 
+        else:
             if Options.GOAL:
                 z3.goal.add(constraint.convert(z3.solver_converter))
             else:
-                print(constraint)
+                #print(SMTLib.toStr(constraint))
                 z3.solver.add(constraint.convert(z3.solver_converter))
         
     def convert(self, f_n, constraint):
@@ -48,6 +48,7 @@ class GenericConstraints(Constraints):
         self.assertID = ident
         
     def addConstraint(self, c):
+        #SMTLib.toStr(c)
         self.constraints.append(c)
     
     def addAll(self, c):
@@ -83,22 +84,25 @@ class ClaferConstraints(Constraints):
         self.group_card_constraints = []
         self.inheritance_constraints = []
         self.ref_constraints = []
-    
+
+    def addConstraint(self, list, c):
+        list.append(c)
+
     def addInstanceConstraint(self,c):
-        self.instance_constraints.append(c)
+        self.addConstraint(self.instance_constraints, c)
     
     def addCardConstraint(self,c):
-        self.card_constraints.append(c)
+        self.addConstraint(self.card_constraints, c)
         
     def addGroupCardConstraint(self,c):
-        self.group_card_constraints.append(c)
+        self.addConstraint(self.group_card_constraints, c)
         
     def addInheritanceConstraint(self,c):
-        self.inheritance_constraints.append(c)
+        self.addConstraint(self.inheritance_constraints, c)
         
     def addRefConstraint(self,c):
-        self.ref_constraints.append(c)
-    
+        self.addConstraint(self.ref_constraints, c)
+
     def __str__(self):
         return str(self.claferSort.element.uid)
     

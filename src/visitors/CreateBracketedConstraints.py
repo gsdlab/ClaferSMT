@@ -4,7 +4,7 @@ Created on Mar 26, 2013
 @author: ezulkosk
 '''
 
-from common import Common, Options
+from common import Common, Options, SMTLib
 from common.Common import mAnd
 from common.Options import debug_print
 from constraints import BracketedConstraint
@@ -127,19 +127,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     def createAllLocalsCombinations(self, localDecls, exprArg, isDisjunct, isSymmetric):
         (sort, mask) = exprArg.getInstanceSort(0)
         my_range = list(mask.keys())
-        if isSymmetric and Options.BREAK_QUANTIFIER_SYMMETRY:
-            if isDisjunct:
-                integer_combinations = itertools.combinations(my_range, len(localDecls))
-            else:
-                integer_combinations = itertools.combinations(my_range, len(localDecls))
-        else:
-            if isDisjunct:
-                integer_combinations = itertools.permutations(my_range, len(localDecls))
-            else:
-                integer_combinations = list(itertools.permutations(my_range, len(localDecls))) + \
-                                            [tuple([i] * len(localDecls)) for i in my_range]
-            #delete the above???
-            integer_combinations = itertools.permutations(my_range, len(localDecls))
+        integer_combinations = itertools.permutations(my_range, len(localDecls))
     
         
         localInstances = []
@@ -216,7 +204,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     
     def integerliteralVisit(self, element):
         if(self.inConstraint):
-            self.currentConstraint.addArg([IntArg([element.value])])
+            self.currentConstraint.addArg([IntArg([SMTLib.SMT_IntConst(element.value)])])
         
     def realliteralVisit(self, element):
         if(self.inConstraint):

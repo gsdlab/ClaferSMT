@@ -73,16 +73,16 @@ def preventSameModel(z3inst, solver, model):
     block = []
     for i in z3inst.z3_sorts.values():
         for j in i.instances:
-            block.append(j != model[j])
+            block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(model[j.var])))
         if i.refs:
             for j in i.refs:
-                block.append(j != model[j])
+                block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(model[j.var])))
 
     if block == []:
         #input was an empty clafer model (no concretes)
         solver.add(False)
     else:
-        solver.add(SMTLib.SMT_Or(block))
+        solver.add(SMTLib.SMT_Or(*block).convert(z3inst.solver_converter))
 
 def getConstraintUID():
     '''
