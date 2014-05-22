@@ -182,7 +182,7 @@ class  ClaferSort(object):
         try:
             return SMTLib.SMT_EQ(self.instances[index], SMTLib.SMT_IntConst(self.parentInstances))
         except:
-            return SMTLib.SMT_EQ(index, self.parentInstances)
+            return SMTLib.SMT_EQ(index, SMTLib.SMT_IntConst(self.parentInstances))
         
        
        
@@ -239,7 +239,7 @@ class  ClaferSort(object):
                 #parent pointer is <= upper, or equal to parentInstances
                 self.constraints.addInstanceConstraint(
                     SMTLib.SMT_Or(self.isOff(i),
-                       SMTLib.SMT_LE(self.instances[i], upper)))
+                       SMTLib.SMT_LE(self.instances[i], SMTLib.SMT_IntConst(upper))))
             
             #sorted parent pointers (only consider things that are not part of an abstract)
             #print(self.element)
@@ -296,9 +296,9 @@ class  ClaferSort(object):
             return
         for i in range(self.numInstances):
             
-            bigSumm = 0
+            bigSumm = SMTLib.SMT_IntConst(0)
             for j in self.fields:
-                bigSumm = bigSumm +  j.summs[i]
+                bigSumm = SMTLib.SMT_Plus(bigSumm, j.summs[i])
             #**** LEAVE THIS CODE ****
             #don't include inherited fields for now 
             #if self.superSort:
@@ -384,7 +384,7 @@ class BoolSort():
         '''
         Returns a Boolean Constraint stating whether or not the instance at the given index is *off*.
         '''
-        return not self.isOn(arg)
+        return SMTLib.SMT_Not(self.isOn(arg))
     
     def __lt__(self, other):
         return not isinstance(other, BoolSort())
@@ -457,7 +457,7 @@ class IntSort():
         '''
         Returns a Boolean Constraint stating whether or not the instance at the given index is *off*.
         '''
-        return not self.isOn(arg)
+        return SMTLib.SMT_Not(self.isOn(arg))
     
     def getNextIndex(self):
         self.index = self.index + 1
@@ -491,7 +491,7 @@ class RealSort():
         '''
         Returns a Boolean Constraint stating whether or not the instance at the given index is *off*.
         '''
-        return not self.isOn(arg)
+        return SMTLib.SMT_Not(self.isOn(arg))
     
     def getNextIndex(self):
         self.index = self.index + 1

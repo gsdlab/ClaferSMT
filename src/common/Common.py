@@ -114,13 +114,13 @@ def min2(l,r):
     '''
     returns the min of two integers
     '''
-    return SMTLib.SMT_If(l <= r, l, r)
+    return SMTLib.SMT_If(SMTLib.SMT_LE(l, r), l, r)
 
 def max2(l,r):
     '''
     returns the min of two integers
     '''
-    return SMTLib.SMT_If(l <= r, r, l)
+    return SMTLib.SMT_If(SMTLib.SMT_LE(l, r), r, l)
 
 def load(file):
     if file.endswith(".cfr"):

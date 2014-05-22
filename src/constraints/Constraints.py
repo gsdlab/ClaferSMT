@@ -34,7 +34,7 @@ class Constraints():
             if Options.GOAL:
                 z3.goal.add(constraint.convert(z3.solver_converter))
             else:
-                #print(SMTLib.toStr(constraint))
+                #SMTLib.toStr(constraint)
                 z3.solver.add(constraint.convert(z3.solver_converter))
         
     def convert(self, f_n, constraint):

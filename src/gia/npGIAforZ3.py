@@ -268,9 +268,9 @@ class GuidedImprovementAlgorithm(object):
         DisjunctionOrLessMetrics  = list()
         for i in range(len(self.metrics_variables)):
             if self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
-                DisjunctionOrLessMetrics.append(self.metrics_variables[i] >  model.eval(self.metrics_variables[i]))#model[self.metrics_variables[i]])
+                DisjunctionOrLessMetrics.append(self.metrics_variables[i].convert(self.z3.solver_converter) >  model.eval(self.metrics_variables[i].convert(self.z3.solver_converter)))#model[self.metrics_variables[i]])
             else :
-                DisjunctionOrLessMetrics.append(self.metrics_variables[i] <  model.eval(self.metrics_variables[i]))#model[self.metrics_variables[i]])
+                DisjunctionOrLessMetrics.append(self.metrics_variables[i].convert(self.z3.solver_converter) <  model.eval(self.metrics_variables[i].convert(self.z3.solver_converter)))#model[self.metrics_variables[i]])
         return Or(DisjunctionOrLessMetrics)
 
 
@@ -321,15 +321,15 @@ class GuidedImprovementAlgorithm(object):
             j = 0
             if  self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
                 #print(model.eval(dominatedByMetric))
-                dominationConjunction.append(dominatedByMetric > model.eval(dominatedByMetric))             
+                dominationConjunction.append(dominatedByMetric.convert(self.z3.solver_converter) > model.eval(dominatedByMetric.convert(self.z3.solver_converter)))             
             else:
-                dominationConjunction.append(dominatedByMetric < model.eval(dominatedByMetric)) 
+                dominationConjunction.append(dominatedByMetric.convert(self.z3.solver_converter) < model.eval(dominatedByMetric.convert(self.z3.solver_converter))) 
             for AtLeastEqualInOtherMetric in self.metrics_variables:
                 if j != i:
                     if self.metrics_objective_direction[j] == Common.METRICS_MAXIMIZE:
-                        dominationConjunction.append(AtLeastEqualInOtherMetric >= model.eval(AtLeastEqualInOtherMetric))#[AtLeastEqualInOtherMetric])
+                        dominationConjunction.append(AtLeastEqualInOtherMetric.convert(self.z3.solver_converter) >= model.eval(AtLeastEqualInOtherMetric.convert(self.z3.solver_converter)))#[AtLeastEqualInOtherMetric])
                     else:
-                        dominationConjunction.append(AtLeastEqualInOtherMetric <= model.eval(AtLeastEqualInOtherMetric))               
+                        dominationConjunction.append(AtLeastEqualInOtherMetric.convert(self.z3.solver_converter) <= model.eval(AtLeastEqualInOtherMetric.convert(self.z3.solver_converter)))               
                 j = 1 + j
             i = 1 + i    
             dominationDisjunction.append(And(dominationConjunction))         

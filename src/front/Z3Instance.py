@@ -31,7 +31,7 @@ class Z3Instance(object):
     '''
     def __init__(self, module):
         Common.reset() #resets variables if in test mode
-        self.EMPTYSTRING = Int("EMPTYSTRING")
+        self.EMPTYSTRING = SMTLib.SMT_Int("EMPTYSTRING")
         self.module = module
         self.z3_bracketed_constraints = []
         self.z3_sorts = {}

@@ -34,6 +34,16 @@ class Z3Converter():
         r = expr.right.convert(self)
         return l < r
     
+    def ge_expr(self, expr):
+        l = expr.left.convert(self)
+        r = expr.right.convert(self)
+        return l >= r
+    
+    def gt_expr(self, expr):
+        l = expr.left.convert(self)
+        r = expr.right.convert(self)
+        return l > r
+    
     def xor_expr(self, expr):
         l = expr.left.convert(self)
         r = expr.right.convert(self)
@@ -50,8 +60,12 @@ class Z3Converter():
     def sum_expr(self, expr):
         newList = [i.convert(self) for i in expr.list]
         #print([i for i in expr.list])
-        #print(newList)
-        return Sum(*newList)
+        #print(*newList)
+        try:
+            ret = Sum(*newList)
+        except:
+            ret = sum(newList)
+        return ret
 
     def plus_expr(self, expr):
         l = expr.left.convert(self)
@@ -67,16 +81,40 @@ class Z3Converter():
         l = expr.left.convert(self)
         r = expr.right.convert(self)
         return l * r
+    
+    def divide_expr(self, expr):
+        l = expr.left.convert(self)
+        r = expr.right.convert(self)
+        return l / r
+
+    def intdivide_expr(self, expr):
+        l = expr.left.convert(self)
+        r = expr.right.convert(self)
+        return l // r
 
     def neg_expr(self, expr):
         val = expr.value.convert(self)
         return -(val)
+    
+    def not_expr(self, expr):
+        val = expr.value.convert(self)
+        return Not(val)
 
     def int_var(self, expr):
         return Int(expr.id)
+    
+    def real_var(self, expr):
+        return Real(expr.id)
+    
+    def bool_var(self, expr):
+        return expr.val
 
     def int_const(self, expr):
         return expr.value
+    
+    def bool_const(self, expr):
+        return expr.value
+    
     
     def bool_expr(self, expr):
         return Bool(expr.id)

@@ -403,7 +403,7 @@ def op_lt(left,right):
     #else:
     #    lval = left_mask.pop_value()
     #    rval = right_mask.pop_value()
-    return BoolArg([lval < rval])  
+    return BoolArg([SMTLib.SMT_LT(lval, rval)])  
         
 def op_le(left,right):
     '''
@@ -423,7 +423,7 @@ def op_le(left,right):
     #rval = right_mask.pop_value()
     lval = SMTLib.SMT_Sum(left_mask.values())
     rval = SMTLib.SMT_Sum(right_mask.values())
-    return BoolArg([lval <= rval])  
+    return BoolArg([SMTLib.SMT_LE(lval, rval)])  
 
 def op_gt(left,right):
     '''
@@ -1007,7 +1007,7 @@ def checkForAriths(instances):
 
 def getArithValue(vals):
     if checkForAriths(vals):
-        val = SMTLib.SMT_Sum(*vals)
+        val = SMTLib.SMT_Sum(vals)
     else:
         val = SMTLib.SMT_Sum(vals)
     return val
@@ -1084,9 +1084,9 @@ def op_div(left,right):
     (_, right_mask) = right.getInstanceSort(0)
     lval = getArithValue(list(left_mask.values()))
     rval = getArithValue(list(right_mask.values()))
-    return IntArg([lval / rval]
-                   if((not isinstance(lval, int)) or (not isinstance(rval, int)))
-                             else [lval // rval])
+    return IntArg([SMTLib.SMT_Divide(lval, rval)]
+                   if((not isinstance(lval, SMTLib.SMT_IntConst)) or (not isinstance(rval, SMTLib.SMT_IntConst)))
+                             else [SMTLib.IntDivide(val, rval)])
     
     
 def op_un_minus(arg):

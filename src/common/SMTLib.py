@@ -25,6 +25,7 @@ class SMT_Implies():
     def __init__(self, l, r):
         self.left = l
         self. right = r
+        
 
     def children(self):
         return [self.left, self.right]
@@ -38,6 +39,10 @@ class SMT_Implies():
 class SMT_And():
     def __init__(self, *l):
         self.list = l
+        for i in self.list:
+            if isinstance(i, bool) and not i:
+                self.list = [SMT_BoolConst(False)]
+        self.list = [i for i in self.list if not isinstance(i, bool)]
 
     def children(self):
         return self.list
@@ -51,6 +56,10 @@ class SMT_And():
 class SMT_Or():
     def __init__(self, *l):
         self.list = l
+        for i in self.list:
+            if isinstance(i, bool) and i:
+                self.list = [SMT_BoolConst(True)]
+        self.list = [i for i in self.list if not isinstance(i, bool)]
 
     def children(self):
         return self.list
@@ -108,6 +117,7 @@ class SMT_LE():
     def __init__(self, l, r):
         self.left = l
         self.right = r
+        
 
     def children(self):
         return [self.left, self.right]
@@ -120,14 +130,14 @@ class SMT_LE():
     
 class SMT_GE():
     def __init__(self, l, r):
-        self.left = r
-        self.right = l
+        self.left = l
+        self.right = r
 
     def children(self):
         return [self.left, self.right]
         
     def convert(self, converter):
-        return converter.le_expr(self)
+        return converter.ge_expr(self)
 
     def __str__(self):
         return ">="
@@ -148,14 +158,14 @@ class SMT_LT():
     
 class SMT_GT():
     def __init__(self, l, r):
-        self.left = r
-        self.right = l
+        self.left = l
+        self.right = r
 
     def children(self):
         return [self.left, self.right]
         
     def convert(self, converter):
-        return converter.lt_expr(self)
+        return converter.gt_expr(self)
 
     def __str__(self):
         return ">"
@@ -164,6 +174,10 @@ class SMT_EQ():
     def __init__(self, l, r):
         self.left = l
         self. right = r
+        if isinstance(l, int) or isinstance(r, int):
+            print(l)
+            print(r)
+            raise Exception
 
     def children(self):
         return [self.left, self.right]
@@ -190,15 +204,12 @@ class SMT_NE():
         
 class SMT_Sum():
     def __init__(self, l):
-        #print(l)
-        print("A" + str(list(l)))
-        self.list = [i for i in list(l)]
+        self.list = list(l)
 
     def children(self):
         return self.list
 
     def convert(self, converter):
-        print("B" + str(list(self.list)))
         return converter.sum_expr(self)
 
     def __str__(self):
@@ -233,23 +244,38 @@ class SMT_IntConst():
     def __str__(self):
         return str(self.value)
     
-class SMT_Real():
-    def __init__(self, uid):
-        self.id = uid
+class SMT_BoolConst():
+    def __init__(self, val):
+        self.value = val
 
     def children(self):
         return []
-    
+
     def convert(self, converter):
-        return converter.real_var(self)
+        return converter.bool_const(self)
+
+    def __str__(self):
+        return str(self.value)
+
+class SMT_Real():
+    def __init__(self, uid):
+        self.id = uid
+        self.var = None
+
+    def children(self):
+        return []
+
+    def convert(self, converter):
+        if not self.var:
+            self.var = converter.real_var(self)
+        return self.var
 
     def __str__(self):
         return self.id
-
         
 class SMT_Bool():
-    def __init__(self, uid):
-        self.id = uid
+    def __init__(self, v):
+        self.val = v
 
     def children(self):
         return []
@@ -264,6 +290,7 @@ class SMT_Plus():
     def __init__(self, l, r):
         self.left = l
         self.right = r
+        
 
     def children(self):
         return [self.left, self.right]
@@ -315,6 +342,20 @@ class SMT_Divide():
 
     def __str__(self):
         return "/"
+    
+class SMT_IntDivide():
+    def __init__(self, l, r):
+        self.left = l
+        self.right = r
+
+    def children(self):
+        return [self.left, self.right]
+
+    def convert(self, converter):
+        return converter.intdivide_expr(self)
+
+    def __str__(self):
+        return "//"
 
 def SMT_IntVector(uid, count):
     return [SMT_Int(str(uid) + "__" + str(i)) for i in range(count)]

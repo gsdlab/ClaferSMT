@@ -4,7 +4,7 @@ Created on Oct 21, 2013
 @author: ezulkosk
 '''
 from bintrees.avltree import AVLTree
-from common import Assertions
+from common import Assertions, SMTLib
 from structures.ClaferSort import BoolSort, IntSort, PrimitiveType, RealSort, \
     StringSort
 
@@ -66,7 +66,7 @@ class IntArg(ExprArg):
         '''
         sort = IntSort()
         for i in range(len(instances)):
-            sort.cardinalityMask.put(i, 1)
+            sort.cardinalityMask.put(i, SMTLib.SMT_IntConst(1))
         self.instanceSorts = [(sort, Mask.createIntMask(instances))]
         
 class RealArg(ExprArg):
@@ -76,7 +76,7 @@ class RealArg(ExprArg):
         '''
         sort = RealSort()
         for i in range(len(instances)):
-            sort.cardinalityMask.put(i, 1)
+            sort.cardinalityMask.put(i, SMTLib.SMT_IntConst(1))
         self.instanceSorts = [(sort, Mask.createIntMask(instances))]
         
         
@@ -98,7 +98,7 @@ class StringArg(ExprArg):
         '''
         sort = StringSort()
         for i in range(len(instances)):
-            sort.cardinalityMask.put(i, 1)
+            sort.cardinalityMask.put(i, SMTLib.SMT_IntConst(1))
         self.instanceSorts = [(sort, Mask.createIntMask(instances))]
 
 class JoinArg(ExprArg):

@@ -171,9 +171,9 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
                                                                                  isSymmetric)
                 if len(combinations) == 0:
                     if element.quantifier == "Some":
-                        self.currentConstraint.stack.append([BoolArg([False])])
+                        self.currentConstraint.stack.append([BoolArg([SMTLib.SMT_Bool(False)])])
                     elif element.quantifier == "All":
-                        self.currentConstraint.stack.append([BoolArg([True])])
+                        self.currentConstraint.stack.append([BoolArg([SMTLib.SMT_Bool(True)])])
                     return
                 num_args = len(combinations[0])
                 num_combinations = len(combinations)
@@ -213,5 +213,5 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     def stringliteralVisit(self, element):
         stringID = Common.STRCONS_SUB + str(Common.getStringUID())
         Common.string_map[stringID] = element.value
-        self.currentConstraint.addArg([StringArg([Int(stringID)])])  # element.value])])
+        self.currentConstraint.addArg([StringArg([SMTLib.SMT_Int(stringID)])])  # element.value])])
     
