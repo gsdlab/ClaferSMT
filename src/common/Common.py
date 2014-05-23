@@ -19,6 +19,18 @@ REPL = 6
 EXPERIMENT = 7
 ECLIPSE = 8
 PRELOAD = 9
+
+#tests
+MY_TESTS = 1 # my tests from debugging
+POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
+STRING_TESTS = 3 #tests that involve strings / string constraints
+OPTIMIZATION_TESTS = 4
+ALL_TESTS = 5
+
+SAT=True
+UNSAT=False
+
+
 BREAK = False
 FUNCTION_ID = 0 
 CONSTRAINT_ID = 0
@@ -32,6 +44,8 @@ BOUND = 600
 
 METRICS_MAXIMIZE = 1
 METRICS_MINIMIZE = 2
+
+
 
 
 def mAnd(*args):
@@ -80,9 +94,9 @@ def preventSameModel(z3inst, solver, model):
 
     if block == []:
         #input was an empty clafer model (no concretes)
-        solver.add(False)
+        solver.add(SMTLib.SMT_BoolConst(False))
     else:
-        solver.add(SMTLib.SMT_Or(*block).convert(z3inst.solver_converter))
+        solver.add(SMTLib.SMT_Or(*block))
 
 def getConstraintUID():
     '''

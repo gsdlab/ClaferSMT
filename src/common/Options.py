@@ -31,9 +31,10 @@ POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
 GLOBAL_SCOPE = 1#this obviously has to change
 
 MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
+SOLVER = "z3"
+
 PRINT_CONSTRAINTS = True
 STRING_CONSTRAINTS = False
-CNF = False
 GOAL = False
 NUM_INSTANCES = 10 # -1 to produce all instances
 INFINITE = -1 #best variable name.
@@ -42,12 +43,7 @@ CPROFILING = False #invokes the standard python profiling method (see Z3Run.py)
 BREAK_QUANTIFIER_SYMMETRY = False
 EXTEND_ABSTRACT_SCOPES = True
 FILE = ""
-MY_TESTS = 1 # my tests from debugging
-POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
-STRING_TESTS = 3 #tests that involve strings / string constraints
-OPTIMIZATION_TESTS = 4
-ALL_TESTS = 5
-TEST_SET = MY_TESTS 
+TEST_SET = Common.MY_TESTS 
 DIMACS_FILE="dimacs"
 UNIQUE_NAMES = False
 SHOW_INHERITANCE = False
@@ -85,12 +81,14 @@ modeMap = {
            }
 
 testMap = {
-           'edstests'     : MY_TESTS,
-           'positive'     : POSITIVE_TESTS,
-           'string'       : STRING_TESTS,
-           'optimization' : OPTIMIZATION_TESTS,
-           'all'          : ALL_TESTS
+           'edstests'     : Common.MY_TESTS,
+           'positive'     : Common.POSITIVE_TESTS,
+           'string'       : Common.STRING_TESTS,
+           'optimization' : Common.OPTIMIZATION_TESTS,
+           'all'          : Common.ALL_TESTS
            }
+
+
 
 def debug_print(string):
     '''
@@ -124,7 +122,7 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--testset', '-t', dest='test_set', default='edstests', help='The test set to be used for modes [experiment | test | one | all], or the number of tests to generate')#,
                         #choices=['edstests', 'positive', 'string'])
     parser.add_argument('--stringconstraints' , '-s', default=False, dest='stringconstraints',action='store_const',  const=True,  help='Flag to output to Z3-Str format instead')
-    parser.add_argument('--outputmode', dest='output_mode', default='', choices=['cnf', 'dimacs', 'smt2'], help='Type of output to dump (for conversions)')
+    parser.add_argument('--solver', dest='solver', default='z3', choices=['z3', 'cvc4', 'smt2'], help='Backend solver')
     parser.add_argument('--printuniquenames', '-u', default=False, dest='unique_names',action='store_const',  const=True,  help='Print clafers with unique prefixes')
     parser.add_argument('--showinheritance', default=False, dest='show_inheritance',action='store_const',  const=True,  help='Show super-clafers explicitly')
     parser.add_argument('--version', '-v', default=False, dest='version',action='store_const',  const=True,  help='Print version number.')
@@ -151,9 +149,8 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--generatorfile', default="", dest='generator_file', help='File to output learned instances.')
     parser.add_argument('--outputdirectory', default="./", dest='output_directory', help='The directory for any output')
     parser.add_argument('--formatter', default="", dest='formatter', help='File to format generated instances properly')
-    parser.add_argument('--verboseprint', default=False, dest='verbose_print',action='store_const',  const=True,  help='Prints extra output    ')
+    parser.add_argument('--verboseprint', default=False, dest='verbose_print',action='store_const',  const=True,  help='Prints extra output')
     parser.add_argument('--learningenvironment', dest='learning_environment', default='local', choices=['local', 'sharcnet'], help='Where the experiments will be run')
-    parser.add_argument('--generategraphs', default=False, dest='generate_graphs',action='store_const',  const=True,  help='Generate GnuPlot graphs (only for LearnerZ3 and single test)')
     parser.add_argument('--timeout', dest='time_out', type=float, default='0', help='The time out for consumers')
     
     args = parser.parse_args()
@@ -230,8 +227,8 @@ def setCommandLineOptions(learner = False):
     VERBOSE_PRINT = args.verbose_print
     global LEARNING_ENVIRONMENT
     LEARNING_ENVIRONMENT = args.learning_environment
-    global OUTPUT_MODE
-    OUTPUT_MODE = args.output_mode
+    global SOLVER
+    SOLVER = args.solver
     
     global PRODUCE_UNSAT_CORE
     PRODUCE_UNSAT_CORE = args.produceunsatcore    

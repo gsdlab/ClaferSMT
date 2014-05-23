@@ -5,7 +5,7 @@ Created on Apr 4, 2014
 '''
 from common import Options, Common
 from common.Options import experiment_print
-from front import Z3Instance, ModelStats
+from front import ClaferModel, ModelStats
 from learner import Classifiers
 from parallel.heuristics import GeneralHeuristics
 from parallel.heuristics.GeneralHeuristics import HeuristicFailureException
@@ -34,7 +34,7 @@ class Learner():
     def getModelStats(self, file):
         currMode = Options.MODE
         module = Common.load(file)
-        z3 = Z3Instance.Z3Instance(module)
+        z3 = ClaferModel.ClaferModel(module)
         parameters = ModelStats.run(z3, self.parameters, self.non_modelstats)
         Common.MODE = currMode
         return parameters
@@ -155,7 +155,7 @@ class Learner():
             for s in Options.EXPERIMENT_NUM_SPLIT:
                 Options.NUM_SPLIT = s
                 try:
-                    z3 = Z3Instance.Z3Instance(module)
+                    z3 = ClaferModel.ClaferModel(module)
                     z3.run()
                     metric = z3.metric
                     num_models_list.append(z3.num_models)

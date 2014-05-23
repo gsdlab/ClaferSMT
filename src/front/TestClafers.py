@@ -6,7 +6,7 @@ Created on Sep 15, 2013
 from common import Options, Common
 from common.Clock import Clock
 from common.Options import INFINITE
-from front.Z3Instance import Z3Instance
+from front.ClaferModel import ClaferModel
 import sys
 import traceback
 
@@ -108,13 +108,13 @@ def getTestSet():
                 (subtypingprimitivetypes, 1)
                 ]
     
-    if Options.TEST_SET == Options.MY_TESTS:
+    if Options.TEST_SET == Common.MY_TESTS:
         return my_tests
-    elif Options.TEST_SET == Options.POSITIVE_TESTS:
+    elif Options.TEST_SET == Common.POSITIVE_TESTS:
         return positive_tests
-    elif Options.TEST_SET == Options.OPTIMIZATION_TESTS:
+    elif Options.TEST_SET == Common.OPTIMIZATION_TESTS:
         return optimization_tests
-    elif Options.TEST_SET == Options.ALL_TESTS:
+    elif Options.TEST_SET == Common.ALL_TESTS:
         return my_tests + positive_tests + optimization_tests
         
 def run():
@@ -138,7 +138,7 @@ def run():
             module = file.getModule()
             print_separate("Attempting: " + str(file.__name__))
             clock.tick("Total Z3 Run Time")
-            z3 = Z3Instance(module)
+            z3 = ClaferModel(module)
             actual_model_count = z3.run()
             clock.tack("Total Z3 Run Time")
             clock = clock.combineClocks(z3.clock)

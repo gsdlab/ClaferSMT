@@ -4,6 +4,37 @@ Created on May 14, 2014
 @author: ezulkosk
 '''
 from z3 import *
+from common import Common
+
+class Z3Solver():
+    def __init__(self):
+        self.converter = Z3Converter()
+        self.solver = z3.Solver()
+        
+    def add(self, constraint):
+        self.solver.add(constraint.convert(self.converter))
+    
+    def addRaw(self, constraint):
+        self.solver.add(constraint)
+    
+    def check(self):
+        if self.solver.check() == sat:
+            return Common.SAT
+        else:
+            return Common.UNSAT
+        
+    def model(self):
+        return self.solver.model()
+
+    def assertions(self):
+        return self.solver.assertions()
+    
+    def push(self):
+        self.solver.push()
+        
+    def pop(self):
+        self.solver.pop()
+        
 
 class Z3Converter():
 

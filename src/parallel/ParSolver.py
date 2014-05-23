@@ -10,16 +10,16 @@ from common import Options, Common
 from common.Clock import Clock
 from common.Common import METRICS_MAXIMIZE, METRICS_MINIMIZE
 from parallel import Consumer
-from parallel.heuristics import SAP, GeneralHeuristics
-from z3 import Solver
+from parallel.heuristics import GeneralHeuristics
+from solvers import Solver
 import multiprocessing
 
 def replicateSolver(solver, num_consumers):
     solvers = []
     for _ in range(num_consumers):
-        newSolver = Solver()
+        newSolver = Solver.getSolver()
         for j in solver.assertions():
-            newSolver.add(j)
+            newSolver.addRaw(j)
         solvers.append(newSolver)
     return solvers    
 

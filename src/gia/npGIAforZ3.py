@@ -1,9 +1,10 @@
 
-from common import Common
+from common import Common, SMTLib
 from common.Common import preventSameModel
+from solvers import Solver
 from time import time
-from z3 import *
 import random
+
 
 
 
@@ -85,7 +86,7 @@ class GuidedImprovementAlgorithm(object):
         #print(count)
         preventSameModel(self.z3, self.s, point)
         #print(self.s.check()==sat)
-        while(self.s.check() == sat and not(len(equivalentSolutions) + count == self.options.num_models)):
+        while(self.s.check() == Common.SAT and not(len(equivalentSolutions) + count == self.options.num_models)):
             #print("in")
             #count_sat_calls += 1
 #                 self.GIALogger.logEndCall(True, model = self.s.model(), statistics = self.s.statistics())                              
@@ -106,7 +107,7 @@ class GuidedImprovementAlgorithm(object):
     def replicateSolver(self, solver, num_consumers):
         solvers = []
         for i in range(num_consumers):
-            newSolver =Solver()
+            newSolver = Solver.getSolver()
             for j in solver.assertions():
                 newSolver.add(j)
             solvers.append(newSolver)
@@ -126,7 +127,7 @@ class GuidedImprovementAlgorithm(object):
         if self.options.magnifying_glass:
             self.s.push()
         #self.GIALogger.logStartCall()
-        if self.s.check() == sat:
+        if self.s.check() == Common.SAT:
             count_sat_calls += 1
             prev_solution = self.s.model()
             #self.GIALogger.logEndCall(True, model=prev_solution, statistics = self.s.statistics())            
@@ -159,7 +160,7 @@ class GuidedImprovementAlgorithm(object):
 #             self.GIALogger.logStartCall(tmpNotDominatedByFirstParetoPoint)
             self.s.add(tmpNotDominatedByFirstParetoPoint)
             start_time = time()
-            while(self.s.check() == sat and not(len(ParetoFront) == self.options.num_models)):
+            while(self.s.check() == Common.SAT and not(len(ParetoFront) == self.options.num_models)):
                 count_sat_calls += 1
 #                 self.GIALogger.logEndCall(True, model = self.s.model(), statistics = self.s.statistics())                              
                 prev_solution = self.s.model()
@@ -253,7 +254,7 @@ class GuidedImprovementAlgorithm(object):
         local_count_unsat_calls = 0
         tmpConstraintMustDominateX= self.ConstraintMustDominatesX(prev_solution)
         self.s.add(tmpConstraintMustDominateX)
-        while (self.s.check() == sat):
+        while (self.s.check() == Common.SAT):
             local_count_sat_calls += 1
             prev_solution = self.s.model()     
             tmpConstraintMustDominateX = self.ConstraintMustDominatesX(prev_solution)
@@ -268,10 +269,10 @@ class GuidedImprovementAlgorithm(object):
         DisjunctionOrLessMetrics  = list()
         for i in range(len(self.metrics_variables)):
             if self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
-                DisjunctionOrLessMetrics.append(self.metrics_variables[i].convert(self.z3.solver_converter) >  model.eval(self.metrics_variables[i].convert(self.z3.solver_converter)))#model[self.metrics_variables[i]])
+                DisjunctionOrLessMetrics.append(SMTLib.SMT_GT(self.metrics_variables[i], SMTLib.SMT_IntConst(model.eval(self.metrics_variables[i].convert(self.z3.solver.converter)))))#model[self.metrics_variables[i]])
             else :
-                DisjunctionOrLessMetrics.append(self.metrics_variables[i].convert(self.z3.solver_converter) <  model.eval(self.metrics_variables[i].convert(self.z3.solver_converter)))#model[self.metrics_variables[i]])
-        return Or(DisjunctionOrLessMetrics)
+                DisjunctionOrLessMetrics.append(SMTLib.SMT_LT(self.metrics_variables[i], SMTLib.SMT_IntConst(model.eval(self.metrics_variables[i].convert(self.z3.solver.converter)))))#model[self.metrics_variables[i]])
+        return SMTLib.SMT_Or(*DisjunctionOrLessMetrics)
 
 
     def ConstraintEqualToX(self, model):
@@ -281,33 +282,19 @@ class GuidedImprovementAlgorithm(object):
         """
         EqualMetrics  = list()
         for i in range(len(self.metrics_variables)):
-            EqualMetrics.append(self.metrics_variables[i] ==  model.eval(self.metrics_variables[i]))
-        return And(EqualMetrics)
+            EqualMetrics.append(SMTLib.SMT_EQ(self.metrics_variables[i], model.eval(self.metrics_variables[i])))
+        return SMTLib.SMT_And(EqualMetrics)
 
     def get_metric_values(self, model):
         metrics  = list()
         for i in range(len(self.metrics_variables)):
-            strval = str(model.eval(self.metrics_variables[i]))
+            strval = str(model.eval(self.metrics_variables[i].convert(self.z3.solver.converter)))
             try:
                 val = int(strval)
             except:
                 val = float(strval)
             metrics.append(val)
         return metrics
-    # add for EPOAL
-
-    def EtractConstraintListNotDominatedByX(self, model):
-        """
-        Returns a Constraint that a  new instance, can't be dominated by the instance represented by model. 
-        (it can't be worst in any objective).
-        """
-        DisjunctionOrLessMetrics  = list()
-        for i in range(len(self.metrics_variables)):
-            if self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
-                DisjunctionOrLessMetrics.append(self.metrics_variables[i] >  model[self.metrics_variables[i]])
-            else :
-                DisjunctionOrLessMetrics.append(self.metrics_variables[i] <  model[self.metrics_variables[i]])
-        return DisjunctionOrLessMetrics
     
     def ConstraintMustDominatesX(self, model):
         """
@@ -321,19 +308,23 @@ class GuidedImprovementAlgorithm(object):
             j = 0
             if  self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
                 #print(model.eval(dominatedByMetric))
-                dominationConjunction.append(dominatedByMetric.convert(self.z3.solver_converter) > model.eval(dominatedByMetric.convert(self.z3.solver_converter)))             
+                dominationConjunction.append(SMTLib.SMT_GT(dominatedByMetric,
+                                                           SMTLib.SMT_IntConst(model.eval(dominatedByMetric.convert(self.z3.solver.converter))))) 
             else:
-                dominationConjunction.append(dominatedByMetric.convert(self.z3.solver_converter) < model.eval(dominatedByMetric.convert(self.z3.solver_converter))) 
+                dominationConjunction.append(SMTLib.SMT_LT(dominatedByMetric, 
+                                                           SMTLib.SMT_IntConst(model.eval(dominatedByMetric.convert(self.z3.solver.converter)))))
             for AtLeastEqualInOtherMetric in self.metrics_variables:
                 if j != i:
                     if self.metrics_objective_direction[j] == Common.METRICS_MAXIMIZE:
-                        dominationConjunction.append(AtLeastEqualInOtherMetric.convert(self.z3.solver_converter) >= model.eval(AtLeastEqualInOtherMetric.convert(self.z3.solver_converter)))#[AtLeastEqualInOtherMetric])
+                        dominationConjunction.append(SMTLib.SMT_GE(AtLeastEqualInOtherMetric,
+                                                                   SMTLib.SMT_IntConst(model.eval(AtLeastEqualInOtherMetric.convert(self.z3.solver.converter)))))
                     else:
-                        dominationConjunction.append(AtLeastEqualInOtherMetric.convert(self.z3.solver_converter) <= model.eval(AtLeastEqualInOtherMetric.convert(self.z3.solver_converter)))               
+                        dominationConjunction.append(SMTLib.SMT_LE(AtLeastEqualInOtherMetric,
+                                                                   SMTLib.SMT_IntConst(model.eval(AtLeastEqualInOtherMetric.convert(self.z3.solver.converter)))))              
                 j = 1 + j
             i = 1 + i    
-            dominationDisjunction.append(And(dominationConjunction))         
-        constraintDominateX = Or(dominationDisjunction)
+            dominationDisjunction.append(SMTLib.SMT_And(*dominationConjunction))         
+        constraintDominateX = SMTLib.SMT_Or(*dominationDisjunction)
         #print(constraintDominateX)
         #sys.exit()
-        return constraintDominateX
+        return constraintDominateX#.convert(self.z3.solver.converter)

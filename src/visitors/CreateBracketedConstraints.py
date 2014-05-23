@@ -13,7 +13,6 @@ from structures.ExprArg import ExprArg, Mask, BoolArg, IntArg, RealArg, \
     StringArg
 from visitors import VisitorTemplate
 from visitors.CheckFunctionSymmetry import CheckFunctionSymmetry
-from z3 import Int
 import itertools
 import sys
 import visitors.Visitor

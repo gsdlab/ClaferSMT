@@ -9,21 +9,20 @@ from common.Common import preventSameModel, load, METRICS_MAXIMIZE
 from common.Exceptions import UnusedAbstractException
 from common.Options import debug_print, standard_print
 from constraints import Constraints
-from converters import Z3Converter, Converters
 from front import Z3Str, ModelStats
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from parallel import ParSolver
+from solvers import Z3, Converters, Solver
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
     SetScopes, AdjustAbstracts, CheckForGoals
-from z3 import Solver, set_option, sat, Int, Goal
 import sys
 
 
 
 
-class Z3Instance(object):
+class ClaferModel(object):
     ''' 
     :var module: The Clafer AST
 
@@ -35,18 +34,16 @@ class Z3Instance(object):
         self.module = module
         self.z3_bracketed_constraints = []
         self.z3_sorts = {}
-        self.solver = Solver()
+        self.solver = Solver.getSolver()
         self.setOptions()
         self.clock = Clock.Clock()
         self.objectives = []
-        self.goal = Goal()
         self.delimeter_count = 0
-        self.solver_converter = Z3Converter.Z3Converter()
         #print(self.solver.help())
         #print(get_version_string())
         
         """ Create simple objects used to store Z3 constraints. """
-        self.join_constraints = Constraints.GenericConstraints("Z3Instance")
+        self.join_constraints = Constraints.GenericConstraints("ClaferModel")
         
         """ 
         Used to map constraints in the UNSAT core to Boolean variables.
@@ -56,6 +53,11 @@ class Z3Instance(object):
         self.unsat_map = {}
         self.translate()
         
+    def setSolver(self):
+        if Options.SOLVER == "z3":
+            return Z3.Solver()
+        elif Options.SOLVER == "smt2":
+            print("Unimplimented")
     
     def createGroupCardConstraints(self):
         for i in self.z3_sorts.values():
@@ -103,18 +105,11 @@ class Z3Instance(object):
         Sets basic options for the Z3 solver.
         Adds additional options for better pretty-printing, if debugging.
         """
-        self.solver.set(unsat_core=True)
-        self.solver.set(model_completion=True)
-        #self.solver.set(produce_models=True)
-        #set_option(auto_config=False)
-        #set_option(candidate_models=True)
-        if Options.MODE == Common.DEBUG:
-            #these may not be necessary
-            set_option(max_width=100)
-            set_option(max_depth=1000)
-            set_option(max_args=1000)
-            set_option(auto_config=False)
-    
+        pass
+        #self.solver.set(unsat_core=True)
+        #self.solver.set(model_completion=True)
+
+
     def isUsed(self, element):
         ab = self.z3_sorts.get(str(element))
         if (not ab.element.isAbstract) or ab.scope_summ != 0:# self.z3_sorts.get(str(element)):
@@ -207,12 +202,6 @@ class Z3Instance(object):
             sys.exit()
         
         
-        if Options.CNF:
-            debug_print("Outputting DIMACS.")
-            for i in self.solver.assertions():
-                self.goal.add(i)
-            Converters.convertToDimacs(self)
-            return 1
             
             
         debug_print("Printing constraints.") 
@@ -327,6 +316,7 @@ class Z3Instance(object):
             for i in ParetoFront:
                 self.printStartDelimeter()
                 standard_print(i)
+                standard_print("")
                 self.printEndDelimeter()
             return ParetoFront
             
@@ -339,9 +329,9 @@ class Z3Instance(object):
         while True:
             self.clock.tick("unsat")
             
-            if (Options.MODE != Common.DEBUG and not(Options.PRODUCE_UNSAT_CORE) and self.solver.check() == sat and count != desired_number_of_models) or \
-                (Options.MODE != Common.DEBUG and Options.PRODUCE_UNSAT_CORE and self.solver.check(self.unsat_core_trackers) == sat and count != desired_number_of_models) or \
-                (Options.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == sat and count != desired_number_of_models):
+            if (Options.MODE != Common.DEBUG and not(Options.PRODUCE_UNSAT_CORE) and self.solver.check() == Common.SAT and count != desired_number_of_models) or \
+                (Options.MODE != Common.DEBUG and Options.PRODUCE_UNSAT_CORE and self.solver.check(self.unsat_core_trackers) == Common.SAT and count != desired_number_of_models) or \
+                (Options.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == Common.SAT and count != desired_number_of_models):
                 if count == 0:
                     self.clock.tock("first model")
                 m = self.solver.model()

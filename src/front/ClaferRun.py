@@ -6,7 +6,7 @@ Created on April 27, 2013
 '''
 from common import Common, Options
 from front import TestClafers, ModelStats
-from front.Z3Instance import Z3Instance
+from front.ClaferModel import ClaferModel
 import cProfile
 import imp
 import sys
@@ -22,7 +22,7 @@ def run(args):
     :param args: Python output file of the Clafer compiler. Generated with argument "-m python".
     :type args: file
     
-    Starting point for ClaferZ3.
+    Starting point for ClaferSMT.
     '''
     if Options.MODE == Common.TEST:
         TestClafers.run()
@@ -33,8 +33,8 @@ def run(args):
     elif Options.MODE in [Common.NORMAL, Common.EXPERIMENT, Common.DEBUG, Common.REPL, Common.MODELSTATS]:
         file = Options.FILE
         module = Common.load(file)
-        z3 = Z3Instance(module)
-        z3.run()
+        model = ClaferModel(module)
+        model.run()
         
 if __name__ == '__main__':
     Options.setCommandLineOptions()

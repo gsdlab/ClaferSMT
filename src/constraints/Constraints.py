@@ -4,7 +4,7 @@ Created on Oct 3, 2013
 @author: ezulkosk
 '''
 from common import Common, Options, SMTLib
-from converters import Converters
+from solvers import Converters
 
 
 
@@ -17,25 +17,15 @@ class Constraints():
     
     def assertConstraint(self, constraint, z3):
         if Common.FLAG:
-            #z3.solver.add(And(con
-        # straint, Not(constraint)))
-            from z3 import simplify
-            print(simplify(constraint))
+            SMTLib.toStr(constraint)
 
         if Options.PRODUCE_UNSAT_CORE:
             p = SMTLib.SMT_Bool(str(self.assertID) + "_" + str(Common.getConstraintUID()))
             z3.unsat_core_trackers.append(p)
             z3.unsat_map[str(p)] = constraint
-            if Options.GOAL:
-                z3.goal.add(SMTLib.SMT_Implies(p, constraint).convert(z3.solver_converter))
-            else:
-                z3.solver.add(SMTLib.SMT_Implies(p, constraint).convert(z3.solver_converter))
+            z3.solver.add(SMTLib.SMT_Implies(p, constraint))
         else:
-            if Options.GOAL:
-                z3.goal.add(constraint.convert(z3.solver_converter))
-            else:
-                #SMTLib.toStr(constraint)
-                z3.solver.add(constraint.convert(z3.solver_converter))
+            z3.solver.add(constraint)
         
     def convert(self, f_n, constraint):
         #print("#####")

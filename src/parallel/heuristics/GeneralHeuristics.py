@@ -3,21 +3,21 @@ Created on Apr 4, 2014
 
 @author: ezulkosk
 '''
-from common import Common, API, Options
+from common import Common, API, Options, SMTLib
 from common.Common import mAnd
 from parallel.heuristics.SAP import random_unique_service_random_server
 from visitors import CreateBracketedConstraints
+from z3 import Or, And
 import itertools
 import operator
 import random
 import sys
-from z3 import Or, And
 
 
 
 
 def no_split(z3inst, module, num_split):
-    return [True for _ in range(num_split)]
+    return [SMTLib.SMT_BoolConst(True) for _ in range(num_split)]
     
 
 def condense(products, num_split): 

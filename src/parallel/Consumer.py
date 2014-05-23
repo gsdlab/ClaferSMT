@@ -3,7 +3,7 @@ Created on Mar 15, 2014
 
 @author: ezulkosk
 '''
-from common import Options
+from common import Options, Common
 from common.Clock import Clock
 from common.Common import preventSameModel
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
@@ -11,7 +11,6 @@ from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
 from visitors import PrintHierarchy, Visitor
 import multiprocessing
 import sys
-import z3
 
 
 
@@ -66,7 +65,7 @@ class GIAConsumer(multiprocessing.Process):
             total_sat_calls = 0
             total_unsat_time = 0
             while True:
-                if self.GIAAlgorithm.s.check() != z3.sat or num_solutions == Options.NUM_INSTANCES:
+                if self.GIAAlgorithm.s.check() != Common.SAT or num_solutions == Options.NUM_INSTANCES:
                     self.clock.tock("Task " + str(next_task))
                     self.task_queue.task_done()
                     self.solver.pop()
@@ -119,7 +118,7 @@ class StandardConsumer(multiprocessing.Process):
             self.solver.push()
             self.solver.add(self.consumerConstraints[int(next_task)])
             self.clock.tick("Task " + str(next_task))
-            while self.solver.check() == z3.sat and num_solutions != Options.NUM_INSTANCES:
+            while self.solver.check() == Common.SAT and num_solutions != Options.NUM_INSTANCES:
                 model = self.solver.model()
                 self.result_queue.put(model_to_string(self.z3, model))
                 num_solutions = num_solutions +  1
