@@ -8,7 +8,7 @@ class ClaferId(object):
     '''
     All variables analogous to those described in IntClafer.hs
     
-    claferSort points to its sort //Z3Clafer
+    claferSort points to its sort 
     '''
 
 
@@ -16,7 +16,7 @@ class ClaferId(object):
         self.moduleName = moduleName
         self.id = my_id
         self.isTop = isTop
-        self.claferSort = claferSort #Z3Clafer
+        self.claferSort = claferSort
         
         
     def __str__(self):
