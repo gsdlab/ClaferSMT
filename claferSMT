@@ -1,0 +1,10 @@
+#!/bin/bash
+
+SRC_DIR=./src
+name=$1
+
+#clafer -sm python $name
+
+cd $SRC_DIR
+python3 front/ClaferRun.py ../${name%.*}.py
+rm ../${name%.*}.py
