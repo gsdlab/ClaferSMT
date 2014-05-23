@@ -1,0 +1,158 @@
+
+Optional$0
+Mandatory$0
+Feature$0
+  type$0 = Optional$0
+  level$0 = 4
+  parent_feature$0 = Feature$13
+Feature$1
+  type$1 = Optional$0
+  level$1 = 3
+  parent_feature$1 = Feature$5
+Feature$2
+  type$2 = Optional$0
+  level$2 = 3
+  parent_feature$2 = Feature$15
+Feature$3
+  type$3 = Optional$0
+  level$3 = 5
+  parent_feature$3 = Feature$23
+Feature$4
+  type$4 = Mandatory$0
+  level$4 = 0
+Feature$5
+  type$5 = Optional$0
+  level$5 = 2
+  parent_feature$4 = Feature$14
+Feature$6
+  type$6 = Mandatory$0
+  level$6 = 6
+  parent_feature$5 = Feature$19
+Feature$7
+  type$7 = Mandatory$0
+  level$7 = 2
+  parent_feature$6 = Feature$14
+Feature$8
+  type$8 = Mandatory$0
+  level$8 = 3
+  parent_feature$7 = Feature$5
+Feature$9
+  type$9 = Mandatory$0
+  level$9 = 5
+  parent_feature$8 = Feature$0
+Feature$10
+  type$10 = Mandatory$0
+  level$10 = 3
+  parent_feature$9 = Feature$15
+Feature$11
+  type$11 = Mandatory$0
+  level$11 = 7
+  parent_feature$10 = Feature$18
+Feature$12
+  type$12 = Optional$0
+  level$12 = 6
+  parent_feature$11 = Feature$19
+Feature$13
+  type$13 = Mandatory$0
+  level$13 = 3
+  parent_feature$12 = Feature$5
+Feature$14
+  type$14 = Mandatory$0
+  level$14 = 1
+  parent_feature$13 = Feature$4
+Feature$15
+  type$15 = Optional$0
+  level$15 = 2
+  parent_feature$14 = Feature$21
+Feature$16
+  type$16 = Optional$0
+  level$16 = 7
+  parent_feature$15 = Feature$12
+Feature$17
+  type$17 = Mandatory$0
+  level$17 = 6
+  parent_feature$16 = Feature$3
+Feature$18
+  type$18 = Optional$0
+  level$18 = 6
+  parent_feature$17 = Feature$9
+Feature$19
+  type$19 = Optional$0
+  level$19 = 5
+  parent_feature$18 = Feature$0
+Feature$20
+  type$20 = Mandatory$0
+  level$20 = 4
+  parent_feature$19 = Feature$8
+Feature$21
+  type$21 = Optional$0
+  level$21 = 1
+  parent_feature$20 = Feature$4
+Feature$22
+  type$22 = Optional$0
+  level$22 = 3
+  parent_feature$21 = Feature$5
+Feature$23
+  type$23 = Optional$0
+  level$23 = 4
+  parent_feature$22 = Feature$2
+OptionalCardFeatures$0 = Feature$0
+OptionalCardFeatures$1 = Feature$1
+OptionalCardFeatures$2 = Feature$2
+OptionalCardFeatures$3 = Feature$3
+OptionalCardFeatures$4 = Feature$5
+OptionalCardFeatures$5 = Feature$12
+OptionalCardFeatures$6 = Feature$15
+OptionalCardFeatures$7 = Feature$16
+OptionalCardFeatures$8 = Feature$18
+OptionalCardFeatures$9 = Feature$19
+OptionalCardFeatures$10 = Feature$21
+OptionalCardFeatures$11 = Feature$22
+OptionalCardFeatures$12 = Feature$23
+MandatoryCardFeatures$0 = Feature$4
+MandatoryCardFeatures$1 = Feature$6
+MandatoryCardFeatures$2 = Feature$7
+MandatoryCardFeatures$3 = Feature$8
+MandatoryCardFeatures$4 = Feature$9
+MandatoryCardFeatures$5 = Feature$10
+MandatoryCardFeatures$6 = Feature$11
+MandatoryCardFeatures$7 = Feature$13
+MandatoryCardFeatures$8 = Feature$14
+MandatoryCardFeatures$9 = Feature$17
+MandatoryCardFeatures$10 = Feature$20
+Include$0
+Exclude$0
+Constraint$0
+  conType$0 = Include$0
+  left$0 = Feature$21
+  right$0 = Feature$22
+Constraint$1
+  conType$1 = Exclude$0
+  left$1 = Feature$18
+  right$1 = Feature$23
+Constraint$2
+  conType$2 = Exclude$0
+  left$2 = Feature$21
+  right$2 = Feature$23
+Constraint$3
+  conType$3 = Exclude$0
+  left$3 = Feature$20
+  right$3 = Feature$23
+Constraint$4
+  conType$4 = Include$0
+  left$4 = Feature$17
+  right$4 = Feature$23
+Constraint$5
+  conType$5 = Include$0
+  left$5 = Feature$22
+  right$5 = Feature$23
+Constraint$6
+  conType$6 = Exclude$0
+  left$6 = Feature$19
+  right$6 = Feature$23
+Constraint$7
+  conType$7 = Include$0
+  left$7 = Feature$10
+  right$7 = Feature$21
+
+

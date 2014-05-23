@@ -1,0 +1,20 @@
+//general
+numClafers 5 15
+numBracketedConstraints 1 10 //denotes the number of CTCs
+
+//card
+numMandatoryCard 1 15
+numOptionalCard 1 15
+
+//global card
+numXorGCard 1 10
+numOptionalGCard 1 10
+numAnyGCard 1 10
+
+//depth
+maxDepth 1 20
+
+//Constraints
+@Constraint (numClafers == numOptionalGCard + numXorGCard + numAnyGCard) and (numClafers == numOptionalCard + numMandatoryCard) and (maxDepth < numClafers) 
+
+

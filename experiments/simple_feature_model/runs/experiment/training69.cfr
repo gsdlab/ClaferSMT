@@ -1,0 +1,29 @@
+// Features
+
+Feature__15 1..1
+  Feature__22 0..1
+    Feature__20 0..1
+      Feature__5 1..1
+    Feature__2 0..1
+      Feature__17 0..1
+  Feature__13 0..1
+    Feature__7 1..1
+      Feature__8 0..1
+    Feature__6 1..1
+    Feature__0 0..1
+      Feature__19 0..1
+      Feature__18 0..1
+      Feature__4 1..1
+      Feature__1 0..1
+  Feature__11 0..1
+    Feature__21 0..1
+    Feature__12 1..1
+      Feature__14 0..1
+  Feature__9 1..1
+    Feature__10 0..1
+      Feature__16 0..1
+    Feature__3 1..1
+
+// Constraints
+
+[!(Feature__21 && Feature__22)]

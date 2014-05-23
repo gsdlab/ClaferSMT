@@ -1,0 +1,34 @@
+enum Type = Optional | Mandatory
+
+Feature @numClafers
+  type -> Type
+  [type = Optional <=> this in OptionalCardFeatures]
+  [type = Mandatory <=> this in MandatoryCardFeatures]
+
+  level : int
+  parent_feature -> Feature ?
+    [ parent.level = parent_feature.level + 1 ]
+  
+  [ level >= 0 ]
+  [ level > 0 <=> parent_feature ]
+  [ level = 0 => type.ref = Mandatory ]
+
+//constraints on the number of each card
+OptionalCardFeatures -> Feature @numOptionalCards
+MandatoryCardFeatures -> Feature @numMandatoryCards
+
+enum ConType = Include | Exclude
+
+Constraint @numBracketedConstraints
+  conType -> ConType
+  left -> Feature
+  right -> Feature
+  [ left.ref != right.ref ]
+
+//No two of the same constraint
+[no disj x;y : Constraint | (x.left.ref = y.left.ref || x.left.ref = y.right.ref) && (x.right.ref = y.left.ref || x.right.ref = y.right.ref)]
+   
+//Depth Constraints
+[one f : Feature | f.level = 0]
+[ some f : Feature | f.level = @maxDepth ]
+[ no   f : Feature | f.level > @maxDepth ]

@@ -1,0 +1,322 @@
+random_optional_clafer_toggle#4 failed.
+===============================
+| Iteration: 0
+| Heuristic: random_optional_clafer_toggle
+| num_split: 4
+===============================
+[],600
+random_optional_clafer_toggle#8 failed.
+===============================
+| Iteration: 0
+| Heuristic: random_optional_clafer_toggle
+| num_split: 8
+===============================
+[],600
+random_optional_clafer_toggle#16 failed.
+===============================
+| Iteration: 0
+| Heuristic: random_optional_clafer_toggle
+| num_split: 16
+===============================
+[],600
+top_optional_clafer_toggle#4 failed.
+===============================
+| Iteration: 0
+| Heuristic: top_optional_clafer_toggle
+| num_split: 4
+===============================
+[],600
+top_optional_clafer_toggle#8 failed.
+===============================
+| Iteration: 0
+| Heuristic: top_optional_clafer_toggle
+| num_split: 8
+===============================
+[],600
+top_optional_clafer_toggle#16 failed.
+===============================
+| Iteration: 0
+| Heuristic: top_optional_clafer_toggle
+| num_split: 16
+===============================
+[],600
+bottom_optional_clafer_toggle#4 failed.
+===============================
+| Iteration: 0
+| Heuristic: bottom_optional_clafer_toggle
+| num_split: 4
+===============================
+[],600
+bottom_optional_clafer_toggle#8 failed.
+===============================
+| Iteration: 0
+| Heuristic: bottom_optional_clafer_toggle
+| num_split: 8
+===============================
+[],600
+bottom_optional_clafer_toggle#16 failed.
+===============================
+| Iteration: 0
+| Heuristic: bottom_optional_clafer_toggle
+| num_split: 16
+===============================
+[],600
+
+random_xor_gcard_clafer_toggle#4 failed.
+===============================
+| Iteration: 0
+| Heuristic: random_xor_gcard_clafer_toggle
+| num_split: 4
+===============================
+[],600
+
+random_xor_gcard_clafer_toggle#8 failed.
+===============================
+| Iteration: 0
+| Heuristic: random_xor_gcard_clafer_toggle
+| num_split: 8
+===============================
+[],600
+
+random_xor_gcard_clafer_toggle#16 failed.
+===============================
+| Iteration: 0
+| Heuristic: random_xor_gcard_clafer_toggle
+| num_split: 16
+===============================
+[],600
+Longest Consumer: 400.67
+Longest Task: 398.59000000000003
+Merge: 0.0
+Longest Consumer Plus Merge: 400.67
+
+===============================
+| Iteration: 0
+| Heuristic: biggest_range_split
+| num_split: 4
+===============================
+[],400.67
+Longest Consumer: 468.94
+Longest Task: 410.47
+Merge: 0.0
+Longest Consumer Plus Merge: 468.94
+
+===============================
+| Iteration: 0
+| Heuristic: biggest_range_split
+| num_split: 8
+===============================
+[],468.94
+Longest Consumer: 295.42
+Longest Task: 271.53999999999996
+Merge: 0.0
+Longest Consumer Plus Merge: 295.42
+
+===============================
+| Iteration: 0
+| Heuristic: biggest_range_split
+| num_split: 16
+===============================
+[],295.42
+Longest Consumer: 299.03
+Longest Task: 296.94
+Merge: 0.0
+Longest Consumer Plus Merge: 299.03
+
+===============================
+| Iteration: 0
+| Heuristic: smallest_range_split
+| num_split: 4
+===============================
+[],299.03
+Longest Consumer: 294.38
+Longest Task: 292.26
+Merge: 0.0
+Longest Consumer Plus Merge: 294.38
+
+===============================
+| Iteration: 0
+| Heuristic: smallest_range_split
+| num_split: 8
+===============================
+[],294.38
+Longest Consumer: 278.74
+Longest Task: 276.64000000000004
+Merge: 0.0
+Longest Consumer Plus Merge: 278.74
+
+===============================
+| Iteration: 0
+| Heuristic: smallest_range_split
+| num_split: 16
+===============================
+[],278.74
+Longest Consumer: 419.24
+Longest Task: 417.17
+Merge: 0.0
+Longest Consumer Plus Merge: 419.24
+
+===============================
+| Iteration: 0
+| Heuristic: random_range_split
+| num_split: 4
+===============================
+[],419.24
+Longest Consumer: 394.97
+Longest Task: 392.88
+Merge: 0.0
+Longest Consumer Plus Merge: 394.97
+
+===============================
+| Iteration: 0
+| Heuristic: random_range_split
+| num_split: 8
+===============================
+[],394.97
+Longest Consumer: 260.29
+Longest Task: 258.15999999999997
+Merge: 0.0
+Longest Consumer Plus Merge: 260.29
+
+===============================
+| Iteration: 0
+| Heuristic: random_range_split
+| num_split: 16
+===============================
+[],260.29
+Longest Consumer: 236.6
+Longest Task: 234.5
+Merge: 0.0
+Longest Consumer Plus Merge: 236.6
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 4
+===============================
+[],236.6
+Longest Consumer: 276.51
+Longest Task: 274.39
+Merge: 0.0
+Longest Consumer Plus Merge: 276.51
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 8
+===============================
+[],276.51
+Longest Consumer: 282.86
+Longest Task: 280.77000000000004
+Merge: 0.0
+Longest Consumer Plus Merge: 282.86
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 16
+===============================
+[],282.86
+Longest Consumer: 566.53
+Longest Task: 564.4
+Merge: 0.0
+Longest Consumer Plus Merge: 566.53
+
+===============================
+| Iteration: 0
+| Heuristic: no_split
+| num_split: 4
+===============================
+[],566.53
+Longest Consumer: 1119.37
+Longest Task: 564.92
+Merge: 0.009999999999763531
+Longest Consumer Plus Merge: 1119.3799999999997
+
+===============================
+| Iteration: 0
+| Heuristic: no_split
+| num_split: 8
+===============================
+[],1119.3799999999997
+Longest Consumer: 2251.1
+Longest Task: 618.0899999999999
+Merge: 0.01999999999998181
+Longest Consumer Plus Merge: 2251.12
+
+===============================
+| Iteration: 0
+| Heuristic: no_split
+| num_split: 16
+===============================
+[],2251.12
+Number of instances List: [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+All metrics: [600, 600, 600, 600, 600, 600, 600, 600, 600, 600, 600, 600, 400.67, 468.94, 295.42, 299.03, 294.38, 278.74, 419.24, 394.97, 260.29, 236.6, 276.51, 282.86, 566.53, 1119.3799999999997, 2251.12]
+
+
+===============================
+| Unsorted
+===============================
+random_optional_clafer_toggle#4 : 600
+random_optional_clafer_toggle#8 : 600
+random_optional_clafer_toggle#16 : 600
+top_optional_clafer_toggle#4 : 600
+top_optional_clafer_toggle#8 : 600
+top_optional_clafer_toggle#16 : 600
+bottom_optional_clafer_toggle#4 : 600
+bottom_optional_clafer_toggle#8 : 600
+bottom_optional_clafer_toggle#16 : 600
+random_xor_gcard_clafer_toggle#4 : 600
+random_xor_gcard_clafer_toggle#8 : 600
+random_xor_gcard_clafer_toggle#16 : 600
+biggest_range_split#4 : 400.67
+biggest_range_split#8 : 468.94
+biggest_range_split#16 : 295.42
+smallest_range_split#4 : 299.03
+smallest_range_split#8 : 294.38
+smallest_range_split#16 : 278.74
+random_range_split#4 : 419.24
+random_range_split#8 : 394.97
+random_range_split#16 : 260.29
+divide_biggest_ranges_in_two#4 : 236.6
+divide_biggest_ranges_in_two#8 : 276.51
+divide_biggest_ranges_in_two#16 : 282.86
+no_split#4 : 566.53
+no_split#8 : 1119.3799999999997
+no_split#16 : 2251.12
+
+
+===============================
+| Sorted
+===============================
+divide_biggest_ranges_in_two#4 : 236.6
+random_range_split#16 : 260.29
+divide_biggest_ranges_in_two#8 : 276.51
+smallest_range_split#16 : 278.74
+divide_biggest_ranges_in_two#16 : 282.86
+smallest_range_split#8 : 294.38
+biggest_range_split#16 : 295.42
+smallest_range_split#4 : 299.03
+random_range_split#8 : 394.97
+biggest_range_split#4 : 400.67
+random_range_split#4 : 419.24
+biggest_range_split#8 : 468.94
+no_split#4 : 566.53
+random_optional_clafer_toggle#4 : 600
+random_optional_clafer_toggle#8 : 600
+random_optional_clafer_toggle#16 : 600
+top_optional_clafer_toggle#4 : 600
+top_optional_clafer_toggle#8 : 600
+top_optional_clafer_toggle#16 : 600
+bottom_optional_clafer_toggle#4 : 600
+bottom_optional_clafer_toggle#8 : 600
+bottom_optional_clafer_toggle#16 : 600
+random_xor_gcard_clafer_toggle#4 : 600
+random_xor_gcard_clafer_toggle#8 : 600
+random_xor_gcard_clafer_toggle#16 : 600
+no_split#8 : 1119.3799999999997
+no_split#16 : 2251.12
+Iteration random_optional_clafer_toggle top_optional_clafer_toggle bottom_optional_clafer_toggle random_xor_gcard_clafer_toggle biggest_range_split smallest_range_split random_range_split divide_biggest_ranges_in_two no_split
+1 600.00 600.00 600.00 600.00 400.67 299.03 419.24 236.60 566.53
+2 600.00 600.00 600.00 600.00 468.94 294.38 394.97 276.51 1119.38
+3 600.00 600.00 600.00 600.00 295.42 278.74 260.29 282.86 2251.12

@@ -1,0 +1,111 @@
+Longest Consumer: 271.51
+Longest Task: 269.54
+Merge: 0.0
+Longest Consumer Plus Merge: 271.51
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 4
+===============================
+[],271.51
+Longest Consumer: 227.18
+Longest Task: 225.18
+Merge: 0.0
+Longest Consumer Plus Merge: 227.18
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 8
+===============================
+[],227.18
+Longest Consumer: 333.41
+Longest Task: 331.39
+Merge: 0.0
+Longest Consumer Plus Merge: 333.41
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 16
+===============================
+[],333.41
+Longest Consumer: 289.2
+Longest Task: 287.06
+Merge: 0.0
+Longest Consumer Plus Merge: 289.2
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 32
+===============================
+[],289.2
+Longest Consumer: 330.14
+Longest Task: 328.04
+Merge: 0.0
+Longest Consumer Plus Merge: 330.14
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 64
+===============================
+[],330.14
+Longest Consumer: 323.94
+Longest Task: 321.81
+Merge: 0.0
+Longest Consumer Plus Merge: 323.94
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 128
+===============================
+[],323.94
+Longest Consumer: 289.39
+Longest Task: 287.29
+Merge: 0.0
+Longest Consumer Plus Merge: 289.39
+
+===============================
+| Iteration: 0
+| Heuristic: divide_biggest_ranges_in_two
+| num_split: 256
+===============================
+[],289.39
+Number of instances List: [5, 5, 5, 5, 5, 5, 5]
+All metrics: [271.51, 227.18, 333.41, 289.2, 330.14, 323.94, 289.39]
+
+
+===============================
+| Unsorted
+===============================
+divide_biggest_ranges_in_two#4 : 271.51
+divide_biggest_ranges_in_two#8 : 227.18
+divide_biggest_ranges_in_two#16 : 333.41
+divide_biggest_ranges_in_two#32 : 289.2
+divide_biggest_ranges_in_two#64 : 330.14
+divide_biggest_ranges_in_two#128 : 323.94
+divide_biggest_ranges_in_two#256 : 289.39
+
+
+===============================
+| Sorted
+===============================
+divide_biggest_ranges_in_two#8 : 227.18
+divide_biggest_ranges_in_two#4 : 271.51
+divide_biggest_ranges_in_two#32 : 289.2
+divide_biggest_ranges_in_two#256 : 289.39
+divide_biggest_ranges_in_two#128 : 323.94
+divide_biggest_ranges_in_two#64 : 330.14
+divide_biggest_ranges_in_two#16 : 333.41
+Iteration divide_biggest_ranges_in_two
+1 271.51
+2 227.18
+3 333.41
+4 289.20
+5 330.14
+6 323.94
+7 289.39

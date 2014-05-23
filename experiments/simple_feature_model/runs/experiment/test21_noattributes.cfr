@@ -1,0 +1,35 @@
+// Features
+
+Feature__13 1..1
+  Feature__23 1..1
+    Feature__15 1..1
+    Feature__7 0..1
+      Feature__10 0..1
+        Feature__18 1..1
+          Feature__14 1..1
+            Feature__1 0..1
+              Feature__2 0..1
+  Feature__11 1..1
+    Feature__3 0..1
+      Feature__17 1..1
+        Feature__12 1..1
+          Feature__20 1..1
+            Feature__16 1..1
+              Feature__5 0..1
+                Feature__21 1..1
+                  Feature__19 1..1
+                    Feature__8 0..1
+                  Feature__6 0..1
+                    Feature__22 1..1
+                Feature__9 0..1
+    Feature__0 0..1
+      Feature__4 0..1
+
+// Constraints
+
+[!(Feature__0 && Feature__21)]
+[Feature__18 => Feature__19]
+[!(Feature__15 && Feature__20)]
+[Feature__22 => Feature__21]
+[Feature__10 => Feature__21]
+[!(Feature__22 && Feature__23)]

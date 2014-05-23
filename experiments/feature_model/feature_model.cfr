@@ -1,0 +1,48 @@
+enum GCard = Xor | Some | Any
+enum Type = Optional | Mandatory
+enum ConType = Include | Exclude
+
+Feature @numClafers
+  type -> Type
+  [type = Optional <=> this in OptionalCardFeatures]
+  [type = Mandatory <=> this in MandatoryCardFeatures]
+
+  gcard -> GCard
+  [gcard = Xor  <=> this in XorGCardFeatures ]
+  [gcard = Some <=> this in OptionalGCardFeatures ]
+  [gcard = Any  <=> this in AnyGCardFeatures ]
+
+  level : int
+  parent_feature -> Feature ?
+    [ parent.level = parent_feature.level + 1 ]
+  
+  [ level >= 0 ]
+  [ level > 0 <=> parent_feature ]
+  [ level = 0 => type.ref = Mandatory ]
+
+//constraints on the number of each card
+OptionalCardFeatures -> Feature @numOptionalCard
+MandatoryCardFeatures -> Feature @numMandatoryCard
+
+
+//constraints on the number of each global card
+XorGCardFeatures -> Feature @numXorGCard
+OptionalGCardFeatures -> Feature @numOptionalGCard
+AnyGCardFeatures -> Feature @numAnyGCard
+
+
+
+
+Constraint @numBracketedConstraints
+  conType -> ConType
+  left -> Feature
+  right -> Feature
+  [ left.ref != right.ref ]
+   
+[one f : Feature | f.level = 0]
+
+//No 2 of the same constraint
+[no disj x;y : Constraint | (x.left.ref = y.left.ref || x.left.ref = y.right.ref) && (x.right.ref = y.left.ref || x.right.ref = y.right.ref)]
+
+[ some f : Feature | f.level = @maxDepth ]
+[ no   f : Feature | f.level > @maxDepth ]
