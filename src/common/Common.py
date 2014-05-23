@@ -80,12 +80,12 @@ def mOr(*args):
     else:
         return SMTLib.SMT_Or(*newArgs)
 
-def preventSameModel(z3inst, solver, model):
+def preventSameModel(cfr, solver, model):
     #from constraints import Operations
     #print(model.eval(Operations.EXPR))
     #print(model.eval(Operations.EXPR2))
     block = []
-    for i in z3inst.z3_sorts.values():
+    for i in cfr.cfr_sorts.values():
         for j in i.instances:
             block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(model[j.var])))
         if i.refs:

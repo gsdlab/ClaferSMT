@@ -38,8 +38,8 @@ def getZ3Feature(feature, expr):
     return []
 
 class ParSolver():
-    def __init__(self, z3, module, solver, metrics_variables, metrics_objective_direction):
-        self.z3 = z3
+    def __init__(self, cfr, module, solver, metrics_variables, metrics_objective_direction):
+        self.cfr = cfr
         self.module = module
         self.solvers = replicateSolver(solver, Options.CORES)
         self.metrics_variables = metrics_variables
@@ -49,7 +49,7 @@ class ParSolver():
     
     def run(self):
         if not self.consumerConstraints:
-            self.z3.metric = Common.BOUND
+            self.cfr.metric = Common.BOUND
             return []
             
         mgr = multiprocessing.Manager()
@@ -66,11 +66,11 @@ class ParSolver():
         # Start consumers 
         #case: objectives
         if self.metrics_variables:
-            self.consumers = [ Consumer.GIAConsumer(taskQueue, solutions, self.z3, timeQueue, i, "out", Options.CORES, j, self.metrics_variables, self.metrics_objective_direction, self.consumerConstraints)
+            self.consumers = [ Consumer.GIAConsumer(taskQueue, solutions, self.cfr, timeQueue, i, "out", Options.CORES, j, self.metrics_variables, self.metrics_objective_direction, self.consumerConstraints)
                             for i,j in zip(range(Options.CORES), self.solvers)]
         #case: no objectives
         else:
-            self.consumers = [ Consumer.StandardConsumer(taskQueue, solutions, self.z3, timeQueue, i, "out", Options.CORES, j, self.consumerConstraints)
+            self.consumers = [ Consumer.StandardConsumer(taskQueue, solutions, self.cfr, timeQueue, i, "out", Options.CORES, j, self.consumerConstraints)
                             for i,j in zip(range(Options.CORES), self.solvers)]
         
         
@@ -101,7 +101,7 @@ class ParSolver():
         merged_results = self.merge(results)
         self.clock.tock("Merge")
         self.clock.tock("ParSolver")
-        self.clock.getParallelStats(self.z3)
+        self.clock.getParallelStats(self.cfr)
         return merged_results
         
         
@@ -153,7 +153,7 @@ class ParSolver():
     
     def splitter(self): 
         heuristic = GeneralHeuristics.heuristics[Options.SPLIT]
-        return heuristic(self.z3, self.module, Options.NUM_SPLIT)
+        return heuristic(self.cfr, self.module, Options.NUM_SPLIT)
     
     
     

@@ -11,15 +11,12 @@ import ast
 import visitors
 
 class SetScopes(VisitorTemplate.VisitorTemplate):
-    '''
-    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
-    '''
-    def __init__(self, z3):
+    def __init__(self, cfr):
         '''
-        :param z3: The Z3 solver.
-        :type z3: :class:`~common.Z3Instance`
+        :param cfr: The Clafer model.
+        :type cfr: :class:`~common.ClaferModel`
         '''
-        self.z3 = z3
+        self.cfr = cfr
         self.glStack = [1]
 
     '''

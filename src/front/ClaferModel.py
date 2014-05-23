@@ -32,8 +32,8 @@ class ClaferModel(object):
         Common.reset() #resets variables if in test mode
         self.EMPTYSTRING = SMTLib.SMT_Int("EMPTYSTRING")
         self.module = module
-        self.z3_bracketed_constraints = []
-        self.z3_sorts = {}
+        self.smt_bracketed_constraints = []
+        self.cfr_sorts = {}
         self.solver = Solver.getSolver()
         self.setOptions()
         self.clock = Clock.Clock()
@@ -60,24 +60,24 @@ class ClaferModel(object):
             print("Unimplimented")
     
     def createGroupCardConstraints(self):
-        for i in self.z3_sorts.values():
+        for i in self.cfr_sorts.values():
             i.addGroupCardConstraints()
             
     def createRefConstraints(self):
-        for i in self.z3_sorts.values():
+        for i in self.cfr_sorts.values():
             i.addRefConstraints()
             
     def createCardinalityConstraints(self):
-        for i in self.z3_sorts.values():
+        for i in self.cfr_sorts.values():
             i.createCardinalityConstraints()
     
     def mapColonClafers(self):
-        for i in self.z3_sorts.values():
+        for i in self.cfr_sorts.values():
             if i.superSort:
                 i.superSort.addSubSort(i)     
     
     def addSubSortConstraints(self):
-        for i in self.z3_sorts.values():
+        for i in self.cfr_sorts.values():
             if i.superSort:
                 i.superSort.addSubSortConstraints(i)     
 
@@ -92,7 +92,7 @@ class ClaferModel(object):
             return upper.value#sort.numInstances 
     
     def findUnusedAbstracts(self):
-        for i in self.z3_sorts.values():
+        for i in self.cfr_sorts.values():
             if i.element.isAbstract:
                 summ = 0
                 for j in i.subs:
@@ -111,8 +111,8 @@ class ClaferModel(object):
 
 
     def isUsed(self, element):
-        ab = self.z3_sorts.get(str(element))
-        if (not ab.element.isAbstract) or ab.scope_summ != 0:# self.z3_sorts.get(str(element)):
+        ab = self.cfr_sorts.get(str(element))
+        if (not ab.element.isAbstract) or ab.scope_summ != 0:# self.cfr_sorts.get(str(element)):
             return True
         return False
     
@@ -243,20 +243,20 @@ class ClaferModel(object):
         self.clock.tack("printing")
     
     def assertConstraints(self):
-        for i in self.z3_sorts.values():
+        for i in self.cfr_sorts.values():
             i.constraints.assertConstraints(self)
         self.join_constraints.assertConstraints(self)
-        for i in self.z3_bracketed_constraints:
+        for i in self.smt_bracketed_constraints:
             i.assertConstraints(self)
     
     def printConstraints(self):
         if not (Options.MODE == Common.DEBUG and Options.PRINT_CONSTRAINTS):
             return
         #print(self.solver.sexpr())
-        for i in self.z3_sorts.values():
+        for i in self.cfr_sorts.values():
             i.constraints.debug_print()
         self.join_constraints.debug_print()
-        for i in self.z3_bracketed_constraints:
+        for i in self.smt_bracketed_constraints:
             i.debug_print()
         
     def print_repl_help(self): 
@@ -398,13 +398,13 @@ class ClaferModel(object):
     
     
     def getSort(self, uid):
-        return self.z3_sorts.get(uid)
+        return self.cfr_sorts.get(uid)
         
     def getSorts(self): 
         '''
-        :returns: z3_sorts
+        :returns: cfr_sorts
         '''
-        return self.z3_sorts.values()
+        return self.cfr_sorts.values()
         
     def addSort(self, sortID, sort):
         '''
@@ -413,7 +413,7 @@ class ClaferModel(object):
         :param sort: A ClaferSort.
         :type sort: :mod:`common.ClaferSort`
         '''
-        self.z3_sorts[sortID] = sort
+        self.cfr_sorts[sortID] = sort
     
     def __str__(self):
         return (str(self.getSorts())) + "\n" +\

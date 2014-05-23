@@ -15,17 +15,17 @@ class Constraints():
     If in debug mode, add a Boolean tracker for the constraint, to obtain possible UNSAT cores.
     """
     
-    def assertConstraint(self, constraint, z3):
+    def assertConstraint(self, constraint, cfr):
         if Common.FLAG:
             SMTLib.toStr(constraint)
 
         if Options.PRODUCE_UNSAT_CORE:
             p = SMTLib.SMT_Bool(str(self.assertID) + "_" + str(Common.getConstraintUID()))
-            z3.unsat_core_trackers.append(p)
-            z3.unsat_map[str(p)] = constraint
-            z3.solver.add(SMTLib.SMT_Implies(p, constraint))
+            cfr.unsat_core_trackers.append(p)
+            cfr.unsat_map[str(p)] = constraint
+            cfr.solver.add(SMTLib.SMT_Implies(p, constraint))
         else:
-            z3.solver.add(constraint)
+            cfr.solver.add(constraint)
         
     def convert(self, f_n, constraint):
         #print("#####")
@@ -45,12 +45,12 @@ class GenericConstraints(Constraints):
         for i in c:
             self.constraints.append(i)    
     
-    def assertConstraints(self, z3):
+    def assertConstraints(self, cfr):
         '''
         Used to add all constraints to the solver.
         '''
         for i in self.constraints:
-            self.assertConstraint(i,z3)
+            self.assertConstraint(i,cfr)
             
     def __str__(self):
         return str(self.ident)
@@ -96,7 +96,7 @@ class ClaferConstraints(Constraints):
     def __str__(self):
         return str(self.claferSort.element.uid)
     
-    def assertConstraints(self, z3):
+    def assertConstraints(self, cfr):
         '''
         Used to add all constraints associated with this clafer to the solver.
         Can turn off different lists for debugging purposes.
@@ -110,7 +110,7 @@ class ClaferConstraints(Constraints):
                        ]   
         for i in constraints:
             for j in i:
-                self.assertConstraint(j,z3)
+                self.assertConstraint(j,cfr)
     
     def debug_print(self):
         constraints = [

@@ -15,7 +15,7 @@ import sys
 class  ClaferSort(object):
     '''
     :var element: The IR clafer.
-    :var z3: The Z3Instance.
+    :var cfr: The Z3Instance.
     :var parentStack: Used to determine the parent of the clafer, and if the clafer is top level.
     :var isTopLevel: True if the clafer is at the top level of indentation.
     :var fields: The direct subclafer ClaferSorts.
@@ -51,9 +51,9 @@ class  ClaferSort(object):
     A0 because the first and second instances are 0, that is, their parent pointers are 0.
     Instances B2-B5 are off because parentInstances for B is 2 (since there are 2 A's).
     '''
-    def __init__(self, element, z3, stack):
+    def __init__(self, element, cfr, stack):
         self.element = element
-        self.z3 = z3
+        self.cfr = cfr
         self.parentStack = stack[:]
         (_,upper) = self.element.card
         if upper.value == -1:
@@ -143,7 +143,7 @@ class  ClaferSort(object):
                                                                          SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))))
                 elif self.refSort == "string":
                     if Options.STRING_CONSTRAINTS:
-                        self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], self.z3.EMPTYSTRING)))
+                        self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], self.cfr.EMPTYSTRING)))
                     else:
                         self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))))
                 else: 
@@ -194,7 +194,7 @@ class  ClaferSort(object):
         is true if the instance may be absent from the model, AND is
         not covered by the upper bound.
         '''
-        if not self.z3.isUsed(self.element):
+        if not self.cfr.isUsed(self.element):
             return (0,0,False)
         
         if self.lowerCardConstraint == 0:
@@ -257,7 +257,7 @@ class  ClaferSort(object):
         
     
     def createCardinalityConstraints(self):
-        if not self.z3.isUsed(self.element):
+        if not self.cfr.isUsed(self.element):
             return
         self.summs = [[] for i in range(self.parentInstances+1)]
         for i in range(self.numInstances):
@@ -326,11 +326,11 @@ class  ClaferSort(object):
                 if ref_id == "integer" or ref_id == "string" or ref_id == "real":
                     self.refSort = PrimitiveType(ref_id)
                 else:
-                    self.refSort = self.z3.getSort(ref_id)
+                    self.refSort = self.cfr.getSort(ref_id)
                 self.superSort = None
             else:
                 self.refSort = None
-                self.superSort = self.z3.getSort(supers.elements[0].iExp[0].id)
+                self.superSort = self.cfr.getSort(supers.elements[0].iExp[0].id)
         else:
             self.superSort = None
             self.refSort = None

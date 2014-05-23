@@ -90,8 +90,6 @@ class Z3Converter():
     
     def sum_expr(self, expr):
         newList = [i.convert(self) for i in expr.list]
-        #print([i for i in expr.list])
-        #print(*newList)
         try:
             ret = Sum(*newList)
         except:
@@ -149,12 +147,4 @@ class Z3Converter():
     
     def bool_expr(self, expr):
         return Bool(expr.id)
-
-
-    
-    
-    
-    
-    
-    
     

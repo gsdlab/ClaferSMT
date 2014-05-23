@@ -37,8 +37,8 @@ def random_xor_gcard_clafer_toggle(z3inst, module,  num_split):
     '''
     initial_num_split = num_split
     xors = []
-    for i in z3inst.z3_sorts:
-        claferSort = z3inst.z3_sorts[i]
+    for i in z3inst.cfr_sorts:
+        claferSort = z3inst.cfr_sorts[i]
         lowerGCard = claferSort.lowerGCard
         upperGCard = claferSort.upperGCard
         if lowerGCard == 1 and upperGCard == 1 and claferSort.numInstances == 1 and not claferSort.element.isAbstract:
@@ -98,8 +98,8 @@ def optional_clafer_toggle(z3inst, module,  num_split, order="random"):
     assert(Common.is_power2(num_split))
     initial_num_split = num_split
     opts = []
-    for i in z3inst.z3_sorts:
-        claferSort = z3inst.z3_sorts[i]
+    for i in z3inst.cfr_sorts:
+        claferSort = z3inst.cfr_sorts[i]
         lowerCard = claferSort.lowerCardConstraint
         upperCard = claferSort.upperCardConstraint
         if lowerCard == 0 and upperCard == 1 and claferSort.numInstances == 1 and not claferSort.element.isAbstract:
@@ -136,7 +136,7 @@ def range_split(z3inst, module, num_split, order="biggest"):
     initial_num_split = num_split
     #only consider ranges of top level abstracts that are referring to the same type of concretes
     pairs = []
-    for i in z3inst.z3_sorts.values():
+    for i in z3inst.cfr_sorts.values():
         glCardRange = i.numInstances - i.element.glCard[0].value + 1
         if glCardRange > 1:
             pairs.append((i, glCardRange))
@@ -179,7 +179,7 @@ def range_split(z3inst, module, num_split, order="biggest"):
 def divide_biggest_ranges_in_two(z3inst, module, num_split):
     initial_num_split = num_split
     pairs = []
-    for i in z3inst.z3_sorts.values():
+    for i in z3inst.cfr_sorts.values():
         glCardRange = i.numInstances - i.element.glCard[0].value + 1
         if glCardRange > 1:
             pairs.append((i, glCardRange))

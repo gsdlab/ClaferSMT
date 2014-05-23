@@ -138,10 +138,10 @@ def run():
             module = file.getModule()
             print_separate("Attempting: " + str(file.__name__))
             clock.tick("Total Z3 Run Time")
-            z3 = ClaferModel(module)
-            actual_model_count = z3.run()
+            cfr = ClaferModel(module)
+            actual_model_count = cfr.run()
             clock.tack("Total Z3 Run Time")
-            clock = clock.combineClocks(z3.clock)
+            clock = clock.combineClocks(cfr.clock)
             if(expected_model_count == actual_model_count or 
                (expected_model_count == Options.INFINITE and actual_model_count == Options.NUM_INSTANCES)):
                 print("PASSED: " + str(file.__name__))

@@ -11,8 +11,6 @@ class Goal(object):
     '''
     All variables analogous to those described in IntClafer.hs
     '''
-
-
     def __init__(self, isMaximize, exp):
         self.isMaximize = isMaximize
         self.exp = exp

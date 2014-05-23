@@ -13,16 +13,16 @@ import visitors
 
 class CheckForGoals(VisitorTemplate.VisitorTemplate):
     '''
-    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
+    :var cfr: (:class:`~common.Z3Instance`) The Z3 solver.
     '''
     
     
-    def __init__(self, z3):
+    def __init__(self, cfr):
         '''
-        :param z3: The Z3 solver.
-        :type z3: :class:`~common.Z3Instance`
+        :param cfr: The Clafer model.
+        :type cfr: :class:`~common.ClaferModel`
         '''
-        self.z3 = z3
+        self.cfr = cfr
 
     '''
     may need to fix for 3..*
@@ -40,7 +40,7 @@ class CheckForGoals(VisitorTemplate.VisitorTemplate):
             expr = Operations.computeJoin(expr)
         mask = expr[0][1]
         valueList = [i for i in mask.values()]
-        self.z3.objectives.append((op, SMTLib.SMT_Sum(valueList)))
+        self.cfr.objectives.append((op, SMTLib.SMT_Sum(valueList)))
     
 
             

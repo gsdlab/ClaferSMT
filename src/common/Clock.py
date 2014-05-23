@@ -104,7 +104,7 @@ class Clock():
         for i in self.completed_event_map.keys():
             self.printEvent(i)
             
-    def getParallelStats(self, z3):
+    def getParallelStats(self, cfr):
         """
         Prints out all completed events.
         """
@@ -131,7 +131,7 @@ class Clock():
                 experiment_print("Merge: " + str(merge))  
                 experiment_print("Longest Consumer Plus Merge: " + str(longestConsumerPlusMerge))  
                 experiment_print("")  
-            z3.metric = longestConsumerPlusMerge
+            cfr.metric = longestConsumerPlusMerge
             #experiment_print(self)  
             return
      

@@ -25,7 +25,7 @@ def convertToSMTLib(f, status="unknown", name="benchmark", logic=""):
     v = (Ast * num_assertions)()
     for i in range(num_assertions):
         v[i] = assertions[i].as_ast()
-    return Z3_benchmark_to_smtlib_string(f.ctx.ref(), name, logic, status, "", num_assertions, v, z3.BoolVal(True).as_ast())
+    return Z3_benchmark_to_smtlib_string(f.ctx.ref(), name, logic, status, "", num_assertions, v, cfr.BoolVal(True).as_ast())
 
 
 '''
@@ -40,7 +40,7 @@ def printZ3StrConstraints(z3):
     f_n.write("(set-option :produce-models true)\n")
     f_n.write("(declare-variable " + "EMPTYSTRING String)\n")
     f_n.write("(assert (= EMPTYSTRING \"\"))\n")
-    for i in z3.z3_sorts.values():    
+    for i in cfr.cfr_sorts.values():    
         for j in i.instances:
             f_n.write("(declare-variable " + str(j) + " Int)\n")
         if i.refs:
@@ -55,10 +55,10 @@ def printZ3StrConstraints(z3):
                 sys.exit("Bug in printZ3StrConstraints")
             for j in i.refs:
                 f_n.write("(declare-variable " + str(j) + " " + sort + ")\n")
-    for i in z3.z3_sorts.values():
+    for i in cfr.cfr_sorts.values():
         i.constraints.z3str_print(f_n)
-    z3.join_constraints.z3str_print(f_n)
-    for i in z3.z3_bracketed_constraints:
+    cfr.join_constraints.z3str_print(f_n)
+    for i in z3.smt_bracketed_constraints:
         i.z3str_print(f_n)
     
     f_n.write("(check-sat)\n")

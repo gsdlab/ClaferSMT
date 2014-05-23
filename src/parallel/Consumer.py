@@ -15,20 +15,20 @@ import sys
 
 
           
-def model_to_string(z3, model):
-    ph = PrintHierarchy.PrintHierarchy(z3, model)
-    Visitor.visit(ph, z3.module)
+def model_to_string(cfr, model):
+    ph = PrintHierarchy.PrintHierarchy(cfr, model)
+    Visitor.visit(ph, cfr.module)
     ph.printTree()
     return ph.get_pickled()
 
 class GIAConsumer(multiprocessing.Process):
-    def __init__(self, task_queue, result_queue, z3, timeQueue, index, outputFileParentName, num_consumers, s, metrics_variables, metrics_objective_direction, consumerConstraints):
+    def __init__(self, task_queue, result_queue, cfr, timeQueue, index, outputFileParentName, num_consumers, s, metrics_variables, metrics_objective_direction, consumerConstraints):
         multiprocessing.Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
 #         self.CurrentNotDomConstraints_queuelist = CurrentNotDomConstraints_queuelist
         self.timeQueue = timeQueue 
-        self.z3 = z3
+        self.cfr = cfr
         self.solver = s
         self.consumerConstraints = consumerConstraints
         self.index = index
@@ -40,7 +40,7 @@ class GIAConsumer(multiprocessing.Process):
                         writeTotalTimeFilename="timefile.csv", \
                         writeRandomSeedsFilename="randomseed.csv", useCallLogs=False)    
         
-        self.GIAAlgorithm = GuidedImprovementAlgorithm(self.z3, self.solver, metrics_variables, \
+        self.GIAAlgorithm = GuidedImprovementAlgorithm(self.cfr, self.solver, metrics_variables, \
                     metrics_objective_direction, [], options=self.GIAOptions)
         
     def addParetoPoints(self, point):
@@ -78,7 +78,7 @@ class GIAConsumer(multiprocessing.Process):
                     #print(local_count_unsat_calls)
                     self.addParetoPoints(NextParetoPoint)
                     metric_values = self.GIAAlgorithm.get_metric_values(NextParetoPoint)
-                    self.result_queue.put((model_to_string(self.z3, NextParetoPoint), metric_values))
+                    self.result_queue.put((model_to_string(self.cfr, NextParetoPoint), metric_values))
 
                     self.GIAAlgorithm.s.pop()
                     tmpNotDominatedByNextParetoPoint = self.GIAAlgorithm.ConstraintNotDominatedByX(NextParetoPoint)
@@ -91,13 +91,13 @@ class GIAConsumer(multiprocessing.Process):
         return 0
     
 class StandardConsumer(multiprocessing.Process):
-    def __init__(self, task_queue, result_queue, z3, timeQueue, index, outputFileParentName, num_consumers, s, consumerConstraints):
+    def __init__(self, task_queue, result_queue, cfr, timeQueue, index, outputFileParentName, num_consumers, s, consumerConstraints):
         multiprocessing.Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
 #         self.CurrentNotDomConstraints_queuelist = CurrentNotDomConstraints_queuelist
         self.timeQueue = timeQueue 
-        self.z3 = z3
+        self.cfr = cfr
         self.solver = s
         self.consumerConstraints = consumerConstraints
         self.index = index
@@ -120,9 +120,9 @@ class StandardConsumer(multiprocessing.Process):
             self.clock.tick("Task " + str(next_task))
             while self.solver.check() == Common.SAT and num_solutions != Options.NUM_INSTANCES:
                 model = self.solver.model()
-                self.result_queue.put(model_to_string(self.z3, model))
+                self.result_queue.put(model_to_string(self.cfr, model))
                 num_solutions = num_solutions +  1
-                preventSameModel(self.z3, self.solver, model)
+                preventSameModel(self.cfr, self.solver, model)
             self.task_queue.task_done()                    
             self.clock.tock("Task " + str(next_task))
             self.solver.pop()

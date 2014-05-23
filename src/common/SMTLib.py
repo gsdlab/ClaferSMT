@@ -272,6 +272,19 @@ class SMT_Real():
 
     def __str__(self):
         return self.id
+    
+class SMT_RealConst():
+    def __init__(self, val):
+        self.value = val
+
+    def children(self):
+        return []
+
+    def convert(self, converter):
+        return converter.real_const(self)
+
+    def __str__(self):
+        return str(self.value)
         
 class SMT_Bool():
     def __init__(self, v):

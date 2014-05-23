@@ -103,10 +103,10 @@ class BracketedConstraint(Constraints.GenericConstraints):
     Class for creating bracketed Clafer constraints in Z3.
     '''
     
-    def __init__(self, z3, claferStack):
+    def __init__(self, cfr, claferStack):
         ident = "BC:" + ".".join([str(i.element.uid) for i in claferStack])
         GenericConstraints.__init__(self, ident)
-        self.z3 = z3
+        self.cfr = cfr
         self.claferStack = claferStack
         self.stack = []
         self.locals = {}
@@ -185,7 +185,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
                     (_, mask) = j
                     self.addConstraint(mask.pop_value())
         if addToZ3:
-            self.z3.z3_bracketed_constraints.append(self)
+            self.cfr.smt_bracketed_constraints.append(self)
         
     
     def __str__(self):

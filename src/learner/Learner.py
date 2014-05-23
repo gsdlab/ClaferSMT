@@ -34,8 +34,8 @@ class Learner():
     def getModelStats(self, file):
         currMode = Options.MODE
         module = Common.load(file)
-        z3 = ClaferModel.ClaferModel(module)
-        parameters = ModelStats.run(z3, self.parameters, self.non_modelstats)
+        cfr = ClaferModel.ClaferModel(module)
+        parameters = ModelStats.run(cfr, self.parameters, self.non_modelstats)
         Common.MODE = currMode
         return parameters
   
@@ -155,10 +155,10 @@ class Learner():
             for s in Options.EXPERIMENT_NUM_SPLIT:
                 Options.NUM_SPLIT = s
                 try:
-                    z3 = ClaferModel.ClaferModel(module)
-                    z3.run()
-                    metric = z3.metric
-                    num_models_list.append(z3.num_models)
+                    cfr = ClaferModel.ClaferModel(module)
+                    cfr.run()
+                    metric = cfr.metric
+                    num_models_list.append(cfr.num_models)
                 except (HeuristicFailureException, RuntimeError) as e:
                     experiment_print(e.value)
                     metric = Common.BOUND

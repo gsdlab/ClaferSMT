@@ -32,16 +32,16 @@ def removePrefix(string):
 
 class PrintHierarchy(VisitorTemplate.VisitorTemplate):
     '''
-    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
+    :var cfr: (:class:`~common.Z3Instance`) The Z3 solver.
     
     '''
     
-    def __init__(self, z3, model):
+    def __init__(self, cfr, model):
         '''
-        :param z3: The Z3 solver.
-        :type z3: :class:`~common.Z3Instance`
+        :param cfr: The Z3 solver.
+        :type cfr: :class:`~common.Z3Instance`
         '''
-        self.z3 = z3
+        self.cfr = cfr
         self.model = model
         self.tree = SimpleTree()
         self.pickledInstance = []
@@ -147,9 +147,9 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
             pass
         
     def claferVisit(self, element):
-        if not self.z3.isUsed(str(element)):
+        if not self.cfr.isUsed(str(element)):
             return 
-        sort = self.z3.z3_sorts[element.uid]
+        sort = self.cfr.cfr_sorts[element.uid]
         if sort.parent:
             parent = sort.parent.element.uid#getNonUniqueID()
         else:
@@ -174,7 +174,7 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                     #print(sort.subs)
                     #print(element)
                     for k in sort.subs:
-                        if not self.z3.isUsed(str(k.element)):
+                        if not self.cfr.isUsed(str(k.element)):
                             continue 
                         if k.indexInSuper <= j and j < k.indexInSuper + k.numInstances:
                             #self.tree.addRef(str(sort.instances[j]), str(k.instances[j - k.indexInSuper]))

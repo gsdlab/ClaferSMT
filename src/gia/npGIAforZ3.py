@@ -48,8 +48,8 @@ class GuidedImprovementAlgorithmOptions(object):
                     
      
 class GuidedImprovementAlgorithm(object):
-    def __init__(self, z3inst, s,  metrics_variables, metrics_objective_direction, decision_variables=[], options=GuidedImprovementAlgorithmOptions()):
-        self.z3 = z3inst
+    def __init__(self, cfr_inst, s,  metrics_variables, metrics_objective_direction, decision_variables=[], options=GuidedImprovementAlgorithmOptions()):
+        self.cfr = cfr_inst
         self.s = s
         self.metrics_variables = metrics_variables
         self.metrics_objective_direction = metrics_objective_direction
@@ -57,24 +57,7 @@ class GuidedImprovementAlgorithm(object):
         self.options = options
         self.verbosity = self.options.verbosity
 
-    def _setAndLogZ3RandomSeeds(self):
-        """ 
-        Will set random seeds for z3 and store them on the file
-        """
-        random.seed()
-        z3_random_seed_val = random.randint(0, 500000000)
-        z3_arith_random_seed_val = random.randint(0, 500000000)        
-        #set_option(random_seed=z3_random_seed_val)
-        #set_option(arith_random_seed=z3_arith_random_seed_val)
-        
-        self.options.randomSeedsFil =  open(self.options.writeRandomSeedsFilename, "a")            
-        self.options.randomSeedsFil.write("%s, %s, %s\n" % \
-          ( self.options.writeLogFilename ,"random_seed", z3_random_seed_val ))
-        self.options.randomSeedsFil.write("%s, %s, %s\n" % \
-          ( self.options.writeLogFilename ,"arith_random_seed", z3_arith_random_seed_val ))
-        
-        self.options.randomSeedsFil.close()
-          
+
     '''
     CAUTION: REMOVED FUNCTIONALITY FOR OUTPUT E.G RECORDPOINT STUFF BELOW
     '''
@@ -84,14 +67,14 @@ class GuidedImprovementAlgorithm(object):
         equalConstraint = self.ConstraintEqualToX(point)
         self.s.add(equalConstraint)
         #print(count)
-        preventSameModel(self.z3, self.s, point)
+        preventSameModel(self.cfr, self.s, point)
         #print(self.s.check()==sat)
         while(self.s.check() == Common.SAT and not(len(equivalentSolutions) + count == self.options.num_models)):
             #print("in")
             #count_sat_calls += 1
 #                 self.GIALogger.logEndCall(True, model = self.s.model(), statistics = self.s.statistics())                              
             solution = self.s.model()
-            preventSameModel(self.z3, self.s, solution)
+            preventSameModel(self.cfr, self.s, solution)
             equivalentSolutions.append(solution)
             
         self.s.pop()
@@ -117,7 +100,6 @@ class GuidedImprovementAlgorithm(object):
         """ 
         Ran the Guided Improvement Algorithm.
         """
-        self._setAndLogZ3RandomSeeds()
         count_paretoPoints = 0
         ParetoFront = []
         initial_start_time = time()
@@ -269,9 +251,9 @@ class GuidedImprovementAlgorithm(object):
         DisjunctionOrLessMetrics  = list()
         for i in range(len(self.metrics_variables)):
             if self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
-                DisjunctionOrLessMetrics.append(SMTLib.SMT_GT(self.metrics_variables[i], SMTLib.SMT_IntConst(model.eval(self.metrics_variables[i].convert(self.z3.solver.converter)))))#model[self.metrics_variables[i]])
+                DisjunctionOrLessMetrics.append(SMTLib.SMT_GT(self.metrics_variables[i], SMTLib.SMT_IntConst(model.eval(self.metrics_variables[i].convert(self.cfr.solver.converter)))))#model[self.metrics_variables[i]])
             else :
-                DisjunctionOrLessMetrics.append(SMTLib.SMT_LT(self.metrics_variables[i], SMTLib.SMT_IntConst(model.eval(self.metrics_variables[i].convert(self.z3.solver.converter)))))#model[self.metrics_variables[i]])
+                DisjunctionOrLessMetrics.append(SMTLib.SMT_LT(self.metrics_variables[i], SMTLib.SMT_IntConst(model.eval(self.metrics_variables[i].convert(self.cfr.solver.converter)))))#model[self.metrics_variables[i]])
         return SMTLib.SMT_Or(*DisjunctionOrLessMetrics)
 
 
@@ -288,7 +270,7 @@ class GuidedImprovementAlgorithm(object):
     def get_metric_values(self, model):
         metrics  = list()
         for i in range(len(self.metrics_variables)):
-            strval = str(model.eval(self.metrics_variables[i].convert(self.z3.solver.converter)))
+            strval = str(model.eval(self.metrics_variables[i].convert(self.cfr.solver.converter)))
             try:
                 val = int(strval)
             except:
@@ -309,22 +291,22 @@ class GuidedImprovementAlgorithm(object):
             if  self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
                 #print(model.eval(dominatedByMetric))
                 dominationConjunction.append(SMTLib.SMT_GT(dominatedByMetric,
-                                                           SMTLib.SMT_IntConst(model.eval(dominatedByMetric.convert(self.z3.solver.converter))))) 
+                                                           SMTLib.SMT_IntConst(model.eval(dominatedByMetric.convert(self.cfr.solver.converter))))) 
             else:
                 dominationConjunction.append(SMTLib.SMT_LT(dominatedByMetric, 
-                                                           SMTLib.SMT_IntConst(model.eval(dominatedByMetric.convert(self.z3.solver.converter)))))
+                                                           SMTLib.SMT_IntConst(model.eval(dominatedByMetric.convert(self.cfr.solver.converter)))))
             for AtLeastEqualInOtherMetric in self.metrics_variables:
                 if j != i:
                     if self.metrics_objective_direction[j] == Common.METRICS_MAXIMIZE:
                         dominationConjunction.append(SMTLib.SMT_GE(AtLeastEqualInOtherMetric,
-                                                                   SMTLib.SMT_IntConst(model.eval(AtLeastEqualInOtherMetric.convert(self.z3.solver.converter)))))
+                                                                   SMTLib.SMT_IntConst(model.eval(AtLeastEqualInOtherMetric.convert(self.cfr.solver.converter)))))
                     else:
                         dominationConjunction.append(SMTLib.SMT_LE(AtLeastEqualInOtherMetric,
-                                                                   SMTLib.SMT_IntConst(model.eval(AtLeastEqualInOtherMetric.convert(self.z3.solver.converter)))))              
+                                                                   SMTLib.SMT_IntConst(model.eval(AtLeastEqualInOtherMetric.convert(self.cfr.solver.converter)))))              
                 j = 1 + j
             i = 1 + i    
             dominationDisjunction.append(SMTLib.SMT_And(*dominationConjunction))         
         constraintDominateX = SMTLib.SMT_Or(*dominationDisjunction)
         #print(constraintDominateX)
         #sys.exit()
-        return constraintDominateX#.convert(self.z3.solver.converter)
+        return constraintDominateX#.convert(self.cfr.solver.converter)

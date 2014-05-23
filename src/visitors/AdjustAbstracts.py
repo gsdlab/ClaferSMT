@@ -15,14 +15,14 @@ import visitors
 
 class AdjustAbstracts(VisitorTemplate.VisitorTemplate):
     '''
-    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
+    :var cfr: (:class:`~common.ClaferModel`) The Clafer model.
     '''
-    def __init__(self, z3):
+    def __init__(self, cfr):
         '''
-        :param z3: The Z3 solver.
-        :type z3: :class:`~common.Z3Instance`
+        :param cfr: The Z3 solver.
+        :type cfr: :class:`~common.Z3Instance`
         '''
-        self.z3 = z3
+        self.cfr = cfr
         self.glStack = []
 
     def computeScope(self):
@@ -41,7 +41,7 @@ class AdjustAbstracts(VisitorTemplate.VisitorTemplate):
         (lower, upper) = element.card
         (glower, gupper) = element.glCard
         upper = upper.value
-        sort = self.z3.z3_sorts[element.uid]
+        sort = self.cfr.cfr_sorts[element.uid]
         
         if not self.glStack:
             self.glStack.append(gupper.value)
@@ -59,7 +59,7 @@ class AdjustAbstracts(VisitorTemplate.VisitorTemplate):
         if sort.unbounded and self.glStack:
             self.glStack.pop()
         '''
-        sort = self.z3.z3_sorts[element.uid]
+        sort = self.cfr.cfr_sorts[element.uid]
         newScope = reduce(operator.mul, self.scopeStack, 1)
         (_, u) = element.card
         if sort.numInstances != newScope and self.scopeStack and u.value != -1:
@@ -70,13 +70,13 @@ class AdjustAbstracts(VisitorTemplate.VisitorTemplate):
         self.scopeStack.pop()    
         '''
         
-def setAbstractScopes(z3):
+def setAbstractScopes(cfr):
     hasChanged = False
-    for i in z3.z3_sorts.values():
+    for i in cfr.cfr_sorts.values():
         if i.element.isAbstract:
             summ = 0
             for j in i.subs:
-                summ = summ + z3.getScope(j)
+                summ = summ + cfr.getScope(j)
             (lower, upper) = i.element.glCard
             i.element.glCard = (lower, IntegerLiteral(summ))
             if upper.value != summ:
@@ -90,11 +90,11 @@ def setAbstractScopes(z3):
                 raise UnusedAbstractException(i.element.uid)
     return hasChanged 
 
-def adjustAbstractsFixedPoint(z3):
+def adjustAbstractsFixedPoint(cfr):
     hasChanged = True
     while hasChanged:
-        hasChanged = setAbstractScopes(z3)
-        for i in z3.z3_sorts.values():
+        hasChanged = setAbstractScopes(cfr)
+        for i in cfr.cfr_sorts.values():
             if i.element.isAbstract:
-                Visitor.visit(AdjustAbstracts(z3), i.element)
+                Visitor.visit(AdjustAbstracts(cfr), i.element)
     

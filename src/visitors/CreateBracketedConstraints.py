@@ -28,22 +28,22 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     :var self.currentConstraint: (:mod:`~constraints.BracketedConstraint`) Holds the constraint currently being traversed. 
     :var self.inConstraint: (bool) True if the traversal is currently within a constraint.
     :var claferStack: ([:mod:`~common.ClaferSort`]) Stack of clafers used primarily for debugging.
-    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
+    :var cfr: (:class:`~common.Z3Instance`) The Z3 solver.
     
-    Converts Clafer constraints to z3 syntax,
-    adds constraints to z3.z3_constraints
+    Converts Clafer constraints to cfr syntax,
+    adds constraints to cfr.z3_constraints
     field.
     '''
     
-    def __init__(self, z3, inConstraint=False):
+    def __init__(self, cfr, inConstraint=False):
         '''
-        :param z3: The Z3 solver.
-        :type z3: :class:`~common.Z3Instance`
+        :param cfr: The Clafer model.
+        :type cfr: :class:`~common.ClaferModel`
         '''
         VisitorTemplate.VisitorTemplate.__init__(self)
         self.inConstraint = inConstraint
         self.currentConstraint = None
-        self.z3 = z3
+        self.cfr = cfr
         self.BRACKETEDCONSCOUNT = 1
     
     def generatedConstraintVisit(self, element):
@@ -55,7 +55,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         fully creating a proper clafer constraint.
         '''
         self.inConstraint = True
-        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.z3, [])
+        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.cfr, [])
         self.funexpVisit(element)
         #return self.currentConstraint.stack.pop()
         self.currentConstraint.endProcessing(addToZ3=False)
@@ -71,17 +71,17 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         fully creating a proper clafer constraint.
         '''
         self.inConstraint = True
-        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.z3, [])
+        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.cfr, [])
         visitors.Visitor.visit(self, element)
         #obtain the first element on the top of the stack (there should only be one anyway)
         return self.currentConstraint.stack[0]
     
     
     def claferVisit(self, element):
-        if not self.z3.isUsed(str(element)):
+        if not self.cfr.isUsed(str(element)):
             return 
         visitors.Visitor.visit(self, element.supers)
-        claferStack.append(self.z3.getSort(element.uid))
+        claferStack.append(self.cfr.getSort(element.uid))
         for i in element.elements:
             visitors.Visitor.visit(self, i)
         claferStack.pop()
@@ -110,7 +110,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.inConstraint = True
         debug_print(self.BRACKETEDCONSCOUNT)
         self.BRACKETEDCONSCOUNT = self.BRACKETEDCONSCOUNT + 1
-        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.z3, claferStack)
+        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.cfr, claferStack)
         visitors.Visitor.visit(self, element.exp)
         self.currentConstraint.endProcessing()
         self.currentConstraint = None
@@ -149,7 +149,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     def declpexpVisit(self, element):
         if Options.BREAK_QUANTIFIER_SYMMETRY:
             sys.exit("BREAK_QUANTIFIER_SYMMETRY still unimplemented.")
-            symmetryChecker = CheckFunctionSymmetry(self.z3)
+            symmetryChecker = CheckFunctionSymmetry(self.cfr)
             visitors.Visitor.visit(symmetryChecker, element.bodyParentExp)
             isSymmetric = symmetryChecker.isSymmetric
             # print(symmetryChecker.isSymmetric)
@@ -207,7 +207,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         
     def realliteralVisit(self, element):
         if(self.inConstraint):
-            self.currentConstraint.addArg([RealArg([element.value])])
+            self.currentConstraint.addArg([RealArg([SMTLib.SMT_RealConst(element.value)])])
         
     def stringliteralVisit(self, element):
         stringID = Common.STRCONS_SUB + str(Common.getStringUID())
