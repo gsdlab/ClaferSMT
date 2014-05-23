@@ -1,4 +1,0 @@
-Iteration random-optional-clafer-toggle top-optional-clafer-toggle bottom-optional-clafer-toggle random-xor-gcard-clafer-toggle biggest-range-split smallest-range-split random-range-split divide-biggest-ranges-in-two no-split
-2 5.20 6.33 4.28 7.99 6.24 4.81 6.19 3.79 9.31
-3 5.53 6.91 3.52 6.43 7.07 7.77 4.28 3.99 10.87
-4 6.99 7.19 4.07 12 9.72 5.51 9.48 4.00 10.85
