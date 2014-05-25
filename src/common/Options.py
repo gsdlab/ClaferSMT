@@ -144,13 +144,6 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--classifier', dest='classifier', default='ldac', choices=['ldac', 'svm', 'classtree'], help='The learning technique to be applied')
     parser.add_argument('--learningiterations', dest='learning_iterations', type=int, default='10', help='the number of iterations through the learning process')
     
-    parser.add_argument('--datafile', default="data", dest='data_file', help='File to output learned instances.')
-    parser.add_argument('--parametersfile', default="", dest='parameters_file', help='File containing the parameters to use for learning, as well as inclusive ranges')
-    parser.add_argument('--generatorfile', default="", dest='generator_file', help='File to output learned instances.')
-    parser.add_argument('--outputdirectory', default="./", dest='output_directory', help='The directory for any output')
-    parser.add_argument('--formatter', default="", dest='formatter', help='File to format generated instances properly')
-    parser.add_argument('--verboseprint', default=False, dest='verbose_print',action='store_const',  const=True,  help='Prints extra output')
-    parser.add_argument('--learningenvironment', dest='learning_environment', default='local', choices=['local', 'sharcnet'], help='Where the experiments will be run')
     parser.add_argument('--timeout', dest='time_out', type=float, default='0', help='The time out for consumers')
     
     args = parser.parse_args()
@@ -206,9 +199,6 @@ def setCommandLineOptions(learner = False):
     SPLIT = args.split
     global TIME_OUT
     TIME_OUT = args.time_out
-    global MODEL_CLASS
-    if args.model_class == "featuremodel":
-        MODEL_CLASS=FEATURE_MODEL
         
     global NUM_SPLIT
     if args.numsplit == -1:
@@ -223,13 +213,8 @@ def setCommandLineOptions(learner = False):
     else:
         EXPERIMENT_NUM_SPLIT = args.experimentnumsplits
         
-    global VERBOSE_PRINT
-    VERBOSE_PRINT = args.verbose_print
-    global LEARNING_ENVIRONMENT
-    LEARNING_ENVIRONMENT = args.learning_environment
     global SOLVER
-    SOLVER = args.solver
-    
+    SOLVER = args.solver.strip()
     global PRODUCE_UNSAT_CORE
     PRODUCE_UNSAT_CORE = args.produceunsatcore    
     

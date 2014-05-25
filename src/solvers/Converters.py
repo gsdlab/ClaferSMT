@@ -25,7 +25,7 @@ def convertToSMTLib(f, status="unknown", name="benchmark", logic=""):
     v = (Ast * num_assertions)()
     for i in range(num_assertions):
         v[i] = assertions[i].as_ast()
-    return Z3_benchmark_to_smtlib_string(f.ctx.ref(), name, logic, status, "", num_assertions, v, cfr.BoolVal(True).as_ast())
+    return Z3_benchmark_to_smtlib_string(f.ctx.ref(), name, logic, status, "", num_assertions, v, z3.BoolVal(True).as_ast())
 
 
 '''

@@ -52,12 +52,6 @@ class ClaferModel(object):
         self.unsat_core_trackers = []
         self.unsat_map = {}
         self.translate()
-        
-    def setSolver(self):
-        if Options.SOLVER == "z3":
-            return Z3.Solver()
-        elif Options.SOLVER == "smt2":
-            print("Unimplimented")
     
     def createGroupCardConstraints(self):
         for i in self.cfr_sorts.values():
@@ -191,8 +185,8 @@ class ClaferModel(object):
         debug_print("Asserting constraints.")
         self.assertConstraints()     
         
-        if Options.OUTPUT_MODE == "smt2":
-            print(Converters.convertToSMTLib(self.solver))
+        if Options.SOLVER == "smt2":
+            print(Converters.convertToSMTLib(self.solver.solver))
             for (pol, obj) in self.objectives:
                 if pol == METRICS_MAXIMIZE:
                     print("(maximize\n   " + str(obj) + ")")
