@@ -6,7 +6,7 @@ Created on May 14, 2014
 from common import Options
 from solvers import Z3
 import sys
-from mathsat import *
+
 
 def getSolver():
     if Options.SOLVER == "z3":
