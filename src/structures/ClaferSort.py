@@ -5,6 +5,7 @@ Created on Apr 29, 2013
 '''
 from common import Common, Options, SMTLib
 from common.Common import mOr, mAnd
+from common.Options import standard_print
 from constraints import Constraints
 import operator
 import sys
@@ -290,7 +291,8 @@ class  ClaferSort(object):
         if(len(self.fields) == 0 and ((not self.superSort) or self.superSort.fields == 0)):
             return
         #lower bounds
-        
+        if not self.fields:
+            return # front end is broken imo...
         if self.lowerGCard == 0 and self.upperGCard == -1:
             return
         for i in range(self.numInstances):

@@ -42,7 +42,7 @@ def getTestSet():
           (relations, 1),
           (boolean_connectives, 2),
           (union, 6),
-          (simple_abstract, 0),
+          (simple_abstract, 1),
           (some, 1),
           (integer_refs, 1),
           (higher_inheritance, 1),

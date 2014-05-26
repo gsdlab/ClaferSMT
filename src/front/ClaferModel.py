@@ -18,9 +18,15 @@ from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
     SetScopes, AdjustAbstracts, CheckForGoals
 import sys
+import traceback
 
 
-
+class TracePrints(object):
+    def __init__(self):    
+        self.stdout = sys.stdout
+    def write(self, s):
+        self.stdout.write("Writing %r\n" % s)
+        traceback.print_stack(file=self.stdout)
 
 class ClaferModel(object):
     ''' 
@@ -41,6 +47,7 @@ class ClaferModel(object):
         self.delimeter_count = 0
         #print(self.solver.help())
         #print(get_version_string())
+        #sys.stdout = TracePrints()
         
         """ Create simple objects used to store Z3 constraints. """
         self.join_constraints = Constraints.GenericConstraints("ClaferModel")
@@ -135,6 +142,9 @@ class ClaferModel(object):
           
             debug_print("Adjusting abstract scopes.")
             AdjustAbstracts.adjustAbstractsFixedPoint(self)
+            
+            #for i in self.cfr_sorts.values():
+            #    standard_print(str(i) + " : "+ str(i.numInstances))
             
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
@@ -322,7 +332,9 @@ class ClaferModel(object):
         self.clock.tick("first model")
         while True:
             self.clock.tick("unsat")
-            
+            #print("AAAAA" + str(self.unsat_core_trackers))
+            #print( self.solver.check(self.unsat_core_trackers) )
+            #print(self.solver.model())
             if (Options.MODE != Common.DEBUG and not(Options.PRODUCE_UNSAT_CORE) and self.solver.check() == Common.SAT and count != desired_number_of_models) or \
                 (Options.MODE != Common.DEBUG and Options.PRODUCE_UNSAT_CORE and self.solver.check(self.unsat_core_trackers) == Common.SAT and count != desired_number_of_models) or \
                 (Options.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == Common.SAT and count != desired_number_of_models):

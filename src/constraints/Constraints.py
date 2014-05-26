@@ -20,8 +20,10 @@ class Constraints():
             SMTLib.toStr(constraint)
 
         if Options.PRODUCE_UNSAT_CORE:
-            p = SMTLib.SMT_Bool(str(self.assertID) + "_" + str(Common.getConstraintUID()))
-            cfr.unsat_core_trackers.append(p)
+            
+            #p = SMTLib.SMT_Bool(str(self.assertID) + "_" + str(Common.getConstraintUID()))
+            p = SMTLib.SMT_Bool("bool" + "_" + str(Common.getConstraintUID()))
+            cfr.unsat_core_trackers.append(cfr.solver.convert(p))
             cfr.unsat_map[str(p)] = constraint
             cfr.solver.add(SMTLib.SMT_Implies(p, constraint))
         else:
@@ -76,12 +78,16 @@ class ClaferConstraints(Constraints):
         self.ref_constraints = []
 
     def addConstraint(self, list, c):
+        #print("A")
+        #SMTLib.toStr(c)
         list.append(c)
 
     def addInstanceConstraint(self,c):
+        #print("B")
         self.addConstraint(self.instance_constraints, c)
     
     def addCardConstraint(self,c):
+        #print("C")
         self.addConstraint(self.card_constraints, c)
         
     def addGroupCardConstraint(self,c):

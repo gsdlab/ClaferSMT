@@ -288,13 +288,16 @@ class SMT_RealConst():
         
 class SMT_Bool():
     def __init__(self, v):
-        self.val = v
+        self.id = v
+        self.var = None
 
     def children(self):
         return []
         
     def convert(self, converter):
-        return converter.bool_var(self)
+        if not self.var:
+            self.var = converter.bool_var(self)
+        return self.var
 
     def __str__(self):
         return self.id

@@ -14,10 +14,14 @@ class Z3Solver():
     def add(self, constraint):
         self.solver.add(constraint.convert(self.converter))
     
+    def convert(self, constraint):
+        return constraint.convert(self.converter)
+    
     def addRaw(self, constraint):
         self.solver.add(constraint)
     
-    def check(self):
+    def check(self, unsat_core_trackers=None):
+        #print(unsat_core_trackers)
         if self.solver.check() == sat:
             return Common.SAT
         else:
@@ -136,7 +140,7 @@ class Z3Converter():
         return Real(expr.id)
     
     def bool_var(self, expr):
-        return expr.val
+        return Bool(expr.id)
 
     def int_const(self, expr):
         return expr.value

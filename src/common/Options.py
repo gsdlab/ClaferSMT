@@ -9,6 +9,7 @@ from optparse import OptionParser
 import argparse
 import sys
 
+
 '''
 ========
 | TODO |
@@ -102,6 +103,7 @@ def standard_print(string):
     Prints the string if **not** in TEST mode.
     '''
     if(MODE != Common.TEST and MODE != Common.EXPERIMENT):
+        #print("ASDF")
         print(string)
         
 def experiment_print(string=""):
