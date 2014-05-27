@@ -7,8 +7,6 @@ from common import Common, Options, SMTLib
 from solvers import Converters
 
 
-
-
 class Constraints():
     """
     Adds a generated constraint to the solver.

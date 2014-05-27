@@ -1,4 +1,3 @@
-//zero models
 abstract vehicle 1
   gps ?
   cost

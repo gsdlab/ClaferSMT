@@ -45,6 +45,7 @@ class ClaferModel(object):
         self.clock = Clock.Clock()
         self.objectives = []
         self.delimeter_count = 0
+        
         #print(self.module.toString(1))
         #print(self.solver.help())
         #print(get_version_string())
@@ -136,17 +137,21 @@ class ClaferModel(object):
             debug_print("Mapping colon clafers.")
             self.mapColonClafers()
           
+           
+          
             debug_print("Adjusting instances for scopes.")
             Visitor.visit(SetScopes.SetScopes(self), self.module)
           
             debug_print("Adjusting abstract scopes.")
             AdjustAbstracts.adjustAbstractsFixedPoint(self)
             
-            #for i in self.cfr_sorts.values():
-            #    standard_print(str(i) + " : "+ str(i.numInstances))
+            #sys.exit()
             
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
+        
+            for i in self.cfr_sorts.values():
+                standard_print(str(i) + " : "+ str(i.numInstances))
             
             debug_print("Creating cardinality constraints.")
             self.createCardinalityConstraints()

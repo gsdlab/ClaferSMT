@@ -74,7 +74,7 @@ class  ClaferSort(object):
         self.instanceRanges = []
         self.indexInSuper = 0
         self.currentSubIndex = 0
-        
+        self.scope_summ = -1
         self.numInstances = int(self.element.glCard[1].value)
         if(self.numInstances == -1):
             newScope = Options.GLOBAL_SCOPE
@@ -95,7 +95,6 @@ class  ClaferSort(object):
     
     def initialize(self):
         (_, upper) = self.element.glCard
-        #print(upper)
         self.numInstances = upper.value
         self.instances = SMTLib.SMT_IntVector(self.element.uid,self.numInstances) #used to be self.element.uid.split("_",1)[1]
         #gets the upper card bound of the parent clafer
