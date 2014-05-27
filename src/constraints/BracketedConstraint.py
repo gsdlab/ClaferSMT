@@ -3,11 +3,10 @@ Created on Apr 29, 2013
 
 @author: ezulkosk
 '''
-from common import Assertions
+from common import Assertions, Common, SMTLib
 from constraints import Constraints
 from constraints.Constraints import GenericConstraints
 from structures.ExprArg import BoolArg
-from common import SMTLib
 import constraints.Operations as Ops
 import sys
 
@@ -103,11 +102,12 @@ class BracketedConstraint(Constraints.GenericConstraints):
     Class for creating bracketed Clafer constraints in Z3.
     '''
     
-    def __init__(self, cfr, claferStack):
-        ident = "BC:" + ".".join([str(i.element.uid) for i in claferStack])
+    def __init__(self, cfr, element, claferStack):
+        ident = "BC" + str(Common.getConstraintUID()) + ":" + ".".join([str(i.element.uid) for i in claferStack])
         GenericConstraints.__init__(self, ident)
+        self.element = element
         self.cfr = cfr
-        self.claferStack = claferStack
+        self.claferStack = [i for i in claferStack]
         self.stack = []
         self.locals = {}
         self.value = None

@@ -22,10 +22,12 @@ class Constraints():
         if Options.PRODUCE_UNSAT_CORE:
             
             #p = SMTLib.SMT_Bool(str(self.assertID) + "_" + str(Common.getConstraintUID()))
-            p = SMTLib.SMT_Bool("bool" + "_" + str(Common.getConstraintUID()))
-            cfr.unsat_core_trackers.append(cfr.solver.convert(p))
-            cfr.unsat_map[str(p)] = constraint
-            cfr.solver.add(SMTLib.SMT_Implies(p, constraint))
+            p = cfr.solver.convert(SMTLib.SMT_Bool("bool" + str(Common.getConstraintUID()) + "_" + str(self.assertID)))
+            cfr.unsat_core_trackers.append(p)
+            cfr.unsat_map[str(p)] = self
+            #print(p)
+            #SMTLib.toStr(constraint)
+            cfr.solver.add(SMTLib.SMT_Implies(p, constraint, unsat_core_implies=True))
         else:
             cfr.solver.add(constraint)
         
@@ -33,6 +35,7 @@ class Constraints():
         #print("#####")
         #print(constraint)
         f_n.write(Converters.obj_to_string(constraint) + "\n")
+        
 
 class GenericConstraints(Constraints): 
     def __init__(self, ident):
@@ -142,3 +145,33 @@ class ClaferConstraints(Constraints):
         for i in constraints:
             for j in i:
                 self.convert(f_n, j)
+                
+                
+def getLineFromPos(pos):
+    ((l,_), (_,_)) = pos
+    return str(l)        
+
+def interpretClaferSort(claferSort):
+    (lgcard, ugcard) = claferSort.element.glCard
+    (lcard, ucard) = claferSort.element.card
+    clafer = str(lgcard) + ".." + str(ugcard) + " " + claferSort.element.uid + " " + str(lcard) + ".." + str(ucard)
+    return clafer  + ", on line " + getLineFromPos(claferSort.element.pos) +  "."
+                
+def interpretUnsatCore(cfr, bool_id):
+    cid = bool_id.split("_", 1)[1]
+    if cid.startswith("BC"):
+        bc = cfr.unsat_map[bool_id]
+        #print(bc.claferStack)
+        #if bc.claferStack:
+        #    text = ", and parent clafers:"
+        #else:
+        #    text = ""
+        retString = "[ " + bc.element.toString(1) + " ]" #+ text
+        #for i in bc.claferStack:
+        #    retString = retString + "\n" + interpretClaferSort(i)
+        return retString
+    
+    else:
+        claferSort = cfr.cfr_sorts.get(cid)
+        return interpretClaferSort(claferSort)
+        

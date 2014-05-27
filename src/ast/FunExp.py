@@ -22,11 +22,14 @@ class FunExp(object):
         if arity == 1:
             return self.operation + str(self.elements[0])
         elif arity == 2:
-            return str(self.elements[0]) + self.operation + str(self.elements[1])
+            return str(self.elements[0]) + " " + self.operation + " " + str(self.elements[1])
         else:
             return self.operation + str(self.elements[0]) + str(self.elements[1]) + str(self.elements[2])
     
     def __repr__(self):
         return self.__str__()
+    
+    def toString(self, level):
+        return str(self)
     
     

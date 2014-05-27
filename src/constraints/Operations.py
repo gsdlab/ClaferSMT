@@ -3,13 +3,12 @@ Created on Nov 1, 2013
 
 @author: ezulkosk
 '''
-from common import Common, Assertions, Options
+from common import Common, Assertions, Options, SMTLib
 from common.Common import mOr, mAnd
 from structures.ClaferSort import BoolSort, IntSort, PrimitiveType, StringSort, \
     RealSort
 from structures.ExprArg import Mask, ExprArg, JoinArg, IntArg, BoolArg
 import sys
-from common import SMTLib
 
 ''' 
 #######################################################################
@@ -1086,7 +1085,7 @@ def op_div(left,right):
     rval = getArithValue(list(right_mask.values()))
     return IntArg([SMTLib.SMT_Divide(lval, rval)]
                    if((not isinstance(lval, SMTLib.SMT_IntConst)) or (not isinstance(rval, SMTLib.SMT_IntConst)))
-                             else [SMTLib.IntDivide(val, rval)])
+                             else [SMTLib.SMT_IntDivide(lval, rval)])
     
     
 def op_un_minus(arg):

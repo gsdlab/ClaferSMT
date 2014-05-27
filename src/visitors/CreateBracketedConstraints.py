@@ -71,7 +71,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         fully creating a proper clafer constraint.
         '''
         self.inConstraint = True
-        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.cfr, [])
+        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.cfr, element, [])
         visitors.Visitor.visit(self, element)
         #obtain the first element on the top of the stack (there should only be one anyway)
         return self.currentConstraint.stack[0]
@@ -110,7 +110,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.inConstraint = True
         debug_print(self.BRACKETEDCONSCOUNT)
         self.BRACKETEDCONSCOUNT = self.BRACKETEDCONSCOUNT + 1
-        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.cfr, claferStack)
+        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.cfr, element, claferStack)
         visitors.Visitor.visit(self, element.exp)
         self.currentConstraint.endProcessing()
         self.currentConstraint = None

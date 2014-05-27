@@ -22,9 +22,10 @@ class SMT_If():
         return "If"
 
 class SMT_Implies():
-    def __init__(self, l, r):
+    def __init__(self, l, r, unsat_core_implies=False):
         self.left = l
         self. right = r
+        self.unsat_core_implies = unsat_core_implies
         
 
     def children(self):

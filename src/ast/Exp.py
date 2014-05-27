@@ -24,4 +24,4 @@ class Exp(object):
         return self.__str__()
     
     def toString(self, level):
-        print("A")
+        return self.iExp[0].toString(level)

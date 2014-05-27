@@ -27,6 +27,6 @@ class Module(object):
         return self.mName #+ " " + ', '.join(map(str, self.elements))
     
     def toString(self, level):
-        print("Module Name:" + self.mName)
+        #print("Module Name:" + self.mName)
         for i in self.elements:
             i.toString(level+1)

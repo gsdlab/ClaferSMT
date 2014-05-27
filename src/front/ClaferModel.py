@@ -45,6 +45,7 @@ class ClaferModel(object):
         self.clock = Clock.Clock()
         self.objectives = []
         self.delimeter_count = 0
+        #print(self.module.toString(1))
         #print(self.solver.help())
         #print(get_version_string())
         #sys.stdout = TracePrints()
@@ -106,9 +107,7 @@ class ClaferModel(object):
         Sets basic options for the Z3 solver.
         Adds additional options for better pretty-printing, if debugging.
         """
-        pass
-        #self.solver.set(unsat_core=True)
-        #self.solver.set(model_completion=True)
+        self.solver.setOptions()
 
 
     def isUsed(self, element):
@@ -334,7 +333,8 @@ class ClaferModel(object):
             self.clock.tick("unsat")
             #print("AAAAA" + str(self.unsat_core_trackers))
             #print( self.solver.check(self.unsat_core_trackers) )
-            #print(self.solver.model())
+            #print(self.solver.check())
+            #print(self.solver.solver.unsat_core())
             if (Options.MODE != Common.DEBUG and not(Options.PRODUCE_UNSAT_CORE) and self.solver.check() == Common.SAT and count != desired_number_of_models) or \
                 (Options.MODE != Common.DEBUG and Options.PRODUCE_UNSAT_CORE and self.solver.check(self.unsat_core_trackers) == Common.SAT and count != desired_number_of_models) or \
                 (Options.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == Common.SAT and count != desired_number_of_models):
@@ -353,11 +353,12 @@ class ClaferModel(object):
             else:
                 if count == 0 and Options.PRODUCE_UNSAT_CORE:# Options.MODE == Common.DEBUG and count == 0:
                     self.clock.tock("unsat")
-                    debug_print(self.solver.check(self.unsat_core_trackers))
+                    #debug_print(self.solver.check(self.unsat_core_trackers))
+                    debug_print("UNSAT")
                     core = self.solver.unsat_core()
-                    debug_print(len(core))
+                    debug_print(str(len(core)) + " constraints in unsat core: \n")
                     for i in core:
-                        print(str(i) + " ==> " + str(self.unsat_map[str(i)]))
+                        print(Constraints.interpretUnsatCore(self, str(i)))
                         print()
                     return result
                 elif count == 0:

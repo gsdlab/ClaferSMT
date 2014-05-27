@@ -3,8 +3,8 @@ Created on May 14, 2014
 
 @author: ezulkosk
 '''
-from z3 import *
 from common import Common
+from z3 import *
 
 class Z3Solver():
     def __init__(self):
@@ -22,13 +22,26 @@ class Z3Solver():
     
     def check(self, unsat_core_trackers=None):
         #print(unsat_core_trackers)
+        if unsat_core_trackers:
+            if self.solver.check(unsat_core_trackers) == sat:
+                return Common.SAT
+            else:
+                return Common.UNSAT 
         if self.solver.check() == sat:
             return Common.SAT
         else:
             return Common.UNSAT
         
+    def setOptions(self):
+        self.solver.set(auto_config=False)
+        self.solver.set(unsat_core=True)
+        self.solver.set(model_completion=True)
+        
     def model(self):
         return self.solver.model()
+
+    def unsat_core(self):
+        return self.solver.unsat_core()
 
     def assertions(self):
         return self.solver.assertions()
@@ -55,7 +68,11 @@ class Z3Converter():
         return If(b,t,f)
 
     def implies_expr(self, expr):
-        l = expr.left.convert(self)
+        if expr.unsat_core_implies:
+            #left is already converted
+            l = expr.left
+        else:
+            l = expr.left.convert(self)
         r = expr.right.convert(self)
         return Implies(l, r)
     

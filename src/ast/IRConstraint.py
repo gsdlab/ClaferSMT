@@ -17,3 +17,6 @@ class IRConstraint(object):
     def __str__(self):
         return self.exp
     
+    def toString(self, level):
+        return self.exp.toString(level)
+    
