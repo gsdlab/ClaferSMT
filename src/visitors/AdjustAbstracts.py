@@ -78,8 +78,13 @@ class AdjustAbstracts(VisitorTemplate.VisitorTemplate):
             #    self.hasChanged = True
         #    element.glCard = (lower, IntegerLiteral(newScope))
         #    self.glStack.append(newScope)
-        elif not self.glStack or sort.unbounded:
+        elif not self.glStack:
             self.glStack.append(gupper.value)
+        elif sort.unbounded:
+            glower = self.glStack[-1] * lower.value
+            element.glCard = (glower, IntegerLiteral(max(glower, Options.GLOBAL_SCOPE)))
+            self.glStack.append(max(Options.GLOBAL_SCOPE, glower))
+            #print(sort.element.uid + str(sort.element.glCard) + " " + str(sort))
         else:
             newScope = upper * self.glStack[-1]
             element.glCard = (lower, IntegerLiteral(newScope))

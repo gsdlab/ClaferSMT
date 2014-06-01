@@ -24,13 +24,13 @@ class SetScopes(VisitorTemplate.VisitorTemplate):
     '''
     
     def claferVisit(self, element):
-        (_, upper) = element.card
-        (glower, _) = element.glCard
+        (lower, upper) = element.card
+        #(glower, _) = element.glCard
         upper = upper.value
-        
+        glower = self.glStack[-1] * lower.value
         if upper == -1:
-            element.glCard = (glower, IntegerLiteral(Options.GLOBAL_SCOPE))
-            self.glStack.append(Options.GLOBAL_SCOPE)
+            element.glCard = (glower, IntegerLiteral(max(glower, Options.GLOBAL_SCOPE)))
+            self.glStack.append(max(glower,Options.GLOBAL_SCOPE))
         else:
             upper = self.glStack[-1] * upper
             element.glCard = (glower, IntegerLiteral(upper))
