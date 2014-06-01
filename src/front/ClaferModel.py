@@ -13,7 +13,7 @@ from front import Z3Str, ModelStats
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from parallel import ParSolver
-from solvers import Z3, Converters, Solver
+from solvers import Z3Solver, Converters, BaseSolver
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
     SetScopes, AdjustAbstracts, CheckForGoals
@@ -40,7 +40,7 @@ class ClaferModel(object):
         self.module = module
         self.smt_bracketed_constraints = []
         self.cfr_sorts = {}
-        self.solver = Solver.getSolver()
+        self.solver = BaseSolver.getSolver()
         self.setOptions()
         self.clock = Clock.Clock()
         self.objectives = []
@@ -199,7 +199,14 @@ class ClaferModel(object):
         debug_print("Asserting constraints.")
         self.assertConstraints()     
         
+        
         if Options.SOLVER == "smt2":
+            self.solver.printConstraints()
+            sys.exit()
+        
+        #approach for Nicolas' converter
+        if Options.SOLVER == "smt2":
+            
             print(Converters.convertToSMTLib(self.solver.solver))
             for (pol, obj) in self.objectives:
                 if pol == METRICS_MAXIMIZE:

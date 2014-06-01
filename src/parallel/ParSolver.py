@@ -11,13 +11,13 @@ from common.Clock import Clock
 from common.Common import METRICS_MAXIMIZE, METRICS_MINIMIZE
 from parallel import Consumer
 from parallel.heuristics import GeneralHeuristics
-from solvers import Solver
+from solvers import BaseSolver
 import multiprocessing
 
 def replicateSolver(solver, num_consumers):
     solvers = []
     for _ in range(num_consumers):
-        newSolver = Solver.getSolver()
+        newSolver = BaseSolver.getSolver()
         for j in solver.assertions():
             newSolver.addRaw(j)
         solvers.append(newSolver)

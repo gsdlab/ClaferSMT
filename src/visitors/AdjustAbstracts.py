@@ -15,6 +15,7 @@ import operator
 import sys
 import visitors
 
+
 class AdjustAbstracts(VisitorTemplate.VisitorTemplate):
     '''
     :var cfr: (:class:`~common.ClaferModel`) The Clafer model.
@@ -27,6 +28,11 @@ class AdjustAbstracts(VisitorTemplate.VisitorTemplate):
         self.cfr = cfr
         self.hasChanged = False
         self.glStack = []
+        
+        
+        
+        
+
 
     def computeScope(self):
         stack = self.glStack[:]

@@ -1,10 +1,9 @@
 
 from common import Common, SMTLib
 from common.Common import preventSameModel
-from solvers import Solver
 from time import time
 import random
-
+from solvers import BaseSolver
 
 
 
@@ -90,7 +89,7 @@ class GuidedImprovementAlgorithm(object):
     def replicateSolver(self, solver, num_consumers):
         solvers = []
         for i in range(num_consumers):
-            newSolver = Solver.getSolver()
+            newSolver = BaseSolver.getSolver()
             for j in solver.assertions():
                 newSolver.add(j)
             solvers.append(newSolver)

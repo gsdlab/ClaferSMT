@@ -4,9 +4,10 @@ Created on May 14, 2014
 @author: ezulkosk
 '''
 from common import Common
+from solvers.BaseSolver import BaseSolver
 from z3 import *
 
-class Z3Solver():
+class Z3Solver(BaseSolver):
     def __init__(self):
         self.converter = Z3Converter()
         self.solver = z3.Solver()
@@ -18,6 +19,9 @@ class Z3Solver():
         return constraint.convert(self.converter)
     
     def addRaw(self, constraint):
+        '''
+        Adds a pre-converted constraint. Should be avoided when possible.
+        '''
         self.solver.add(constraint)
     
     def check(self, unsat_core_trackers=None):
@@ -165,7 +169,4 @@ class Z3Converter():
     def bool_const(self, expr):
         return expr.value
     
-    
-    def bool_expr(self, expr):
-        return Bool(expr.id)
     
