@@ -1,7 +1,9 @@
 
-
+numCalls = 0
 
 def toStr(root, indent=0):
+    global numCalls
+    numCalls += 1
     print(indent * "  " + str(root))
     for i in root.children():
         toStr(i, indent + 1)
@@ -301,7 +303,7 @@ class SMT_Bool():
         return self.var
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
 class SMT_Plus():
     def __init__(self, l, r):

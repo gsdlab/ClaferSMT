@@ -140,19 +140,26 @@ class  ClaferSort(object):
             if isinstance(self.refSort, PrimitiveType):
                 if self.refSort == "integer":
                     self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i),
-                                                                         SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))))
+                                                                         SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))),
+                                                      self.canBeOff(i))
                 elif self.refSort == "string":
                     if Options.STRING_CONSTRAINTS:
-                        self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], self.cfr.EMPTYSTRING)))
+                        self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], self.cfr.EMPTYSTRING)),
+                                                          self.canBeOff(i))
                     else:
-                        self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))))
+                        self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))),
+                                                          self.canBeOff(i))
                 else: 
-                    self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))))
+                    self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))),
+                                                          self.canBeOff(i))
                     #sys.exit(str(self.refSort) + " not supported yet")
             else:
-                self.constraints.addRefConstraint(SMTLib.SMT_If(self.isOff(i)
-                                           , SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances))
-                                           , SMTLib.SMT_NE(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances))))
+                if self.canBeOff(i):
+                    self.constraints.addRefConstraint(SMTLib.SMT_If(self.isOff(i)
+                                               , SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances))
+                                               , SMTLib.SMT_NE(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances))))
+                else:
+                    self.constraints.addRefConstraint(SMTLib.SMT_NE(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances)))
                 #if refsort.full does not exist, create it
                 if not self.refSort.full:
                     self.refSort.full = lambda x:mOr(*[SMTLib.SMT_And(SMTLib.SMT_EQ(x, SMTLib.SMT_IntConst(i)), self.refSort.isOn(i)) for i in range(self.refSort.numInstances)])
@@ -175,7 +182,7 @@ class  ClaferSort(object):
     
     def isOff(self, index):
         '''
-        Returns a Boolean Constraint stating whether or not the instance at the given index is *on*.
+        Returns a Boolean Constraint stating whether or not the instance at the given index is *off*.
         An instance is off if it is set to self.parentInstances.
         '''
         try:
@@ -183,7 +190,17 @@ class  ClaferSort(object):
         except:
             return SMTLib.SMT_EQ(index, SMTLib.SMT_IntConst(self.parentInstances))
         
-       
+    def canBeOff(self, index):
+        '''
+        Used to determine if a particular instance may be absent from the model. 
+        Used to simplify translation to SMT.
+        '''
+        try:
+            (l,h,off) = self.instanceRanges[index]
+            return off or h == self.parentInstances
+        except:
+            return True
+    
        
        
     def getInstanceRange(self, index):
@@ -229,20 +246,27 @@ class  ClaferSort(object):
         self.instanceRanges = [self.getInstanceRange(i) for i in range(self.numInstances)]
         for i in range(self.numInstances):
             (lower, upper, extraAbsenceConstraint) = self.instanceRanges[i]
-            #parent pointer is >= lower
-            self.constraints.addInstanceConstraint(SMTLib.SMT_GE(self.instances[i],SMTLib.SMT_IntConst(lower)))
-            if not extraAbsenceConstraint: 
-                #parent pointer is <= upper         
-                self.constraints.addInstanceConstraint(SMTLib.SMT_LE(self.instances[i], SMTLib.SMT_IntConst(upper)))
+            
+            #lower == upper case (simpler)
+            if lower == upper:
+                constraint = SMTLib.SMT_EQ(self.instances[i], SMTLib.SMT_IntConst(upper))
+                if extraAbsenceConstraint:
+                    self.constraints.addInstanceConstraint(SMTLib.SMT_Or(self.isOff(i), constraint))
+                else:
+                    self.constraints.addInstanceConstraint(constraint)
             else:
-                #parent pointer is <= upper, or equal to parentInstances
-                self.constraints.addInstanceConstraint(
-                    SMTLib.SMT_Or(self.isOff(i),
-                       SMTLib.SMT_LE(self.instances[i], SMTLib.SMT_IntConst(upper))))
+                #parent pointer is >= lower
+                self.constraints.addInstanceConstraint(SMTLib.SMT_GE(self.instances[i],SMTLib.SMT_IntConst(lower)))
+                constraint = SMTLib.SMT_LE(self.instances[i], SMTLib.SMT_IntConst(upper))
+                if extraAbsenceConstraint: 
+                    #parent pointer is <= upper , or equal to parentInstances
+                    self.constraints.addInstanceConstraint(SMTLib.SMT_Or(self.isOff(i), constraint))        
+                else:
+                    #parent pointer is <= upper
+                    self.constraints.addInstanceConstraint(constraint)
             
             #sorted parent pointers (only consider things that are not part of an abstract)
-            #print(self.element)
-            #print(self.subs )
+            
             if(not self.element.isAbstract and not (True in [(p.element.isAbstract) for p in self.parentStack])):
                 #print(self.element)
                 if i != self.numInstances - 1:
@@ -253,7 +277,8 @@ class  ClaferSort(object):
         for i in range(self.parent.numInstances):
             for j in range(self.numInstances):
                 self.constraints.addInstanceConstraint(SMTLib.SMT_Implies(self.parent.isOff(i),
-                                                                          SMTLib.SMT_NE(self.instances[j], SMTLib.SMT_IntConst(i))))
+                                                                          SMTLib.SMT_NE(self.instances[j], SMTLib.SMT_IntConst(i))),
+                                                       self.parent.canBeOff(i))
         
     
     def createCardinalityConstraints(self):

@@ -59,15 +59,15 @@ class GenericConstraints(Constraints):
         return str(self.ident)
             
     def debug_print(self):
+        print("GENERIC CONSTRAINT")
         for i in self.constraints:
-            print(i)
+            SMTLib.toStr(i)
             print("")
             
     def z3str_print(self, f_n):
         for i in self.constraints:
             self.convert(f_n, i)
             
-
 class ClaferConstraints(Constraints):
     def __init__(self, claferSort):
         self.claferSort = claferSort
@@ -83,22 +83,25 @@ class ClaferConstraints(Constraints):
         #SMTLib.toStr(c)
         list.append(c)
 
-    def addInstanceConstraint(self,c):
-        #print("B")
-        self.addConstraint(self.instance_constraints, c)
+    def addInstanceConstraint(self,c,constraintConditional=True):
+        if constraintConditional:
+            self.addConstraint(self.instance_constraints, c)
     
-    def addCardConstraint(self,c):
-        #print("C")
-        self.addConstraint(self.card_constraints, c)
+    def addCardConstraint(self,c,constraintConditional=True):
+        if constraintConditional:
+            self.addConstraint(self.card_constraints, c)
         
-    def addGroupCardConstraint(self,c):
-        self.addConstraint(self.group_card_constraints, c)
+    def addGroupCardConstraint(self,c,constraintConditional=True):
+        if constraintConditional:
+            self.addConstraint(self.group_card_constraints, c)
         
-    def addInheritanceConstraint(self,c):
-        self.addConstraint(self.inheritance_constraints, c)
+    def addInheritanceConstraint(self,c,constraintConditional=True):
+        if constraintConditional:
+            self.addConstraint(self.inheritance_constraints, c)
         
-    def addRefConstraint(self,c):
-        self.addConstraint(self.ref_constraints, c)
+    def addRefConstraint(self,c,constraintConditional=True):
+        if constraintConditional:
+            self.addConstraint(self.ref_constraints, c)
 
     def __str__(self):
         return str(self.claferSort.element.uid)
@@ -127,9 +130,10 @@ class ClaferConstraints(Constraints):
                        self.inheritance_constraints,
                        self.ref_constraints
                        ]   
-        for i in constraints:
-            for j in i:
-                print(j)
+        for i in range(len(constraints)):
+            print("CONSTRAINT TYPE: " + str(i))
+            for j in constraints[i]:
+                SMTLib.toStr(j)
                 print("")
                 
     def z3str_print(self,f_n):

@@ -150,8 +150,8 @@ class ClaferModel(object):
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
         
-            for i in self.cfr_sorts.values():
-                standard_print(str(i) + " : "+ str(i.numInstances))
+            #for i in self.cfr_sorts.values():
+            #    standard_print(str(i) + " : "+ str(i.numInstances))
             
             debug_print("Creating cardinality constraints.")
             self.createCardinalityConstraints()
@@ -221,6 +221,7 @@ class ClaferModel(object):
             
         debug_print("Printing constraints.") 
         self.printConstraints()
+        #sys.exit()
         
         debug_print("Getting models.")  
         
@@ -273,6 +274,7 @@ class ClaferModel(object):
         self.join_constraints.debug_print()
         for i in self.smt_bracketed_constraints:
             i.debug_print()
+        print("Num lines of print: " + str(SMTLib.numCalls))
         
     def print_repl_help(self): 
         print("n -- get next model")
