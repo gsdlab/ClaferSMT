@@ -7,6 +7,7 @@ from common import Common, Options, SMTLib
 from common.Common import mOr, mAnd
 from common.Options import standard_print
 from constraints import Constraints
+import math
 import operator
 import sys
 
@@ -93,10 +94,20 @@ class  ClaferSort(object):
             self.parentInstances = self.parent.numInstances
     
     
+    #should get longest numInstances for getBits
+    def getBits(self, instances):
+        if Options.USE_BITVECTORS:
+            bits = math.ceil(math.log(instances,2))
+            sys.exit("GetBits is still hacked")
+            
+            return bits + 3
+        return None
+    
     def initialize(self):
         (_, upper) = self.element.glCard
         self.numInstances = upper.value
-        self.instances = SMTLib.SMT_IntVector(self.element.uid,self.numInstances) #used to be self.element.uid.split("_",1)[1]
+        self.instances = SMTLib.SMT_IntVector(self.element.uid,self.numInstances, 
+                                              bits=self.getBits(self.parentInstances+1))
         #gets the upper card bound of the parent clafer
         if not self.parentStack:
             self.parent = None
@@ -107,12 +118,16 @@ class  ClaferSort(object):
         self.createInstancesConstraintsAndFunctions()
     
     def addRefConstraints(self):
-        if isinstance(self.refSort, PrimitiveType) and self.refSort.type == "real":
-            self.refs = SMTLib.SMT_RealVector(self.element.uid + "_ref",self.numInstances)
-        elif(self.refSort):
-            self.refs = SMTLib.SMT_IntVector(self.element.uid + "_ref",self.numInstances)#used to be self.element.uid.split("_",1)[1] + "_ref"
         if not self.refSort:
-            return  
+            return 
+        elif isinstance(self.refSort, PrimitiveType) and self.refSort.type == "real":
+            self.refs = SMTLib.SMT_RealVector(self.element.uid + "_ref",self.numInstances)
+        elif isinstance(self.refSort, PrimitiveType):
+            self.refs = SMTLib.SMT_IntVector(self.element.uid + "_ref",self.numInstances)
+        else:
+            self.refs = SMTLib.SMT_IntVector(self.element.uid + "_ref",self.numInstances, 
+                                              bits=self.getBits(self.refSort.parentInstances+1))
+         
         if not isinstance(self.refSort, PrimitiveType):
             for i in range(self.numInstances):
                 #refs pointer is >= 0
@@ -124,7 +139,6 @@ class  ClaferSort(object):
         
         
         #reference symmetry breaking
-        
         for i in range(self.numInstances - 1):
             for j in range(i+1, self.numInstances):
                 if isinstance(self.refSort, PrimitiveType):
@@ -170,7 +184,7 @@ class  ClaferSort(object):
     
     def isOn(self, index):
         '''
-        index is either an int or Z3-Int
+        index is either an int or SMT-Int
         Returns a Boolean Constraint stating whether or not the instance at the given index is *on*.
         An instance is on if it is not set to self.parentInstances.
         '''
@@ -266,7 +280,6 @@ class  ClaferSort(object):
                     self.constraints.addInstanceConstraint(constraint)
             
             #sorted parent pointers (only consider things that are not part of an abstract)
-            
             if(not self.element.isAbstract and not (True in [(p.element.isAbstract) for p in self.parentStack])):
                 #print(self.element)
                 if i != self.numInstances - 1:

@@ -787,6 +787,7 @@ def op_intersection(left,right):
     '''
     sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.getInstanceSorts()])
     sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.getInstanceSorts()])
+
     newInstanceSorts = []
     while True:
         nextSorts = getNextInstanceSort(sortedL, sortedR)
@@ -800,11 +801,11 @@ def op_intersection(left,right):
             (_, (sort, l)) = nextSorts[0]
             (_, (_, r)) = nextSorts[1]
             newMask = Mask()
-            for i in l.intersection(r.keys()):
+            for i in l.intersection(r.getTree()):
                 #newMask.put(i, Common.max2(l.get(0), r.get(0)))
                 putIfNotMatched(sort, newMask, i, Common.max2(l.get(0), r.get(0)), matches)
             newInstanceSorts.append((sort, newMask))
-    return ExprArg(left.joinSorts, newInstanceSorts)
+    return ExprArg(newInstanceSorts)
 
 def int_set_difference(leftIntSort, rightIntSort):
     (_,(left_sort, left_mask)) = leftIntSort

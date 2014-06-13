@@ -219,7 +219,8 @@ class SMT_Sum():
         return "Sum"
    
 class SMT_Int():
-    def __init__(self, uid):
+    def __init__(self, uid, bits=None):
+        self.bits = bits
         self.id = uid
         self.var = None
 
@@ -232,7 +233,10 @@ class SMT_Int():
         return self.var
 
     def __str__(self):
-        return self.id
+        if self.bits:
+            return self.id + ":" + str(self.bits)
+        else:
+            return self.id
 
 class SMT_IntConst():
     def __init__(self, val):
@@ -376,8 +380,8 @@ class SMT_IntDivide():
     def __str__(self):
         return "//"
 
-def SMT_IntVector(uid, count):
-    return [SMT_Int(str(uid) + "__" + str(i)) for i in range(count)]
+def SMT_IntVector(uid, count, bits=None):
+    return [SMT_Int(str(uid) + "__" + str(i), bits) for i in range(count)]
     
 def SMT_RealVector(uid, count):
     return [SMT_Real(str(uid) + "__" + str(i)) for i in range(count)]

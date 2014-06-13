@@ -14,7 +14,7 @@ class ExprArg():
     def __init__(self, instanceSorts):
         '''
         :param instanceSorts: The list of sorts that are actually in instances.
-        :type instancesSorts: [:class:`~common.ClaferSort`]
+        :type instancesSorts: [(:class:`~common.ClaferSort`, Mask)]
         
         Struct used to hold information as a bracketed constraint is traversed. 
         '''
