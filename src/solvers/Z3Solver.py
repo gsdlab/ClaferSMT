@@ -64,7 +64,11 @@ class Z3Converter():
         return expr.left.convert(self) == expr.right.convert(self)
 
     def ne_expr(self, expr):
-        return expr.left.convert(self) != expr.right.convert(self)
+        l = expr.left.convert(self)
+        r = expr.right.convert(self)
+        #print("NEl: " + str(l))
+        #print("NEr: " + str(r))
+        return l != r
 
     def if_expr(self, expr):
         b = expr.bool_expr.convert(self)

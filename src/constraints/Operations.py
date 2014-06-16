@@ -711,6 +711,10 @@ def int_set_union(leftIntSort, rightIntSort):
     
 
 def putIfNotMatched(sort, mask, index, value, matches):
+    '''
+    Used to make sure you don't add duplicate elements to a set i.e. a sub and super.
+    Needed by union, intersection, and difference.
+    '''
     if not matches:
         mask.put(index, value)
     else:
@@ -771,10 +775,28 @@ def op_union(left,right):
             for i in r.difference(l.getTree()):
                 putIfNotMatched(sort, newMask, i, r.get(i), matches)
             for i in l.intersection(r.getTree()):
-                putIfNotMatched(sort, newMask, i, Common.min2(l.get(0), r.get(0)), matches)
+                putIfNotMatched(sort, newMask, i, Common.min2(l.get(i), r.get(i)), matches)
             newInstanceSorts.append((sort, newMask))
     return ExprArg(newInstanceSorts)
                 
+
+def int_set_intersection(left_sort, left_mask, right_sort, right_mask):
+    newMask = Mask()
+    sort = IntSort()
+    for i in left_mask.keys():
+        cardMask_constraint = SMTLib.SMT_EQ(left_sort.cardinalityMask.get(i), SMTLib.SMT_IntConst(1))
+        onRight_constraint = SMTLib.SMT_Or(*[SMTLib.SMT_And(SMTLib.SMT_EQ(left_mask.get(i), right_mask.get(j)),
+                                         SMTLib.SMT_EQ(right_sort.cardinalityMask.get(j), SMTLib.SMT_IntConst(1))) for j in right_mask.keys()])
+        if newMask.size() != 0:
+            noPrevious_constraint = SMTLib.SMT_And(*[SMTLib.SMT_Or(SMTLib.SMT_EQ(sort.cardinalityMask.get(j), SMTLib.SMT_IntConst(0)),
+                                                                   SMTLib.SMT_NE(newMask.get(j), left_mask.get(i))) for j in newMask.keys()])
+        else:
+            noPrevious_constraint = SMTLib.SMT_BoolConst(True)
+        full_constraint = SMTLib.SMT_And(noPrevious_constraint, cardMask_constraint, onRight_constraint)
+        sort.cardinalityMask.put(i, SMTLib.SMT_If(full_constraint, SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
+        newMask.put(i, SMTLib.SMT_If(full_constraint, left_mask.get(i), SMTLib.SMT_IntConst(0)))
+    return (sort, newMask)              
+
 def op_intersection(left,right):
     '''
     :param left:
@@ -788,7 +810,43 @@ def op_intersection(left,right):
     sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.getInstanceSorts()])
     sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.getInstanceSorts()])
 
+    #for all instances in left:
+    #  if there is a match in right:
+    #    add it if not already matched
+    
     newInstanceSorts = []
+    for (left_sort, left_mask) in sortedL:
+        newMask = Mask()
+        right_matches = getClaferMatch(left_sort, sortedR)
+        added_matches = getClaferMatch(left_sort, newInstanceSorts)
+        if not right_matches:
+            continue
+        if isinstance(left_sort, IntSort):
+            (_,_,(right_sort, right_mask)) = right_matches[0]
+            (left_sort, newMask) = int_set_intersection(left_sort, left_mask, right_sort, right_mask)
+        else:
+            for left_key in left_mask.keys():
+                key_matches = []
+                for (leftIsSub, transform, (match_sort,match_mask)) in right_matches:
+                    right_val = match_mask.get(left_key + transform)
+                    if right_val:
+                        key_matches.append(match_sort.isOn(right_val))
+                #if the left key is on, and ANY of it's matches are on, then include it
+                if key_matches:
+                    putIfNotMatched(left_sort, newMask, left_key,
+                                    SMTLib.SMT_If(SMTLib.SMT_And(left_sort.isOn(left_mask.get(left_key)), SMTLib.SMT_Or(*key_matches)),
+                                                  left_mask.get(left_key),
+                                                  SMTLib.SMT_IntConst(left_sort.parentInstances)),
+                                    added_matches + [(True,0,(left_sort,newMask))])
+        newInstanceSorts.append((left_sort,newMask))
+    #print(newInstanceSorts)
+    #for (sort, mask) in newInstanceSorts:
+    #    for i in mask.values():
+    #        SMTLib.toStr(i)
+    return ExprArg(newInstanceSorts)
+    sys.exit()
+      
+      
     while True:
         nextSorts = getNextInstanceSort(sortedL, sortedR)
         if not nextSorts:
@@ -803,7 +861,7 @@ def op_intersection(left,right):
             newMask = Mask()
             for i in l.intersection(r.getTree()):
                 #newMask.put(i, Common.max2(l.get(0), r.get(0)))
-                putIfNotMatched(sort, newMask, i, Common.max2(l.get(0), r.get(0)), matches)
+                putIfNotMatched(sort, newMask, i, Common.max2(l.get(i), r.get(i)), matches)
             newInstanceSorts.append((sort, newMask))
     return ExprArg(newInstanceSorts)
 

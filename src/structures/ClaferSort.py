@@ -139,16 +139,17 @@ class  ClaferSort(object):
         
         
         #reference symmetry breaking
-        for i in range(self.numInstances - 1):
-            for j in range(i+1, self.numInstances):
-                if isinstance(self.refSort, PrimitiveType):
-                    self.constraints.addRefConstraint(SMTLib.SMT_Implies(SMTLib.SMT_EQ(self.instances[i],self.instances[j]),
-                                                          SMTLib.SMT_LE(self.refs[i], self.refs[j])))
-                else:
-                    self.constraints.addRefConstraint(SMTLib.SMT_Implies(mAnd(SMTLib.SMT_NE(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances)),
-                                                                              SMTLib.SMT_EQ(self.instances[i], self.instances[j])),
-                                                          SMTLib.SMT_LE(self.refs[i], self.refs[j])))
-                
+        if not self.element.isAbstract:
+            for i in range(self.numInstances - 1):
+                for j in range(i+1, self.numInstances):
+                    if isinstance(self.refSort, PrimitiveType):
+                        self.constraints.addRefConstraint(SMTLib.SMT_Implies(SMTLib.SMT_EQ(self.instances[i],self.instances[j]),
+                                                              SMTLib.SMT_LE(self.refs[i], self.refs[j])))
+                    else:
+                        self.constraints.addRefConstraint(SMTLib.SMT_Implies(mAnd(SMTLib.SMT_NE(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances)),
+                                                                                  SMTLib.SMT_EQ(self.instances[i], self.instances[j])),
+                                                              SMTLib.SMT_LE(self.refs[i], self.refs[j])))
+
         
         for i in range(self.numInstances):
             if isinstance(self.refSort, PrimitiveType):

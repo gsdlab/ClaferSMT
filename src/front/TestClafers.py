@@ -81,7 +81,7 @@ def getTestSet():
         (i70, 3),
         (i71,INFINITE),
         (i72sharedreference, 90),
-        (i78_transitiveclosure, 0),
+        (i78_transitiveclosure, 4),
         (i83individualscope,INFINITE),
         (i98_toplevelreferences, 1),
         (layout, 1),
