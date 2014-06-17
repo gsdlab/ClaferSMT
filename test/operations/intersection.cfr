@@ -1,0 +1,11 @@
+abstract I : int 4
+O : I 2
+  [ this.ref = 1 ]
+E : I 2
+  [ this.ref = 2 ]
+
+[ # (O & I) = 2 ]
+[ (O.ref & I.ref) = 1 ]
+[ # (O.ref & E.ref) = 0 ]
+[ O.ref & E.ref = 0 ]
+

@@ -41,7 +41,7 @@ def getTestSet():
           (arithmetic, 2),
           (relations, 1),
           (boolean_connectives, 2),
-          (union, 6),
+          (union, 1),
           (simple_abstract, 1),
           (some, 1),
           (integer_refs, 1),
