@@ -34,7 +34,7 @@ def convertToSMTLib(f, status="unknown", name="benchmark", logic=""):
 ###################################
 '''
 
-def printZ3StrConstraints(z3):
+def printZ3StrConstraints(cfr):
     f_n = open("z3str_in", 'w')
     f_n.write("(set-option :auto-config true)\n")
     f_n.write("(set-option :produce-models true)\n")
@@ -58,7 +58,7 @@ def printZ3StrConstraints(z3):
     for i in cfr.cfr_sorts.values():
         i.constraints.z3str_print(f_n)
     cfr.join_constraints.z3str_print(f_n)
-    for i in z3.smt_bracketed_constraints:
+    for i in cfr.smt_bracketed_constraints:
         i.z3str_print(f_n)
     
     f_n.write("(check-sat)\n")

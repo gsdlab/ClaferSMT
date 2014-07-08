@@ -53,6 +53,7 @@ INDENTATION="  "
 MAGNIFYING_GLASS = False
 OUTPUT_MODE=""
 PRODUCE_UNSAT_CORE = False
+USE_BITVECTORS = False
 
 ''' parallel options '''
 CORES=1
@@ -132,7 +133,7 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--indentation', dest='indentation', default='doublespace', choices=['doublespace', 'tab'])
     parser.add_argument('--magnifyingglass', default=False, dest='magnifying_glass',action='store_const',  const=True,  help='Print equally optimal solutions if optimizing')
     parser.add_argument('--produceunsatcore', dest='produceunsatcore', default=False, const = True, action='store_const', help='produce unsat core for UNSAT specifications')
-    
+    parser.add_argument('--usebitvectors', dest='usebitvectors', default=False, const = True, action='store_const', help='Use bitvectors to represent clafer instances')
     
     ''' parallel '''
     parser.add_argument('--cores', '-c', dest='cores', type=int, default='1', help='the number of cores for parallel processing')
@@ -215,6 +216,8 @@ def setCommandLineOptions(learner = False):
     else:
         EXPERIMENT_NUM_SPLIT = args.experimentnumsplits
         
+    global USE_BITVECTORS
+    USE_BITVECTORS = args.usebitvectors
     global SOLVER
     SOLVER = args.solver.strip()
     global PRODUCE_UNSAT_CORE

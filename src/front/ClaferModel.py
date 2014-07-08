@@ -46,19 +46,14 @@ class ClaferModel(object):
         self.objectives = []
         self.delimeter_count = 0
         
-        #print(self.module.toString(1))
-        #print(self.solver.help())
-        #print(get_version_string())
-        #sys.stdout = TracePrints()
-        
         """ Create simple objects used to store Z3 constraints. """
         self.join_constraints = Constraints.GenericConstraints("ClaferModel")
         
         """ 
         Used to map constraints in the UNSAT core to Boolean variables.
-        Will eventually be used to map UNSAT core back to the Clafer model.
         """
         self.unsat_core_trackers = []
+        self.low_level_unsat_core_trackers = {}
         self.unsat_map = {}
         self.translate()
     
@@ -92,7 +87,7 @@ class ClaferModel(object):
             return summ
         else:
             (_, upper) = sort.element.glCard
-            return upper.value#sort.numInstances 
+            return upper.value
     
     def findUnusedAbstracts(self):
         for i in self.cfr_sorts.values():
@@ -150,8 +145,8 @@ class ClaferModel(object):
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
         
-            for i in self.cfr_sorts.values():
-                standard_print(str(i) + " : "+ str(i.numInstances))
+            #for i in self.cfr_sorts.values():
+            #    standard_print(str(i) + " : "+ str(i.numInstances))
             
             debug_print("Creating cardinality constraints.")
             self.createCardinalityConstraints()
@@ -184,6 +179,7 @@ class ClaferModel(object):
         
          and computes models.
         '''
+        
         if Options.MODE == Common.PRELOAD:
             return 0
     
@@ -196,9 +192,10 @@ class ClaferModel(object):
             Z3Str.clafer_to_z3str("z3str_in")
             return 1
         
+        self.clock.tick("Asserting Constraints")
         debug_print("Asserting constraints.")
         self.assertConstraints()     
-        
+        self.clock.tock("Asserting Constraints")
         
         if Options.SOLVER == "smt2":
             self.solver.printConstraints()
@@ -221,15 +218,17 @@ class ClaferModel(object):
             
         debug_print("Printing constraints.") 
         self.printConstraints()
+        #sys.exit()
         
         debug_print("Getting models.")  
-        
         models = self.get_models(Options.NUM_INSTANCES)
         self.num_models = len(models)
         
         if Options.LEARNING_ENVIRONMENT == "sharcnet":
             print(Options.SPLIT + str(Options.NUM_SPLIT))
             sys.exit("FIX SHARCNET")
+        
+        
         
         return self.num_models
         
@@ -273,6 +272,7 @@ class ClaferModel(object):
         self.join_constraints.debug_print()
         for i in self.smt_bracketed_constraints:
             i.debug_print()
+        print("Num lines of print: " + str(SMTLib.numCalls))
         
     def print_repl_help(self): 
         print("n -- get next model")
@@ -321,6 +321,8 @@ class ClaferModel(object):
     
             ParetoFront = GIAAlgorithmNP.ExecuteGuidedImprovementAlgorithm(outfilename)
             if not Options.MODE == Common.TEST and not Options.MODE == Common.EXPERIMENT:
+                if not ParetoFront:
+                    standard_print("UNSAT")
                 for i in ParetoFront:
                     self.printVars(i)
             #count = count + 1
@@ -341,6 +343,8 @@ class ClaferModel(object):
         count = 0
         #print(self.solver.sexpr())
         self.clock.tick("first model")
+        #for i in self.solver.assertions():
+        #    print(i)
         while True:
             self.clock.tick("unsat")
             #print("AAAAA" + str(self.unsat_core_trackers))

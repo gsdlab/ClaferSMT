@@ -38,7 +38,9 @@ class Z3Solver(BaseSolver):
         
     def setOptions(self):
         self.solver.set(auto_config=False)
+        #self.solver.help()
         self.solver.set(unsat_core=True)
+        #self.solver.set("qi_profile",True)
         self.solver.set(model_completion=True)
         
     def model(self):
@@ -63,7 +65,11 @@ class Z3Converter():
         return expr.left.convert(self) == expr.right.convert(self)
 
     def ne_expr(self, expr):
-        return expr.left.convert(self) != expr.right.convert(self)
+        l = expr.left.convert(self)
+        r = expr.right.convert(self)
+        #print("NEl: " + str(l))
+        #print("NEr: " + str(r))
+        return l != r
 
     def if_expr(self, expr):
         b = expr.bool_expr.convert(self)
@@ -155,7 +161,11 @@ class Z3Converter():
         return Not(val)
 
     def int_var(self, expr):
-        return Int(expr.id)
+        if not expr.bits:
+            return Int(expr.id)
+        else:
+            #use bitvectors
+            return BitVec(expr.id, expr.bits)
     
     def real_var(self, expr):
         return Real(expr.id)
