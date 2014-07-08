@@ -38,6 +38,7 @@ class Z3Solver(BaseSolver):
         
     def setOptions(self):
         self.solver.set(auto_config=False)
+        #self.solver.help()
         self.solver.set(unsat_core=True)
         #self.solver.set("qi_profile",True)
         self.solver.set(model_completion=True)

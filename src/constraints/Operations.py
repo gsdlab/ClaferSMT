@@ -36,10 +36,6 @@ def joinWithSuper(sort, mask):
     '''
     newMask = Mask()
     for i in mask.keys():
-        #ClaferSort.addSubSort(self, sub), is somewhat related
-        #print(sort)
-        #print(sort.superSort)
-        #print(sort.refSort) 
         newMask.put(i + sort.indexInSuper,
                     SMTLib.SMT_If(sort.isOn(mask.get(i)), 
                        sort.superSort.instances[i + sort.indexInSuper], 
@@ -1259,13 +1255,10 @@ def quant_one(exprs, ifConstraints):
     There's probably a better way to do this.
     '''
     condList = getQuantifierConditionList(exprs)
-    #print(ifConstraints)
-    #print(condList)
     if ifConstraints:
         condList = [SMTLib.SMT_And(i, j) for i,j in zip(ifConstraints, condList)]
     exprList = []
     for i in range(len(condList)):
-        #exprList.append(If(condList[i], indicatorVars[i] == 1, indicatorVars[i] == 0))
         exprList.append(SMTLib.SMT_If(condList[i], SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
     return SMTLib.SMT_EQ(SMTLib.SMT_Sum(*exprList), SMTLib.SMT_IntConst(1))
     
