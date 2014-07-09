@@ -9,6 +9,7 @@ Contributors
 ------------
 
 * [Ed Zulkoski](http://gsd.uwaterloo.ca/ezulkosk). Main developer.
+* [Rafael Olaechea](http://gsd.uwaterloo.ca/rolaechea). Developer.
 * [Alexandr Murashkin](http://gsd.uwaterloo.ca/amurashk). Testing.
 * [Michał Antkiewicz](http://gsd.uwaterloo.ca/mantkiew). Testing, technology transfer.
 
@@ -23,6 +24,7 @@ Regardless of the installation method, the following are required:
 * [Clafer Compiler](https://github.com/gsdlab/clafer) v0.3.6.1
   * Required for compiling Clafer files (`.cfr`) into the Clafer Python IR format (`.py`), so that they can be run using the tool.
 * [Z3 SMT Solver](http://z3.codeplex.com/) v4.2.3
+  * add the `bin` folder to your system PATH
 * [bintrees](https://bitbucket.org/mozman/bintrees)
   * pip install bintrees (make sure it is installed for Python 3).
   * (optional): Remove the warning messages from bintrees' imports.
@@ -51,10 +53,8 @@ This will produce `model.py` file in the same directory as the input `.cfr` file
 Next, execute
 
 ```
-python Z3Run.py model.py
+./claferSMT.sh model.py
 ```
-
-which will produce the AST in python and print the tree.
 
 ### Interactive Session Usage
 In the interactive mode, the users can invoke the following commands...
