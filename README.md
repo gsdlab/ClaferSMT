@@ -24,10 +24,12 @@ Regardless of the installation method, the following are required:
 * [Clafer Compiler](https://github.com/gsdlab/clafer) v0.3.6.1
   * Required for compiling Clafer files (`.cfr`) into the Clafer Python IR format (`.py`), so that they can be run using the tool.
 * [Z3 SMT Solver](http://z3.codeplex.com/) v4.2.3
-  * add the `bin` folder to your system PATH
+  * add the `bin` (`build` on some systems) folder to your PYTHONPATH
+  * Ensure that Z3 is built using python3 (as in `python3 scripts/mk_make.py`).
 * [bintrees](https://bitbucket.org/mozman/bintrees)
   * pip install bintrees (make sure it is installed for Python 3).
   * (optional): Remove the warning messages from bintrees' imports.
+* Ensure that the PYTHONPATH in ClaferSMT.sh is properly set to include the `ClaferSMT/src/` directory.
 
 ### Installation from binaries
 
