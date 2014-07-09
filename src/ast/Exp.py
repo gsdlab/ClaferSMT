@@ -18,10 +18,10 @@ class Exp(object):
 
         
     def __str__(self):
-        return "ExpType: " + self.expType
+        return str(self.iExp[0])
     
     def __repr__(self):
-        print(str(self.iExp))
+        return self.__str__()
     
     def toString(self, level):
-        print("A")
+        return self.iExp[0].toString(level)

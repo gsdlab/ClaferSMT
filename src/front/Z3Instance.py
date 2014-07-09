@@ -6,11 +6,9 @@ Created on Apr 30, 2013
 
 from ast.IntegerLiteral import IntegerLiteral
 from common import Common, Options, Clock
-from common.Common import debug_print, standard_print, mOr
 from common.Exceptions import UnusedAbstractException
-from constraints import Constraints, IsomorphismConstraint, Translator
-from front import Z3Str, Converters
-from front.Converters import DimacsConverter
+from common.Options import debug_print, standard_print
+from constraints import Translator, Constraints
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
@@ -23,6 +21,8 @@ from z3types import Z3Exception
 import sys
 import time
 import z3
+
+
 
 class Z3Instance(object):
     
@@ -110,7 +110,7 @@ class Z3Instance(object):
         #self.solver.set(produce_models=True)
         #set_option(auto_config=False)
         #set_option(candidate_models=True)
-        if Common.MODE == Common.DEBUG:
+        if Options.MODE == Common.DEBUG:
             #these may not be necessary
             set_option(max_width=100)
             set_option(max_depth=1000)
@@ -238,16 +238,6 @@ class Z3Instance(object):
         for i in self.z3_bracketed_constraints:
             i.assertConstraints(self)
     
-    def printConstraints(self):
-        if not (Common.MODE == Common.DEBUG and Options.PRINT_CONSTRAINTS):
-            return
-        #print(self.solver.sexpr())
-        for i in self.z3_sorts.values():
-            i.constraints.debug_print()
-        self.join_constraints.debug_print()
-        for i in self.z3_bracketed_constraints:
-            i.debug_print()
-            
     
     
         
@@ -287,63 +277,7 @@ class Z3Instance(object):
             count = count + 1
         return ParetoFront
     
-    def standard_get_models(self, desired_number_of_models):
-        result = []
-        count = 0
-        #print(self.solver.sexpr())
-        self.clock.tick("first model")
-        while True:
-            self.clock.tick("unsat")
-            
-            if (Common.MODE != Common.DEBUG and self.solver.check() == sat and count != desired_number_of_models) or \
-                (Common.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == sat and count != desired_number_of_models):
-                if count == 0:
-                    self.clock.tock("first model")
-                m = self.solver.model()
-                #if count ==0:
-                #print(m)
-                result.append(m)
-                # Create a new constraint that blocks the current model
-            
-                if not Common.MODE == Common.TEST and not Common.MODE == Common.EXPERIMENT:
-                    self.printVars(m, count)
-                if Options.GET_ISOMORPHISM_CONSTRAINT:
-                    IsomorphismConstraint.IsomorphismConstraint(self, m).createIsomorphicConstraint()
-                    isoConstraint = self.z3_bracketed_constraints.pop()
-                    isoConstraint.assertConstraints(self)
-                else:
-                    block = []
-                    for d in m:
-                        # d is a declaration
-                        if d.arity() > 0:
-                            continue #raise Z3Exception("uninterpreted functions are not supported")
-                        # create a constant from declaration
-                        c = d()
-                        if (str(c)).startswith("z3name!") or is_real(c):
-                            continue
-                        if is_array(c) or c.sort().kind() == Z3_UNINTERPRETED_SORT:
-                            raise Z3Exception("arrays and uninterpreted sorts are not supported")
-                        block.append(c != m[d])
-                        #print(str(d) + " = " + str(m[d]))
-                    if not block:
-                        #input was an empty clafer model (no concretes)
-                        return [[]]
-                    self.solver.add(Or(block))
-                count += 1
-            else:
-                
-                if Common.MODE == Common.DEBUG and count == 0:
-                    self.clock.tock("unsat")
-                    debug_print(self.solver.check(self.unsat_core_trackers))
-                    core = self.solver.unsat_core()
-                    debug_print(len(core))
-                    for i in core:
-                        print(str(i) + " ==> " + str(self.unsat_map[str(i)]))
-                        print()
-                    return result
-                if count == 0:
-                    standard_print("UNSAT")
-                return result
+    
     
     def getSort(self, uid):
         return self.z3_sorts.get(uid)

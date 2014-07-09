@@ -12,17 +12,15 @@ import visitors.Visitor
 
 class CreateSorts(VisitorTemplate.VisitorTemplate):
     '''
-    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
-    
     Adds sorts to the :mod:`~common.Z3Instance` for each clafer.
     '''
     
-    def __init__(self, z3):
+    def __init__(self, cfr):
         '''
-        :param z3: The Z3 solver.
-        :type z3: :class:`~common.Z3Instance`
+        :param cfr: The Clafer model.
+        :type cfr: :class:`~common.ClaferModel`
         '''
-        self.z3 = z3
+        self.cfr = cfr
         self.stack = []
     
     def claferVisit(self, element):
@@ -32,9 +30,9 @@ class CreateSorts(VisitorTemplate.VisitorTemplate):
         *see* :mod:`common.ClaferSort`
         '''
         visitors.Visitor.visit(self,element.supers)
-        sort = ClaferSort(element, self.z3, self.stack)
+        sort = ClaferSort(element, self.cfr, self.stack)
         #print(element.uid)
-        self.z3.addSort(element.uid, sort)  
+        self.cfr.addSort(element.uid, sort)  
         self.stack.append(sort)
         for i in element.elements:
             visitors.Visitor.visit(self, i)

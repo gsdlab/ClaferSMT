@@ -1,0 +1,5 @@
+A ->> int 3
+  [this.ref > 0 && this.ref < 2]
+B : int
+[B = sum A]
+

@@ -4,7 +4,7 @@ Created on Oct 21, 2013
 @author: ezulkosk
 '''
 from bintrees.avltree import AVLTree
-from common import Assertions
+from common import Assertions, SMTLib
 from structures.ClaferSort import BoolSort, IntSort, PrimitiveType, RealSort, \
     StringSort
 
@@ -14,7 +14,7 @@ class ExprArg():
     def __init__(self, instanceSorts):
         '''
         :param instanceSorts: The list of sorts that are actually in instances.
-        :type instancesSorts: [:class:`~common.ClaferSort`]
+        :type instancesSorts: [(:class:`~common.ClaferSort`, Mask)]
         
         Struct used to hold information as a bracketed constraint is traversed. 
         '''
@@ -66,7 +66,7 @@ class IntArg(ExprArg):
         '''
         sort = IntSort()
         for i in range(len(instances)):
-            sort.cardinalityMask.put(i, 1)
+            sort.cardinalityMask.put(i, SMTLib.SMT_IntConst(1))
         self.instanceSorts = [(sort, Mask.createIntMask(instances))]
         
 class RealArg(ExprArg):
@@ -76,7 +76,7 @@ class RealArg(ExprArg):
         '''
         sort = RealSort()
         for i in range(len(instances)):
-            sort.cardinalityMask.put(i, 1)
+            sort.cardinalityMask.put(i, SMTLib.SMT_IntConst(1))
         self.instanceSorts = [(sort, Mask.createIntMask(instances))]
         
         
@@ -98,7 +98,7 @@ class StringArg(ExprArg):
         '''
         sort = StringSort()
         for i in range(len(instances)):
-            sort.cardinalityMask.put(i, 1)
+            sort.cardinalityMask.put(i, SMTLib.SMT_IntConst(1))
         self.instanceSorts = [(sort, Mask.createIntMask(instances))]
 
 class JoinArg(ExprArg):
@@ -147,14 +147,15 @@ class Mask():
     '''
     Wrapper for AVLTree to keep track of which instances are *on*.
     '''
-    def __init__(self, sort=None, instances=[], copy=False):
+    def __init__(self, sort=None, instances=[], copy=False, potentiallyEmpty=False):
         if copy:
             #sort holds a copy of the AVLTree from the previous Mask
             self.tree = sort
         newInstances = []
+        
         if not sort:
             self.tree = AVLTree()
-        elif instances:
+        elif instances or potentiallyEmpty:
             newInstances = [(i, sort.instances[i]) for i in (instances)]
             self.tree = AVLTree(newInstances)
         elif sort:

@@ -1,0 +1,12 @@
+/*
+Example from <a href="http://t3-necsis.cs.uwaterloo.ca:8091/NECSIS-Workshop/Modeling%20Quality%204" target="exampleSource">wiki</a>
+*/
+
+A : int
+B : int
+C : int
+[ A >= -1000]
+[ A <   -400]
+
+
+<< min A >>

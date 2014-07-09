@@ -1,6 +1,0 @@
-//zero models
-abstract vehicle 1
-  gps ?
-  cost
-1..1 car : vehicle 1 
-  [#this.gps = 1]

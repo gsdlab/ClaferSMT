@@ -1,13 +1,10 @@
 
-from gia import consts
-from gia.GIALogs import GIALogging
+from common import Common, SMTLib
+from common.Common import preventSameModel
 from time import time
-from z3 import *
-import inspect
-import multiprocessing
 import random
-import string
-import sys
+from solvers import BaseSolver
+
 
 
 #Modified by Jianmei for EPOAL
@@ -30,7 +27,7 @@ class GuidedImprovementAlgorithmOptions(object):
          writeRandomSeedsFilename="randomseed.csv",  \
          exclude_variables_in_printout=[],\
          incrementallyprintparetopoints=False,
-         useCallLogs=False):
+         useCallLogs=False, num_models=-1, magnifying_glass=False):
         self.verbosity = verbosity
         self.useSummaryStatsFile = useSummaryStatsFile
         self.SummaryStatsFilename = SummaryStatsFilename
@@ -43,52 +40,75 @@ class GuidedImprovementAlgorithmOptions(object):
             self.logfile = open(self.writeLogFilename, "w")
         self.incrementallyprintparetopoints = incrementallyprintparetopoints
         self.writeRandomSeedsFilename = writeRandomSeedsFilename
+        self.magnifying_glass = magnifying_glass
+        self.num_models = num_models
         
         
                     
      
 class GuidedImprovementAlgorithm(object):
-    def __init__(self, s,  metrics_variables, metrics_objective_direction, decision_variables=[], options=GuidedImprovementAlgorithmOptions()):
+    def __init__(self, cfr_inst, s,  metrics_variables, metrics_objective_direction, decision_variables=[], options=GuidedImprovementAlgorithmOptions()):
+        self.cfr = cfr_inst
         self.s = s
         self.metrics_variables = metrics_variables
         self.metrics_objective_direction = metrics_objective_direction
         self.decision_variables = decision_variables
         self.options = options
         self.verbosity = self.options.verbosity
-        self.GIALogger = GIALogging(self.options, self.metrics_variables, self.decision_variables)
 
-    def _setAndLogZ3RandomSeeds(self):
-        """ 
-        Will set random seeds for z3 and store them on the file
-        """
-        random.seed()
-        z3_random_seed_val = random.randint(0, 500000000)
-        z3_arith_random_seed_val = random.randint(0, 500000000)        
-        set_option(random_seed=z3_random_seed_val)
-        set_option(arith_random_seed=z3_arith_random_seed_val)
-        
-        self.options.randomSeedsFil =  open(self.options.writeRandomSeedsFilename, "a")            
-        self.options.randomSeedsFil.write("%s, %s, %s\n" % \
-          ( self.options.writeLogFilename ,"random_seed", z3_random_seed_val ))
-        self.options.randomSeedsFil.write("%s, %s, %s\n" % \
-          ( self.options.writeLogFilename ,"arith_random_seed", z3_arith_random_seed_val ))
-        
-        self.options.randomSeedsFil.close()
+
+    '''
+    CAUTION: REMOVED FUNCTIONALITY FOR OUTPUT E.G RECORDPOINT STUFF BELOW
+    '''
+    def genEquivalentSolutions(self, point, count):
+        self.s.push()
+        equivalentSolutions = []
+        equalConstraint = self.ConstraintEqualToX(point)
+        self.s.add(equalConstraint)
+        #print(count)
+        preventSameModel(self.cfr, self.s, point)
+        #print(self.s.check()==sat)
+        while(self.s.check() == Common.SAT and not(len(equivalentSolutions) + count == self.options.num_models)):
+            #print("in")
+            #count_sat_calls += 1
+#                 self.GIALogger.logEndCall(True, model = self.s.model(), statistics = self.s.statistics())                              
+            solution = self.s.model()
+            preventSameModel(self.cfr, self.s, solution)
+            equivalentSolutions.append(solution)
+            
+        self.s.pop()
+        return equivalentSolutions
+#           
           
-        
-    def ExecuteGuidedImprovementAlgorithm(self, outfilename, max_models):
+
+    def addParetoPoints(self, ParetoFront, point):
+        ParetoFront.append(point)
+        return ParetoFront
+
+
+    def replicateSolver(self, solver, num_consumers):
+        solvers = []
+        for i in range(num_consumers):
+            newSolver = BaseSolver.getSolver()
+            for j in solver.assertions():
+                newSolver.add(j)
+            solvers.append(newSolver)
+        return solvers   
+
+    def ExecuteGuidedImprovementAlgorithm(self, outfilename):
         """ 
         Ran the Guided Improvement Algorithm.
         """
-        self._setAndLogZ3RandomSeeds()
         count_paretoPoints = 0
         ParetoFront = []
         initial_start_time = time()
         start_time = time()
         count_sat_calls = 0
         count_unsat_calls = 0
+        if self.options.magnifying_glass:
+            self.s.push()
         #self.GIALogger.logStartCall()
-        if self.s.check() == sat:
+        if self.s.check() == Common.SAT:
             count_sat_calls += 1
             prev_solution = self.s.model()
             #self.GIALogger.logEndCall(True, model=prev_solution, statistics = self.s.statistics())            
@@ -98,7 +118,9 @@ class GuidedImprovementAlgorithm(object):
             count_sat_calls += local_count_sat_calls
             count_unsat_calls += local_count_unsat_calls
             count_paretoPoints += 1
-            ParetoFront.append(FirstParetoPoint)
+            
+            ParetoFront = self.addParetoPoints(ParetoFront, FirstParetoPoint)
+            #ParetoFront.append(FirstParetoPoint)
             # RecordPoint
             strNextParetoPoint = list((d.name(), str(FirstParetoPoint[d])) for d in FirstParetoPoint.decls())
             if RECORDPOINT:
@@ -119,7 +141,7 @@ class GuidedImprovementAlgorithm(object):
 #             self.GIALogger.logStartCall(tmpNotDominatedByFirstParetoPoint)
             self.s.add(tmpNotDominatedByFirstParetoPoint)
             start_time = time()
-            while(self.s.check() == sat and len(ParetoFront) < max_models):
+            while(self.s.check() == Common.SAT and not(len(ParetoFront) == self.options.num_models)):
                 count_sat_calls += 1
 #                 self.GIALogger.logEndCall(True, model = self.s.model(), statistics = self.s.statistics())                              
                 prev_solution = self.s.model()
@@ -129,7 +151,9 @@ class GuidedImprovementAlgorithm(object):
                 count_sat_calls += local_count_sat_calls
                 count_unsat_calls += local_count_unsat_calls
                 count_paretoPoints += 1
-                ParetoFront.append(NextParetoPoint)
+                #ParetoFront.append(NextParetoPoint)
+                ParetoFront = self.addParetoPoints(ParetoFront, NextParetoPoint)
+                
                 # RecordPoint
                 strNextParetoPoint = list((d.name(), str(FirstParetoPoint[d])) for d in FirstParetoPoint.decls())
                 if RECORDPOINT:
@@ -157,57 +181,12 @@ class GuidedImprovementAlgorithm(object):
             #self.GIALogger.logEndCall(False, statistics = self.s.statistics())            
             
         end_time = time()
-        if OUTPUT_PARETO_FRONT:
-            #         print count_paretoPoints, count_sat_calls, count_sat_calls, end_time - start_time
-            outputFile2 = open("ERS_ParetoFront.csv", 'a')
-            ParetoPointsList2 = []
-            try:
-                for paretopoint in ParetoFront:
-                    strParetoPoint = list((d.name(), str(paretopoint[d])) for d in paretopoint.decls())
-                    dict = {}
-                    for item in strParetoPoint:
-                        if( item[0] == 'total_batteryusage' or item[0] == 'total_cost' or item[0] == 'total_deploymenttime' or
-                            item[0] == 'total_developmenttime' or item[0] == 'total_rampuptime' or item[0] == 'total_reliability' or
-                            item[0] == 'total_responsetime' ):
-                            # print item
-                            outputFile2.writelines(str(item) + ';')
-                            dict[str(item[0])] = str(item[1])
-                    ParetoPointsList2.append(dict)
-                    outputFile2.writelines('\n')
-            finally:
-                outputFile2.close()
-            
-            totalpoints = count_paretoPoints
-            for i in range(len(ParetoPointsList2)):
-                isDominated = False
-                for j in range(i+1, len(ParetoPointsList2)):
-                        strlist1 = ParetoPointsList2[i]['total_reliability'].split("/")
-                        #print strlist1
-                        strlist2 = ParetoPointsList2[j]['total_reliability'].split("/")
-                        #print strlist2
-                        if (int(ParetoPointsList2[i]['total_cost']) >= int(ParetoPointsList2[j]['total_cost']) and 
-                            int(ParetoPointsList2[i]['total_responsetime']) >= int(ParetoPointsList2[j]['total_responsetime']) and
-                            int(ParetoPointsList2[i]['total_batteryusage']) >= int(ParetoPointsList2[j]['total_batteryusage']) and 
-                            int(ParetoPointsList2[i]['total_deploymenttime']) >= int(ParetoPointsList2[j]['total_deploymenttime']) and 
-                            int(ParetoPointsList2[i]['total_developmenttime']) >= int(ParetoPointsList2[j]['total_developmenttime']) and
-                            int(ParetoPointsList2[i]['total_rampuptime']) >= int(ParetoPointsList2[j]['total_rampuptime']) and
-                            # precision of reliability is 1/1000 
-                            round(float(strlist1[0])/float(strlist1[1]),12) >= round(float(strlist2[0])/float(strlist2[1]), 12)):
-                            isDominated = True
-        #                     print str(i) + " dominated by " + str(j)
-        #                     print str(int(ParetoPointsList2[i]['total_cost'])) + " cost >=" + str(int(ParetoPointsList2[j]['total_cost']))
-        #                     print str(int(ParetoPointsList2[i]['total_responsetime'])) + "response >=" + str(int(ParetoPointsList2[j]['total_responsetime']))
-        #                     print str(int(ParetoPointsList2[i]['total_batteryusage'])) + "battery >=" + str(int(ParetoPointsList2[j]['total_batteryusage']))
-        #                     print str(int(ParetoPointsList2[i]['total_deploymenttime'])) + "deploy >=" + str(int(ParetoPointsList2[j]['total_deploymenttime']))
-        #                     print str(int(ParetoPointsList2[i]['total_developmenttime'])) + "develp >=" + str(int(ParetoPointsList2[j]['total_developmenttime']))
-        #                     print str(int(ParetoPointsList2[i]['total_rampuptime'])) + "rampup >=" + str(int(ParetoPointsList2[j]['total_rampuptime']))
-        #                     print str(strlist1[0]) + "/" + str(strlist1[1])  + "reliability >=" + str(strlist2[0]) + "/" + str(strlist2[1])
-        #                     print str(round(float(strlist1[0])/float(strlist1[1]),3)) +"reliability >=" + str(round(float(strlist2[0])/float(strlist2[1]), 3))
-                            break;
-                if isDominated == True: 
-                    totalpoints -= 1   
-            print(totalpoints)
         
+        if self.options.magnifying_glass:
+            self.s.pop()
+            for i in ParetoFront:
+                equivalentSolutions = self.genEquivalentSolutions(i, len(ParetoFront))
+                ParetoFront = ParetoFront + equivalentSolutions
         
         
 #         print count_paretoPoints, count_sat_calls, count_sat_calls, end_time - start_time
@@ -221,56 +200,7 @@ class GuidedImprovementAlgorithm(object):
         finally:
             outputFile.close()
         return ParetoFront
-        
-#         TotalUniqueParetoFront = len(ParetoFront)
-#         print TotalUniqueParetoFront
-#         ParetoPointsList = []
-#         for i in xrange(len(ParetoFront)):
-#             point = ParetoFront[i]
-#             strPoint = list((d.name(), str(point[d])) for d in point.decls())
-#             dict = {}
-#             for item in strPoint:
-#                 dict[str(item[0])] = str(item[1])
-#             ParetoPointsList.append(dict)
-#             
-#         for i in xrange(len(ParetoPointsList)):
-#             isDominated = False
-#             for j in xrange(i+1, len(ParetoPointsList)):
-#                     strlist1 = ParetoPointsList[i]['total_reliability'].split("/")
-#                     #print strlist1
-#                     strlist2 = ParetoPointsList[j]['total_reliability'].split("/")
-#                     #print strlist2
-#                     if (int(ParetoPointsList[i]['total_cost']) < int(ParetoPointsList[j]['total_cost']) and 
-#                         int(ParetoPointsList[i]['total_responsetime']) < int(ParetoPointsList[j]['total_responsetime']) and
-#                         int(ParetoPointsList[i]['total_batteryusage']) < int(ParetoPointsList[j]['total_batteryusage']) and 
-#                         int(ParetoPointsList[i]['total_deploymenttime']) < int(ParetoPointsList[j]['total_deploymenttime']) and 
-#                         int(ParetoPointsList[i]['total_developmenttime']) < int(ParetoPointsList[j]['total_developmenttime']) and
-#                         int(ParetoPointsList[i]['total_rampuptime']) < int(ParetoPointsList[j]['total_rampuptime']) and 
-#                         float(int(strlist1[0])/int(strlist1[1])) < float(int(strlist2[0])/int(strlist2[1]))):
-#                         isDominated = True
-#             if isDominated == True: 
-#                 TotalUniqueParetoFront = TotalUniqueParetoFront - 1
-#         print TotalUniqueParetoFront
-
-             
-#         if self.verbosity > consts.VERBOSE_NONE:
-#             print "ParetoFront has size of %s " % len(ParetoFront)
-#             print "Time taken is %s " % (end_time - start_time)
-#         
-#             for ParetoPoint in ParetoFront:
-#                 self.print_solution(ParetoPoint)
-#        
-#         if  self.options.useSummaryStatsFile == True:        
-#             self.print_stats_info(end_time, start_time, ParetoFront)
-# 
-#         self.options.timefilelog =  open(self.options.writeTotalTimeFilename, "a")            
-#         self.options.timefilelog.write("%s, %s\n" %  ( self.options.writeLogFilename , (end_time - start_time)))
-#         self.options.timefilelog.close()
-        
-        #for entry in self.GIALogger.getLog():
-        #    print entry.statistics
-
-        
+              
     def print_stats_info(self, end_time, start_time, ParetoFront):
         statsfile_fd = open(self.args.statsfile, "a")   
         self.print_header_if_file_is_empty(statsfile_fd)   
@@ -299,58 +229,53 @@ class GuidedImprovementAlgorithm(object):
     
     def ranToParetoFront(self, prev_solution):
         """
-        It iterates getting close and closer to the pareto front.
+        Iterates until a pareto optimal solution is found.
         """
-#         if self.verbosity > consts.VERBOSE_NONE:
-#             self.print_solution(prev_solution)
-
         local_count_sat_calls = 0
         local_count_unsat_calls = 0
         tmpConstraintMustDominateX= self.ConstraintMustDominatesX(prev_solution)
-#         self.GIALogger.logStartCall(tmpConstraintMustDominateX)
         self.s.add(tmpConstraintMustDominateX)
-        while (self.s.check() == sat):
+        while (self.s.check() == Common.SAT):
             local_count_sat_calls += 1
-#             self.GIALogger.logEndCall(True, model = self.s.model(), statistics = self.s.statistics())              
-#             if self.verbosity > consts.VERBOSE_NONE:
-#                 self.print_solution(prev_solution)
             prev_solution = self.s.model()     
-            tmpConstraintMustDominateX = self.ConstraintMustDominatesX(prev_solution)      
+            tmpConstraintMustDominateX = self.ConstraintMustDominatesX(prev_solution)
             self.s.add(tmpConstraintMustDominateX)
-            self.GIALogger.logStartCall(tmpConstraintMustDominateX)
         local_count_unsat_calls += 1
-#         self.GIALogger.logEndCall(False, statistics = self.s.statistics())  
-#         if self.verbosity > consts.VERBOSE_NONE:
-#             self.print_solution(prev_solution)
         return prev_solution, local_count_sat_calls, local_count_unsat_calls
 
     def ConstraintNotDominatedByX(self, model):
         """
-        Returns a Constraint that a  new instance, can't be dominated by the instance represented by model. 
-        (it can't be worst in any objective).
+        Creates a constraint preventing search in dominated regions.
         """
         DisjunctionOrLessMetrics  = list()
         for i in range(len(self.metrics_variables)):
-            if self.metrics_objective_direction[i] == consts.METRICS_MAXIMIZE:
-                DisjunctionOrLessMetrics.append(self.metrics_variables[i] >  model.eval(self.metrics_variables[i]))#model[self.metrics_variables[i]])
+            if self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
+                DisjunctionOrLessMetrics.append(SMTLib.SMT_GT(self.metrics_variables[i], SMTLib.SMT_IntConst(model.eval(self.metrics_variables[i].convert(self.cfr.solver.converter)))))#model[self.metrics_variables[i]])
             else :
-                DisjunctionOrLessMetrics.append(self.metrics_variables[i] <  model.eval(self.metrics_variables[i]))#model[self.metrics_variables[i]])
-        return Or(DisjunctionOrLessMetrics)
+                DisjunctionOrLessMetrics.append(SMTLib.SMT_LT(self.metrics_variables[i], SMTLib.SMT_IntConst(model.eval(self.metrics_variables[i].convert(self.cfr.solver.converter)))))#model[self.metrics_variables[i]])
+        return SMTLib.SMT_Or(*DisjunctionOrLessMetrics)
 
-    # add for EPOAL
 
-    def EtractConstraintListNotDominatedByX(self, model):
+    def ConstraintEqualToX(self, model):
         """
         Returns a Constraint that a  new instance, can't be dominated by the instance represented by model. 
         (it can't be worst in any objective).
         """
-        DisjunctionOrLessMetrics  = list()
+        EqualMetrics  = list()
         for i in range(len(self.metrics_variables)):
-            if self.metrics_objective_direction[i] == consts.METRICS_MAXIMIZE:
-                DisjunctionOrLessMetrics.append(self.metrics_variables[i] >  model[self.metrics_variables[i]])
-            else :
-                DisjunctionOrLessMetrics.append(self.metrics_variables[i] <  model[self.metrics_variables[i]])
-        return DisjunctionOrLessMetrics
+            EqualMetrics.append(SMTLib.SMT_EQ(self.metrics_variables[i], model.eval(self.metrics_variables[i])))
+        return SMTLib.SMT_And(EqualMetrics)
+
+    def get_metric_values(self, model):
+        metrics  = list()
+        for i in range(len(self.metrics_variables)):
+            strval = str(model.eval(self.metrics_variables[i].convert(self.cfr.solver.converter)))
+            try:
+                val = int(strval)
+            except:
+                val = float(strval)
+            metrics.append(val)
+        return metrics
     
     def ConstraintMustDominatesX(self, model):
         """
@@ -362,19 +287,25 @@ class GuidedImprovementAlgorithm(object):
         for dominatedByMetric in self.metrics_variables:        
             dominationConjunction = []
             j = 0
-            if  self.metrics_objective_direction[i] == consts.METRICS_MAXIMIZE :
+            if  self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
                 #print(model.eval(dominatedByMetric))
-                dominationConjunction.append(dominatedByMetric > model.eval(dominatedByMetric))#[dominatedByMetric])             
+                dominationConjunction.append(SMTLib.SMT_GT(dominatedByMetric,
+                                                           SMTLib.SMT_IntConst(model.eval(dominatedByMetric.convert(self.cfr.solver.converter))))) 
             else:
-                dominationConjunction.append(dominatedByMetric < model.eval(dominatedByMetric))#model[dominatedByMetric]) 
+                dominationConjunction.append(SMTLib.SMT_LT(dominatedByMetric, 
+                                                           SMTLib.SMT_IntConst(model.eval(dominatedByMetric.convert(self.cfr.solver.converter)))))
             for AtLeastEqualInOtherMetric in self.metrics_variables:
                 if j != i:
-                    if self.metrics_objective_direction[j] == consts.METRICS_MAXIMIZE:
-                        dominationConjunction.append(AtLeastEqualInOtherMetric >= model.eval(AtLeastEqualInOtherMetric))#[AtLeastEqualInOtherMetric])
+                    if self.metrics_objective_direction[j] == Common.METRICS_MAXIMIZE:
+                        dominationConjunction.append(SMTLib.SMT_GE(AtLeastEqualInOtherMetric,
+                                                                   SMTLib.SMT_IntConst(model.eval(AtLeastEqualInOtherMetric.convert(self.cfr.solver.converter)))))
                     else:
-                        dominationConjunction.append(AtLeastEqualInOtherMetric <= model.eval(AtLeastEqualInOtherMetric))               
+                        dominationConjunction.append(SMTLib.SMT_LE(AtLeastEqualInOtherMetric,
+                                                                   SMTLib.SMT_IntConst(model.eval(AtLeastEqualInOtherMetric.convert(self.cfr.solver.converter)))))              
                 j = 1 + j
             i = 1 + i    
-            dominationDisjunction.append(And(dominationConjunction))         
-        constraintDominateX = Or(dominationDisjunction)
-        return constraintDominateX
+            dominationDisjunction.append(SMTLib.SMT_And(*dominationConjunction))         
+        constraintDominateX = SMTLib.SMT_Or(*dominationDisjunction)
+        #print(constraintDominateX)
+        #sys.exit()
+        return constraintDominateX#.convert(self.cfr.solver.converter)

@@ -58,21 +58,21 @@ class CheckFunctionSymmetry(VisitorTemplate.VisitorTemplate):
     '''
     :var self.currentConstraint: (:mod:`~constraints.BracketedConstraint`) Holds the constraint currently being traversed. 
     :var self.inConstraint: (bool) True if the traversal is currently within a constraint.
-    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
+    :var cfr: (:class:`~common.ClaferModel`) TheClafer Model.
     
     Determines if all functions in the given subtree are symmetric functions. If so, we can optimize.
     '''
     
     
-    def __init__(self, z3, inConstraint=False):
+    def __init__(self, cfr, inConstraint=False):
         '''
-        :param z3: The Z3 solver.
-        :type z3: :class:`~common.Z3Instance`
+        :param cfr: The Clafer model.
+        :type cfr: :class:`~common.ClaferModel`
         '''
         VisitorTemplate.VisitorTemplate.__init__(self)
         self.isSymmetric = True
         self.visitedLocalDecl = False
-        self.z3 = z3
+        self.cfr = cfr
 
 
     def localdeclarationVisit(self, element):

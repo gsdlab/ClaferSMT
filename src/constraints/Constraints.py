@@ -3,11 +3,8 @@ Created on Oct 3, 2013
 
 @author: ezulkosk
 '''
-from common import Common, Options
-from common.Common import debug_print
-from front import Converters
-from z3 import Bool, Implies, simplify, And, Not
-
+from common import Common, Options, SMTLib
+from solvers import Converters
 
 
 class Constraints():
@@ -15,28 +12,29 @@ class Constraints():
     Adds a generated constraint to the solver.
     If in debug mode, add a Boolean tracker for the constraint, to obtain possible UNSAT cores.
     """
-    def assertConstraint(self, constraint, z3):
+    
+    def assertConstraint(self, constraint, cfr):
         if Common.FLAG:
-            #z3.solver.add(And(constraint, Not(constraint)))
-            print(simplify(constraint))
-        if Common.MODE != Common.DEBUG: 
-            if Options.GOAL:
-                z3.goal.add(constraint)
-            else:
-                z3.solver.add(constraint)
-        if Common.MODE == Common.DEBUG:
-            p = Bool(str(self.assertID) + "_" + str(Common.getConstraintUID()))
-            z3.unsat_core_trackers.append(p)
-            z3.unsat_map[str(p)] = constraint
-            if Options.GOAL:
-                z3.goal.add(Implies(p, constraint))
-            else:
-                z3.solver.add(Implies(p, constraint))
+            SMTLib.toStr(constraint)
+
+        if Options.PRODUCE_UNSAT_CORE:
             
+            #p = SMTLib.SMT_Bool(str(self.assertID) + "_" + str(Common.getConstraintUID()))
+            p = cfr.solver.convert(SMTLib.SMT_Bool("bool" + str(Common.getConstraintUID()) + "_" + str(self.assertID)))
+            cfr.unsat_core_trackers.append(p)
+            cfr.low_level_unsat_core_trackers[str(p)] = constraint
+            cfr.unsat_map[str(p)] = self
+            #print(p)
+            #SMTLib.toStr(constraint)
+            cfr.solver.add(SMTLib.SMT_Implies(p, constraint, unsat_core_implies=True))
+        else:
+            cfr.solver.add(constraint)
+        
     def convert(self, f_n, constraint):
         #print("#####")
         #print(constraint)
         f_n.write(Converters.obj_to_string(constraint) + "\n")
+        
 
 class GenericConstraints(Constraints): 
     def __init__(self, ident):
@@ -44,32 +42,33 @@ class GenericConstraints(Constraints):
         self.assertID = ident
         
     def addConstraint(self, c):
+        #SMTLib.toStr(c)
         self.constraints.append(c)
     
     def addAll(self, c):
         for i in c:
             self.constraints.append(i)    
     
-    def assertConstraints(self, z3):
+    def assertConstraints(self, cfr):
         '''
         Used to add all constraints to the solver.
         '''
         for i in self.constraints:
-            self.assertConstraint(i,z3)
+            self.assertConstraint(i,cfr)
             
     def __str__(self):
         return str(self.ident)
             
     def debug_print(self):
+        print("GENERIC CONSTRAINT")
         for i in self.constraints:
-            print(i)
+            SMTLib.toStr(i)
             print("")
             
     def z3str_print(self, f_n):
         for i in self.constraints:
             self.convert(f_n, i)
             
-
 class ClaferConstraints(Constraints):
     def __init__(self, claferSort):
         self.claferSort = claferSort
@@ -79,26 +78,36 @@ class ClaferConstraints(Constraints):
         self.group_card_constraints = []
         self.inheritance_constraints = []
         self.ref_constraints = []
+
+    def addConstraint(self, list, c):
+        #print("A")
+        #SMTLib.toStr(c)
+        list.append(c)
+
+    def addInstanceConstraint(self,c,constraintConditional=True):
+        if constraintConditional:
+            self.addConstraint(self.instance_constraints, c)
     
-    def addInstanceConstraint(self,c):
-        self.instance_constraints.append(c)
-    
-    def addCardConstraint(self,c):
-        self.card_constraints.append(c)
+    def addCardConstraint(self,c,constraintConditional=True):
+        if constraintConditional:
+            self.addConstraint(self.card_constraints, c)
         
-    def addGroupCardConstraint(self,c):
-        self.group_card_constraints.append(c)
+    def addGroupCardConstraint(self,c,constraintConditional=True):
+        if constraintConditional:
+            self.addConstraint(self.group_card_constraints, c)
         
-    def addInheritanceConstraint(self,c):
-        self.inheritance_constraints.append(c)
+    def addInheritanceConstraint(self,c,constraintConditional=True):
+        if constraintConditional:
+            self.addConstraint(self.inheritance_constraints, c)
         
-    def addRefConstraint(self,c):
-        self.ref_constraints.append(c)
-    
+    def addRefConstraint(self,c,constraintConditional=True):
+        if constraintConditional:
+            self.addConstraint(self.ref_constraints, c)
+
     def __str__(self):
         return str(self.claferSort.element.uid)
     
-    def assertConstraints(self, z3):
+    def assertConstraints(self, cfr):
         '''
         Used to add all constraints associated with this clafer to the solver.
         Can turn off different lists for debugging purposes.
@@ -112,7 +121,7 @@ class ClaferConstraints(Constraints):
                        ]   
         for i in constraints:
             for j in i:
-                self.assertConstraint(j,z3)
+                self.assertConstraint(j,cfr)
     
     def debug_print(self):
         constraints = [
@@ -122,9 +131,10 @@ class ClaferConstraints(Constraints):
                        self.inheritance_constraints,
                        self.ref_constraints
                        ]   
-        for i in constraints:
-            for j in i:
-                print(j)
+        for i in range(len(constraints)):
+            print("CONSTRAINT TYPE: " + str(i))
+            for j in constraints[i]:
+                SMTLib.toStr(j)
                 print("")
                 
     def z3str_print(self,f_n):
@@ -138,3 +148,27 @@ class ClaferConstraints(Constraints):
         for i in constraints:
             for j in i:
                 self.convert(f_n, j)
+                
+                
+def getLineFromPos(pos):
+    ((l,_), (_,_)) = pos
+    return str(l)        
+
+def interpretClaferSort(claferSort):
+    (lgcard, ugcard) = claferSort.element.glCard
+    (lcard, ucard) = claferSort.element.card
+    clafer = str(lgcard) + ".." + str(ugcard) + " " + claferSort.element.uid + " " + str(lcard) + ".." + str(ucard)
+    return clafer  + ", on line " + getLineFromPos(claferSort.element.pos) +  "."
+                
+def interpretUnsatCore(cfr, bool_id):
+    #print(bool_id)
+    cid = bool_id.split("_", 1)[1]
+    SMTLib.toStr(cfr.low_level_unsat_core_trackers[bool_id])
+    if cid.startswith("BC"):
+        bc = cfr.unsat_map[bool_id]
+        retString = "[ " + bc.element.toString(1) + " ]" #+ text
+        return retString
+    else:
+        claferSort = cfr.cfr_sorts.get(cid)
+        return interpretClaferSort(claferSort)
+        

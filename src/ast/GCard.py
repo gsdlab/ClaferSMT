@@ -21,3 +21,6 @@ class GCard(object):
     
     def toString(self, level):
         print("A")
+        
+    def __repr__(self):
+        return str(self)

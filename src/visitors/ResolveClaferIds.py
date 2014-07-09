@@ -15,23 +15,23 @@ class ResolveClaferIds(VisitorTemplate.VisitorTemplate):
     :var CreateBracketedConstraints.currentConstraint: (:mod:`~constraints.BracketedConstraint`) Holds the constraint currently being traversed. 
     :var CreateBracketedConstraints.inConstraint: (bool) True if the traversal is currently within a constraint.
     :var claferStack: ([:mod:`~common.ClaferSort`]) Stack of clafers used primarily for debugging.
-    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
+    :var cfr: (:class:`~common.Z3Instance`) The Z3 solver.
     
-    Converts Clafer constraints to z3 syntax,
-    adds constraints to z3.z3_constraints
+    Converts Clafer constraints to cfr syntax,
+    adds constraints to cfr.smt_constraints
     field.
     '''
-    def __init__(self, z3):
+    def __init__(self, cfr):
         '''
-        :param z3: The Z3 solver.
-        :type z3: :class:`~common.Z3Instance`
+        :param cfr: The Z3 solver.
+        :type cfr: :class:`~common.Z3Instance`
         '''
         VisitorTemplate.VisitorTemplate.__init__(self)
-        self.z3 = z3
+        self.cfr = cfr
         self.claferStack = []
     
     def claferVisit(self, element):
-        self.claferStack.append(self.z3.z3_sorts[element.uid])
+        self.claferStack.append(self.cfr.cfr_sorts[element.uid])
         #visitors.Visitor.visit(self,element.supers)
         for i in element.elements:
             visitors.Visitor.visit(self, i)
@@ -43,10 +43,10 @@ class ResolveClaferIds(VisitorTemplate.VisitorTemplate):
         elif(element.id == "this"):
             element.claferSort = self.claferStack[-1]
         else:
-            if(not element.id in self.z3.z3_sorts):
+            if(not element.id in self.cfr.cfr_sorts):
                 #local variable decl
                 return
-            element.claferSort = self.z3.z3_sorts[element.id]
+            element.claferSort = self.cfr.cfr_sorts[element.id]
     
     
             

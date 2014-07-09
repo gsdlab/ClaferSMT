@@ -11,15 +11,12 @@ import ast
 import visitors
 
 class SetScopes(VisitorTemplate.VisitorTemplate):
-    '''
-    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
-    '''
-    def __init__(self, z3):
+    def __init__(self, cfr):
         '''
-        :param z3: The Z3 solver.
-        :type z3: :class:`~common.Z3Instance`
+        :param cfr: The Clafer model.
+        :type cfr: :class:`~common.ClaferModel`
         '''
-        self.z3 = z3
+        self.cfr = cfr
         self.glStack = [1]
 
     '''
@@ -27,13 +24,13 @@ class SetScopes(VisitorTemplate.VisitorTemplate):
     '''
     
     def claferVisit(self, element):
-        (_, upper) = element.card
-        (glower, _) = element.glCard
+        (lower, upper) = element.card
+        #(glower, _) = element.glCard
         upper = upper.value
-        
+        glower = self.glStack[-1] * lower.value
         if upper == -1:
-            element.glCard = (glower, IntegerLiteral(Options.GLOBAL_SCOPE))
-            self.glStack.append(Options.GLOBAL_SCOPE)
+            element.glCard = (glower, IntegerLiteral(max(glower, Options.GLOBAL_SCOPE)))
+            self.glStack.append(max(glower,Options.GLOBAL_SCOPE))
         else:
             upper = self.glStack[-1] * upper
             element.glCard = (glower, IntegerLiteral(upper))

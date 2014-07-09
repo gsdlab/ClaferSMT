@@ -3,11 +3,13 @@ Created on Apr 29, 2013
 
 @author: ezulkosk
 '''
-from common import Common, Options
-from common.Common import mOr
+from common import Common, Options, SMTLib
+from common.Common import mOr, mAnd
+from common.Options import standard_print
 from constraints import Constraints
-from pip.backwardcompat import reduce
-from z3 import IntVector, If, Implies, And, Or, Sum, Not, RealVector, Int, Function, ForAll, Exists
+from z3 import IntVector, If, Implies, And, Or, Sum, Not, RealVector, Int, \
+    Function, ForAll, Exists
+import math
 import operator
 import sys
 import z3
@@ -16,10 +18,12 @@ import z3
 
 
 
+
+
 class  ClaferSort(object):
     '''
     :var element: The IR clafer.
-    :var z3: The Z3Instance.
+    :var cfr: The Z3Instance.
     :var parentStack: Used to determine the parent of the clafer, and if the clafer is top level.
     :var isTopLevel: True if the clafer is at the top level of indentation.
     :var fields: The direct subclafer ClaferSorts.
@@ -55,9 +59,9 @@ class  ClaferSort(object):
     A0 because the first and second instances are 0, that is, their parent pointers are 0.
     Instances B2-B5 are off because parentInstances for B is 2 (since there are 2 A's).
     '''
-    def __init__(self, element, z3, stack):
+    def __init__(self, element, cfr, stack):
         self.element = element
-        self.z3 = z3
+        self.cfr = cfr
         self.parentStack = stack[:]
         (_,upper) = self.element.card
         if upper.value == -1:
@@ -79,7 +83,7 @@ class  ClaferSort(object):
         self.currentSubIndex = 0
         self.myid = str(self.element)
         self.T = None
-        
+        self.scope_summ = -1
         self.numInstances = int(self.element.glCard[1].value)
         if(self.numInstances == -1):
             newScope = Options.GLOBAL_SCOPE
@@ -97,8 +101,15 @@ class  ClaferSort(object):
             self.parent = self.parentStack[-1]
             self.parentInstances = self.parent.numInstances
     
-    def modifyAbstract(self):
-        a= 0
+    
+    #should get longest numInstances for getBits
+    def getBits(self, instances):
+        if Options.USE_BITVECTORS:
+            bits = math.ceil(math.log(instances,2))
+            sys.exit("GetBits is still hacked")
+            
+            return bits + 3
+        return None
     
     def scopeless_initialize(self):
         #print(str(self.element))
@@ -142,9 +153,9 @@ class  ClaferSort(object):
     
     def initialize(self):
         (_, upper) = self.element.glCard
-        #print(upper)
         self.numInstances = upper.value
-        self.instances = IntVector(self.element.uid,self.numInstances) #used to be self.element.uid.split("_",1)[1]
+        self.instances = SMTLib.SMT_IntVector(self.element.uid,self.numInstances, 
+                                              bits=self.getBits(self.parentInstances+1))
         #gets the upper card bound of the parent clafer
         if not self.parentStack:
             self.parent = None
@@ -155,65 +166,105 @@ class  ClaferSort(object):
         self.createInstancesConstraintsAndFunctions()
     
     def addRefConstraints(self):
-        if isinstance(self.refSort, PrimitiveType) and self.refSort.type == "real":
-            self.refs = RealVector(self.element.uid + "_ref",self.numInstances)
-        elif(self.refSort):
-            self.refs = IntVector(self.element.uid + "_ref",self.numInstances)#used to be self.element.uid.split("_",1)[1] + "_ref"
         if not self.refSort:
-            return  
+            return 
+        elif isinstance(self.refSort, PrimitiveType) and self.refSort.type == "real":
+            self.refs = SMTLib.SMT_RealVector(self.element.uid + "_ref",self.numInstances)
+        elif isinstance(self.refSort, PrimitiveType):
+            self.refs = SMTLib.SMT_IntVector(self.element.uid + "_ref",self.numInstances)
+        else:
+            self.refs = SMTLib.SMT_IntVector(self.element.uid + "_ref",self.numInstances, 
+                                              bits=self.getBits(self.refSort.parentInstances+1))
+         
         if not isinstance(self.refSort, PrimitiveType):
             for i in range(self.numInstances):
                 #refs pointer is >= 0
-                self.constraints.addRefConstraint(self.refs[i] >= 0) 
+                self.constraints.addRefConstraint(SMTLib.SMT_GE(self.refs[i], SMTLib.SMT_IntConst(0)))
                 #ref pointer is <= upper card of ref parent           
-                self.constraints.addRefConstraint(self.refs[i] <= self.refSort.numInstances)
+                self.constraints.addRefConstraint(SMTLib.SMT_LE(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances)))
         #if integer refs, zero out refs that do not have live parents,
         #if clafer refs, set equal to ref.parentInstances if not live   
+        
+        
+        #reference symmetry breaking
+        if not self.element.isAbstract:
+            for i in range(self.numInstances - 1):
+                for j in range(i+1, self.numInstances):
+                    if isinstance(self.refSort, PrimitiveType):
+                        self.constraints.addRefConstraint(SMTLib.SMT_Implies(SMTLib.SMT_EQ(self.instances[i],self.instances[j]),
+                                                              SMTLib.SMT_LE(self.refs[i], self.refs[j])))
+                    else:
+                        self.constraints.addRefConstraint(SMTLib.SMT_Implies(mAnd(SMTLib.SMT_NE(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances)),
+                                                                                  SMTLib.SMT_EQ(self.instances[i], self.instances[j])),
+                                                              SMTLib.SMT_LE(self.refs[i], self.refs[j])))
+
+        
         for i in range(self.numInstances):
             if isinstance(self.refSort, PrimitiveType):
                 if self.refSort == "integer":
-                    self.constraints.addRefConstraint(Implies(self.isOff(i), self.refs[i] == 0))    
+                    self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i),
+                                                                         SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))),
+                                                      self.canBeOff(i))
                 elif self.refSort == "string":
                     if Options.STRING_CONSTRAINTS:
-                        self.constraints.addRefConstraint(Implies(self.isOff(i), self.refs[i] == self.z3.EMPTYSTRING))    
+                        self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], self.cfr.EMPTYSTRING)),
+                                                          self.canBeOff(i))
                     else:
-                        self.constraints.addRefConstraint(Implies(self.isOff(i), self.refs[i] == 0))    
+                        self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))),
+                                                          self.canBeOff(i))
                 else: 
-                    self.constraints.addRefConstraint(Implies(self.isOff(i), self.refs[i] == 0))    
+                    self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))),
+                                                          self.canBeOff(i))
                     #sys.exit(str(self.refSort) + " not supported yet")
             else:
-                self.constraints.addRefConstraint(If(self.isOff(i)
-                                           , self.refs[i] == self.refSort.numInstances
-                                           , self.refs[i] != self.refSort.numInstances))  
+                if self.canBeOff(i):
+                    self.constraints.addRefConstraint(SMTLib.SMT_If(self.isOff(i)
+                                               , SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances))
+                                               , SMTLib.SMT_NE(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances))))
+                else:
+                    self.constraints.addRefConstraint(SMTLib.SMT_NE(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances)))
                 #if refsort.full does not exist, create it
                 if not self.refSort.full:
-                    self.refSort.full = lambda x:mOr(*[And(x == i, self.refSort.isOn(i)) for i in range(self.refSort.numInstances)])     
+                    self.refSort.full = lambda x:mOr(*[SMTLib.SMT_And(SMTLib.SMT_EQ(x, SMTLib.SMT_IntConst(i)), self.refSort.isOn(i)) for i in range(self.refSort.numInstances)])
                 #the clafer that the reference points to must be "on"
-                self.constraints.addRefConstraint(Implies(self.refs[i] != self.refSort.numInstances
-                                                     , self.refSort.full(self.refs[i]) == True))
+                self.constraints.addRefConstraint(SMTLib.SMT_Implies(SMTLib.SMT_NE(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances)),
+                                                      self.refSort.full(self.refs[i])))
              
     
     def isOn(self, index):
         '''
-        index is either an int or Z3-Int
+        index is either an int or SMT-Int
         Returns a Boolean Constraint stating whether or not the instance at the given index is *on*.
         An instance is on if it is not set to self.parentInstances.
         '''
+        #print(index)
         try:
-            return self.instances[index] != self.parentInstances
+            return SMTLib.SMT_NE(self.instances[index], SMTLib.SMT_IntConst(self.parentInstances))
         except:
-            return index != self.parentInstances
+            return SMTLib.SMT_NE(index, SMTLib.SMT_IntConst(self.parentInstances))
     
     def isOff(self, index):
         '''
-        Returns a Boolean Constraint stating whether or not the instance at the given index is *on*.
+        Returns a Boolean Constraint stating whether or not the instance at the given index is *off*.
         An instance is off if it is set to self.parentInstances.
         '''
         try:
-            return self.instances[index] == self.parentInstances
+            return SMTLib.SMT_EQ(self.instances[index], SMTLib.SMT_IntConst(self.parentInstances))
         except:
-            return index == self.parentInstances
+            return SMTLib.SMT_EQ(index, SMTLib.SMT_IntConst(self.parentInstances))
         
+    def canBeOff(self, index):
+        '''
+        Used to determine if a particular instance may be absent from the model. 
+        Used to simplify translation to SMT.
+        '''
+        try:
+            (l,h,off) = self.instanceRanges[index]
+            return off or h == self.parentInstances
+        except:
+            return True
+    
+       
        
     def getInstanceRange(self, index):
         '''
@@ -223,6 +274,9 @@ class  ClaferSort(object):
         is true if the instance may be absent from the model, AND is
         not covered by the upper bound.
         '''
+        if not self.cfr.isUsed(self.element):
+            return (0,0,False)
+        
         if self.lowerCardConstraint == 0:
             upper = self.parentInstances # this is new upper = self.numInstances
         else:
@@ -255,71 +309,96 @@ class  ClaferSort(object):
         self.instanceRanges = [self.getInstanceRange(i) for i in range(self.numInstances)]
         for i in range(self.numInstances):
             (lower, upper, extraAbsenceConstraint) = self.instanceRanges[i]
-            #parent pointer is >= lower
-            self.constraints.addInstanceConstraint(self.instances[i] >= lower) 
-            if not extraAbsenceConstraint: 
-                #parent pointer is <= upper         
-                self.constraints.addInstanceConstraint(self.instances[i] <= upper)
+            
+            #lower == upper case (simpler)
+            if lower == upper:
+                constraint = SMTLib.SMT_EQ(self.instances[i], SMTLib.SMT_IntConst(upper))
+                if extraAbsenceConstraint:
+                    self.constraints.addInstanceConstraint(SMTLib.SMT_Or(self.isOff(i), constraint))
+                else:
+                    self.constraints.addInstanceConstraint(constraint)
             else:
-                #parent pointer is <= upper, or equal to parentInstances
-                self.constraints.addInstanceConstraint(
-                    Or(self.isOff(i),
-                       self.instances[i] <= upper))
-            #sorted parent pointers
-            if(not self.element.isAbstract):
+                #parent pointer is >= lower
+                self.constraints.addInstanceConstraint(SMTLib.SMT_GE(self.instances[i],SMTLib.SMT_IntConst(lower)))
+                constraint = SMTLib.SMT_LE(self.instances[i], SMTLib.SMT_IntConst(upper))
+                if extraAbsenceConstraint: 
+                    #parent pointer is <= upper , or equal to parentInstances
+                    self.constraints.addInstanceConstraint(SMTLib.SMT_Or(self.isOff(i), constraint))        
+                else:
+                    #parent pointer is <= upper
+                    self.constraints.addInstanceConstraint(constraint)
+            
+            #sorted parent pointers (only consider things that are not part of an abstract)
+            if(not self.element.isAbstract and not (True in [(p.element.isAbstract) for p in self.parentStack])):
+                #print(self.element)
                 if i != self.numInstances - 1:
-                    self.constraints.addInstanceConstraint(self.instances[i] <= self.instances[i+1])    
+                    self.constraints.addInstanceConstraint(SMTLib.SMT_LE(self.instances[i],self.instances[i+1]))    
         if not self.parent:
             return 
         #if the parent is not live, then no child can point to it  
         for i in range(self.parent.numInstances):
             for j in range(self.numInstances):
-                self.constraints.addInstanceConstraint(Implies(self.parent.isOff(i), self.instances[j] != i))    
+                self.constraints.addInstanceConstraint(SMTLib.SMT_Implies(self.parent.isOff(i),
+                                                                          SMTLib.SMT_NE(self.instances[j], SMTLib.SMT_IntConst(i))),
+                                                       self.parent.canBeOff(i))
         
     
     def createCardinalityConstraints(self):
+        if not self.cfr.isUsed(self.element):
+            return
         self.summs = [[] for i in range(self.parentInstances+1)]
         for i in range(self.numInstances):
             (lower, upper, _) = self.getInstanceRange(i)
             for j in range(lower, upper + 1):
-                self.summs[j].append(If(self.instances[i] == j, 1, 0))
+                self.summs[j].append(SMTLib.SMT_If(SMTLib.SMT_EQ(self.instances[i], SMTLib.SMT_IntConst(j)),
+                                                   SMTLib.SMT_IntConst(1),
+                                                   SMTLib.SMT_IntConst(0)))
         for i in range(len(self.summs)):
             if self.summs[i]:
-                self.summs[i] = Sum(*[self.summs[i]])
+                self.summs[i] = SMTLib.SMT_Sum(*[self.summs[i]])
             else:
-                self.summs[i] = 0
+                self.summs[i] = SMTLib.SMT_IntConst(0)
         for i in range(self.parentInstances):
             if self.parent:
-                self.constraints.addCardConstraint(Implies(self.parent.isOn(i),self.summs[i] >= self.lowerCardConstraint))
+                self.constraints.addCardConstraint(SMTLib.SMT_Implies(self.parent.isOn(i),
+                                                                      SMTLib.SMT_GE(self.summs[i], SMTLib.SMT_IntConst(self.lowerCardConstraint))))
                 if self.upperCardConstraint != -1:
-                    self.constraints.addCardConstraint(Implies(self.parent.isOn(i),self.summs[i] <= self.upperCardConstraint))
+                    self.constraints.addCardConstraint(SMTLib.SMT_Implies(self.parent.isOn(i),
+                                                                          SMTLib.SMT_LE(self.summs[i], SMTLib.SMT_IntConst(self.upperCardConstraint))))
             else:
-                self.constraints.addCardConstraint(self.summs[i] >= self.lowerCardConstraint)
+                self.constraints.addCardConstraint(SMTLib.SMT_GE(self.summs[i], SMTLib.SMT_IntConst(self.lowerCardConstraint)))
                 if self.upperCardConstraint != -1:
-                    self.constraints.addCardConstraint(self.summs[i] <= self.upperCardConstraint)
+                    self.constraints.addCardConstraint(SMTLib.SMT_LE(self.summs[i], SMTLib.SMT_IntConst(self.upperCardConstraint)))
         
     def addGroupCardConstraints(self):
+        #print(str(self) + str(self.element.gcard.interval))
+        self.upperGCard = self.element.gcard.interval[1].value
+        self.lowerGCard = self.element.gcard.interval[0].value
         if(len(self.fields) == 0 and ((not self.superSort) or self.superSort.fields == 0)):
             return
         #lower bounds
-        upperGCard = self.element.gcard.interval[1].value
-        lowerGCard = self.element.gcard.interval[0].value
-        if lowerGCard == 0 and upperGCard == -1:
+        if not self.fields:
+            return # front end is broken imo...
+        if self.lowerGCard == 0 and self.upperGCard == -1:
             return
         for i in range(self.numInstances):
             
-            bigSumm = 0
+            bigSumm = SMTLib.SMT_IntConst(0)
             for j in self.fields:
-                bigSumm = bigSumm +  j.summs[i]
+                bigSumm = SMTLib.SMT_Plus(bigSumm, j.summs[i])
             #**** LEAVE THIS CODE ****
             #don't include inherited fields for now 
-            if self.superSort:
-                for j in self.superSort.fields:
-                    bigSumm = bigSumm +  j.summs[i + self.indexInSuper]
-            if lowerGCard != 0:
-                self.constraints.addGroupCardConstraint(bigSumm >= lowerGCard)
-            if upperGCard != -1:
-                self.constraints.addGroupCardConstraint(bigSumm <= upperGCard)
+            #if self.superSort:
+            #    for j in self.superSort.fields:
+            #        print("found " + str(j))
+            #        bigSumm = bigSumm +  j.summs[i + self.indexInSuper]
+            if self.lowerGCard != 0:
+                    self.constraints.addGroupCardConstraint(SMTLib.SMT_Implies(self.isOn(i),
+                                                                               SMTLib.SMT_GE(bigSumm, SMTLib.SMT_IntConst(self.lowerGCard))))
+            if self.upperGCard != -1:
+                self.constraints.addGroupCardConstraint(SMTLib.SMT_Implies(self.isOn(i),
+                                                                           SMTLib.SMT_LE(bigSumm, SMTLib.SMT_IntConst(self.upperGCard))))
+            #print(str(self) +  " " + str(lowerGCard) + " " + str(upperGCard) + str(bigSumm))
         
     
     def checkSuperAndRef(self):
@@ -335,11 +414,11 @@ class  ClaferSort(object):
                 if ref_id == "integer" or ref_id == "string" or ref_id == "real":
                     self.refSort = PrimitiveType(ref_id)
                 else:
-                    self.refSort = self.z3.getSort(ref_id)
+                    self.refSort = self.cfr.getSort(ref_id)
                 self.superSort = None
             else:
                 self.refSort = None
-                self.superSort = self.z3.getSort(supers.elements[0].iExp[0].id)
+                self.superSort = self.cfr.getSort(supers.elements[0].iExp[0].id)
         else:
             self.superSort = None
             self.refSort = None
@@ -354,8 +433,8 @@ class  ClaferSort(object):
         sub.indexInSuper = oldSubIndex
         self.currentSubIndex = self.currentSubIndex + sub.numInstances
         for i in range(sub.numInstances):
-            self.constraints.addInheritanceConstraint(And(Implies(self.isOn(i + sub.indexInSuper), sub.isOn(i)),
-                                         Implies(sub.isOn(i),self.isOn(i + sub.indexInSuper))))
+            self.constraints.addInheritanceConstraint(SMTLib.SMT_And(SMTLib.SMT_Implies(self.isOn(i + sub.indexInSuper), sub.isOn(i)),
+                                         SMTLib.SMT_Implies(sub.isOn(i),self.isOn(i + sub.indexInSuper))))
     
     def addSubSort(self, sub):
         self.subs.append(sub)
@@ -392,7 +471,7 @@ class BoolSort():
         '''
         Returns a Boolean Constraint stating whether or not the instance at the given index is *off*.
         '''
-        return not self.isOn(arg)
+        return SMTLib.SMT_Not(self.isOn(arg))
     
     def __lt__(self, other):
         return not isinstance(other, BoolSort())
@@ -465,7 +544,7 @@ class IntSort():
         '''
         Returns a Boolean Constraint stating whether or not the instance at the given index is *off*.
         '''
-        return not self.isOn(arg)
+        return SMTLib.SMT_Not(self.isOn(arg))
     
     def getNextIndex(self):
         self.index = self.index + 1
@@ -499,7 +578,7 @@ class RealSort():
         '''
         Returns a Boolean Constraint stating whether or not the instance at the given index is *off*.
         '''
-        return not self.isOn(arg)
+        return SMTLib.SMT_Not(self.isOn(arg))
     
     def getNextIndex(self):
         self.index = self.index + 1

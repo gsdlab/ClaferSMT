@@ -3,14 +3,12 @@ Created on Nov 1, 2013
 
 @author: ezulkosk
 '''
-from common import Common, Assertions, Options
+from common import Common, Assertions, Options, SMTLib
 from common.Common import mOr, mAnd
 from structures.ClaferSort import BoolSort, IntSort, PrimitiveType, StringSort, \
     RealSort
 from structures.ExprArg import Mask, ExprArg, JoinArg, IntArg, BoolArg
-from z3 import If, And, Sum, Not, Implies, Xor, Or, IntVector, Int, ToReal
 import sys
-
 
 ''' 
 #######################################################################
@@ -38,14 +36,10 @@ def joinWithSuper(sort, mask):
     '''
     newMask = Mask()
     for i in mask.keys():
-        #ClaferSort.addSubSort(self, sub), is somewhat related
-        #print(sort)
-        #print(sort.superSort)
-        #print(sort.refSort) 
         newMask.put(i + sort.indexInSuper,
-                    If(sort.isOn(mask.get(i)), 
+                    SMTLib.SMT_If(sort.isOn(mask.get(i)), 
                        sort.superSort.instances[i + sort.indexInSuper], 
-                       sort.superSort.parentInstances))
+                       SMTLib.SMT_IntConst(sort.superSort.parentInstances)))
         Assertions.nonEmptyMask(newMask)
     return(sort.superSort, newMask)
 
@@ -60,23 +54,26 @@ def joinWithParent(arg):
                 if k >= sort.parentInstances:
                     break
                 prevClause = newMask.get(k)
-                newMask.put(k, mOr(prevClause, mask.get(j) == k))
+                newMask.put(k, mOr(prevClause, SMTLib.SMT_EQ(mask.get(j), SMTLib.SMT_IntConst(k))))
         newInstanceSorts.append((sort.parent, newMask))
         Assertions.nonEmptyMask(newMask)
     for i in newInstanceSorts:
         (sort, mask) = i
         for j in mask.keys():
-            mask.put(j, If(mask.get(j), sort.instances[j], sort.parentInstances))
+            mask.put(j, SMTLib.SMT_If(mask.get(j), sort.instances[j], SMTLib.SMT_IntConst(sort.parentInstances)))
     return ExprArg(newInstanceSorts)
 
 
-def addPrimitive(newSort, newMask, oldSort, oldMask, index):
+def addPrimitive(newSort, newMask, oldSort, oldMask, index, wasEmpty=False):
     newIndex = newSort.getNextIndex()
     cardinalityMask = newSort.getCardinalityMask()
-    constraint = And(oldSort.isOn(oldMask.get(index)), mAnd(*[oldSort.refs[index] != i for i in newMask.values()]))
-    cardinalityMask.put(newIndex, If(constraint, 1, 0))
-    newMask.put(newIndex, If(constraint, oldSort.refs[index], 0))
-    Assertions.nonEmptyMask(newMask)
+    if wasEmpty:
+        constraint = oldSort.isOn(oldMask.get(index))
+    else:
+        #TODO: only add this constraint if it is NOT the first set being added (needs to be modified to not look in the same set) (bag fix)
+        constraint = SMTLib.SMT_And(oldSort.isOn(oldMask.get(index)), mAnd(*[SMTLib.SMT_NE(oldSort.refs[index], i) for i in newMask.values()]))
+    cardinalityMask.put(newIndex, SMTLib.SMT_If(constraint, SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
+    newMask.put(newIndex, SMTLib.SMT_If(constraint, oldSort.refs[index], SMTLib.SMT_IntConst(0)))
 
 
 def joinWithPrimitive(arg):
@@ -85,9 +82,13 @@ def joinWithPrimitive(arg):
         (sort, mask) = i
         if sort.refSort == "integer" or (sort.refSort == "string" and not Options.STRING_CONSTRAINTS):  #change for string soon
             newMask = alreadyExists(IntSort(), newInstanceSorts) #check that this works!!!
+            if newMask.size() == 0:
+                wasEmpty = True
+            else:
+                wasEmpty = False
             newSort = IntSort()
-            for i in mask.keys():
-                addPrimitive(newSort, newMask, sort, mask, i)         
+            for j in mask.keys():
+                addPrimitive(newSort, newMask, sort, mask, j, wasEmpty)         
             newInstanceSorts.append((newSort, newMask)) #should change the "int", but not sure how yet
             Assertions.nonEmptyMask(newMask)
         elif sort.refSort == "string":
@@ -106,6 +107,10 @@ def joinWithPrimitive(arg):
             Assertions.nonEmptyMask(newMask)
     return ExprArg(newInstanceSorts)
     
+    
+'''
+CLEAN : THERE IS PRIMITIVES STUFF IN HERE
+'''
 def joinWithClaferRef(arg):
     newInstanceSorts = []
     for i in arg.getInstanceSorts():
@@ -118,30 +123,31 @@ def joinWithClaferRef(arg):
             return joinWithPrimitive(ExprArg([(sort, mask)]))
         for j in mask.keys():
             if isinstance(sort.refSort, PrimitiveType):
-                tempRefs.append(If(sort.isOn(mask.get(j)),
+                tempRefs.append(SMTLib.SMT_If(sort.isOn(mask.get(j)),
                                    sort.refs[j], 0))
             else:
-                tempRefs.append(If(sort.isOn(mask.get(j)),
-                                   sort.refs[j], sort.refSort.numInstances))
+                tempRefs.append(SMTLib.SMT_If(sort.isOn(mask.get(j)),
+                                   sort.refs[j], SMTLib.SMT_IntConst(sort.refSort.numInstances)))
         if isinstance(sort.refSort, PrimitiveType):
             for j in range(sort.numInstances):
-                clause = mOr(*[k == j for k in tempRefs])
+                clause = mOr(*[SMTLib.SMT_EQ(k, SMTLib.SMT_IntConst(j)) for k in tempRefs])
                 newMask.put(j, mOr(newMask.get(j), clause))
         else:
             for j in range(sort.refSort.numInstances):
-                clause = mOr(*[k == j for k in tempRefs])
+                clause = mOr(*[SMTLib.SMT_EQ(k, SMTLib.SMT_IntConst(j)) for k in tempRefs])
                 newMask.put(j, mOr(newMask.get(j), clause))
         newInstanceSorts.append((sort.refSort, newMask))
         Assertions.nonEmptyMask(newMask)
     for i in newInstanceSorts:
         (sort, mask) = i
         for j in mask.keys():
-            mask.put(j, If(mask.get(j), sort.instances[j], sort.parentInstances))
+            mask.put(j, SMTLib.SMT_If(mask.get(j), sort.instances[j], SMTLib.SMT_IntConst(sort.parentInstances)))
     return ExprArg(newInstanceSorts)
     
 def joinWithRef(arg): 
     (sort, _) = arg.instanceSorts[0]
     if len(arg.instanceSorts) > 1:
+        #TODO: allow joins with multiple RHS 
         sys.exit("bug in join with ref, need to implement...")
     if isinstance(sort.refSort, PrimitiveType):
         return joinWithPrimitive(arg)
@@ -174,8 +180,8 @@ def joinWithClafer(left, right):
                     #only possibly join with things that are in left
                     if left_mask.get(j):
                         prevClause = newMask.get(i)
-                        newMask.put(i, mOr(prevClause, And(left_sort.isOn(left_mask.get(j)), 
-                                                        right_sort.instances[i] == j)))
+                        newMask.put(i, mOr(prevClause, SMTLib.SMT_And(left_sort.isOn(left_mask.get(j)), 
+                                                    SMTLib.SMT_EQ(right_sort.instances[i], SMTLib.SMT_IntConst(j)))))
             '''CAREFUL!!! '''
             if newMask.size() == 0:
                 #print(left)
@@ -186,7 +192,7 @@ def joinWithClafer(left, right):
     for i in newInstanceSorts:
         (sort, mask) = i
         for j in mask.keys():
-            mask.put(j, If(mask.get(j), sort.instances[j], sort.parentInstances))
+            mask.put(j, SMTLib.SMT_If(mask.get(j), sort.instances[j], SMTLib.SMT_IntConst(sort.parentInstances)))
     return ExprArg(newInstanceSorts)
 
 def computeJoin(joinList):
@@ -230,7 +236,7 @@ def op_not(arg):
     assert isinstance(arg, ExprArg)
     (_, mask) = arg.getInstanceSort(0)
     val = mask.pop_value()
-    return BoolArg([Not(val)])
+    return BoolArg([SMTLib.SMT_Not(val)])
       
     
 def getClaferMatch(key, my_list):
@@ -291,19 +297,19 @@ def op_eq(left,right):
     (left_sort, left_mask) = left.getInstanceSort(0)
     (right_sort, right_mask) = right.getInstanceSort(0)
     if isinstance(left_sort, IntSort) or isinstance(right_sort, IntSort):
-        return BoolArg([sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]) 
-                        == sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()])])
+        return BoolArg([SMTLib.SMT_EQ(SMTLib.SMT_Sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]),
+                         SMTLib.SMT_Sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()]))])
     #real equality case
     (left_sort, left_mask) = left.getInstanceSort(0)
     (right_sort, right_mask) = right.getInstanceSort(0)
     if isinstance(left_sort, RealSort) or isinstance(right_sort, RealSort):
-        return BoolArg([sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]) 
-                        == sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()])])
+        return BoolArg([SMTLib.SMT_EQ(SMTLib.SMT_Sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]),
+                         SMTLib.SMT_Sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()]))])
     #string equality case
     (left_sort, left_mask) = left.getInstanceSort(0)
     (right_sort, right_mask) = right.getInstanceSort(0)
     if isinstance(left_sort, StringSort) or isinstance(right_sort, StringSort):
-        return BoolArg([left_mask.get(0) == right_mask.get(0)])
+        return BoolArg([SMTLib.SMT_EQ(left_mask.get(0), right_mask.get(0))])
         #return BoolArg([sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]) 
         #                == sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()])])
     #clafer-set equality case
@@ -339,9 +345,9 @@ def op_eq(left,right):
                     if not super_mask.get(k + transform):
                         cond.append(sub_sort.isOff(sub_mask.get(k)))
                     else:
-                        cond.append(And(Implies(sub_sort.isOn(sub_mask.get(k)),
+                        cond.append(SMTLib.SMT_And(SMTLib.SMT_Implies(sub_sort.isOn(sub_mask.get(k)),
                                             super_sort.isOn(super_mask.get(k + transform))),
-                                        Implies(super_sort.isOn(super_mask.get(k + transform)),
+                                        SMTLib.SMT_Implies(super_sort.isOn(super_mask.get(k + transform)),
                                             sub_sort.isOn(sub_mask.get(k)))))
         #unmatched extension
         for i in unmatchedL + unmatchedR:
@@ -367,7 +373,7 @@ def op_ne(left,right):
     for i in expr.getInstanceSorts():
         (_, mask) = i
         for j in mask.keys():
-            mask.put(j, Not(mask.get(j)))
+            mask.put(j, SMTLib.SMT_Not(mask.get(j)))
     return expr
     
 def op_lt(left,right):
@@ -384,15 +390,9 @@ def op_lt(left,right):
     assert isinstance(right, ExprArg)
     (_, left_mask) = left.getInstanceSort(0)
     (_, right_mask) = right.getInstanceSort(0)
-    
-    #if(left_mask.size() > 1 or right_mask.size() > 1):
-    #    print("bug clafer makes no sense.")
-    lval = sum(left_mask.values())
-    rval = sum(right_mask.values())
-    #else:
-    #    lval = left_mask.pop_value()
-    #    rval = right_mask.pop_value()
-    return BoolArg([lval < rval])  
+    lval = SMTLib.SMT_Sum(left_mask.values())
+    rval = SMTLib.SMT_Sum(right_mask.values())
+    return BoolArg([SMTLib.SMT_LT(lval, rval)])  
         
 def op_le(left,right):
     '''
@@ -408,11 +408,9 @@ def op_le(left,right):
     assert isinstance(right, ExprArg)
     (_, left_mask) = left.getInstanceSort(0)
     (_, right_mask) = right.getInstanceSort(0)
-    #lval = left_mask.pop_value()
-    #rval = right_mask.pop_value()
-    lval = sum(left_mask.values())
-    rval = sum(right_mask.values())
-    return BoolArg([lval <= rval])  
+    lval = SMTLib.SMT_Sum(left_mask.values())
+    rval = SMTLib.SMT_Sum(right_mask.values())
+    return BoolArg([SMTLib.SMT_LE(lval, rval)])  
 
 def op_gt(left,right):
     '''
@@ -494,7 +492,7 @@ def op_xor(left,right):
     (_, right_mask) = right.getInstanceSort(0)
     lval = left_mask.pop_value()
     rval = right_mask.pop_value()
-    return BoolArg([Xor(lval, rval)])  
+    return BoolArg([SMTLib.SMT_Xor(lval, rval)])  
 
 def op_implies(left,right):
     '''
@@ -517,7 +515,7 @@ def op_implies(left,right):
     (left_sort, left_mask) = left.getInstanceSort(0)
     (right_sort, right_mask) = right.getInstanceSort(0)
     if isinstance(left_sort, BoolSort) or isinstance(right_sort, BoolSort):
-        return BoolArg([Implies(left_mask.pop_value(), right_mask.pop_value())])
+        return BoolArg([SMTLib.SMT_Implies(left_mask.pop_value(), right_mask.pop_value())])
     elif isinstance(left_sort, IntSort) or isinstance(right_sort, IntSort):
         return BoolArg([int_set_in((left_sort, left_mask), (right_sort, right_mask))])
     #clafer-set equality case
@@ -548,10 +546,10 @@ def op_implies(left,right):
                     if not super_mask.get(k + transform) and leftIsSub:
                         cond.append(sub_sort.isOff(sub_mask.get(k)))
                     elif leftIsSub:
-                        cond.append(Implies(sub_sort.isOn(sub_mask.get(k)),
+                        cond.append(SMTLib.SMT_Implies(sub_sort.isOn(sub_mask.get(k)),
                                             super_sort.isOn(super_mask.get(k + transform))))
                     else:
-                        cond.append(Implies(super_sort.isOn(super_mask.get(k + transform)),
+                        cond.append(SMTLib.SMT_Implies(super_sort.isOn(super_mask.get(k + transform)),
                                             sub_sort.isOn(sub_mask.get(k))))
         #unmatched extension
         for i in unmatchedL:
@@ -559,39 +557,7 @@ def op_implies(left,right):
             for j in mask.keys():
                 cond.append(sort.isOff(mask.get(j)))
         return BoolArg([mAnd(*cond)])
-    '''
-    #integer equality case
-    (left_sort, left_mask) = left.getInstanceSort(0)
-    (right_sort, right_mask) = right.getInstanceSort(0)
-    if isinstance(left_sort, BoolSort) or isinstance(right_sort, BoolSort):
-        return BoolArg([Implies(left_mask.pop_value(), right_mask.pop_value())])
-    #clafer-set equality case
-    else:
-        cond = []
-        while True:
-            nextSorts = getNextInstanceSort(sortedL, sortedR)
-            if not nextSorts:
-                break
-            if len(nextSorts) == 1:
-                (side, (sort, l)) = nextSorts[0]
-                #if only left side of the equation has elements of a sort,
-                #make sure none are on.
-                if side == "l":
-                    for i in l.values():
-                        cond.append(sort.isOff(i))
-                    
-            else:
-                (_, (sort, l)) = nextSorts[0]
-                (_, (_, r)) = nextSorts[1]
-                for i in l.difference(r.getTree()):
-                    cond.append(sort.isOff(l.get(i)))
-                for i in l.intersection(r.getTree()):
-                    cond.append(Implies(sort.isOn(l.get(i)),
-                                              sort.isOn(r.get(i))))
-        Assertions.nonEmpty(cond)
-        return BoolArg([And(*cond)])
-    #return BoolArg([mAnd(*[Implies(i,j) for i,j in zip(left.instances, right.instances)])])
-    '''
+
 
 def op_equivalence(left,right):
     '''
@@ -611,7 +577,7 @@ def op_equivalence(left,right):
     rightResult = op_implies(rightcopy, leftcopy)
     lval = leftResult.getValue()
     rval = rightResult.getValue()
-    cond = [And(lval, rval)]
+    cond = [SMTLib.SMT_And(lval, rval)]
     return BoolArg(cond)
     #return BoolArg([mAnd(*[mAnd(Implies(i,j), Implies(j,i)) for i,j in zip(left.instances, right.instances)])])
     
@@ -635,7 +601,7 @@ def op_ifthenelse(cond, ifExpr, elseExpr):
     (_, if_mask) = ifExpr.getInstanceSort(0)
     (_, else_mask) = elseExpr.getInstanceSort(0)
     
-    return BoolArg([If(cond_mask.pop_value(), if_mask.pop_value(), else_mask.pop_value())])
+    return BoolArg([SMTLib.SMT_If(cond_mask.pop_value(), if_mask.pop_value(), else_mask.pop_value())])
 
 ''' 
 #######################################################################
@@ -708,8 +674,8 @@ def op_card(arg):
             instances = [i for i in sort.cardinalityMask.values()]
         else:
             for j in mask.values():
-                instances.append(If(sort.isOn(j), 1, 0))  
-    return IntArg([Sum(instances)])
+                instances.append(SMTLib.SMT_If(sort.isOn(j), SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
+    return IntArg([SMTLib.SMT_Sum(instances)])
 
 def int_set_union(leftIntSort, rightIntSort):
     (_,(left_sort, left_mask)) = leftIntSort
@@ -717,19 +683,42 @@ def int_set_union(leftIntSort, rightIntSort):
     newMask = Mask()
     sort = IntSort()
     for i in left_mask.keys():
-        sort.cardinalityMask.put(i, left_sort.cardinalityMask.get(i))
-        newMask.put(i, If(left_sort.cardinalityMask.get(i) == 1, left_mask.get(i), 0))
+        cardMask_constraint = SMTLib.SMT_EQ(left_sort.cardinalityMask.get(i), SMTLib.SMT_IntConst(1))
+        if newMask.size() != 0:
+            noPrevious_constraint = SMTLib.SMT_And(*[SMTLib.SMT_Or(SMTLib.SMT_EQ(sort.cardinalityMask.get(j), SMTLib.SMT_IntConst(0)),
+                                                                   SMTLib.SMT_NE(newMask.get(j), left_mask.get(i))) for j in newMask.keys()])
+        else:
+            noPrevious_constraint = SMTLib.SMT_BoolConst(True)
+        full_constraint = SMTLib.SMT_And(noPrevious_constraint, cardMask_constraint)
+        
+        sort.cardinalityMask.put(i, SMTLib.SMT_If(full_constraint, SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
+        newMask.put(i, SMTLib.SMT_If(full_constraint, left_mask.get(i), SMTLib.SMT_IntConst(0)))
     delta = left_mask.size()
     for i in right_mask.keys():
-        constraint = And(right_sort.cardinalityMask.get(i) == 1, 
-                         *[Or(left_mask.get(j) != right_mask.get(i), left_sort.cardinalityMask.get(j) == 0) for j in left_mask.keys()])
-        sort.cardinalityMask.put(i + delta, If(constraint, 1, 0))
-        newMask.put(i+delta, If(constraint, right_mask.get(i), 0))
+        cardMask_constraint = SMTLib.SMT_EQ(right_sort.cardinalityMask.get(i), SMTLib.SMT_IntConst(1))
+        if newMask.size() != 0:
+            noPrevious_constraint = SMTLib.SMT_And(*[SMTLib.SMT_Or(SMTLib.SMT_EQ(sort.cardinalityMask.get(j), SMTLib.SMT_IntConst(0)),
+                                                                   SMTLib.SMT_NE(newMask.get(j), right_mask.get(i))) for j in newMask.keys()])
+        else:
+            noPrevious_constraint = SMTLib.SMT_BoolConst(True)
+        full_constraint = SMTLib.SMT_And(noPrevious_constraint, cardMask_constraint)
+        
+        
+        
+        #constraint = SMTLib.SMT_And(SMTLib.SMT_EQ(right_sort.cardinalityMask.get(i), SMTLib.SMT_IntConst(1)),
+        #                 *[SMTLib.SMT_Or(SMTLib.SMT_NE(left_mask.get(j), right_mask.get(i)),
+        #                                 SMTLib.SMT_EQ(left_sort.cardinalityMask.get(j), SMTLib.SMT_IntConst(0))) for j in left_mask.keys()])
+        sort.cardinalityMask.put(i + delta, SMTLib.SMT_If(full_constraint, SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
+        newMask.put(i+delta, SMTLib.SMT_If(full_constraint, right_mask.get(i), SMTLib.SMT_IntConst(0)))
     return (sort, newMask)
 
     
 
 def putIfNotMatched(sort, mask, index, value, matches):
+    '''
+    Used to make sure you don't add duplicate elements to a set i.e. a sub and super.
+    Needed by union, intersection, and difference.
+    '''
     if not matches:
         mask.put(index, value)
     else:
@@ -745,7 +734,7 @@ def putIfNotMatched(sort, mask, index, value, matches):
         if not cond:
             mask.put(index, value)
         else:
-            mask.put(index, If(mAnd(*cond), value, sort.parentInstances))
+            mask.put(index, SMTLib.SMT_If(mAnd(*cond), value, SMTLib.SMT_IntConst(sort.parentInstances)))
            
 def op_union(left,right):
     '''
@@ -759,6 +748,7 @@ def op_union(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
+    
     sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.getInstanceSorts()])
     sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.getInstanceSorts()])
     newInstanceSorts = []
@@ -790,10 +780,28 @@ def op_union(left,right):
             for i in r.difference(l.getTree()):
                 putIfNotMatched(sort, newMask, i, r.get(i), matches)
             for i in l.intersection(r.getTree()):
-                putIfNotMatched(sort, newMask, i, Common.min2(l.get(0), r.get(0)), matches)
+                putIfNotMatched(sort, newMask, i, Common.min2(l.get(i), r.get(i)), matches)
             newInstanceSorts.append((sort, newMask))
     return ExprArg(newInstanceSorts)
                 
+
+def int_set_intersection(left_sort, left_mask, right_sort, right_mask):
+    newMask = Mask()
+    sort = IntSort()
+    for i in left_mask.keys():
+        cardMask_constraint = SMTLib.SMT_EQ(left_sort.cardinalityMask.get(i), SMTLib.SMT_IntConst(1))
+        onRight_constraint = SMTLib.SMT_Or(*[SMTLib.SMT_And(SMTLib.SMT_EQ(left_mask.get(i), right_mask.get(j)),
+                                         SMTLib.SMT_EQ(right_sort.cardinalityMask.get(j), SMTLib.SMT_IntConst(1))) for j in right_mask.keys()])
+        if newMask.size() != 0:
+            noPrevious_constraint = SMTLib.SMT_And(*[SMTLib.SMT_Or(SMTLib.SMT_EQ(sort.cardinalityMask.get(j), SMTLib.SMT_IntConst(0)),
+                                                                   SMTLib.SMT_NE(newMask.get(j), left_mask.get(i))) for j in newMask.keys()])
+        else:
+            noPrevious_constraint = SMTLib.SMT_BoolConst(True)
+        full_constraint = SMTLib.SMT_And(noPrevious_constraint, cardMask_constraint, onRight_constraint)
+        sort.cardinalityMask.put(i, SMTLib.SMT_If(full_constraint, SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
+        newMask.put(i, SMTLib.SMT_If(full_constraint, left_mask.get(i), SMTLib.SMT_IntConst(0)))
+    return (sort, newMask)              
+
 def op_intersection(left,right):
     '''
     :param left:
@@ -804,26 +812,40 @@ def op_intersection(left,right):
     
     Computes the set intersection (left & right)
     '''
+    assert isinstance(left, ExprArg)
+    assert isinstance(right, ExprArg)
     sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.getInstanceSorts()])
     sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.getInstanceSorts()])
+
+    #for all instances in left:
+    #  if there is a match in right:
+    #    add it if not already matched
     newInstanceSorts = []
-    while True:
-        nextSorts = getNextInstanceSort(sortedL, sortedR)
-        if not nextSorts:
-            break
-        (_, (sort,_))=nextSorts[0]
-        matches = getClaferMatch(sort, newInstanceSorts)
-        if len(nextSorts) == 1:
+    for (left_sort, left_mask) in sortedL:
+        newMask = Mask()
+        right_matches = getClaferMatch(left_sort, sortedR)
+        added_matches = getClaferMatch(left_sort, newInstanceSorts)
+        if not right_matches:
             continue
+        if isinstance(left_sort, IntSort):
+            (_,_,(right_sort, right_mask)) = right_matches[0]
+            (left_sort, newMask) = int_set_intersection(left_sort, left_mask, right_sort, right_mask)
         else:
-            (_, (sort, l)) = nextSorts[0]
-            (_, (_, r)) = nextSorts[1]
-            newMask = Mask()
-            for i in l.intersection(r.keys()):
-                #newMask.put(i, Common.max2(l.get(0), r.get(0)))
-                putIfNotMatched(sort, newMask, i, Common.max2(l.get(0), r.get(0)), matches)
-            newInstanceSorts.append((sort, newMask))
-    return ExprArg(left.joinSorts, newInstanceSorts)
+            for left_key in left_mask.keys():
+                key_matches = []
+                for (leftIsSub, transform, (match_sort,match_mask)) in right_matches:
+                    right_val = match_mask.get(left_key + transform)
+                    if right_val:
+                        key_matches.append(match_sort.isOn(right_val))
+                #if the left key is on, and ANY of it's matches are on, then include it
+                if key_matches:
+                    putIfNotMatched(left_sort, newMask, left_key,
+                                    SMTLib.SMT_If(SMTLib.SMT_And(left_sort.isOn(left_mask.get(left_key)), SMTLib.SMT_Or(*key_matches)),
+                                                  left_mask.get(left_key),
+                                                  SMTLib.SMT_IntConst(left_sort.parentInstances)),
+                                    added_matches + [(True,0,(left_sort,newMask))])
+        newInstanceSorts.append((left_sort,newMask))
+    return ExprArg(newInstanceSorts)
 
 def int_set_difference(leftIntSort, rightIntSort):
     (_,(left_sort, left_mask)) = leftIntSort
@@ -832,10 +854,11 @@ def int_set_difference(leftIntSort, rightIntSort):
     newMask = Mask()
     sort = IntSort()
     for i in left_mask.keys():
-        constraint = And(left_sort.cardinalityMask.get(i) == 1, 
-                         *[Or(left_mask.get(i) != right_mask.get(j), right_sort.cardinalityMask.get(j) == 0) for j in right_mask.keys()])
-        sort.cardinalityMask.put(i, If(constraint, 1, 0))
-        newMask.put(i, If(constraint, left_mask.get(i), 0))
+        constraint = SMTLib.SMT_And(SMTLib.SMT_EQ(left_sort.cardinalityMask.get(i), SMTLib.SMT_IntConst(1)),
+                         *[SMTLib.SMT_Or(SMTLib.SMT_NE(left_mask.get(i), right_mask.get(j)),
+                                         SMTLib.SMT_EQ(right_sort.cardinalityMask.get(j), SMTLib.SMT_IntConst(0))) for j in right_mask.keys()])
+        sort.cardinalityMask.put(i, SMTLib.SMT_If(constraint, SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
+        newMask.put(i, SMTLib.SMT_If(constraint, left_mask.get(i), SMTLib.SMT_IntConst(0)))
     return (sort, newMask)
 
 def op_difference(left,right):
@@ -885,9 +908,9 @@ def op_difference(left,right):
                     #newMask.put(i, If(sort.isOn(r.get(i))
                     #                     , l.get(i)
                     #                     , sort.parentInstances))
-                    putIfNotMatched(sort, newMask, i, If(sort.isOn(r.get(i))
+                    putIfNotMatched(sort, newMask, i, SMTLib.SMT_If(sort.isOn(r.get(i))
                                          , l.get(i)
-                                         , sort.parentInstances), matches)
+                                         , SMTLib.SMT_IntConst(sort.parentInstances)), matches)
             newInstanceSorts.append((sort, newMask))
     return ExprArg(newInstanceSorts)
     
@@ -922,11 +945,11 @@ def int_set_in(leftIntSort, rightIntSort):
     (right_sort, right_mask) = rightIntSort
     cond = []
     for i in left_mask.keys():
-        constraint = Or(left_sort.cardinalityMask.get(i) == 0, 
-                        Or(*[And(right_sort.cardinalityMask.get(j) == 1, 
-                                 right_mask.get(j) == left_mask.get(i)) for j in right_mask.keys()]))
+        constraint = SMTLib.SMT_Or(SMTLib.SMT_EQ(left_sort.cardinalityMask.get(i), SMTLib.SMT_IntConst(0)),
+                        SMTLib.SMT_Or(*[SMTLib.SMT_And(SMTLib.SMT_EQ(right_sort.cardinalityMask.get(j), SMTLib.SMT_IntConst(1)),
+                                 SMTLib.SMT_EQ(right_mask.get(j), left_mask.get(i))) for j in right_mask.keys()]))
         cond.append(constraint)
-    return(And(*cond))
+    return(SMTLib.SMT_And(*cond))
 
 
 def op_in(left,right):
@@ -940,27 +963,6 @@ def op_in(left,right):
     Ensures that left is a subset of right.
     '''
     return op_implies(left,right)
-    '''
-    sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.getInstanceSorts()])
-    sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.getInstanceSorts()])
-    cond = []
-    for i in sortedL:
-        (left_sort, left_mask) = i
-        matches = getMatch(left_sort, sortedR)
-        if isinstance(left_sort, IntSort):
-            assert(matches) #must have ints in both sets (i think the front-end ensures this
-            cond.append(int_set_in(i, matches[0][1]))
-        else:
-            for j in matches:
-                (transform, (right_sort,right_mask)) = j
-                for k in left_mask.keys():
-                    if not right_mask.get(k + transform):
-                        cond.append(left_sort.isOff(left_mask.get(k)))
-                    else:
-                        cond.append(Implies(left_sort.isOn(left_mask.get(k)),
-                                            right_sort.isOn(right_mask.get(k + transform))))
-    return BoolArg([mAnd(*cond)])
-   '''
 
 def op_nin(left,right):
     '''
@@ -1016,6 +1018,19 @@ def op_range_restriction(l,r):
 #######################################################################
 ''' 
 
+def checkForAriths(instances):
+    for i in instances:
+        if not isinstance(i, SMTLib.SMT_IntConst):
+            return True
+    return False
+
+def getArithValue(vals):
+    if checkForAriths(vals):
+        val = SMTLib.SMT_Sum(vals)
+    else:
+        val = SMTLib.SMT_Sum(vals)
+    return val
+
 def op_add(left,right):
     '''
     :param left:
@@ -1030,9 +1045,10 @@ def op_add(left,right):
     assert isinstance(right, ExprArg)
     (_, left_mask) = left.getInstanceSort(0)
     (_, right_mask) = right.getInstanceSort(0)
-    lval = left_mask.pop_value()
-    rval = right_mask.pop_value()
-    return IntArg([lval + rval])
+    
+    lval = getArithValue(list(left_mask.values()))
+    rval = getArithValue(list(right_mask.values()))
+    return IntArg([SMTLib.SMT_Plus(lval, rval)])
 
 def op_sub(left,right):
     '''
@@ -1048,9 +1064,9 @@ def op_sub(left,right):
     assert isinstance(right, ExprArg)
     (_, left_mask) = left.getInstanceSort(0)
     (_, right_mask) = right.getInstanceSort(0)
-    lval = left_mask.pop_value()
-    rval = right_mask.pop_value()
-    return IntArg([lval - rval])
+    lval = getArithValue(list(left_mask.values()))
+    rval = getArithValue(list(right_mask.values()))
+    return IntArg([SMTLib.SMT_Minus(lval,rval)])
 
 def op_mul(left,right):
     '''
@@ -1066,9 +1082,9 @@ def op_mul(left,right):
     assert isinstance(right, ExprArg)
     (_, left_mask) = left.getInstanceSort(0)
     (_, right_mask) = right.getInstanceSort(0)
-    lval = left_mask.pop_value()
-    rval = right_mask.pop_value()
-    return IntArg([lval * rval])
+    lval = getArithValue(list(left_mask.values()))
+    rval = getArithValue(list(right_mask.values()))
+    return IntArg([SMTLib.SMT_Times(lval, rval)])
 
 #integer division
 def op_div(left,right):
@@ -1085,11 +1101,11 @@ def op_div(left,right):
     assert isinstance(right, ExprArg)
     (_, left_mask) = left.getInstanceSort(0)
     (_, right_mask) = right.getInstanceSort(0)
-    lval = left_mask.pop_value()
-    rval = right_mask.pop_value()
-    return IntArg([lval / rval]
-                   if((not isinstance(lval, int)) or (not isinstance(rval, int)))
-                             else [lval // rval])
+    lval = getArithValue(list(left_mask.values()))
+    rval = getArithValue(list(right_mask.values()))
+    return IntArg([SMTLib.SMT_Divide(lval, rval)]
+                   if((not isinstance(lval, SMTLib.SMT_IntConst)) or (not isinstance(rval, SMTLib.SMT_IntConst)))
+                             else [SMTLib.SMT_IntDivide(lval, rval)])
     
     
 def op_un_minus(arg):
@@ -1102,8 +1118,8 @@ def op_un_minus(arg):
     '''
     assert isinstance(arg, ExprArg)
     (_, mask) = arg.getInstanceSort(0)
-    val = mask.pop_value()
-    return IntArg([-(val)])
+    val = getArithValue(list(mask.values()))
+    return IntArg([SMTLib.SMT_Neg(val)])
    
 def op_sum(arg):
     '''
@@ -1114,12 +1130,11 @@ def op_sum(arg):
     Computes the sum of all integer instances in arg. May not match the semantics of the Alloy backend.
     '''
     assert isinstance(arg, ExprArg)
-    instances = []
+    all_vals = []
     for i in arg.getInstanceSorts():
         (_, mask) = i
-        for j in mask.values():
-            instances.append(j)
-    return IntArg([Sum(instances)])
+        all_vals.append(getArithValue(list(mask.values())))
+    return IntArg([getArithValue(all_vals)])
 
 ''' 
 #######################################################################
@@ -1147,7 +1162,7 @@ def op_length(arg):
     arg_i = mask.get(0)
     stringID = Common.STRCONS_SUB + str(Common.getStringUID())
     Common.string_map[stringID] = arg_i
-    return IntArg([Int("Length$" + str(stringID))])
+    return IntArg([SMTLib.SMT_Int("Length$" + str(stringID))])
 
 def op_substring(whole_string, left_index, right_index):
     (_, whole_mask) = whole_string.getInstanceSort(0)
@@ -1182,7 +1197,7 @@ def op_indexof(left, right):
     left_i = mask.get(0)
     (_, mask) = right.getInstanceSort(0)
     right_i = mask.get(0)
-    return IntArg([Int("Indexof$" + left_i + "$" + right_i)])
+    return IntArg([SMTLib.SMT_Int("Indexof$" + left_i + "$" + right_i)])
 
 '''
 #######################################################################
@@ -1217,20 +1232,23 @@ def getQuantifierConditionList(exprs):
 def quant_some(exprs, ifConstraints):
     condList = getQuantifierConditionList(exprs)
     if ifConstraints:
-        condList = [And(i, j) for i,j in zip(ifConstraints, condList)]
+        condList = [SMTLib.SMT_And(i, j) for i,j in zip(ifConstraints, condList)]
     return mOr(*condList)
 
 def quant_all(exprs, ifConstraints):
     condList = getQuantifierConditionList(exprs)
     if ifConstraints:
-        condList = [Implies(i, j) for i,j in zip(ifConstraints, condList)]
+        condList = [SMTLib.SMT_Implies(i, j) for i,j in zip(ifConstraints, condList)]
     return mAnd(*condList)
 
 def quant_no(exprs, ifConstraints):
     condList = getQuantifierConditionList(exprs)
     if ifConstraints:
-        condList = [And(i, j) for i,j in zip(ifConstraints, condList)]
-    return Not(Or(*condList))
+        condList = [SMTLib.SMT_And(i, j) for i,j in zip(ifConstraints, condList)]
+    return SMTLib.SMT_Not(SMTLib.SMT_Or(*condList))
+
+EXPR = ""
+EXPR2 = ""
 
 def quant_one(exprs, ifConstraints):
     '''
@@ -1238,15 +1256,14 @@ def quant_one(exprs, ifConstraints):
     '''
     condList = getQuantifierConditionList(exprs)
     if ifConstraints:
-        condList = [And(i, j) for i,j in zip(ifConstraints, condList)]
-    indicatorVars = IntVector("one_" + str(Common.getConstraintUID()),len(condList))
+        condList = [SMTLib.SMT_And(i, j) for i,j in zip(ifConstraints, condList)]
     exprList = []
     for i in range(len(condList)):
-        exprList.append(If(condList[i], indicatorVars[i] == 1, indicatorVars[i] == 0))
-    return Sum(*exprList) == 1
+        exprList.append(SMTLib.SMT_If(condList[i], SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
+    return SMTLib.SMT_EQ(SMTLib.SMT_Sum(*exprList), SMTLib.SMT_IntConst(1))
     
 def quant_lone(exprs, ifConstraints):
-    return Or(quant_no(exprs, ifConstraints), quant_one(exprs, ifConstraints))
+    return SMTLib.SMT_Or(quant_no(exprs, ifConstraints), quant_one(exprs, ifConstraints))
 
 ''' 
 #######################################################################

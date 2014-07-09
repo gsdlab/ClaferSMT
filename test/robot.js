@@ -1,0 +1,24 @@
+scope({c0_Motor:1, c0_Robot:1, c0_Tool:1, c0_kind:1, c0_pwr:1, c0_pwr_min:1});
+defaultScope(1);
+intRange(-8, 7);
+
+c0_Robot = Clafer("c0_Robot").withCard(1, 1);
+c0_Motor = c0_Robot.addChild("c0_Motor").withCard(1, 1);
+c0_pwr = c0_Motor.addChild("c0_pwr").withCard(1, 1);
+c0_Tool = c0_Robot.addChild("c0_Tool").withCard(1, 1);
+c0_pwr_min = c0_Tool.addChild("c0_pwr_min").withCard(1, 1);
+c0_kind = c0_Tool.addChild("c0_kind").withCard(1, 1).withGroupCard(1, 1);
+c0_Drill = c0_kind.addChild("c0_Drill").withCard(0, 1);
+c0_Glue = c0_kind.addChild("c0_Glue").withCard(0, 1);
+c0_Mill = c0_kind.addChild("c0_Mill").withCard(0, 1);
+c0_Protective_grid = c0_Robot.addChild("c0_Protective_grid").withCard(0, 1);
+c0_Mounting_set = c0_Protective_grid.addChild("c0_Mounting_set").withCard(1, 1);
+c0_pwr.refToUnique(Int);
+c0_pwr_min.refToUnique(Int);
+Constraint(and(some(join(join(join(global(c0_Robot), c0_Tool), c0_kind), c0_Drill)), equal(joinRef(join(join(global(c0_Robot), c0_Motor), c0_pwr)), constant(10))));
+c0_Robot.addConstraint(greaterThanEqual(joinRef(join(join($this(), c0_Motor), c0_pwr)), div(mul(joinRef(join(join($this(), c0_Tool), c0_pwr_min)), constant(110)), constant(100))));
+c0_Robot.addConstraint(implies(or(some(join(join(join($this(), c0_Tool), c0_kind), c0_Drill)), some(join(join(join($this(), c0_Tool), c0_kind), c0_Mill))), some(join($this(), c0_Protective_grid))));
+c0_Motor.addConstraint(or(or(equal(joinRef(join($this(), c0_pwr)), constant(10)), equal(joinRef(join($this(), c0_pwr)), constant(20))), equal(joinRef(join($this(), c0_pwr)), constant(30))));
+c0_Drill.addConstraint(equal(joinRef(join(joinParent(joinParent($this())), c0_pwr_min)), constant(20)));
+c0_Glue.addConstraint(equal(joinRef(join(joinParent(joinParent($this())), c0_pwr_min)), constant(10)));
+c0_Mill.addConstraint(equal(joinRef(join(joinParent(joinParent($this())), c0_pwr_min)), constant(20)));

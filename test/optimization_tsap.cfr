@@ -1,0 +1,104 @@
+//=======================================================
+// Generic model customized to handle time-varied requirements
+//=======================================================
+
+// ------------------
+// Service prototype
+// ------------------
+
+abstract Service
+    requirements: Requirements  // resources required by a service
+    machine -> Machine          // machine the service is allocated to 
+    [this in machine.services]  // inverse relationship constraint
+
+// ----------------------------------
+// Requirements and Resources prototypes
+// ----------------------------------
+
+abstract Requirements
+    morning_cpu ->> integer
+    midday_cpu ->> integer
+    evening_cpu ->> integer
+    night_cpu ->> integer
+
+abstract Resources
+    cpu ->> integer
+
+// ------------------
+// Machine prototype
+// ------------------
+
+abstract Machine
+
+    services -> Service*        // set of services allocated to this machine
+        [this.machine = Machine] // inverse relationship constraint
+        
+    isFree? // boolean showing whether the machine is free or not
+    [isFree <=> no services] // being free means no services allocated
+
+    limits : Resources
+
+    // constraints for limiting total requirements
+    //---------------------------------------------
+    
+    morning_utilization : Resources
+        [cpu = sum services.requirements.morning_cpu]
+        [cpu < limits.cpu]
+
+    midday_utilization : Resources
+        [cpu = sum services.requirements.midday_cpu]
+        [cpu < limits.cpu]
+
+    evening_utilization : Resources
+        [cpu = sum services.requirements.evening_cpu]
+        [cpu < limits.cpu]
+
+    night_utilization : Resources
+        [cpu = sum services.requirements.night_cpu]
+        [cpu < limits.cpu]
+
+// -----------------------------------
+// Optimization goals and constraints
+// -----------------------------------
+
+abstract Task   
+    // total number of machines free
+    total_free : integer = #Machine.isFree
+
+MyTask: Task
+<<max MyTask.total_free>>
+
+//=======================================================
+// Particular data (machines and services)
+//=======================================================
+
+// machines:
+
+GoogleCA : Machine
+    [limits.cpu = 10]
+
+GoogleNY : Machine
+    [limits.cpu = 16]
+
+GoogleTX : Machine
+    [limits.cpu = 14]
+
+// services:
+
+MailService : Service
+    [requirements.morning_cpu = 5]
+    [requirements.midday_cpu = 4]
+    [requirements.evening_cpu = 5]
+    [requirements.night_cpu = 1]
+
+SearchService : Service
+    [requirements.morning_cpu = 7]
+    [requirements.midday_cpu = 7]
+    [requirements.evening_cpu = 8]
+    [requirements.night_cpu = 3]
+
+CalendarService : Service
+    [requirements.morning_cpu = 2]
+    [requirements.midday_cpu = 2]
+    [requirements.evening_cpu = 2]
+    [requirements.night_cpu = 1]

@@ -1,0 +1,16 @@
+abstract Feature
+  cost : int
+
+f1 : Feature
+  [cost = 1]
+f2 : Feature
+  [cost = 1]
+
+out1 : int
+[out1 = sum Feature.cost]
+
+out2 ->> int *
+[out2 = Feature.cost]
+
+out3 -> int *
+[out3 = Feature.cost]

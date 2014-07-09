@@ -22,6 +22,7 @@ class Clafer(object):
         self.glCard = glCard
         self.nonUniqueID = self.uid.split("_")[1]
         self.elements = []
+       
         
     def addElement(self, element):
         #print(self.elements)
@@ -38,8 +39,11 @@ class Clafer(object):
         return self.nonUniqueID
         
     def __str__(self):
-        return self.uid
+        return str(self.uid)
+    
+    def __repr__(self):
+        return self.__str__()
     
     def toString(self, level):
-        self.uid.split("_",1)[1]
+        return str(self.glCard) + " " + self.uid + " " + str(self.card)
         

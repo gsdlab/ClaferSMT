@@ -1,0 +1,112 @@
+//=======================================================
+// Generic model
+//=======================================================
+
+// ------------------
+// Service prototype
+// ------------------
+
+abstract Service
+    requirements: Requirements  // resources required by a service
+    machine -> Machine          // machine the service is allocated to 
+    [this in machine.services]  // inverse relationship constraint
+
+// ----------------------------------
+// Requirements and Resources prototypes
+// ----------------------------------
+
+abstract Requirements
+    cpu ->> integer
+
+abstract Resources: Requirements
+
+// ------------------
+// Machine prototype
+// ------------------
+
+abstract Machine
+
+    services -> Service*        // set of services allocated to this machine
+        [this.machine = Machine] // inverse relationship constraint
+        
+    isFree? // boolean showing whether the machine is free or not
+    [isFree <=> no services] // being free means no services allocated
+
+    limits : Resources
+
+    // constraints for limiting total requirements
+    //---------------------------------------------
+    
+    utilization : Resources
+        [cpu = sum services.requirements.cpu]
+        [cpu < limits.cpu]
+
+
+// -----------------------------------
+// Optimization goals and constraints
+// -----------------------------------
+
+abstract Task   
+    // total number of machines free
+    total_free : integer = #Machine.isFree
+
+MyTask: Task
+<<max MyTask.total_free>>
+
+//=======================================================
+// ISAP problem specifics
+//=======================================================
+
+abstract InterferenceData
+    memoryPressure ->> integer
+    memorySensitivity ->> integer
+
+abstract MachineISAP : Machine
+    interferenceSensitiveServices -> ServiceISAP*
+
+    [all s: services | (s in ServiceISAP) <=> (s in interferenceSensitiveServices)]
+
+abstract ServiceISAP: Service
+    interferenceData : InterferenceData
+
+    machineISAP -> MachineISAP           // typecasting the machine to MachineISAP
+        [this = machine]
+
+    totalPressure ->> integer = sum machineISAP.interferenceSensitiveServices.interferenceData.memoryPressure
+    memoryPressureToThisService ->> integer = totalPressure - interferenceData.memoryPressure
+    
+    // constraint:
+    [memoryPressureToThisService <= interferenceData.memorySensitivity]
+
+//=======================================================
+// Particular data (machines and services)
+//=======================================================
+
+// machines:
+
+GoogleCA : MachineISAP
+    [limits.cpu = 10]
+
+GoogleNY : MachineISAP
+    [limits.cpu = 16]
+
+GoogleTX : MachineISAP
+    [limits.cpu = 14]
+
+// services:
+
+MailService : ServiceISAP
+    [requirements.cpu = 4]
+    [interferenceData.memoryPressure = 4]
+    [interferenceData.memorySensitivity = 6]
+
+SearchService : ServiceISAP
+    [requirements.cpu = 3]
+    [interferenceData.memoryPressure = 4]
+    [interferenceData.memorySensitivity = 2]
+
+CalendarService : Service
+    [requirements.cpu = 1]
+
+DriveService : Service
+    [requirements.cpu = 2]

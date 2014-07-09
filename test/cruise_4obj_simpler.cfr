@@ -1,0 +1,32 @@
+/*
+Example from <a href="http://t3-necsis.cs.uwaterloo.ca:8091/NECSIS-Workshop/Modeling%20Quality%204" target="exampleSource">wiki</a>
+*/
+
+abstract Feature
+    cost ->> integer
+    mass ->> integer
+
+abstract ComfortFeature : Feature
+    comfort ->> integer
+
+abstract FuelFeature : ComfortFeature
+    fuel ->> integer
+    
+abstract Car
+    ABS : ComfortFeature ?
+    xor Transmission : Feature
+        Automatic : FuelFeature
+        Manual : FuelFeature
+    FCA : FuelFeature ?
+        xor Sensor : Feature
+            Radar : Feature
+            Lidar : Feature
+        xor Alert : Feature ?
+            Haptic : ComfortFeature
+            Audible : ComfortFeature
+    CC : FuelFeature ?
+        ACC : FuelFeature ?
+    [ ACC => FCA]
+    
+optimalCar : Car
+

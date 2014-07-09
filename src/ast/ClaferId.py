@@ -8,15 +8,15 @@ class ClaferId(object):
     '''
     All variables analogous to those described in IntClafer.hs
     
-    claferSort points to its sort //Z3Clafer
+    claferSort points to its sort 
     '''
 
 
-    def __init__(self, moduleName, my_id, isTop):
+    def __init__(self, moduleName, my_id, isTop, claferSort = None):
         self.moduleName = moduleName
         self.id = my_id
         self.isTop = isTop
-        self.claferSort = None #Z3Clafer
+        self.claferSort = claferSort
         
         
     def __str__(self):

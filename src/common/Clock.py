@@ -4,6 +4,7 @@ Created on Oct 10, 2013
 @author: ezulkosk
 '''
 from common import Options, Common
+from common.Options import experiment_print
 import sys
 import time
 
@@ -98,8 +99,50 @@ class Clock():
         """
         if self.isBroken:
             return
-        if Common.MODE == Common.EXPERIMENT:
-            print(self.completed_event_map.get("first model"))  
-            return
+        if Options.MODE == Common.EXPERIMENT:
+            sys.exit("Shouldn't get here")
         for i in self.completed_event_map.keys():
             self.printEvent(i)
+            
+    def getParallelStats(self, cfr):
+        """
+        Prints out all completed events.
+        """
+        if self.isBroken:
+            return
+        if Options.MODE == Common.EXPERIMENT:
+            longestConsumer = -1
+            longestTask = -1
+            merge = -1
+            longestConsumerPlusMerge = -1
+            
+            for key in self.completed_event_map.keys():
+                val = self.completed_event_map.get(key)
+                if "Consumer" in key and val > longestConsumer:
+                    longestConsumer = val
+                if "Task" in key and val > longestTask:
+                    longestTask = val
+                if "Merge" in key:
+                    merge = val
+                longestConsumerPlusMerge = longestConsumer + merge
+            if Options.VERBOSE_PRINT:
+                experiment_print("Longest Consumer: " + str(longestConsumer))  
+                experiment_print("Longest Task: " + str(longestTask))  
+                experiment_print("Merge: " + str(merge))  
+                experiment_print("Longest Consumer Plus Merge: " + str(longestConsumerPlusMerge))  
+                experiment_print("")  
+            cfr.metric = longestConsumerPlusMerge
+            #experiment_print(self)  
+            return
+     
+    def hackUnsat(self, starttime):
+        #print("B")
+        self.completed_event_map["unsattime"] = time.clock() - starttime   
+    
+    def __str__(self):
+        retstr = []
+        for i in self.completed_event_map.keys():
+            eventTime = self.completed_event_map[i]
+            retstr.append(i + ": " + str(eventTime))
+        return "\n".join(retstr)+"\n"
+            

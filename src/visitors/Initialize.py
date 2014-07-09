@@ -9,24 +9,23 @@ import visitors
 
 class Initialize(VisitorTemplate.VisitorTemplate):
     '''
-    :var z3: (:class:`~common.Z3Instance`) The Z3 solver.
+    :var cfr: (:class:`~common.Z3Instance`) The Z3 solver.
     
     Creates the Clafer hierarchy using Z3 Datatypes and Sorts.
     The fields will need to be changed to lists ASAP.
     '''
-    def __init__(self, z3):
+    def __init__(self, cfr):
         '''
-        :param z3: The Z3 solver.
-        :type z3: :class:`~common.Z3Instance`
+        :param cfr: The Z3 solver.
+        :type cfr: :class:`~common.Z3Instance`
         '''
-        self.z3 = z3
+        self.cfr = cfr
 
     
     def claferVisit(self, element):
-        
-        if element.isAbstract:
-            self.z3.z3_sorts[element.uid].modifyAbstract()
-        self.z3.z3_sorts[element.uid].initialize()
+
+        self.cfr.cfr_sorts[element.uid].initialize()
+
         for i in element.elements:
             visitors.Visitor.visit(self, i)
             

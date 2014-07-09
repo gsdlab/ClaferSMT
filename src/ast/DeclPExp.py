@@ -15,6 +15,7 @@ class DeclPExp(object):
         
         
     def __str__(self):
-        return self.declaration
+        return str(self.declaration)
     
-    
+    def __repr__(self):
+        return str(self)

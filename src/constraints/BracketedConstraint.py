@@ -3,12 +3,10 @@ Created on Apr 29, 2013
 
 @author: ezulkosk
 '''
-from common import Assertions
-from common.Common import debug_print
+from common import Assertions, Common, SMTLib
 from constraints import Constraints
 from constraints.Constraints import GenericConstraints
 from structures.ExprArg import BoolArg
-from z3 import Implies, And, Or
 import constraints.Operations as Ops
 import sys
 
@@ -104,11 +102,12 @@ class BracketedConstraint(Constraints.GenericConstraints):
     Class for creating bracketed Clafer constraints in Z3.
     '''
     
-    def __init__(self, z3, claferStack):
-        ident = "BC:" + ".".join([str(i.element.uid) for i in claferStack])
+    def __init__(self, cfr, element, claferStack):
+        ident = "BC" + str(Common.getConstraintUID()) + ":" + ".".join([str(i.element.uid) for i in claferStack])
         GenericConstraints.__init__(self, ident)
-        self.z3 = z3
-        self.claferStack = claferStack
+        self.element = element
+        self.cfr = cfr
+        self.claferStack = [i for i in claferStack]
         self.stack = []
         self.locals = {}
         self.value = None
@@ -131,25 +130,6 @@ class BracketedConstraint(Constraints.GenericConstraints):
                 ifConstraints = []
         localStack.reverse()
         ifConstraints.reverse()
-        '''
-        for _ in range(num_combinations):
-            currExpr = localStack.pop(0)
-            if ifConstraints:
-                currIfConstraint = ifConstraints.pop(0)
-            else:
-                currIfConstraint = None
-                
-            quantFunction = getQuantifier(quantifier)
-            cond = quantFunction(currExpr)
-            
-            if currIfConstraint:
-                cond = Implies(currIfConstraint, cond)
-            condList.append(cond)
-        self.stack.append([BoolArg([And(*condList)])])
-        '''
-        #for _ in range(num_combinations):
-        #    currExpr = localStack.pop(0)
-        #    condList.append(currExpr)
         quantFunction = getQuantifier(quantifier)
         cond = quantFunction(localStack, ifConstraints)
         Assertions.nonEmpty(cond)
@@ -164,7 +144,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
         for i in args:
             if len(i) != maxInstances:
                 if len(i) != 1:
-                    sys.exit("Bug in BracketedConstraint.")
+                    sys.exit("Bug in BracketedConstraint." + str(i))
                 extendedArgs.append([i[0].clone() for _ in range(maxInstances)])
             else:
                 extendedArgs.append(i)
@@ -186,23 +166,26 @@ class BracketedConstraint(Constraints.GenericConstraints):
         Assertions.nonEmpty(finalExprs)
         self.stack.append(finalExprs)
     
-    def endProcessing(self):
+    def endProcessing(self, addToZ3 = True):
+        if not self.stack:
+            return
         self.value = self.stack.pop()
         expr = self.value
         if(self.claferStack):
             thisClafer = self.claferStack[-1]
             for i in range(thisClafer.numInstances):
                 if thisClafer.numInstances == len(expr):
-                    self.addConstraint(Implies(thisClafer.isOn(thisClafer.instances[i]), expr[i].finish()))
+                    self.addConstraint(SMTLib.SMT_Implies(thisClafer.isOn(thisClafer.instances[i]), expr[i].finish()))
                 #hack for now
                 else:
-                    self.addConstraint(Implies(thisClafer.isOn(thisClafer.instances[i]), expr[0].finish()))
+                    self.addConstraint(SMTLib.SMT_Implies(thisClafer.isOn(thisClafer.instances[i]), expr[0].finish()))
         else:
             for i in expr:
                 for j in i.getInstanceSorts():
                     (_, mask) = j
                     self.addConstraint(mask.pop_value())
-        self.z3.z3_bracketed_constraints.append(self)
+        if addToZ3:
+            self.cfr.smt_bracketed_constraints.append(self)
         
     
     def __str__(self):

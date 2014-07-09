@@ -3,7 +3,11 @@ Created on Apr 28, 2013
 
 @author: ezulkosk
 '''
-from z3 import If, And, Or, Int
+
+from common import SMTLib
+import imp
+import sys
+
 
 NORMAL = 0
 DEBUG = 1
@@ -11,10 +15,22 @@ TEST = 2
 ONE = 3
 ALL = 4
 MODELSTATS = 5 
-COMMANDLINE = 6
+REPL = 6
 EXPERIMENT = 7
 ECLIPSE = 8
-MODE = NORMAL
+PRELOAD = 9
+
+#tests
+MY_TESTS = 1 # my tests from debugging
+POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
+STRING_TESTS = 3 #tests that involve strings / string constraints
+OPTIMIZATION_TESTS = 4
+ALL_TESTS = 5
+
+SAT=True
+UNSAT=False
+
+
 BREAK = False
 FUNCTION_ID = 0 
 CONSTRAINT_ID = 0
@@ -22,6 +38,15 @@ STRING_ID = 0
 FLAG = False
 string_map = {}
 STRCONS_SUB = "STRCONS_SUB"
+FIRST_REPL_LOOP = True
+STANDARD_DELIMETER = "=== Instance "
+BOUND = 600
+
+METRICS_MAXIMIZE = 1
+METRICS_MINIMIZE = 2
+
+
+
 
 def mAnd(*args):
     '''
@@ -38,7 +63,7 @@ def mAnd(*args):
     elif len(newArgs) == 1:
         return newArgs[0]
     else:
-        return And(*newArgs)
+        return SMTLib.SMT_And(*newArgs)
 
 def mOr(*args):
     '''
@@ -53,21 +78,25 @@ def mOr(*args):
     elif len(newArgs) == 1:
         return newArgs[0]
     else:
-        return Or(*newArgs)
+        return SMTLib.SMT_Or(*newArgs)
 
-def debug_print(string):
-    '''
-    Only prints the string if in DEBUG mode.
-    '''
-    if(MODE == DEBUG):
-        print(string)
-        
-def standard_print(string):
-    '''
-    Prints the string if **not** in TEST mode.
-    '''
-    if(MODE != TEST and MODE != EXPERIMENT):
-        print(string)
+def preventSameModel(cfr, solver, model):
+    #from constraints import Operations
+    #print(model.eval(Operations.EXPR))
+    #print(model.eval(Operations.EXPR2))
+    block = []
+    for i in cfr.cfr_sorts.values():
+        for j in i.instances:
+            block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(model[j.var])))
+        if i.refs:
+            for j in i.refs:
+                block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(model[j.var])))
+
+    if block == []:
+        #input was an empty clafer model (no concretes)
+        solver.add(SMTLib.SMT_BoolConst(False))
+    else:
+        solver.add(SMTLib.SMT_Or(*block))
 
 def getConstraintUID():
     '''
@@ -92,16 +121,25 @@ def reset():
     CONSTRAINT_ID = 0
     STRING_ID = 0
 
+def is_power2(num):
+    return num != 0 and ((num & (num - 1)) == 0)
 
 def min2(l,r):
     '''
     returns the min of two integers
     '''
-    return If(l <= r, l, r)
+    return SMTLib.SMT_If(SMTLib.SMT_LE(l, r), l, r)
 
 def max2(l,r):
     '''
     returns the min of two integers
     '''
-    return If(l <= r, r, l)
+    return SMTLib.SMT_If(SMTLib.SMT_LE(l, r), r, l)
+
+def load(file):
+    if file.endswith(".cfr"):
+        sys.exit("Run 'clafer --mode=python " + str(file) + "' first.")
+    file = imp.load_source("module", str(file))
+    module = file.getModule()
+    return module
     

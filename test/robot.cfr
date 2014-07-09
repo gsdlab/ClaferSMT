@@ -1,0 +1,20 @@
+Robot
+    Motor
+        pwr -> integer
+        [ pwr = 10 || pwr = 20 || pwr = 30 ]
+    Tool
+        pwr_min -> integer
+        xor kind
+            Drill
+                [ pwr_min = 20 ]
+            Glue
+                [ pwr_min = 10 ]
+            Mill
+                [ pwr_min = 20 ]
+    Protective_grid ?
+        Mounting_set
+    [ pwr >= pwr_min * 110 / 100 ]
+    [ Drill || Mill => Protective_grid ]
+
+[ Drill
+  pwr = 10 ]

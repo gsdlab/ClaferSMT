@@ -1,0 +1,562 @@
+// ------------------
+// Contractor prototype
+// ------------------
+
+abstract Contractor
+    methods -> ContractorMethod*       // methods of particular contractor
+        [this.contractor = Contractor]
+    assignedVUs -> ValueUnit*
+        [this.assignedContractor = Contractor]
+
+// ----------------------------------
+// Contractor Method
+// ----------------------------------
+
+abstract ContractorMethod
+    methodVUs -> MethodVU*
+    contractor -> Contractor
+    [this in contractor.methods] //optional
+        
+    [all disj m1; m2 : methodVUs | m1.valueUnit.ref != m2.valueUnit.ref]
+        //optional:
+        // do not repeat definitions for the same valueUnits
+
+// ----------------------------------
+// Method / Value Unit relation prototype
+// ----------------------------------
+
+abstract MethodVU
+    cost ->> integer
+    time ->> integer
+    valueUnit -> ValueUnit
+
+// ------------------
+// ValueUnit prototype
+// ------------------
+
+abstract ValueUnit
+
+    // the method of a contractpr assigned to this value unit
+    appliedContractorMethod -> ContractorMethod
+
+    // part of contractor Method applied to this ValueUnit 
+    appliedMethodVU -> MethodVU                     
+    [appliedMethodVU in appliedContractorMethod.methodVUs.ref]
+    [appliedMethodVU.valueUnit = this]
+
+    // the contractor assigned to this value unit
+    assignedContractor -> Contractor
+    [assignedContractor = appliedContractorMethod.contractor.ref]
+
+    [this in assignedContractor.assignedVUs]
+
+    // method-dependent criteria
+
+    criterion1 ->> integer = appliedMethodVU.time
+    criterion2 ->> integer = appliedMethodVU.cost
+
+    // internal criteria, to be defined in the concrete model
+
+    criterion3 ->> integer
+    criterion4 ->> integer
+    criterion5 ->> integer
+
+// -----------------------------------
+// Optimization goals and constraints
+// -----------------------------------
+
+abstract Problem 
+    // optimization with respect to criteria
+    total_criterion1 : integer = sum ValueUnit.criterion1
+    total_criterion2 : integer = sum ValueUnit.criterion2
+//    total_criterion3 : integer = sum ValueUnit.criterion3
+//    total_criterion4 : integer = sum ValueUnit.criterion4
+//    total_criterion5 : integer = sum ValueUnit.criterion5
+
+MyProblem: Problem
+<<min MyProblem.total_criterion1 >>
+<<min MyProblem.total_criterion2 >>
+//<<max MyProblem.total_criterion3 >>
+//<<min MyProblem.total_criterion4 >>
+//<<max MyProblem.total_criterion5 >>
+
+//=======================================================
+// Classification of value units
+//=======================================================
+
+//financially_unstable_value_units -> ValueUnit*
+//[all vu : ValueUnit | (vu.criterion3 <= 2) <=> (vu in financially_unstable_value_units)]
+
+//inexperienced_value_units  -> ValueUnit*
+//[all vu : ValueUnit | (vu.criterion4 <= 5) <=> (vu in inexperienced_value_units)]
+
+//high_rate_value_units  -> ValueUnit*
+//[all vu : ValueUnit | (vu.criterion5 = 9) <=> (vu in high_rate_value_units)]
+
+//=======================================================
+// CONCRETE MODEL
+//=======================================================
+//----------------------
+// DATA
+//----------------------
+
+VU1 : ValueUnit
+    [criterion3 = 3]
+    [criterion4 = 4]
+    [criterion5 = 5]
+
+VU2 : ValueUnit
+    [criterion3 = 1]
+    [criterion4 = 10]
+    [criterion5 = 3]
+
+VU3 : ValueUnit
+    [criterion3 = 1]
+    [criterion4 = 2]
+    [criterion5 = 5]
+
+VU4 : ValueUnit
+    [criterion3 = 7]
+    [criterion4 = 2]
+    [criterion5 = 2]
+
+VU5 : ValueUnit
+    [criterion3 = 6]
+    [criterion4 = 3]
+    [criterion5 = 1]
+
+VU6 : ValueUnit
+    [criterion3 = 2]
+    [criterion4 = 6]
+    [criterion5 = 3]
+
+VU7 : ValueUnit
+    [criterion3 = 3]
+    [criterion4 = 7]
+    [criterion5 = 3]
+
+VU8 : ValueUnit
+    [criterion3 = 2]
+    [criterion4 = 5]
+    [criterion5 = 3]
+
+VU9 : ValueUnit
+    [criterion3 = 2]
+    [criterion4 = 9]
+    [criterion5 = 5]
+
+VU10 : ValueUnit
+    [criterion3 = 4]
+    [criterion4 = 2]
+    [criterion5 = 6]
+
+ContractorA : Contractor
+    ContractorMethodA1 : ContractorMethod
+        methodVU1 : MethodVU
+            [valueUnit = VU1]
+            [cost = 1]
+            [time = 2]
+        methodVU2 : MethodVU
+            [valueUnit = VU2]
+            [cost = 2]
+            [time = 3]
+        methodVU3 : MethodVU
+            [valueUnit = VU3]
+            [cost = 1]
+            [time = 2]
+        methodVU4 : MethodVU
+            [valueUnit = VU4]
+            [cost = 3]
+            [time = 2]
+        methodVU5 : MethodVU
+            [valueUnit = VU5]
+            [cost = 8]
+            [time = 4]
+        methodVU6 : MethodVU
+            [valueUnit = VU6]
+            [cost = 3]
+            [time = 5]
+        methodVU7 : MethodVU
+            [valueUnit = VU7]
+            [cost = 1]
+            [time = 2]
+        methodVU8 : MethodVU
+            [valueUnit = VU8]
+            [cost = 7]
+            [time = 4]
+        methodVU9 : MethodVU
+            [valueUnit = VU9]
+            [cost = 2]
+            [time = 9]
+        methodVU10 : MethodVU
+            [valueUnit = VU10]
+            [cost = 3]
+            [time = 5]
+        [methodVUs = methodVU1, methodVU2, methodVU3, methodVU4, methodVU5, methodVU6, methodVU7, methodVU8, methodVU9, methodVU10] 
+
+    ContractorMethodA2 : ContractorMethod
+        methodVU1 : MethodVU
+            [valueUnit = VU1]
+            [cost = 2]
+            [time = 4]
+        methodVU2 : MethodVU
+            [valueUnit = VU2]
+            [cost = 1]
+            [time = 2]
+        methodVU3 : MethodVU
+            [valueUnit = VU3]
+            [cost = 7]
+            [time = 5]
+        methodVU4 : MethodVU
+            [valueUnit = VU4]
+            [cost = 3]
+            [time = 4]
+        methodVU5 : MethodVU
+            [valueUnit = VU5]
+            [cost = 3]
+            [time = 4]
+        methodVU6 : MethodVU
+            [valueUnit = VU6]
+            [cost = 8]
+            [time = 4]
+        methodVU7 : MethodVU
+            [valueUnit = VU7]
+            [cost = 9]
+            [time = 4]
+        methodVU8 : MethodVU
+            [valueUnit = VU8]
+            [cost = 2]
+            [time = 3]
+        methodVU9 : MethodVU
+            [valueUnit = VU9]
+            [cost = 4]
+            [time = 3]
+        methodVU10 : MethodVU
+            [valueUnit = VU10]
+            [cost = 2]
+            [time = 6]
+        [methodVUs = methodVU1, methodVU2, methodVU3, methodVU4, methodVU5, methodVU6, methodVU7, methodVU8, methodVU9, methodVU10] 
+
+    ContractorMethodA3 : ContractorMethod
+        methodVU1 : MethodVU
+            [valueUnit = VU1]
+            [cost = 2]
+            [time = 3]
+        methodVU2 : MethodVU
+            [valueUnit = VU2]
+            [cost = 3]
+            [time = 4]
+        methodVU3 : MethodVU
+            [valueUnit = VU3]
+            [cost = 5]
+            [time = 6]
+        methodVU4 : MethodVU
+            [valueUnit = VU4]
+            [cost = 2]
+            [time = 3]
+        methodVU5 : MethodVU
+            [valueUnit = VU5]
+            [cost = 7]
+            [time = 5]
+        methodVU6 : MethodVU
+            [valueUnit = VU6]
+            [cost = 3]
+            [time = 7]
+        methodVU7 : MethodVU
+            [valueUnit = VU7]
+            [cost = 3]
+            [time = 2]
+        methodVU8 : MethodVU
+            [valueUnit = VU8]
+            [cost = 3]
+            [time = 4]
+        methodVU9 : MethodVU
+            [valueUnit = VU9]
+            [cost = 6]
+            [time = 2]
+        methodVU10 : MethodVU
+            [valueUnit = VU10]
+            [cost = 4]
+            [time = 6]
+        [methodVUs = methodVU1, methodVU2, methodVU3, methodVU4, methodVU5, methodVU6, methodVU7, methodVU8, methodVU9, methodVU10] 
+
+    [methods = ContractorMethodA1, ContractorMethodA2, ContractorMethodA3]
+
+
+ContractorB : Contractor
+    ContractorMethodB1 : ContractorMethod
+        methodVU1 : MethodVU
+            [valueUnit = VU1]
+            [cost = 4]
+            [time = 3]
+        methodVU2 : MethodVU
+            [valueUnit = VU2]
+            [cost = 6]
+            [time = 3]
+        methodVU3 : MethodVU
+            [valueUnit = VU3]
+            [cost = 4]
+            [time = 2]
+        methodVU4 : MethodVU
+            [valueUnit = VU4]
+            [cost = 5]
+            [time = 3]
+        methodVU5 : MethodVU
+            [valueUnit = VU5]
+            [cost = 8]
+            [time = 6]
+        methodVU6 : MethodVU
+            [valueUnit = VU6]
+            [cost = 5]
+            [time = 7]
+        methodVU7 : MethodVU
+            [valueUnit = VU7]
+            [cost = 4]
+            [time = 3]
+        methodVU8 : MethodVU
+            [valueUnit = VU8]
+            [cost = 4]
+            [time = 6]
+        methodVU9 : MethodVU
+            [valueUnit = VU9]
+            [cost = 3]
+            [time = 4]
+        methodVU10 : MethodVU
+            [valueUnit = VU10]
+            [cost = 7]
+            [time = 5]
+        [methodVUs = methodVU1, methodVU2, methodVU3, methodVU4, methodVU5, methodVU6, methodVU7, methodVU8, methodVU9, methodVU10] 
+
+    ContractorMethodB2 : ContractorMethod
+        methodVU1 : MethodVU
+            [valueUnit = VU1]
+            [cost = 9]
+            [time = 2]
+        methodVU2 : MethodVU
+            [valueUnit = VU2]
+            [cost = 3]
+            [time = 4]
+        methodVU3 : MethodVU
+            [valueUnit = VU3]
+            [cost = 6]
+            [time = 4]
+        methodVU4 : MethodVU
+            [valueUnit = VU4]
+            [cost = 4]
+            [time = 6]
+        methodVU5 : MethodVU
+            [valueUnit = VU5]
+            [cost = 1]
+            [time = 2]
+        methodVU6 : MethodVU
+            [valueUnit = VU6]
+            [cost = 2]
+            [time = 3]
+        methodVU7 : MethodVU
+            [valueUnit = VU7]
+            [cost = 4]
+            [time = 3]
+        methodVU8 : MethodVU
+            [valueUnit = VU8]
+            [cost = 6]
+            [time = 5]
+        methodVU9 : MethodVU
+            [valueUnit = VU9]
+            [cost = 3]
+            [time = 4]
+        methodVU10 : MethodVU
+            [valueUnit = VU10]
+            [cost = 3]
+            [time = 5]
+        [methodVUs = methodVU1, methodVU2, methodVU3, methodVU4, methodVU5, methodVU6, methodVU7, methodVU8, methodVU9, methodVU10] 
+
+    ContractorMethodB3 : ContractorMethod
+        methodVU1 : MethodVU
+            [valueUnit = VU1]
+            [cost = 1]
+            [time = 2]
+        methodVU2 : MethodVU
+            [valueUnit = VU2]
+            [cost = 3]
+            [time = 2]
+        methodVU3 : MethodVU
+            [valueUnit = VU3]
+            [cost = 5]
+            [time = 2]
+        methodVU4 : MethodVU
+            [valueUnit = VU4]
+            [cost = 5]
+            [time = 6]
+        methodVU5 : MethodVU
+            [valueUnit = VU5]
+            [cost = 3]
+            [time = 5]
+        methodVU6 : MethodVU
+            [valueUnit = VU6]
+            [cost = 7]
+            [time = 4]
+        methodVU7 : MethodVU
+            [valueUnit = VU7]
+            [cost = 7]
+            [time = 5]
+        methodVU8 : MethodVU
+            [valueUnit = VU8]
+            [cost = 4]
+            [time = 3]
+        methodVU9 : MethodVU
+            [valueUnit = VU9]
+            [cost = 2]
+            [time = 3]
+        methodVU10 : MethodVU
+            [valueUnit = VU10]
+            [cost = 4]
+            [time = 5]
+        [methodVUs = methodVU1, methodVU2, methodVU3, methodVU4, methodVU5, methodVU6, methodVU7, methodVU8, methodVU9, methodVU10] 
+
+    [methods = ContractorMethodB1, ContractorMethodB2, ContractorMethodB3]
+
+ContractorC : Contractor
+    ContractorMethodC1 : ContractorMethod
+        methodVU1 : MethodVU
+            [valueUnit = VU1]
+            [cost = 2]
+            [time = 3]
+        methodVU2 : MethodVU
+            [valueUnit = VU2]
+            [cost = 1]
+            [time = 2]
+        methodVU3 : MethodVU
+            [valueUnit = VU3]
+            [cost = 3]
+            [time = 3]
+        methodVU4 : MethodVU
+            [valueUnit = VU4]
+            [cost = 1]
+            [time = 2]
+        methodVU5 : MethodVU
+            [valueUnit = VU5]
+            [cost = 6]
+            [time = 5]
+        methodVU6 : MethodVU
+            [valueUnit = VU6]
+            [cost = 3]
+            [time = 4]
+        methodVU7 : MethodVU
+            [valueUnit = VU7]
+            [cost = 4]
+            [time = 5]
+        methodVU8 : MethodVU
+            [valueUnit = VU8]
+            [cost = 2]
+            [time = 1]
+        methodVU9 : MethodVU
+            [valueUnit = VU9]
+            [cost = 3]
+            [time = 5]
+        methodVU10 : MethodVU
+            [valueUnit = VU10]
+            [cost = 4]
+            [time = 3]
+        [methodVUs = methodVU1, methodVU2, methodVU3, methodVU4, methodVU5, methodVU6, methodVU7, methodVU8, methodVU9, methodVU10] 
+
+    ContractorMethodC2 : ContractorMethod
+        methodVU1 : MethodVU
+            [valueUnit = VU1]
+            [cost = 8]
+            [time = 7]
+        methodVU2 : MethodVU
+            [valueUnit = VU2]
+            [cost = 4]
+            [time = 5]
+        methodVU3 : MethodVU
+            [valueUnit = VU3]
+            [cost = 3]
+            [time = 4]
+        methodVU4 : MethodVU
+            [valueUnit = VU4]
+            [cost = 5]
+            [time = 4]
+        methodVU5 : MethodVU
+            [valueUnit = VU5]
+            [cost = 3]
+            [time = 3]
+        methodVU6 : MethodVU
+            [valueUnit = VU6]
+            [cost = 6]
+            [time = 5]
+        methodVU7 : MethodVU
+            [valueUnit = VU7]
+            [cost = 4]
+            [time = 6]
+        methodVU8 : MethodVU
+            [valueUnit = VU8]
+            [cost = 3]
+            [time = 2]
+        methodVU9 : MethodVU
+            [valueUnit = VU9]
+            [cost = 1]
+            [time = 2]
+        methodVU10 : MethodVU
+            [valueUnit = VU10]
+            [cost = 3]
+            [time = 2]
+        [methodVUs = methodVU1, methodVU2, methodVU3, methodVU4, methodVU5, methodVU6, methodVU7, methodVU8, methodVU9, methodVU10] 
+
+    ContractorMethodC3 : ContractorMethod
+        methodVU1 : MethodVU
+            [valueUnit = VU1]
+            [cost = 9]
+            [time = 5]
+        methodVU2 : MethodVU
+            [valueUnit = VU2]
+            [cost = 2]
+            [time = 2]
+        methodVU3 : MethodVU
+            [valueUnit = VU3]
+            [cost = 1]
+            [time = 2]
+        methodVU4 : MethodVU
+            [valueUnit = VU4]
+            [cost = 1]
+            [time = 1]
+        methodVU5 : MethodVU
+            [valueUnit = VU5]
+            [cost = 2]
+            [time = 1]
+        methodVU6 : MethodVU
+            [valueUnit = VU6]
+            [cost = 5]
+            [time = 3]
+        methodVU7 : MethodVU
+            [valueUnit = VU7]
+            [cost = 7]
+            [time = 7]
+        methodVU8 : MethodVU
+            [valueUnit = VU8]
+            [cost = 4]
+            [time = 3]
+        methodVU9 : MethodVU
+            [valueUnit = VU9]
+            [cost = 3]
+            [time = 6]
+        methodVU10 : MethodVU
+            [valueUnit = VU10]
+            [cost = 3]
+            [time = 2]
+        [methodVUs = methodVU1, methodVU2, methodVU3, methodVU4, methodVU5, methodVU6, methodVU7, methodVU8, methodVU9, methodVU10] 
+
+    [methods = ContractorMethodC1, ContractorMethodC2, ContractorMethodC3]
+
+    
+//----------------------
+// CONSTRAINTS
+//----------------------
+
+//[all c : Contractor | #c.assignedVUs <= 5]
+//[some ContractorB.assignedVUs]
+//[VU1.assignedContractor.ref = VU3.assignedContractor.ref]
+//[#ContractorB.assignedVUs <= 4]
+
+//[#financially_unstable_value_units <= 5]
+//[#inexperienced_value_units <= 5]
+//[#high_rate_value_units <= 5]
