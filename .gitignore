@@ -9,6 +9,10 @@
 *.exe
 *.dll
 src/test/
+src/z3*.*
+src/libz3*.*
+src/example.py
+src/com.microsoft.z3.jar
 \#*
 experiment/runs/
 giaoutput
