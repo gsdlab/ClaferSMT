@@ -5,6 +5,9 @@
 *.py.class
 .project
 .pydevproject
+*.egg
+*.exe
+*.dll
 src/test/
 \#*
 experiment/runs/
