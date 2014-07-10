@@ -8,3 +8,6 @@
 src/test/
 \#*
 experiment/runs/
+giaoutput
+src/giaoutput
+*.csv
