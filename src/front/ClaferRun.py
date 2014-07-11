@@ -30,10 +30,14 @@ def run(args):
         module = Common.load(file)
         model = ClaferModel(module)
         model.run()
-        
-if __name__ == '__main__':
+       
+def main():
     Options.setCommandLineOptions()
     if Options.CPROFILING:
         cProfile.run("main(sys.argv[1:])", sort=1)
     else:
         run(sys.argv[1:])
+
+if __name__ == '__main__':
+    main()
+    

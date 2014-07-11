@@ -5,6 +5,17 @@
 *.py.class
 .project
 .pydevproject
+*.egg
+*.exe
+*.dll
+__pycache__
 src/test/
+src/z3*.*
+src/libz3*.*
+src/example.py
+src/com.microsoft.z3.jar
 \#*
 experiment/runs/
+giaoutput
+src/giaoutput
+*.csv
