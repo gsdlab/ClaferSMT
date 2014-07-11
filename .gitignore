@@ -8,6 +8,7 @@
 *.egg
 *.exe
 *.dll
+__pycache__
 src/test/
 src/z3*.*
 src/libz3*.*
