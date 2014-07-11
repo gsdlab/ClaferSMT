@@ -11,6 +11,11 @@ init:
 		read z3bin; \
 	fi
 	cp $(z3bin)/*.* src
+	rm -f src/com.microsoft.z3.jar
+	rm -f src/example.py
+	rm -f src/libz3java*.*
+	rm -f src/z3.exe   # on Windows
+	rm -f src/z3       # on Linux and Mac
 
 install:
 	mkdir -p $(to)
