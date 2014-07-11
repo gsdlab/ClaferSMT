@@ -1,7 +1,7 @@
 ClaferSMT
 =========
 
-v0.3.6.1
+v0.3.6.2
 
 Instance generator and multi-objective optimizer based on SMT solvers (currently Microsoft Z3) for Clafer.
 
