@@ -14,7 +14,7 @@ init:
 	# Windows Z3
 	cp -f $(z3bin)/libz3.dll .  2>/dev/null || :    # supress error message and exit code if missing
 	# Linux Z3
-	cp -f $(z3bin)/libz3.so .   2>/dev/null || :
+	cp -f $(z3bin)/libz3.so src   2>/dev/null || :  # need it in src for claferSMT.sh to work
 	# Mac Z3
 	cp -f $(z3bin)/libz3.dylib .  2>/dev/null || :
 
@@ -24,7 +24,11 @@ install:
 	cp -f ClaferSMT.egg $(to)	
 	# Windows Z3
 	cp -f libz3.dll $(to)  2>/dev/null || :
-	# Linux Z3 
-	cp -f libz3.so $(to)  2>/dev/null || :
+	# Linux Z3 included in egg
 	# Mac Z3
 	cp -f libz3.dylib $(to)  2>/dev/null || :
+
+clean:
+	find . -type d -name '__pycache__' -print0 | xargs -0 rm -fr
+	find . -type f -name '*.pyo' -print0 | xargs -0 rm -f
+	find . -type f -name '*.pyc' -print0 | xargs -0 rm -f
