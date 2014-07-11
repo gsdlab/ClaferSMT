@@ -3,7 +3,7 @@ ClaferSMT
 
 v0.3.6.1
 
-Python IR classes for Clafer, as well as Z3 backend
+Instance generator and multi-objective optimizer based on SMT solvers (currently Microsoft Z3) for Clafer.
 
 Contributors
 ------------
