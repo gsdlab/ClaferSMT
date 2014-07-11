@@ -1,0 +1,2 @@
+#!/bin/sh
+exec python3.2 -m pdb $1 $2 $3 $4 $5 $6 $7 $8 $9

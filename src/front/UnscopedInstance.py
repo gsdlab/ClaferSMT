@@ -24,7 +24,7 @@ import z3
 
 
 
-class Z3Instance(object):
+class UnscopedInstance(object):
     
     ''' 
     :var module: The Clafer AST
@@ -35,10 +35,15 @@ class Z3Instance(object):
         Common.reset() #resets variables if in test mode
         self.EMPTYSTRING = Int("EMPTYSTRING")
         self.module = module
-        self.z3_bracketed_constraints = []
-        self.z3_sorts = {}
+        self.cfr_bracketed_constraints = []
+        self.cfr_sorts = {}
+        self.relations = {}
+        self.constraints = []
         #self.solver = SolverFor("QF_LIA")
-        self.solver = Solver()
+        self.solver = z3.Then('simplify', 'qe', 'smt').solver()
+        for i in z3.tactics():
+            print(str(i) + ": " + z3.tactic_description(i))
+        print(z3.tactics())
         self.setOptions()
         self.clock = Clock.Clock()
         self.objectives = []
@@ -58,24 +63,24 @@ class Z3Instance(object):
         self.unsat_map = {}
     
     def createGroupCardConstraints(self):
-        for i in self.z3_sorts.values():
+        for i in self.cfr_sorts.values():
             i.addGroupCardConstraints()
             
     def createRefConstraints(self):
-        for i in self.z3_sorts.values():
+        for i in self.cfr_sorts.values():
             i.addRefConstraints()
             
     def createCardinalityConstraints(self):
-        for i in self.z3_sorts.values():
+        for i in self.cfr_sorts.values():
             i.createCardinalityConstraints()
     
     def mapColonClafers(self):
-        for i in self.z3_sorts.values():
+        for i in self.cfr_sorts.values():
             if i.superSort:
                 i.superSort.addSubSort(i)     
     
     def addSubSortConstraints(self):
-        for i in self.z3_sorts.values():
+        for i in self.cfr_sorts.values():
             if i.superSort:
                 i.superSort.addSubSortConstraints(i)     
     
@@ -90,7 +95,7 @@ class Z3Instance(object):
             return upper.value#sort.numInstances 
     
     def findUnusedAbstracts(self):
-        for i in self.z3_sorts.values():
+        for i in self.cfr_sorts.values():
             if i.element.isAbstract:
                 summ = 0
                 for j in i.subs:
@@ -105,8 +110,8 @@ class Z3Instance(object):
         """
         self.solver.set(unsat_core=True)
         self.solver.set(model_completion=True)
-        self.solver.set('qi.eager_threshold',100)
-        self.solver.set('qi.lazy_threshold',100)
+        #self.solver.set('qi.eager_threshold',100)
+        #self.solver.set('qi.lazy_threshold',100)
         #self.solver.set(produce_models=True)
         #set_option(auto_config=False)
         #set_option(candidate_models=True)
@@ -149,20 +154,24 @@ class Z3Instance(object):
             print("Solving")
             #print(self.solver.assertions())
             #print(self.solver.param_descrs())
-            self.solver.check()
+            print(self.solver.check())
             stop = time.clock()
             print(stop - start)
             m = self.solver.model()
             #print(m)
-            for i in self.z3_sorts:
-                print(m[self.z3_sorts[i].card])
+            for i in self.cfr_sorts.values():
+                if not i.superSort:
+                    print(str(i) + " : " + str(m[i.sort]))
+            """
+            #print(m)
+            for i in self.cfr_sorts:
+                print(m[self.cfr_sorts[i].card])
                 
-                print(m[self.z3_sorts[i].sort])
-                l = m[self.z3_sorts[i].sort]
+                print(m[self.cfr_sorts[i].sort])
+                l = m[self.cfr_sorts[i].sort]
                 if str(l[0]).startswith("c0_B"):
                     for k in l:
                         print(k)
-            """
             debug_print("Adjusting instances for scopes.")
             Visitor.visit(SetScopes.SetScopes(self), self.module)
           
@@ -232,10 +241,12 @@ class Z3Instance(object):
     
     
     def assertConstraints(self):
-        for i in self.z3_sorts.values():
+        for i in self.constraints:
+            self.solver.add(i)
+        for i in self.cfr_sorts.values():
             i.constraints.assertConstraints(self)
         self.join_constraints.assertConstraints(self)
-        for i in self.z3_bracketed_constraints:
+        for i in self.cfr_bracketed_constraints:
             i.assertConstraints(self)
     
     
@@ -280,13 +291,13 @@ class Z3Instance(object):
     
     
     def getSort(self, uid):
-        return self.z3_sorts.get(uid)
+        return self.cfr_sorts.get(uid)
         
     def getSorts(self): 
-        '''
+        ''' 
         :returns: z3_sorts
         '''
-        return self.z3_sorts.values()
+        return self.cfr_sorts.values()
         
     def addSort(self, sortID, sort):
         '''
@@ -295,7 +306,7 @@ class Z3Instance(object):
         :param sort: A ClaferSort.
         :type sort: :mod:`common.ClaferSort`
         '''
-        self.z3_sorts[sortID] = sort
+        self.cfr_sorts[sortID] = sort
     
     def __str__(self):
         return (str(self.getSorts())) + "\n" +\

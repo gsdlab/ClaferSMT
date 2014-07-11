@@ -3,7 +3,7 @@ Created on Apr 29, 2013
 
 @author: ezulkosk
 '''
-from common import Common, Options, SMTLib
+from common import Common, Options, SMTLib, Alloy
 from common.Common import mOr, mAnd
 from common.Options import standard_print
 from constraints import Constraints
@@ -111,6 +111,42 @@ class  ClaferSort(object):
             return bits + 3
         return None
     
+    def getConsts(self, count):
+        t = Alloy.T(self)
+        if len(t.consts) < count:
+            for i in range(len(t.consts), count):
+                t.consts.append(z3.Const(str(t.element) + '_' + str(i), t.sort))
+        return t.consts[0:count]
+    
+    def getNewConst(self):
+        t = Alloy.T(self)
+        c = z3.Const(str(t.element) + '_' + str(len(t.consts)), t.sort)
+        t.consts.append(c)
+        return c
+
+    def scopeless_initialize(self):
+        #see Alloy-SMT paper, Integer Fig
+        self.sort = Alloy.declareSort(self)
+        #if(self.sort and len(self.sort) == 2):
+        #    self.sort, _ = self.sort
+        self.isOn = Alloy.isOn(self)
+        self.consts = []
+        if self.sort:
+            self.consts.append(z3.Const(str(self.element) + '_0', self.sort))
+            self.consts.append(z3.Const(str(self.element) + '_1', self.sort))
+        
+        self.isName = Alloy.isName(self)
+        
+        if self.superSort:
+            Alloy.isA(self.cfr, self, self.superSort)
+            
+        #no child wo/ parent
+        if self.parent:
+            Alloy.relation(self.cfr, self, self.parent, lone=True, some=True)
+        
+        Alloy.setCard(self.cfr, self)
+    
+    '''
     def scopeless_initialize(self):
         #print(str(self.element))
         
@@ -148,7 +184,7 @@ class  ClaferSort(object):
             #todo
             #create card constraints for the relation...generalize alloysmt
             self.z3.translator.addParentChildRelation(self, self.parent, self.lowerCardConstraint, self.upperCardConstraint, self.parent.sort, self.sort)
-            
+    '''
         
     
     def initialize(self):

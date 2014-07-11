@@ -5,7 +5,7 @@ Created on April 27, 2013
 
 '''
 from common import Common, Options
-from front import TestClafers, ModelStats
+from front import TestClafers, ModelStats, UnscopedInstance
 from front.ClaferModel import ClaferModel
 import cProfile
 import imp
@@ -28,7 +28,8 @@ def run(args):
     elif Options.MODE in [Common.NORMAL, Common.EXPERIMENT, Common.DEBUG, Common.REPL, Common.MODELSTATS]:
         file = Options.FILE
         module = Common.load(file)
-        model = ClaferModel(module)
+        model = UnscopedInstance.UnscopedInstance(module)
+        #model = ClaferModel(module)
         model.run()
        
 def main():
