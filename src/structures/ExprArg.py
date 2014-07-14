@@ -108,10 +108,10 @@ class JoinArg(ExprArg):
         self.instanceSorts = []
     
     def checkIfJoinIsComputed(self):
-        import constraints.Operations as Ops
+        import constraints.operations.Join as Join
         if not self.instanceSorts:
             joinList = self.flattenJoin()
-            self.instanceSorts = Ops.computeJoin(joinList)
+            self.instanceSorts = Join.computeJoin(joinList)
     
     def getInstanceSorts(self):
         self.checkIfJoinIsComputed()

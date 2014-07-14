@@ -5,11 +5,11 @@ Created on Jan 13, 2014
 '''
 from ast import IntegerLiteral
 from common import Options, Common, SMTLib
-from constraints import Operations
+from constraints import operations
 from structures.ExprArg import JoinArg
 from visitors import VisitorTemplate, Visitor, CreateBracketedConstraints
-
 import visitors
+
 
 class CheckForGoals(VisitorTemplate.VisitorTemplate):
     '''
@@ -37,7 +37,7 @@ class CheckForGoals(VisitorTemplate.VisitorTemplate):
             op = Common.METRICS_MAXIMIZE
         expr = bracketedConstraintsVisitor.objectiveVisit(element.exp.iExp[0].elements[0])
         if isinstance(expr[0], JoinArg):
-            expr = Operations.computeJoin(expr)
+            expr = operations.Join.computeJoin(expr)
         mask = expr[0][1]
         valueList = [i for i in mask.values()]
         self.cfr.objectives.append((op, SMTLib.SMT_Sum(valueList)))

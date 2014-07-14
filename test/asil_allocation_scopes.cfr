@@ -1,12 +1,12 @@
-ComponentFailureEvent 24
+abstract ComponentFailureEvent 24
   sil ->> integer
   [sil >= 0 && sil <= 4]
 
-CutSet 31
+abstract CutSet 31
   fault -> Fault
   componentFailureEvent -> ComponentFailureEvent + 
     
-Fault 2
+abstract Fault 2
   sil ->> integer
   [sil >= 0 && sil <= 4]
     

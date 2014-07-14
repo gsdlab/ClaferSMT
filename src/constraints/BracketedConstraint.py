@@ -6,9 +6,11 @@ Created on Apr 29, 2013
 from common import Assertions, Common, SMTLib
 from constraints import Constraints
 from constraints.Constraints import GenericConstraints
+from constraints.operations import Join, Arithmetic, String, Quantifier, Boolean, \
+    Set
 from structures.ExprArg import BoolArg
-import constraints.Operations as Ops
 import sys
+
 
 
 '''
@@ -21,54 +23,52 @@ import sys
 
 ClaferToZ3OperationsMap = {
                            #Unary Ops
-                           "!"           : (1, Ops.op_not),
-                           "UNARY_MINUS" : (1, Ops.op_un_minus),
-                           "#"           : (1, Ops.op_card),
-                           "max"         : (1, "TODO"),
-                           "min"         : (1, "TODO"),
-                           "sum"         : (1, Ops.op_sum),    
+                           "!"           : (1, Boolean.op_not),
+                           "UNARY_MINUS" : (1, Arithmetic.op_un_minus),
+                           "#"           : (1, Set.op_card),
+                           "sum"         : (1, Arithmetic.op_sum),    
                            #Binary Ops
-                           "<=>"         : (2, Ops.op_equivalence),
-                           "=>"          : (2, Ops.op_implies),
-                           "||"          : (2, Ops.op_or),
-                           "xor"         : (2, Ops.op_xor),
-                           "&&"          : (2, Ops.op_and),
-                           "<"           : (2, Ops.op_lt),
-                           ">"           : (2, Ops.op_gt),
-                           "<="          : (2, Ops.op_le),
-                           ">="          : (2, Ops.op_ge),
-                           "="           : (2, Ops.op_eq),
-                           "!="          : (2, Ops.op_ne),
-                           "in"          : (2, Ops.op_in),
-                           "nin"         : (2, Ops.op_nin),
-                           "+"           : (2, Ops.op_add),
-                           "-"           : (2, Ops.op_sub),
-                           "*"           : (2, Ops.op_mul),
-                           "/"           : (2, Ops.op_div),
-                           "++"          : (2, Ops.op_union),
-                           "--"          : (2, Ops.op_difference),
-                           "&"           : (2, Ops.op_intersection),
-                           "<:"          : (2, Ops.op_domain_restriction),
-                           ":>"          : (2, Ops.op_range_restriction),
-                           "."           : (2, Ops.op_join),
+                           "<=>"         : (2, Boolean.op_equivalence),
+                           "=>"          : (2, Set.op_implies),
+                           "||"          : (2, Boolean.op_or),
+                           "xor"         : (2, Boolean.op_xor),
+                           "&&"          : (2, Boolean.op_and),
+                           "<"           : (2, Arithmetic.op_lt),
+                           ">"           : (2, Arithmetic.op_gt),
+                           "<="          : (2, Arithmetic.op_le),
+                           ">="          : (2, Arithmetic.op_ge),
+                           "="           : (2, Set.op_eq),
+                           "!="          : (2, Set.op_ne),
+                           "in"          : (2, Set.op_in),
+                           "nin"         : (2, Set.op_nin),
+                           "+"           : (2, Arithmetic.op_add),
+                           "-"           : (2, Arithmetic.op_sub),
+                           "*"           : (2, Arithmetic.op_mul),
+                           "/"           : (2, Arithmetic.op_div),
+                           "++"          : (2, Set.op_union),
+                           "--"          : (2, Set.op_difference),
+                           "&"           : (2, Set.op_intersection),
+                           "<:"          : (2, Set.op_domain_restriction),
+                           ":>"          : (2, Set.op_range_restriction),
+                           "."           : (2, Join.op_join),
                            #Ternary Ops
-                           "ifthenelse"  : (3, Ops.op_ifthenelse),
+                           "ifthenelse"  : (3, Boolean.op_ifthenelse),
                            #String Ops
-                           "concat"      : (2, Ops.op_concat),
-                           "length"      : (1, Ops.op_length),
-                           "substring"   : (3, Ops.op_substring),
-                           "contains"    : (2, Ops.op_contains),
-                           "indexOf"     : (2, Ops.op_indexof),
-                           "replace"     : (3, Ops.op_replace),
-                           "split"       : (2, Ops.op_split)
+                           "concat"      : (2, String.op_concat),
+                           "length"      : (1, String.op_length),
+                           "substring"   : (3, String.op_substring),
+                           "contains"    : (2, String.op_contains),
+                           "indexOf"     : (2, String.op_indexof),
+                           "replace"     : (3, String.op_replace),
+                           "split"       : (2, String.op_split)
                            }
 
 QuantifierMap = {
-               "All"           : Ops.quant_all,
-               "Lone"          : Ops.quant_lone,
-               "One"           : Ops.quant_one,
-               "No"            : Ops.quant_no, 
-               "Some"          : Ops.quant_some, 
+               "All"           : Quantifier.quant_all,
+               "Lone"          : Quantifier.quant_lone,
+               "One"           : Quantifier.quant_one,
+               "No"            : Quantifier.quant_no, 
+               "Some"          : Quantifier.quant_some, 
                }
 
 
