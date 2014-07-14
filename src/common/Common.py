@@ -7,7 +7,7 @@ Created on Apr 28, 2013
 from common import SMTLib
 import imp
 import sys
-
+import subprocess
 
 NORMAL = 0
 DEBUG = 1
@@ -138,7 +138,12 @@ def max2(l,r):
 
 def load(file):
     if file.endswith(".cfr"):
-        sys.exit("Run 'clafer --mode=python " + str(file) + "' first.")
+        print("Running 'clafer --mode=python " + str(file) + "' first.")
+        try:
+            subprocess.call(["clafer", "-sm" , "python", file]);
+        except Exception as err:
+            print(err)
+        file = file[:-4] + ".py"
     file = imp.load_source("module", str(file))
     module = file.getModule()
     return module
