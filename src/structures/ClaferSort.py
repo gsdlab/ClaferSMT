@@ -127,9 +127,8 @@ class  ClaferSort(object):
     def scopeless_initialize(self):
         #see Alloy-SMT paper, Integer Fig
         self.sort = Alloy.declareSort(self)
-        #if(self.sort and len(self.sort) == 2):
-        #    self.sort, _ = self.sort
-        self.isOn = Alloy.isOn(self)
+        #(self.sort, self.bounded_consts) = Alloy.declareBoundedSort(self)
+        #self.isOn = Alloy.isOn(self)
         self.consts = []
         if self.sort:
             self.consts.append(z3.Const(str(self.element) + '_0', self.sort))
@@ -144,7 +143,9 @@ class  ClaferSort(object):
         if self.parent:
             Alloy.relation(self.cfr, self, self.parent, lone=True, some=True)
         
-        Alloy.setCard(self.cfr, self)
+        
+        
+        #Alloy.setCard(self.cfr, self)
     
     '''
     def scopeless_initialize(self):

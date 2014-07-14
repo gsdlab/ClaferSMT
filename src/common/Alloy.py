@@ -17,8 +17,10 @@ def declareSort(claferSort):
 
 def declareBoundedSort(claferSort):
     if not claferSort.superSort:
-        return z3.EnumSort(claferSort.element.uid, [claferSort.element.uid + "_" + str(i) for i in range(12)])
-    return None
+        (s,consts) = z3.EnumSort(claferSort.element.uid, [claferSort.element.uid + "_" + str(i) for i in range(4)])
+        #print(s)
+        return (s,consts)
+    return (None,None)
 
 def isOn(claferSort):
     if not claferSort.superSort:
@@ -62,15 +64,15 @@ def relation(model, s1, s2, lone=False, some=False):
         constraint = z3.ForAll([c1,p1,p2], z3.Implies(z3.And(r(c1,p1), r(c1,p2)), p1 == p2))
         model.constraints.append(constraint)
     if some:
-        constraint = z3.ForAll(c1, z3.And(z3.Implies(T(s1).isOn(c1), z3.Exists(p1, r(c1,p1))),
-                                          z3.Implies(z3.Exists(p1, r(c1,p1)), T(s1).isOn(c1))))
+        #constraint = z3.ForAll(c1, z3.And(z3.Implies(T(s1).isOn(c1), z3.Exists(p1, r(c1,p1))),
+        #                                  z3.Implies(z3.Exists(p1, r(c1,p1)), T(s1).isOn(c1))))
+        constraint = z3.ForAll(c1, z3.Exists(p1, r(c1,p1)))
         model.constraints.append(constraint)
     return r
 
 def And(s1, s2):
     return z3.And(s1, s2)
     
-
 #TODO ensure 0 upper bound case?
 def setCard(model, s):
     (lcard, ucard) = s.element.card
@@ -88,14 +90,25 @@ def setCard(model, s):
         if s.parent:
             constraint = z3.ForAll(p, z3.Not(z3.Exists(consts, z3.And(z3.Distinct(consts), *[r(i,p) for i in consts]))))
         else:
-            constraint = z3.Not(z3.Exists(consts, z3.And(z3.Distinct(consts), *[T(s).isOn(i) for i in consts])))
+            #constraint = z3.Not(z3.Exists(consts, z3.And(z3.Distinct(consts), *[And(T(s).isOn(i), s.isName(i)) for i in consts])))
+            constraint = z3.Not(z3.Exists(consts, z3.And(z3.Distinct(consts), *[s.isName(i) for i in consts])))
         model.constraints.append(constraint)
     if lcard > 0:
         if s.parent:
-            constraint = z3.ForAll(p, z3.Exists(consts[:lcard], 
-                                                z3.And(z3.Distinct(consts[:lcard]), *[r(i,p) for i in consts[:lcard]])))
+            #constraint = z3.ForAll(p, z3.Implies(And(T(s.parent).isOn(p), s.parent.isName(p)),
+            #                                     z3.Exists(consts[:lcard], 
+            #                                               z3.And(z3.Distinct(consts[:lcard]), *[r(i,p) for i in consts[:lcard]]))))
+            constraint = z3.ForAll(p, z3.Implies(s.parent.isName(p),
+                                                 z3.Exists(consts[:lcard], 
+                                                           z3.And(z3.Distinct(consts[:lcard]), *[r(i,p) for i in consts[:lcard]]))))
         else:
-            constraint = z3.Exists(consts[:lcard], z3.Distinct(consts[:lcard]))
+            #constraint = z3.Exists(consts[:lcard], z3.And(z3.Distinct(consts[:lcard]), *[z3.And(s.isName(i), T(s).isOn(i)) for i in consts[:lcard]]))
+            constraint = z3.Exists(consts[:lcard], z3.And(z3.Distinct(consts[:lcard]), *[s.isName(i) for i in consts[:lcard]]))
         model.constraints.append(constraint)
-    
-    
+            
+def noOverlappingSubs(model, s):
+    subs = s.subs
+    p = s.consts[0]
+    cons = z3.ForAll(p, z3.And(*[z3.Not(z3.And(subs[i].isName(p), subs[j].isName(p))) for i in range(len(subs) - 1) for j in range(i+1, len(subs))]))
+    #print(cons)
+    model.constraints.append(cons)

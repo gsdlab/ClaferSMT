@@ -5,7 +5,7 @@ Created on Apr 30, 2013
 '''
 
 from ast.IntegerLiteral import IntegerLiteral
-from common import Common, Options, Clock
+from common import Common, Options, Clock, Alloy
 from common.Exceptions import UnusedAbstractException
 from common.Options import debug_print, standard_print
 from constraints import Translator, Constraints
@@ -40,10 +40,10 @@ class UnscopedInstance(object):
         self.relations = {}
         self.constraints = []
         #self.solver = SolverFor("QF_LIA")
-        self.solver = z3.Then('simplify', 'qe', 'smt').solver()
-        for i in z3.tactics():
-            print(str(i) + ": " + z3.tactic_description(i))
-        print(z3.tactics())
+        self.solver = z3.Solver()#z3.Then('simplify', 'qe', 'smt').solver()
+        #for i in z3.tactics():
+        #    print(str(i) + ": " + z3.tactic_description(i))
+        #print(z3.tactics())
         self.setOptions()
         self.clock = Clock.Clock()
         self.objectives = []
@@ -120,7 +120,7 @@ class UnscopedInstance(object):
             set_option(max_width=100)
             set_option(max_depth=1000)
             set_option(max_args=1000)
-            set_option(auto_config=False)
+        set_option(auto_config=False)
     
     def run(self):
         '''
@@ -146,7 +146,11 @@ class UnscopedInstance(object):
           
             debug_print("Scopeless Initialization")
             Visitor.visit(Initialize.Scopeless_Initialize(self), self.module)
-
+            
+            #no overlapping subs
+            for i in self.cfr_sorts.values():      
+                if i.subs:
+                    Alloy.noOverlappingSubs(self, i)
 
             debug_print("Asserting constraints.")
             self.assertConstraints()  
@@ -157,138 +161,45 @@ class UnscopedInstance(object):
             print(self.solver.check())
             stop = time.clock()
             print(stop - start)
+            if self.solver.check() != sat:
+                print(self.solver.unsat_core())
+                return
             m = self.solver.model()
             #print(m)
             for i in self.cfr_sorts.values():
                 if not i.superSort:
                     print(str(i) + " : " + str(m[i.sort]))
-            """
-            #print(m)
-            for i in self.cfr_sorts:
-                print(m[self.cfr_sorts[i].card])
-                
-                print(m[self.cfr_sorts[i].sort])
-                l = m[self.cfr_sorts[i].sort]
-                if str(l[0]).startswith("c0_B"):
-                    for k in l:
-                        print(k)
-            debug_print("Adjusting instances for scopes.")
-            Visitor.visit(SetScopes.SetScopes(self), self.module)
-          
-            debug_print("Adjusting abstract scopes.")
-            AdjustAbstracts.adjustAbstractsFixedPoint(self)
-            """
             '''
-            """ Initializing ClaferSorts and their instances. """
-            Visitor.visit(Initialize.Initialize(self), self.module)
-            
-            debug_print("Creating cardinality constraints.")
-            self.createCardinalityConstraints()
-            
-            debug_print("Creating ref constraints.")
-            self.createRefConstraints()
-            
-            debug_print("Adding subsort constraints.")
-            self.addSubSortConstraints()
-            
-            debug_print("Creating group cardinality constraints.")
-            self.createGroupCardConstraints()
-            
-            debug_print("Creating bracketed constraints.")
-            Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
-            
-            debug_print("Checking for goals.")
-            Visitor.visit(CheckForGoals.CheckForGoals(self), self.module)
-        
-            if Options.STRING_CONSTRAINTS:
-                Converters.printZ3StrConstraints(self)
-                Z3Str.clafer_to_z3str("z3str_in")
-                return 1
-            
-               
-            
-            if Options.CNF:
-                debug_print("Outputting DIMACS.")
-                Converters.convertToDimacs()
-                return 1
-                
-            debug_print("Printing constraints.") 
-            self.printConstraints()
-            
-            debug_print("Getting models.")  
-            self.clock.tock("translation")
-            models = self.get_models(Options.NUM_INSTANCES)
-            
-            self.clock.printEvents()
-            return len(models)
-        '''
+            for i in self.cfr_sorts.values():
+                if not i.superSort:
+                    #print(i.sort)
+                    print(str(i) + " : ")
+                    for j in i.bounded_consts:
+                        if str(m.eval(i.isOn(j))) == "True":
+                            #print(m.eval(i.isOn(j)))
+                            print(str(j))
+            for i in self.cfr_sorts.values():
+                if i.superSort: 
+                    print(i)
+                    for j in Alloy.T(i).bounded_consts:
+                        if str(m.eval(i.isName(j))) == "True":
+                            print(str(j))
+            '''
         except UnusedAbstractException as e:
             print(str(e))
             return 0
         
-        
-    def printVars(self, model, count):
-        self.clock.tick("printing")
-        standard_print("###########################")
-        standard_print("# Model: " + str(count+1))    
-        standard_print("###########################")
-        ph = PrintHierarchy.PrintHierarchy(self, model)
-        Visitor.visit(ph, self.module)
-        ph.printTree()
-        standard_print("")
-        self.clock.tack("printing")
-    
-    
     
     def assertConstraints(self):
-        for i in self.constraints:
-            self.solver.add(i)
+        for i in range(len(self.constraints)):
+            #print(self.constraints[i])
+            self.solver.assert_and_track(self.constraints[i], "p" + str(i))
+            #self.solver.add(self.constraints[i])
         for i in self.cfr_sorts.values():
             i.constraints.assertConstraints(self)
         self.join_constraints.assertConstraints(self)
         for i in self.cfr_bracketed_constraints:
             i.assertConstraints(self)
-    
-    
-    
-        
-    #this is not my method, some stackoverflow or z3.codeplex.com method. Can't remember, should find it.
-    # i no longer need this method if i implement the isomorphism detection
-    def get_models(self, desired_number_of_models):
-        if not self.objectives:
-            return self.standard_get_models(desired_number_of_models)
-        else:
-            return self.GIA(desired_number_of_models)
-    
-    def GIA(self, desired_number_of_models):
-        metrics_objective_direction = []
-        metrics_variables = []
-        
-        for i in self.objectives:
-            (dir, var) = i
-            metrics_objective_direction.append(dir)
-            metrics_variables.append(var)
-        
-        
-        # Non-Parallel    
-        GIAOptionsNP = GuidedImprovementAlgorithmOptions(verbosity=0, \
-            incrementallyWriteLog=False, \
-            writeTotalTimeFilename="timefile.csv", \
-            writeRandomSeedsFilename="randomseed.csv", useCallLogs=False)    
-        GIAAlgorithmNP = GuidedImprovementAlgorithm(self.solver, metrics_variables, \
-                metrics_objective_direction, [], options=GIAOptionsNP) 
-        '''featurevars instead of []'''
-        outfilename = str("giaoutput").strip()#"npGIA_" + str(sys.argv[1]).strip() + ".csv"
-
-        ParetoFront = GIAAlgorithmNP.ExecuteGuidedImprovementAlgorithm(outfilename, desired_number_of_models)
-        print(ParetoFront)
-        count = 0
-        for i in ParetoFront:
-            self.printVars(i, count)
-            count = count + 1
-        return ParetoFront
-    
-    
     
     def getSort(self, uid):
         return self.cfr_sorts.get(uid)
