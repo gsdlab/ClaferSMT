@@ -34,7 +34,7 @@ def run(args):
 def main():
     Options.setCommandLineOptions()
     if Options.CPROFILING:
-        cProfile.run("main(sys.argv[1:])", sort=1)
+        cProfile.run("run(sys.argv[1:])", sort=1)
     else:
         run(sys.argv[1:])
 

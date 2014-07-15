@@ -157,14 +157,12 @@ class ClaferModel(object):
           
             debug_print("Adjusting instances for scopes.")
             self.setScopes()
-        
-            
             
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
             
-            for i in self.cfr_sorts.values():
-                standard_print(str(i) + " : "+ str(i.numInstances))
+            #for i in self.cfr_sorts.values():
+            #    standard_print(str(i) + " : "+ str(i.numInstances))
             
             debug_print("Creating cardinality constraints.")
             self.createCardinalityConstraints()

@@ -11,9 +11,11 @@ from structures.ExprArg import Mask, ExprArg, IntArg, BoolArg
     
 def getClaferMatch(key, my_list):
     '''
-    returns the items in list with the same sort as key,
-    along with the index of the instances in the supersort,
-    along with True if the key is the subsort, else False
+    Returns the entries in my_list that correspond to either sub or super sorts of key,
+    specifically a list of tuples [(bool, int, (sort, Mask))],
+    where bool is True iff the key is the subsort,
+    int is the index of the subsort in the supersort (0 if the same sort),
+    (sort,Mask) are the actual entries from my_list.
     '''
     matches = []
     for i in my_list:
@@ -63,25 +65,15 @@ def op_eq(left,right):
     unmatchedL = [(sort, mask.copy()) for (sort,mask) in sortedL]
     unmatchedR = [(sort, mask.copy()) for (sort,mask) in sortedR]
     
-    #integer equality case
     (left_sort, left_mask) = left.getInstanceSort(0)
     (right_sort, right_mask) = right.getInstanceSort(0)
-    if isinstance(left_sort, IntSort) or isinstance(right_sort, IntSort):
-        return BoolArg([SMTLib.SMT_EQ(SMTLib.SMT_Sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]),
-                         SMTLib.SMT_Sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()]))])
-    #real equality case
-    (left_sort, left_mask) = left.getInstanceSort(0)
-    (right_sort, right_mask) = right.getInstanceSort(0)
-    if isinstance(left_sort, RealSort) or isinstance(right_sort, RealSort):
+    #numeric equality case
+    if isinstance(left_sort, IntSort) or isinstance(right_sort, IntSort) or isinstance(left_sort, RealSort) or isinstance(right_sort, RealSort):
         return BoolArg([SMTLib.SMT_EQ(SMTLib.SMT_Sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]),
                          SMTLib.SMT_Sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()]))])
     #string equality case
-    (left_sort, left_mask) = left.getInstanceSort(0)
-    (right_sort, right_mask) = right.getInstanceSort(0)
-    if isinstance(left_sort, StringSort) or isinstance(right_sort, StringSort):
+    elif isinstance(left_sort, StringSort) or isinstance(right_sort, StringSort):
         return BoolArg([SMTLib.SMT_EQ(left_mask.get(0), right_mask.get(0))])
-        #return BoolArg([sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]) 
-        #                == sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()])])
     #clafer-set equality case
     else:
         cond = []
