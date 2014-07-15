@@ -104,6 +104,7 @@ class  ClaferSort(object):
         return None
     
     def initialize(self):
+        #TODO this should just use the current value of numInstances...
         (_, upper) = self.element.glCard
         self.numInstances = upper.value
         self.instances = SMTLib.SMT_IntVector(self.element.uid,self.numInstances, 

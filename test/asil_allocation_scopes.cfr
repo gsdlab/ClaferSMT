@@ -1,8 +1,8 @@
-abstract ComponentFailureEvent 24
+abstract ComponentFailureEvent 2
   sil ->> integer
   [sil >= 0 && sil <= 4]
 
-abstract CutSet 31
+abstract CutSet 3
   fault -> Fault
   componentFailureEvent -> ComponentFailureEvent + 
     
@@ -16,125 +16,19 @@ Task
   total_sil : integer = sum (ComponentFailureEvent.sil)
   Wheel_Node_Controller_OFailure1 : ComponentFailureEvent
   IWM_Power_Converter_OFailure1 : ComponentFailureEvent
-  Auxiliary_Battery_OFailure1 : ComponentFailureEvent
-  EMB_Power_Converter_VFailure1 : ComponentFailureEvent
-  Auxiliary_Battery_VFailure1 : ComponentFailureEvent
-  EMB_Power_Converter_OFailure1 : ComponentFailureEvent
-  Wheel_Node_Controller_VFailure2 : ComponentFailureEvent
-  Wheel_Node_Controller_VFailure1 : ComponentFailureEvent
-  Wheel_Node_Controller_OFailure2 : ComponentFailureEvent
-  Communication_Bus1_OFailure1 : ComponentFailureEvent
-  IWM_OFailure1 : ComponentFailureEvent
-  Mechanical_Pedal_VFailure1 : ComponentFailureEvent
-  Powertrain_Battery_VFailure1 : ComponentFailureEvent
-  Powertrain_Battery_OFailure1 : ComponentFailureEvent
-  IWM_Power_Converter_VFailure1 : ComponentFailureEvent
-  Electronic_Pedal_OFailure1 : ComponentFailureEvent
-  EMB_OFailure1 : ComponentFailureEvent
-  Mechanical_Pedal_OFailure1 : ComponentFailureEvent
-  IWM_VFailure1 : ComponentFailureEvent
-  EMB_VFailure1 : ComponentFailureEvent
-  Electronic_Pedal_VFailure1 : ComponentFailureEvent
-  Electronic_Pedal_OFailure2 : ComponentFailureEvent
-  Communication_Bus2_OFailure1 : ComponentFailureEvent
-  Electronic_Pedal_VFailure2 : ComponentFailureEvent
   No_Braking_after_command : Fault
     [sil = 4]
     cutSet1 : CutSet
       [fault = No_Braking_after_command]
-      [componentFailureEvent = Mechanical_Pedal_OFailure1]
+      [componentFailureEvent = IWM_Power_Converter_OFailure1]
     cutSet2 : CutSet
       [fault = No_Braking_after_command]
-      [componentFailureEvent = Auxiliary_Battery_OFailure1,IWM_OFailure1]
-    cutSet3 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = Auxiliary_Battery_OFailure1,IWM_Power_Converter_OFailure1]
-    cutSet4 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = Auxiliary_Battery_OFailure1,Powertrain_Battery_OFailure1]
-    cutSet5 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = Auxiliary_Battery_OFailure1,Wheel_Node_Controller_OFailure2]
-    cutSet6 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = Communication_Bus1_OFailure1,Communication_Bus2_OFailure1]
-    cutSet7 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = EMB_OFailure1,IWM_OFailure1]
-    cutSet8 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = EMB_OFailure1,IWM_Power_Converter_OFailure1]
-    cutSet9 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = EMB_OFailure1,Powertrain_Battery_OFailure1]
-    cutSet10 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = EMB_OFailure1,Wheel_Node_Controller_OFailure2]
-    cutSet11 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = EMB_Power_Converter_OFailure1,IWM_OFailure1]
-    cutSet12 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = EMB_Power_Converter_OFailure1,IWM_Power_Converter_OFailure1]
-    cutSet13 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = EMB_Power_Converter_OFailure1,Powertrain_Battery_OFailure1]
-    cutSet14 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = EMB_Power_Converter_OFailure1,Wheel_Node_Controller_OFailure2]
-    cutSet15 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = Electronic_Pedal_OFailure1,Electronic_Pedal_OFailure2]
-    cutSet16 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = IWM_OFailure1,Wheel_Node_Controller_OFailure1]
-    cutSet17 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = IWM_Power_Converter_OFailure1,Wheel_Node_Controller_OFailure1]
-    cutSet18 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = Powertrain_Battery_OFailure1,Wheel_Node_Controller_OFailure1]
-    cutSet19 : CutSet
-      [fault = No_Braking_after_command]
-      [componentFailureEvent = Wheel_Node_Controller_OFailure1,Wheel_Node_Controller_OFailure2]
+      [componentFailureEvent = Wheel_Node_Controller_OFailure1,IWM_Power_Converter_OFailure1]
   Wrong_value_braking : Fault
     [sil = 1]
-    cutSet1 : CutSet
-      [fault = Wrong_value_braking]
-      [componentFailureEvent = Auxiliary_Battery_VFailure1]
-    cutSet2 : CutSet
-      [fault = Wrong_value_braking]
-      [componentFailureEvent = EMB_VFailure1]
     cutSet3 : CutSet
       [fault = Wrong_value_braking]
-      [componentFailureEvent = EMB_Power_Converter_VFailure1]
-    cutSet4 : CutSet
-      [fault = Wrong_value_braking]
-      [componentFailureEvent = Electronic_Pedal_VFailure1]
-    cutSet5 : CutSet
-      [fault = Wrong_value_braking]
-      [componentFailureEvent = IWM_VFailure1]
-    cutSet6 : CutSet
-      [fault = Wrong_value_braking]
-      [componentFailureEvent = IWM_Power_Converter_VFailure1]
-    cutSet7 : CutSet
-      [fault = Wrong_value_braking]
-      [componentFailureEvent = Mechanical_Pedal_VFailure1]
-    cutSet8 : CutSet
-      [fault = Wrong_value_braking]
-      [componentFailureEvent = Powertrain_Battery_VFailure1]
-    cutSet9 : CutSet
-      [fault = Wrong_value_braking]
-      [componentFailureEvent = Wheel_Node_Controller_VFailure1]
-    cutSet10 : CutSet
-      [fault = Wrong_value_braking]
-      [componentFailureEvent = Wheel_Node_Controller_VFailure2]
-    cutSet11 : CutSet
-      [fault = Wrong_value_braking]
-      [componentFailureEvent = Electronic_Pedal_OFailure1,Electronic_Pedal_VFailure2]
-    cutSet12 : CutSet
-      [fault = Wrong_value_braking]
-      [componentFailureEvent = Electronic_Pedal_VFailure2,Mechanical_Pedal_OFailure1]
+      [componentFailureEvent = IWM_Power_Converter_OFailure1]
 
 <<min Task.total_sil >>
 

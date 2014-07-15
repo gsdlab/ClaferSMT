@@ -54,6 +54,11 @@ MAGNIFYING_GLASS = False
 OUTPUT_MODE=""
 PRODUCE_UNSAT_CORE = False
 USE_BITVECTORS = False
+IGNORE_GOALS = False
+
+SCOPE_FILE = ""
+SCOPE_MAP_FILE = ""
+
 
 ''' parallel options '''
 CORES=1
@@ -134,6 +139,9 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--magnifyingglass', default=False, dest='magnifying_glass',action='store_const',  const=True,  help='Print equally optimal solutions if optimizing')
     parser.add_argument('--produceunsatcore', dest='produceunsatcore', default=False, const = True, action='store_const', help='produce unsat core for UNSAT specifications')
     parser.add_argument('--usebitvectors', dest='usebitvectors', default=False, const = True, action='store_const', help='Use bitvectors to represent clafer instances')
+    parser.add_argument('--ignoregoals', dest='ignoregoals', default=False, const = True, action='store_const', help='Ignore optimization objectives (for testing purposes)')
+    parser.add_argument('--scopefile', default="", dest='scopefile', help='Scope file produced by `clafer --meta-data`. Requires the map file as well.')
+    parser.add_argument('--scopemapfile', default="", dest='scopemapfile', help='Scope map file produced by `clafer --meta-data`. Requires the scope file as well.')
     
     ''' parallel '''
     parser.add_argument('--cores', '-c', dest='cores', type=int, default='1', help='the number of cores for parallel processing')
@@ -222,6 +230,12 @@ def setCommandLineOptions(learner = False):
     SOLVER = args.solver.strip()
     global PRODUCE_UNSAT_CORE
     PRODUCE_UNSAT_CORE = args.produceunsatcore    
+    global IGNORE_GOALS
+    IGNORE_GOALS = args.ignoregoals
+    global SCOPE_FILE
+    SCOPE_FILE = args.scopefile
+    global SCOPE_MAP_FILE
+    SCOPE_MAP_FILE = args.scopemapfile
     
     return args    
     

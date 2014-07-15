@@ -4,6 +4,7 @@ Created on Apr 30, 2013
 @author: ezulkosk
 '''
 
+from ast.IntegerLiteral import IntegerLiteral
 from common import Common, Options, Clock, SMTLib
 from common.Common import preventSameModel, load, METRICS_MAXIMIZE
 from common.Exceptions import UnusedAbstractException
@@ -79,6 +80,28 @@ class ClaferModel(object):
             if i.superSort:
                 i.superSort.addSubSortConstraints(i)     
 
+    def setScopes(self):
+        if Options.SCOPE_FILE != "" or Options.SCOPE_MAP_FILE != "":
+            if Options.SCOPE_FILE == "" or Options.SCOPE_MAP_FILE == "":
+                sys.exit("--scopemapfile requires --scopefile, and vice versa.")
+            scopeJSON = Common.readJSONFile(Options.SCOPE_FILE)
+            scopeDict = {}
+            for i in scopeJSON:
+                scopeDict[i["lpqName"]] = i["scope"]
+            scopeMapJSON = Common.readJSONFile(Options.SCOPE_MAP_FILE)
+            scopeMapDict = {}
+            for i in scopeMapJSON:
+                scopeMapDict[i["uid"]] = i["lpqName"]
+            for i in self.cfr_sorts.values():
+                uid = i.element.uid
+                scope = scopeDict.get(scopeMapDict[uid],1)
+                (glower, _) = i.element.glCard
+                i.element.glCard = (glower, IntegerLiteral(scope))
+        else:
+            Visitor.visit(SetScopes.SetScopes(self), self.module)
+            AdjustAbstracts.adjustAbstractsFixedPoint(self)
+          
+            
     def getScope(self, sort):
         if sort.element.isAbstract:
             summ = 0
@@ -132,21 +155,16 @@ class ClaferModel(object):
             debug_print("Mapping colon clafers.")
             self.mapColonClafers()
           
-           
-          
             debug_print("Adjusting instances for scopes.")
-            Visitor.visit(SetScopes.SetScopes(self), self.module)
-          
-            debug_print("Adjusting abstract scopes.")
-            AdjustAbstracts.adjustAbstractsFixedPoint(self)
+            self.setScopes()
+        
             
-            #sys.exit()
             
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
-        
-            #for i in self.cfr_sorts.values():
-            #    standard_print(str(i) + " : "+ str(i.numInstances))
+            
+            for i in self.cfr_sorts.values():
+                standard_print(str(i) + " : "+ str(i.numInstances))
             
             debug_print("Creating cardinality constraints.")
             self.createCardinalityConstraints()
@@ -164,7 +182,8 @@ class ClaferModel(object):
             Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
             
             debug_print("Checking for goals.")
-            Visitor.visit(CheckForGoals.CheckForGoals(self), self.module)
+            if not Options.IGNORE_GOALS:
+                Visitor.visit(CheckForGoals.CheckForGoals(self), self.module)
             
             self.clock.tock("translation")
             
@@ -201,35 +220,21 @@ class ClaferModel(object):
             self.solver.printConstraints()
             sys.exit()
         
-        #approach for Nicolas' converter
-        if Options.SOLVER == "smt2":
-            
-            print(Converters.convertToSMTLib(self.solver.solver))
-            for (pol, obj) in self.objectives:
-                if pol == METRICS_MAXIMIZE:
-                    print("(maximize\n   " + str(obj) + ")")
-                else:
-                    print("(minimize\n   " + str(obj) + ")")
-                    
-            sys.exit()
-        
-        
-            
-            
         debug_print("Printing constraints.") 
         self.printConstraints()
         #sys.exit()
         
         debug_print("Getting models.")  
+        self.clock.tick("Get Models")
         models = self.get_models(Options.NUM_INSTANCES)
+        self.clock.tock("Get Models")
+        print(self.clock)
         self.num_models = len(models)
         
         if Options.LEARNING_ENVIRONMENT == "sharcnet":
             print(Options.SPLIT + str(Options.NUM_SPLIT))
             sys.exit("FIX SHARCNET")
-        
-        
-        
+             
         return self.num_models
         
     def printStartDelimeter(self):

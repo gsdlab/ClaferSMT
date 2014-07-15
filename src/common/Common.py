@@ -6,8 +6,9 @@ Created on Apr 28, 2013
 
 from common import SMTLib
 import imp
-import sys
+import json
 import subprocess
+import sys
 
 NORMAL = 0
 DEBUG = 1
@@ -46,7 +47,13 @@ METRICS_MAXIMIZE = 1
 METRICS_MINIMIZE = 2
 
 
-
+def readJSONFile(file_name):
+    '''
+    Takes a file name (str) and returns a json dump 
+    '''
+    file = open(file_name)
+    j = json.load(file)
+    return j
 
 def mAnd(*args):
     '''
