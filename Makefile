@@ -10,11 +10,11 @@ init:
 		echo "Provide the path to Z3 SMT solver's bin (or build) folder to 'z3bin' flag";  \
 		read z3bin; \
 	fi
-	cp -f $(z3bin)/*.py src
+	cp -f $(z3bin)/*.py* src
 	# Windows Z3
 	cp -f $(z3bin)/libz3.dll .  2>/dev/null || :    # supress error message and exit code if missing
 	# Linux Z3
-	cp -f $(z3bin)/libz3.so src   2>/dev/null || :  # need it in src for claferSMT.sh to work
+	cp -f $(z3bin)/libz3.so .   2>/dev/null || :
 	# Mac Z3
 	cp -f $(z3bin)/libz3.dylib .  2>/dev/null || :
 
@@ -24,7 +24,8 @@ install:
 	cp -f ClaferSMT.egg $(to)	
 	# Windows Z3
 	cp -f libz3.dll $(to)  2>/dev/null || :
-	# Linux Z3 included in egg
+	# Linux Z3
+	cp -f libz3.so $(to)  2>/dev/null || :
 	# Mac Z3
 	cp -f libz3.dylib $(to)  2>/dev/null || :
 
