@@ -60,6 +60,7 @@ def op_eq(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
+    
     sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.getInstanceSorts()])
     sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.getInstanceSorts()])
     unmatchedL = [(sort, mask.copy()) for (sort,mask) in sortedL]
@@ -71,7 +72,7 @@ def op_eq(left,right):
     if isinstance(left_sort, IntSort) or isinstance(right_sort, IntSort) or isinstance(left_sort, RealSort) or isinstance(right_sort, RealSort):
         return BoolArg([SMTLib.SMT_EQ(SMTLib.SMT_Sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]),
                          SMTLib.SMT_Sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()]))])
-    #string equality case
+    #TODO string equality case...probably bogus 
     elif isinstance(left_sort, StringSort) or isinstance(right_sort, StringSort):
         return BoolArg([SMTLib.SMT_EQ(left_mask.get(0), right_mask.get(0))])
     #clafer-set equality case

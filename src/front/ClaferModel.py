@@ -79,6 +79,15 @@ class ClaferModel(object):
         for i in self.cfr_sorts.values():
             if i.superSort:
                 i.superSort.addSubSortConstraints(i)     
+                
+    def setTopLevelIndices(self):
+        for i in self.cfr_sorts.values():
+            i.indexInHighestSuper = i.indexInSuper
+            sup = i.superSort
+            while sup:
+                i.indexInHighestSuper = i.indexInHighestSuper + sup.indexInSuper
+                i.highestSuperSort = sup
+                sup = sup.superSort
 
     def setScopes(self):
         if Options.SCOPE_FILE != "" or Options.SCOPE_MAP_FILE != "":
@@ -172,6 +181,7 @@ class ClaferModel(object):
             
             debug_print("Adding subsort constraints.")
             self.addSubSortConstraints()
+            self.setTopLevelIndices()
             
             debug_print("Creating group cardinality constraints.")
             self.createGroupCardConstraints()

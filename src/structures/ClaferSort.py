@@ -74,6 +74,8 @@ class  ClaferSort(object):
         self.full = None
         self.instanceRanges = []
         self.indexInSuper = 0
+        self.indexInHighestSuper = 0
+        self.highestSuperSort = self
         self.currentSubIndex = 0
         self.scope_summ = -1
         self.numInstances = int(self.element.glCard[1].value)
