@@ -4,10 +4,10 @@ Created on Nov 1, 2013
 @author: ezulkosk
 '''
 from common import Common, SMTLib
-from common.Common import mAnd
-
+from common.Common import mAnd, mOr
 from structures.ClaferSort import BoolSort, IntSort, StringSort, RealSort
-from structures.ExprArg import Mask, ExprArg, IntArg, BoolArg 
+from structures.ExprArg import Mask, ExprArg, IntArg, BoolArg
+
     
 def getClaferMatch(key, my_list):
     '''
@@ -47,6 +47,40 @@ def find(key, l):
         (sort, mask) =  i
         if sort == key:
             return mask
+
+def addMatchValues(matches, instanceSorts, left=True):
+    '''
+    Ignores PrimitiveSorts
+    '''
+    #print(instanceSorts)
+    for (sort, mask) in instanceSorts:
+        #print(sort)
+        if isinstance(sort, RealSort) or isinstance(sort, IntSort) or isinstance(sort, StringSort):
+            continue
+        for i in mask.keys():
+            #print(i)
+            val = mask.get(i)
+            
+            matches_key = (sort.highestSuperSort, sort.indexInHighestSuper + i)
+            (currLeft, currRight) = matches.get(matches_key, ([],[]))
+            if left:
+                currLeft.append(sort.isOn(val))
+            else:
+                currRight.append(sort.isOn(val))
+            matches[matches_key] = (currLeft, currRight)
+    return matches
+
+def getSetInstancePairs(left,right=None):
+    #key -- (sort, index), where sort must be a highest sort
+    #value -- ([isOnExpr], [isOnExpr]), where the left and right come from leftInstanceSort or rightInstanceSort, respectively
+    matches = {}
+    matches = addMatchValues(matches, left.getInstanceSorts(), left=True)
+    if right:
+        matches = addMatchValues(matches, right.getInstanceSorts(), left=False)
+    #print(matches.values())
+    return matches
+    
+        
     
 def op_eq(left,right):
     '''
@@ -61,11 +95,6 @@ def op_eq(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     
-    sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.getInstanceSorts()])
-    sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.getInstanceSorts()])
-    unmatchedL = [(sort, mask.copy()) for (sort,mask) in sortedL]
-    unmatchedR = [(sort, mask.copy()) for (sort,mask) in sortedR]
-    
     (left_sort, left_mask) = left.getInstanceSort(0)
     (right_sort, right_mask) = right.getInstanceSort(0)
     #numeric equality case
@@ -77,6 +106,21 @@ def op_eq(left,right):
         return BoolArg([SMTLib.SMT_EQ(left_mask.get(0), right_mask.get(0))])
     #clafer-set equality case
     else:
+        cond = []
+        matches = getSetInstancePairs(left,right)
+        for (l,r) in matches.values():
+            if l == []:
+                cond.append(SMTLib.SMT_Not(SMTLib.SMT_Or(*r)))
+            elif r == []:
+                cond.append(SMTLib.SMT_Not(SMTLib.SMT_Or(*l)))
+            else:
+                lval = SMTLib.SMT_Or(*l)
+                rval = SMTLib.SMT_Or(*r)
+                cond.append(SMTLib.SMT_Implies(lval, rval))
+                cond.append(SMTLib.SMT_Implies(rval, lval))
+
+        return BoolArg([mAnd(*cond)])
+        '''
         cond = []
         for i in sortedL:
             (left_sort, left_mask) = i
@@ -118,6 +162,7 @@ def op_eq(left,right):
             for j in mask.keys():
                 cond.append(sort.isOff(mask.get(j)))
         return BoolArg([mAnd(*cond)])
+        ''' 
         
             
 def op_ne(left,right):
@@ -170,6 +215,22 @@ def op_implies(left,right):
     #clafer-set equality case
     else:
         cond = []
+        matches = getSetInstancePairs(left,right)
+        #print(left)
+        #print(right)
+        #print(matches)
+        for (l,r) in matches.values():
+            if l == []:
+                continue
+            elif r == []:
+                cond.append(SMTLib.SMT_Not(SMTLib.SMT_Or(*l)))
+            else:
+                lval = SMTLib.SMT_Or(*l)
+                rval = SMTLib.SMT_Or(*r)
+                cond.append(SMTLib.SMT_Implies(lval, rval))
+        return BoolArg([mAnd(*cond)])
+        '''
+        cond = []
         for i in sortedL:
             (left_sort, left_mask) = i
             matches = getClaferMatch(left_sort, sortedR)
@@ -206,7 +267,7 @@ def op_implies(left,right):
             for j in mask.keys():
                 cond.append(sort.isOff(mask.get(j)))
         return BoolArg([mAnd(*cond)])
-    
+        '''
 
 
 ''' 
@@ -251,17 +312,29 @@ def op_card(arg):
     Returns the number of instances that are *on* in arg.
     '''
     assert isinstance(arg, ExprArg)
+    
+    instances = []
+    matches = getSetInstancePairs(arg)
+    for (l,_) in matches.values():
+        instances.append(SMTLib.SMT_If(mOr(*l), SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
+    for i in arg.getInstanceSorts():
+        (sort, _) = i
+        if isinstance(sort, IntSort):
+            instances = instances + [i for i in sort.cardinalityMask.values()]
+    return IntArg([SMTLib.SMT_Sum(instances)])
+    '''
     instances = []
     for i in arg.getInstanceSorts():
         (sort, mask) = i
         #refactor
         if isinstance(sort, IntSort):
-            instances = [i for i in sort.cardinalityMask.values()]
+            instances = instances + [i for i in sort.cardinalityMask.values()]
         else:
             for j in mask.values():
                 instances.append(SMTLib.SMT_If(sort.isOn(j), SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
     return IntArg([SMTLib.SMT_Sum(instances)])
-
+    '''
+    
 def int_set_union(leftIntSort, rightIntSort):
     (_,(left_sort, left_mask)) = leftIntSort
     (_,(right_sort, right_mask)) = rightIntSort

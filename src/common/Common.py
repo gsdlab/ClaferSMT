@@ -66,7 +66,7 @@ def mAnd(*args):
         if i:
             newArgs.append(i)
     if len(newArgs) == 0:
-        return True
+        return SMTLib.SMT_BoolConst(True)
     elif len(newArgs) == 1:
         return newArgs[0]
     else:
@@ -81,7 +81,7 @@ def mOr(*args):
         if i:
             newArgs.append(i)
     if len(newArgs) == 0:
-        return False
+        return SMTLib.SMT_BoolConst(False)
     elif len(newArgs) == 1:
         return newArgs[0]
     else:

@@ -5,7 +5,8 @@ Created on Jul 14, 2014
 '''
 from common import SMTLib, Assertions, Options
 from common.Common import mOr, mAnd
-from structures.ClaferSort import IntSort, StringSort, RealSort, PrimitiveType
+from structures.ClaferSort import IntSort, StringSort, RealSort, PrimitiveType, \
+    ClaferSort
 from structures.ExprArg import Mask, ExprArg, JoinArg
 import sys
 
@@ -33,7 +34,6 @@ def joinWithSuper(sort, mask):
                     SMTLib.SMT_If(sort.isOn(mask.get(i)), 
                        sort.superSort.instances[i + sort.indexInSuper], 
                        SMTLib.SMT_IntConst(sort.superSort.parentInstances)))
-        Assertions.nonEmptyMask(newMask)
     return(sort.superSort, newMask)
 
 def joinWithParent(arg):
@@ -115,20 +115,11 @@ def joinWithClaferRef(arg):
         if isinstance(sort.refSort, PrimitiveType):
             return joinWithPrimitive(ExprArg([(sort, mask)]))
         for j in mask.keys():
-            if isinstance(sort.refSort, PrimitiveType):
-                tempRefs.append(SMTLib.SMT_If(sort.isOn(mask.get(j)),
-                                   sort.refs[j], 0))
-            else:
-                tempRefs.append(SMTLib.SMT_If(sort.isOn(mask.get(j)),
-                                   sort.refs[j], SMTLib.SMT_IntConst(sort.refSort.numInstances)))
-        if isinstance(sort.refSort, PrimitiveType):
-            for j in range(sort.numInstances):
-                clause = mOr(*[SMTLib.SMT_EQ(k, SMTLib.SMT_IntConst(j)) for k in tempRefs])
-                newMask.put(j, mOr(newMask.get(j), clause))
-        else:
-            for j in range(sort.refSort.numInstances):
-                clause = mOr(*[SMTLib.SMT_EQ(k, SMTLib.SMT_IntConst(j)) for k in tempRefs])
-                newMask.put(j, mOr(newMask.get(j), clause))
+            tempRefs.append(SMTLib.SMT_If(sort.isOn(mask.get(j)),
+                               sort.refs[j], SMTLib.SMT_IntConst(sort.refSort.numInstances)))
+        for j in range(sort.refSort.numInstances):
+            clause = mOr(*[SMTLib.SMT_EQ(k, SMTLib.SMT_IntConst(j)) for k in tempRefs])
+            newMask.put(j, mOr(newMask.get(j), clause))
         newInstanceSorts.append((sort.refSort, newMask))
         Assertions.nonEmptyMask(newMask)
     for i in newInstanceSorts:

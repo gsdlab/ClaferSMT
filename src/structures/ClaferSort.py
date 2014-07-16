@@ -411,7 +411,7 @@ class  ClaferSort(object):
         return self.element.uid == other.element.uid
     
     def __hash__(self):
-        return hash(self.id)
+        return hash(self.element.uid)
     
     
 class BoolSort():
@@ -448,6 +448,8 @@ class StringSort():
         from structures.ExprArg import Mask
         self.cardinalityMask = Mask()
         self.index = 0
+        self.indexInHighestSuper = 0
+        self.highestSuperSort = self
         
     def isOn(self, arg):
         '''
@@ -481,6 +483,8 @@ class StringSort():
     def __repr__(self):
         return self.__str__()    
 
+    def __hash__(self):
+        return hash("stringsort")
     
 class IntSort():
     
@@ -488,6 +492,8 @@ class IntSort():
         from structures.ExprArg import Mask
         self.cardinalityMask = Mask()
         self.index = 0
+        self.indexInHighestSuper = 0
+        self.highestSuperSort = self
         
     def isOn(self, arg):
         '''
@@ -515,6 +521,9 @@ class IntSort():
     def __eq__(self, other):
         return isinstance(other, IntSort)
     
+    def __hash__(self):
+        return hash("intsort")
+    
     
 class RealSort():
     
@@ -522,6 +531,8 @@ class RealSort():
         from structures.ExprArg import Mask
         self.cardinalityMask = Mask()
         self.index = 0
+        self.indexInHighestSuper = 0
+        self.highestSuperSort = self
         
     def isOn(self, arg):
         '''
@@ -555,6 +566,9 @@ class RealSort():
     
     def __repr__(self):
         return self.__str__()
+    
+    def __hash__(self):
+        return hash("realsort")
     
 class PrimitiveType():
     def __init__(self, type):

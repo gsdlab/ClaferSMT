@@ -6,7 +6,7 @@ Created on Apr 29, 2013
 from common import Assertions, Common, SMTLib
 from constraints import Constraints
 from constraints.Constraints import GenericConstraints
-from constraints.operations import Join, Arithmetic, String, Quantifier, Boolean, \
+from constraints.operations import Join, Numeric, String, Quantifier, Boolean, \
     Set
 from structures.ExprArg import BoolArg
 import sys
@@ -24,27 +24,27 @@ import sys
 ClaferToZ3OperationsMap = {
                            #Unary Ops
                            "!"           : (1, Boolean.op_not),
-                           "UNARY_MINUS" : (1, Arithmetic.op_un_minus),
+                           "UNARY_MINUS" : (1, Numeric.op_un_minus),
                            "#"           : (1, Set.op_card),
-                           "sum"         : (1, Arithmetic.op_sum),    
+                           "sum"         : (1, Numeric.op_sum),    
                            #Binary Ops
                            "<=>"         : (2, Boolean.op_equivalence),
                            "=>"          : (2, Set.op_implies),
                            "||"          : (2, Boolean.op_or),
                            "xor"         : (2, Boolean.op_xor),
                            "&&"          : (2, Boolean.op_and),
-                           "<"           : (2, Arithmetic.op_lt),
-                           ">"           : (2, Arithmetic.op_gt),
-                           "<="          : (2, Arithmetic.op_le),
-                           ">="          : (2, Arithmetic.op_ge),
+                           "<"           : (2, Numeric.op_lt),
+                           ">"           : (2, Numeric.op_gt),
+                           "<="          : (2, Numeric.op_le),
+                           ">="          : (2, Numeric.op_ge),
                            "="           : (2, Set.op_eq),
                            "!="          : (2, Set.op_ne),
                            "in"          : (2, Set.op_in),
                            "nin"         : (2, Set.op_nin),
-                           "+"           : (2, Arithmetic.op_add),
-                           "-"           : (2, Arithmetic.op_sub),
-                           "*"           : (2, Arithmetic.op_mul),
-                           "/"           : (2, Arithmetic.op_div),
+                           "+"           : (2, Numeric.op_add),
+                           "-"           : (2, Numeric.op_sub),
+                           "*"           : (2, Numeric.op_mul),
+                           "/"           : (2, Numeric.op_div),
                            "++"          : (2, Set.op_union),
                            "--"          : (2, Set.op_difference),
                            "&"           : (2, Set.op_intersection),
