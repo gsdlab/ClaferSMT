@@ -21,6 +21,21 @@ EXPERIMENT = 7
 ECLIPSE = 8
 PRELOAD = 9
 
+#canBeOff conditionals
+DEFINITELY_OFF = -1
+UNKNOWN = 0
+DEFINITELY_ON = 1
+
+
+def aggregate_polarity(p1, p2):
+    #unknown or unknown => unknown
+    #unknown or off => unknown
+    #unknown or on => on
+    #...
+    #on or off => on
+    return max(p1, p2)
+
+
 #tests
 MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository

@@ -6,7 +6,7 @@ Created on Nov 1, 2013
 from common import Common, SMTLib
 from common.Common import mAnd, mOr
 from structures.ClaferSort import BoolSort, IntSort, StringSort, RealSort
-from structures.ExprArg import Mask, ExprArg, IntArg, BoolArg
+from structures.ExprArg import ExprArg, IntArg, BoolArg
 
     
 def getClaferMatch(key, my_list):
@@ -48,12 +48,12 @@ def find(key, l):
         if sort == key:
             return mask
 
-def addMatchValues(matches, instanceSorts, left=True):
+def addMatchValues(matches, instances, left=True):
     '''
     Ignores PrimitiveSorts
     '''
     #print(instanceSorts)
-    for (sort, mask) in instanceSorts:
+    for (sort, mask) in instances:
         #print(sort)
         if isinstance(sort, RealSort) or isinstance(sort, IntSort) or isinstance(sort, StringSort):
             continue
@@ -74,7 +74,7 @@ def getSetInstancePairs(left,right=None):
     #key -- (sort, index), where sort must be a highest sort
     #value -- ([isOnExpr], [isOnExpr]), where the left and right come from leftInstanceSort or rightInstanceSort, respectively
     matches = {}
-    matches = addMatchValues(matches, left.getInstanceSorts(), left=True)
+    matches = addMatchValues(matches, left.getInstances(), left=True)
     if right:
         matches = addMatchValues(matches, right.getInstanceSorts(), left=False)
     #print(matches.values())
@@ -314,14 +314,22 @@ def op_card(arg):
     assert isinstance(arg, ExprArg)
     
     instances = []
-    matches = getSetInstancePairs(arg)
-    for (l,_) in matches.values():
-        instances.append(SMTLib.SMT_If(mOr(*l), SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
+    matches = arg.getInstances().values()#getSetInstancePairs(arg)
+    #TODO int card case
+    known_card = 0
+    for (entries,polarity) in matches:
+        if polarity == Common.DEFINITELY_ON:
+            known_card = known_card + 1
+        else:
+            instances.append(SMTLib.SMT_If(mOr(*entries), SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
+    '''
     for i in arg.getInstanceSorts():
         (sort, _) = i
         if isinstance(sort, IntSort):
             instances = instances + [i for i in sort.cardinalityMask.values()]
-    return IntArg([SMTLib.SMT_Sum(instances)])
+    '''
+    instances.append(SMTLib.SMT_IntConst(known_card))
+    return IntArg(SMTLib.SMT_Sum(instances))
     '''
     instances = []
     for i in arg.getInstanceSorts():

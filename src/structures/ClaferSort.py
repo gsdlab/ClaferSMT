@@ -159,20 +159,20 @@ class  ClaferSort(object):
                 if self.refSort == "integer":
                     self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i),
                                                                          SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))),
-                                                      self.canBeOff(i))
+                                                      self.known_polarity(i) != Common.DEFINITELY_ON)
                 elif self.refSort == "string":
                     if Options.STRING_CONSTRAINTS:
                         self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], self.cfr.EMPTYSTRING)),
-                                                          self.canBeOff(i))
+                                                          self.known_polarity(i) != Common.DEFINITELY_ON)
                     else:
                         self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))),
-                                                          self.canBeOff(i))
+                                                          self.known_polarity(i) != Common.DEFINITELY_ON)
                 else: 
                     self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))),
-                                                          self.canBeOff(i))
+                                                          self.known_polarity(i) != Common.DEFINITELY_ON)
                     #sys.exit(str(self.refSort) + " not supported yet")
             else:
-                if self.canBeOff(i):
+                if self.known_polarity(i) != Common.DEFINITELY_ON:
                     self.constraints.addRefConstraint(SMTLib.SMT_If(self.isOff(i)
                                                , SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances))
                                                , SMTLib.SMT_NE(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances))))
@@ -208,18 +208,29 @@ class  ClaferSort(object):
         except:
             return SMTLib.SMT_EQ(index, SMTLib.SMT_IntConst(self.parentInstances))
         
-    def canBeOff(self, index):
+    def known_polarity(self, index):
         '''
         Used to determine if a particular instance may be absent from the model. 
         Used to simplify translation to SMT.
+        '''
         '''
         try:
             (l,h,off) = self.instanceRanges[index]
             return off or h == self.parentInstances
         except:
             return True
-    
-       
+        '''
+        try:
+            (l,h,off) = self.instanceRanges[index]
+            if off or h == self.parentInstances:
+                if l != self.parentInstances:
+                    return Common.UNKNOWN
+                else:
+                    return Common.DEFINITELY_OFF
+            else:
+                return Common.DEFINITELY_ON
+        except:
+            return Common.UNKNOWN   
        
     def getInstanceRange(self, index):
         '''
@@ -295,7 +306,7 @@ class  ClaferSort(object):
             for j in range(self.numInstances):
                 self.constraints.addInstanceConstraint(SMTLib.SMT_Implies(self.parent.isOff(i),
                                                                           SMTLib.SMT_NE(self.instances[j], SMTLib.SMT_IntConst(i))),
-                                                       self.parent.canBeOff(i))
+                                                       self.parent.known_polarity(i) != Common.DEFINITELY_ON)
         
     
     def createCardinalityConstraints(self):
@@ -571,6 +582,9 @@ class RealSort():
         return hash("realsort")
     
 class PrimitiveType():
+    '''
+    corresponds to 'ref' and 'parent'
+    '''
     def __init__(self, type):
         self.type = type
         

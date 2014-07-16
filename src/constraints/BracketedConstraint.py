@@ -145,7 +145,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
             if len(i) != maxInstances:
                 if len(i) != 1:
                     sys.exit("Bug in BracketedConstraint." + str(i))
-                extendedArgs.append([i[0].clone() for _ in range(maxInstances)])
+                extendedArgs.append([i[0] for _ in range(maxInstances)])
             else:
                 extendedArgs.append(i)
         return (maxInstances, extendedArgs)
@@ -181,9 +181,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
                     self.addConstraint(SMTLib.SMT_Implies(thisClafer.isOn(thisClafer.instances[i]), expr[0].finish()))
         else:
             for i in expr:
-                for j in i.getInstanceSorts():
-                    (_, mask) = j
-                    self.addConstraint(mask.pop_value())
+                self.addConstraint(i.getBool())
         if addToZ3:
             self.cfr.smt_bracketed_constraints.append(self)
         

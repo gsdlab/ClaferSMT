@@ -7,7 +7,7 @@ from common import SMTLib, Assertions, Options
 from common.Common import mOr, mAnd
 from structures.ClaferSort import IntSort, StringSort, RealSort, PrimitiveType, \
     ClaferSort
-from structures.ExprArg import Mask, ExprArg, JoinArg
+from structures.ExprArg import ExprArg, JoinArg
 import sys
 
 def alreadyExists(key, instanceSorts):

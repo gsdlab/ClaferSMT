@@ -3,103 +3,135 @@ Created on Oct 21, 2013
 
 @author: ezulkosk
 '''
-from bintrees.avltree import AVLTree
-from common import Assertions, SMTLib
+from common import Assertions, SMTLib, Common
 from structures.ClaferSort import BoolSort, IntSort, PrimitiveType, RealSort, \
     StringSort
+import sys
 
 
 
 class ExprArg():
-    def __init__(self, instanceSorts):
+    def __init__(self, instances = [], nonsupered=True):
         '''
         :param instanceSorts: The list of sorts that are actually in instances.
         :type instancesSorts: [(:class:`~common.ClaferSort`, Mask)]
         
         Struct used to hold information as a bracketed constraint is traversed. 
         '''
-        self.instanceSorts = instanceSorts
+        #key: [(highestSuperSort, indexInHighestSuper)], 
+        #value: ([BoolSort b], polarity), b evaluates to true if the instance is on, list needs to be converted to OR
+        #polarity: a *PYTHON* int, either DEFINITELY_ON, DEFINITELY_OFF, UNKNOWN
+        self.clafers = {}
+        self.nonsupered_clafers = []
+        self.ints = []
+        self.bool = None
+        self.cardinalityMask = []
+        #contains clafer instances that are possibly not represented by their highest ancestor (so joins aren't broken)
+        if nonsupered:
+            self.nonsupered_clafers = instances
+        
+        #TODO expand to reals, strings
+    
+    def isPrimitive(self):
+        return False
     
     def flattenJoin(self, joinList):
         #only used when reifying joins
         return [self]
         
-    def getInstanceSorts(self):
-        return self.instanceSorts
+    def getInstances(self):
+        if self.nonsupered_clafers:
+            for (sort, index, polarity) in self.nonsupered_clafers:
+                #TODO if the currPolarity is already DEFINITELY_ON, don't add anything new
+                if polarity == Common.DEFINITELY_OFF:
+                    continue
+                key = (sort.highestSuperSort, sort.indexInHighestSuper + index)
+                (currEntryList, currPolarity) = self.clafers.get(key, ([], Common.DEFINITELY_OFF))
+                currEntryList.append((sort,index))
+                self.clafers[key] = (currEntryList, Common.aggregate_polarity(currPolarity, polarity))
+                
+        return self.clafers
     
-    def getInstanceSort(self, index):
-        return self.instanceSorts[index]
-    
-    def modifyInstances(self, newInstances):
-        '''
-        :param newInstances:
-        :type newInstances: [Int()]
-        :returns: :class:`~ExprArg`
-        
-        Returns the old ExprArg, with its instances changed to **newInstances**.
-        '''
-        return ExprArg(self.instanceSorts[:])
     
     def finish(self):
         return self.instanceSorts[0][1].get(0)
-    
-    def clone(self):
-        newInstanceSorts = []
-        for i in self.instanceSorts:
-            if isinstance(i, PrimitiveType):
-                newInstanceSorts.append(i)
-            else:    
-                (sort, mask) = i
-                newInstanceSorts.append((sort, mask.copy()))
-        return ExprArg(newInstanceSorts)
       
     def __str__(self):
-        return (str(self.getInstanceSorts())) 
+        return (str(self.getInstances())) 
      
     def __repr__(self):
-        return (str(self.getInstanceSorts())) 
+        return (str(self.getInstances())) 
+
+class PrimitiveArg(): 
+    '''
+    only used to hold 'ref' or 'parent'
+    '''
+    def __init__(self, val):
+        self.value = val
+    
+    def isPrimitive(self):
+        return True
                
 class IntArg(ExprArg):
-    def __init__(self, instances):
+    def __init__(self, instance):
         '''
         Convenience class that extends ExprArg and holds an integer instance.
         '''
-        sort = IntSort()
-        for i in range(len(instances)):
-            sort.cardinalityMask.put(i, SMTLib.SMT_IntConst(1))
-        self.instanceSorts = [(sort, Mask.createIntMask(instances))]
+        ExprArg.__init__(self)
+        self.ints = [instance]
+        self.cardinalityMask.append(SMTLib.SMT_IntConst(1))
+        
+    def getInstances(self):
+        return self.ints
+    
+    def __str__(self):
+        return (str(self.ints)) 
+     
+    def __repr__(self):
+        return (str(self.ints)) 
         
 class RealArg(ExprArg):
     def __init__(self, instances):
         '''
         Convenience class that extends ExprArg and holds an integer instance.
         '''
+        sys.exit("TODO realarg")
         sort = RealSort()
         for i in range(len(instances)):
             sort.cardinalityMask.put(i, SMTLib.SMT_IntConst(1))
-        self.instanceSorts = [(sort, Mask.createIntMask(instances))]
+        #self.instanceSorts = [(sort, Mask.createIntMask(instances))]
         
         
 class BoolArg(ExprArg):
-    def __init__(self, instances):
+    def __init__(self, instance):
         '''
         Convenience class that extends ExprArg and holds a boolean instance.
-        ''' 
-        self.instanceSorts = [(BoolSort(), Mask.createBoolMask(instances))]
-        Assertions.nonEmpty(instances)
+        '''
+        ExprArg.__init__(self)
+        self.bool = instance
         
     def getValue(self):
         return self.instanceSorts[0][1].get(0)
+    
+    def __str__(self):
+        return (str(self.bool)) 
+     
+    def __repr__(self):
+        return (str(self.bool)) 
+    
+    def getBool(self):
+        return self.bool
  
 class StringArg(ExprArg):
     def __init__(self, instances):
         '''
         Convenience class that extends ExprArg and holds an integer instance.
         '''
+        #TODO
         sort = StringSort()
         for i in range(len(instances)):
             sort.cardinalityMask.put(i, SMTLib.SMT_IntConst(1))
-        self.instanceSorts = [(sort, Mask.createIntMask(instances))]
+        #self.instanceSorts = [(sort, Mask.createIntMask(instances))]
 
 class JoinArg(ExprArg):
     def __init__(self, left, right):
@@ -143,94 +175,6 @@ class JoinArg(ExprArg):
     def __repr__(self):
         return ("join: " + str(self.getInstanceSorts())+ str(self.getInstanceSorts()))
     
-class Mask():
-    '''
-    Wrapper for AVLTree to keep track of which instances are *on*.
-    '''
-    def __init__(self, sort=None, instances=[], copy=False, potentiallyEmpty=False):
-        if copy:
-            #sort holds a copy of the AVLTree from the previous Mask
-            self.tree = sort
-        newInstances = []
-        
-        if not sort:
-            self.tree = AVLTree()
-        elif instances or potentiallyEmpty:
-            newInstances = [(i, sort.instances[i]) for i in (instances)]
-            self.tree = AVLTree(newInstances)
-        elif sort:
-            self.tree = AVLTree(sort)
-        elif not instances and not sort:
-            self.tree = AVLTree()
-       
-    @staticmethod
-    def createIntMask(instances):
-        Assertions.nonEmpty(instances)
-        return Mask([(i, instances[i]) for i in range(len(instances))])
-    
-    @staticmethod
-    def createBoolMask(instances):
-        Assertions.nonEmpty(instances)
-        return Mask([(i, instances[i]) for i in range(len(instances))])
-    
-    def difference(self, keyset):
-        return self.tree.difference(keyset)
-    
-    def remove(self, key):
-        try:
-            self.tree.remove(key)
-        except:
-            return
-    
-    def intersection(self, keyset):
-        return self.tree.intersection(keyset)
-    
-    def copy(self):
-        if self.tree.count == 0:
-            return Mask()
-        return Mask(self.tree.copy(), instances=[], copy=True)
-    
-    def pop_value(self):
-        (_, value) = self.tree.pop_item()
-        return value
-    
-    def getTree(self):
-        return self.tree
-        
-    def size(self):
-        return self.tree.count
-    
-    def keys(self):
-        return self.tree.keys()
-    
-    def values(self):
-        return self.tree.values()
-    
-    def put(self, key, value):
-        return self.tree.insert(key, value)
-    
-    
-    def get(self, index):
-        return self.tree.get(index)
-    
-    def __str__(self):
-        return (str(self.tree)) 
-     
-    def __repr__(self):
-        return (str(self.tree))    
 
-    def __lt__(self, other):
-        #dummy sorting for now
-        return True
-    def __eq__(self, other):
-        return not self<other and not other<self
-    def __ne__(self, other):
-        return self<other or other<self
-    def __gt__(self, other):
-        return other<self
-    def __ge__(self, other):
-        return not self<other
-    def __le__(self, other):
-        return not other<self
        
        

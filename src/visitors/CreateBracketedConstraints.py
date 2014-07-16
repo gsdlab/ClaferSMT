@@ -9,8 +9,8 @@ from common.Common import mAnd
 from common.Options import debug_print
 from constraints import BracketedConstraint
 from structures.ClaferSort import PrimitiveType
-from structures.ExprArg import ExprArg, Mask, BoolArg, IntArg, RealArg, \
-    StringArg
+from structures.ExprArg import ExprArg, BoolArg, IntArg, RealArg, \
+    StringArg, PrimitiveArg
 from visitors import VisitorTemplate
 from visitors.CheckFunctionSymmetry import CheckFunctionSymmetry
 import itertools
@@ -91,15 +91,17 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             if element.id == "this":
                 exprArgList = []
                 for i in range(element.claferSort.numInstances):
-                    exprArgList.append(ExprArg([(element.claferSort, Mask(element.claferSort, [i]))]))
+                    exprArgList.append(ExprArg([(element.claferSort, i, element.claferSort.known_polarity(i))], nonsupered=True))
+                                                #[(element.claferSort, Mask(element.claferSort, [i]))]))
                 self.currentConstraint.addArg(exprArgList)
             elif element.id == "ref":
-                self.currentConstraint.addArg([ExprArg([PrimitiveType("ref")])])
+                self.currentConstraint.addArg([PrimitiveArg("ref")])
             elif element.id == "parent":
-                self.currentConstraint.addArg([ExprArg([PrimitiveType("parent")])])
+                self.currentConstraint.addArg([PrimitiveArg("parent")])
             elif element.claferSort:  
-                self.currentConstraint.addArg([ExprArg([(element.claferSort,
-                                                        Mask(element.claferSort, [i for i in range(element.claferSort.numInstances)],copy=False, potentiallyEmpty=True))])])
+                self.currentConstraint.addArg([ExprArg([(element.claferSort, i, element.claferSort.known_polarity(i)) for i in range(element.claferSort.numInstances)], 
+                                                       nonsupered=True)])
+                                                        #Mask(element.claferSort, [i for i in range(element.claferSort.numInstances)]))])])
             else:
                 # localdecl case
                 expr = self.currentConstraint.locals[element.id]
@@ -203,7 +205,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     
     def integerliteralVisit(self, element):
         if(self.inConstraint):
-            self.currentConstraint.addArg([IntArg([SMTLib.SMT_IntConst(element.value)])])
+            self.currentConstraint.addArg([IntArg(SMTLib.SMT_IntConst(element.value))])
         
     def realliteralVisit(self, element):
         if(self.inConstraint):

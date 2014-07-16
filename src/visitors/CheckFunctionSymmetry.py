@@ -4,12 +4,7 @@ Created on Nov 1, 2013
 @author: ezulkosk
 '''
 
-from common import Common
-from common.Common import mAnd
-from constraints import BracketedConstraint
-from structures.ExprArg import ExprArg, Mask, BoolArg, IntArg
 from visitors import VisitorTemplate
-import itertools
 import visitors.Visitor
 
 
