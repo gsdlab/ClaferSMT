@@ -91,7 +91,9 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             if element.id == "this":
                 exprArgList = []
                 for i in range(element.claferSort.numInstances):
-                    exprArgList.append(ExprArg([(element.claferSort, i, element.claferSort.known_polarity(i))], nonsupered=True))
+                    exprArg = ExprArg(instances={}, nonsupered=True)
+                    exprArg.addBasedOnPolarity(element.claferSort, i, element.claferSort.isOn(i))
+                    exprArgList.append(exprArg)
                                                 #[(element.claferSort, Mask(element.claferSort, [i]))]))
                 self.currentConstraint.addArg(exprArgList)
             elif element.id == "ref":
@@ -99,8 +101,10 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             elif element.id == "parent":
                 self.currentConstraint.addArg([PrimitiveArg("parent")])
             elif element.claferSort:  
-                self.currentConstraint.addArg([ExprArg([(element.claferSort, i, element.claferSort.known_polarity(i)) for i in range(element.claferSort.numInstances)], 
-                                                       nonsupered=True)])
+                exprArg = ExprArg(instances={}, nonsupered=True)
+                for i in range(element.claferSort.numInstances):
+                    exprArg.addBasedOnPolarity(element.claferSort, i, element.claferSort.isOn(i))
+                self.currentConstraint.addArg([exprArg])
                                                         #Mask(element.claferSort, [i for i in range(element.claferSort.numInstances)]))])])
             else:
                 # localdecl case

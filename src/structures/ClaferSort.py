@@ -72,6 +72,7 @@ class  ClaferSort(object):
         self.refs = []
         self.subs = []
         self.full = None
+        self.marked = False
         self.instanceRanges = []
         self.indexInSuper = 0
         self.indexInHighestSuper = 0
@@ -118,7 +119,7 @@ class  ClaferSort(object):
         else:
             self.parent = self.parentStack[-1]
             self.parentInstances = self.parent.numInstances
-        self.createInstancesConstraintsAndFunctions()
+        
     
     def addRefConstraints(self):
         if not self.refSort:
@@ -159,20 +160,20 @@ class  ClaferSort(object):
                 if self.refSort == "integer":
                     self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i),
                                                                          SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))),
-                                                      self.known_polarity(i) != Common.DEFINITELY_ON)
+                                                      self.known_polarity(i, local=True) != Common.DEFINITELY_ON)
                 elif self.refSort == "string":
                     if Options.STRING_CONSTRAINTS:
                         self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], self.cfr.EMPTYSTRING)),
-                                                          self.known_polarity(i) != Common.DEFINITELY_ON)
+                                                          self.known_polarity(i, local=True) != Common.DEFINITELY_ON)
                     else:
                         self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))),
-                                                          self.known_polarity(i) != Common.DEFINITELY_ON)
+                                                          self.known_polarity(i, local=True) != Common.DEFINITELY_ON)
                 else: 
                     self.constraints.addRefConstraint(SMTLib.SMT_Implies(self.isOff(i), SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(0))),
-                                                          self.known_polarity(i) != Common.DEFINITELY_ON)
+                                                          self.known_polarity(i, local=True) != Common.DEFINITELY_ON)
                     #sys.exit(str(self.refSort) + " not supported yet")
             else:
-                if self.known_polarity(i) != Common.DEFINITELY_ON:
+                if self.known_polarity(i, local=True) != Common.DEFINITELY_ON:
                     self.constraints.addRefConstraint(SMTLib.SMT_If(self.isOff(i)
                                                , SMTLib.SMT_EQ(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances))
                                                , SMTLib.SMT_NE(self.refs[i], SMTLib.SMT_IntConst(self.refSort.numInstances))))
@@ -208,28 +209,29 @@ class  ClaferSort(object):
         except:
             return SMTLib.SMT_EQ(index, SMTLib.SMT_IntConst(self.parentInstances))
         
-    def known_polarity(self, index):
+    def known_polarity(self, index, local=False):
         '''
         Used to determine if a particular instance may be absent from the model. 
         Used to simplify translation to SMT.
-        '''
-        '''
-        try:
-            (l,h,off) = self.instanceRanges[index]
-            return off or h == self.parentInstances
-        except:
-            return True
+        
+        local= if set to true, do not consider subsorts
         '''
         try:
             (l,h,off) = self.instanceRanges[index]
+            #if sub is definitely on, so is super => if still unknown, check polarity of sub at that index
             if off or h == self.parentInstances:
                 if l != self.parentInstances:
+                    if self.subs and not local:
+                        for sub in self.subs:
+                            if sub.indexInSuper <= index and index < sub.indexInSuper + sub.numInstances:
+                                return sub.known_polarity(index - sub.indexInSuper)
                     return Common.UNKNOWN
                 else:
                     return Common.DEFINITELY_OFF
             else:
                 return Common.DEFINITELY_ON
         except:
+            sys.exit("Bug in known_polarity")
             return Common.UNKNOWN   
        
     def getInstanceRange(self, index):
@@ -271,8 +273,22 @@ class  ClaferSort(object):
                     extraAbsenceConstraint = True
         return (lower, upper, extraAbsenceConstraint)
     
-    def createInstancesConstraintsAndFunctions(self):
+    def getInstanceRanges(self):
         self.instanceRanges = [self.getInstanceRange(i) for i in range(self.numInstances)]
+        '''
+        if self.subs:
+            for i in self.subs:
+                if not i.marked:
+                    i.getInstanceRanges()
+                    i.marked = True
+                    for j in range(len(i.instanceRanges)):
+                        (sublower, subupper, subExtraCons) = i.instanceRanges[j]
+                        i.indexInSuper + j
+            self.marked=True
+        '''
+        self.marked = True
+    
+    def createInstancesConstraintsAndFunctions(self):
         for i in range(self.numInstances):
             (lower, upper, extraAbsenceConstraint) = self.instanceRanges[i]
             
@@ -306,7 +322,7 @@ class  ClaferSort(object):
             for j in range(self.numInstances):
                 self.constraints.addInstanceConstraint(SMTLib.SMT_Implies(self.parent.isOff(i),
                                                                           SMTLib.SMT_NE(self.instances[j], SMTLib.SMT_IntConst(i))),
-                                                       self.parent.known_polarity(i) != Common.DEFINITELY_ON)
+                                                       self.parent.known_polarity(i, local=True) != Common.DEFINITELY_ON)
         
     
     def createCardinalityConstraints(self):

@@ -70,6 +70,14 @@ class ClaferModel(object):
         for i in self.cfr_sorts.values():
             i.createCardinalityConstraints()
     
+    def createInstancesConstraintsAndFunctions(self):
+        for i in self.cfr_sorts.values():
+            if not i.marked:
+                i.getInstanceRanges()
+        
+        for i in self.cfr_sorts.values():
+            i.createInstancesConstraintsAndFunctions()
+    
     def mapColonClafers(self):
         for i in self.cfr_sorts.values():
             if i.superSort:
@@ -169,6 +177,10 @@ class ClaferModel(object):
             
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
+            self.createInstancesConstraintsAndFunctions()
+            
+            
+            
             
             #for i in self.cfr_sorts.values():
             #    standard_print(str(i) + " : "+ str(i.numInstances))

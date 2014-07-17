@@ -11,26 +11,39 @@ import sys
 
 
 class ExprArg():
-    def __init__(self, instances = [], nonsupered=True):
+    def __init__(self, instances = {}, nonsupered=True):
         '''
         :param instanceSorts: The list of sorts that are actually in instances.
         :type instancesSorts: [(:class:`~common.ClaferSort`, Mask)]
         
         Struct used to hold information as a bracketed constraint is traversed. 
         '''
-        #key: [(highestSuperSort, indexInHighestSuper)], 
+        #key: (highestSuperSort, indexInHighestSuper), if supered (see below)
         #value: ([BoolSort b], polarity), b evaluates to true if the instance is on, list needs to be converted to OR
         #polarity: a *PYTHON* int, either DEFINITELY_ON, DEFINITELY_OFF, UNKNOWN
-        self.clafers = {}
-        self.nonsupered_clafers = []
+        self.clafers = instances
         self.ints = []
         self.bool = None
         self.cardinalityMask = []
-        #contains clafer instances that are possibly not represented by their highest ancestor (so joins aren't broken)
+        #if true, contains clafer instances that are possibly not represented by their highest ancestor (so joins aren't broken)
         if nonsupered:
-            self.nonsupered_clafers = instances
+            self.hasBeenSupered = False
+        else:
+            self.hasBeenSupered = True
         
         #TODO expand to reals, strings
+    
+    
+    def addBasedOnPolarity(self, sort, index, expr):
+        #DOES NOT SUPER
+        polarity = sort.known_polarity(index)
+        if polarity == Common.DEFINITELY_ON:
+            self.clafers[(sort,index)] = (SMTLib.SMT_BoolConst(True), polarity)
+        elif polarity == Common.UNKNOWN:
+            self.clafers[(sort,index)] = (expr, polarity)
+        else:
+            #if definitely off, do not add
+            return
     
     def isPrimitive(self):
         return False
@@ -39,17 +52,21 @@ class ExprArg():
         #only used when reifying joins
         return [self]
         
-    def getInstances(self):
-        if self.nonsupered_clafers:
-            for (sort, index, polarity) in self.nonsupered_clafers:
+    def getInstances(self, nonsupered=True):
+        if nonsupered or self.hasBeenSupered:
+            return self.clafers
+        else:
+            newClafers = {}
+            for (sort, index, polarity) in self.clafers:
                 #TODO if the currPolarity is already DEFINITELY_ON, don't add anything new
                 if polarity == Common.DEFINITELY_OFF:
                     continue
                 key = (sort.highestSuperSort, sort.indexInHighestSuper + index)
                 (currEntryList, currPolarity) = self.clafers.get(key, ([], Common.DEFINITELY_OFF))
                 currEntryList.append((sort,index))
-                self.clafers[key] = (currEntryList, Common.aggregate_polarity(currPolarity, polarity))
-                
+                newClafers[key] = (currEntryList, Common.aggregate_polarity(currPolarity, polarity))
+            self.clafers = newClafers
+            self.hasBeenSupered = True 
         return self.clafers
     
     
@@ -57,10 +74,10 @@ class ExprArg():
         return self.instanceSorts[0][1].get(0)
       
     def __str__(self):
-        return (str(self.getInstances())) 
+        return (str(self.getInstances(nonsupered=True))) 
      
     def __repr__(self):
-        return (str(self.getInstances())) 
+        return (str(self.getInstances(nonsupered=True))) 
 
 class PrimitiveArg(): 
     '''
@@ -71,6 +88,9 @@ class PrimitiveArg():
     
     def isPrimitive(self):
         return True
+    
+    def getValue(self):
+        return self.value
                
 class IntArg(ExprArg):
     def __init__(self, instance):

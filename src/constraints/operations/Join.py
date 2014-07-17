@@ -3,11 +3,11 @@ Created on Jul 14, 2014
 
 @author: ezulkosk
 '''
-from common import SMTLib, Assertions, Options
+from common import SMTLib, Assertions, Options, Common
 from common.Common import mOr, mAnd
 from structures.ClaferSort import IntSort, StringSort, RealSort, PrimitiveType, \
     ClaferSort
-from structures.ExprArg import ExprArg, JoinArg
+from structures.ExprArg import ExprArg, JoinArg, PrimitiveArg
 import sys
 
 def alreadyExists(key, instanceSorts):
@@ -141,7 +141,50 @@ def joinWithRef(arg):
         return joinWithClaferRef(arg)
 
 
+def fixPolarities(instances):
+    '''
+    sets the new polarities to corresponding ternary values
+    '''
+    print(instances)
+
 def joinWithClafer(left, right):
+    newInstances = {}
+    leftInstances = left.getInstances(nonsupered=True)
+    rightInstances = right.getInstances(nonsupered=True)
+    print(left)
+    print(right)
+    for (lsort, lindex) in leftInstances.keys():
+        (lexpr, lpolarity) = leftInstances[(lsort,lindex)]
+        if lpolarity == Common.DEFINITELY_OFF:
+            continue
+        for (rsort, rindex) in rightInstances.keys():
+            (rexpr, rpolarity) = rightInstances[(rsort,rindex)]
+            if rpolarity == Common.DEFINITELY_OFF:
+                continue
+            noMatch = False
+            while not(rsort in lsort.fields):
+                sys.exit("TODO joinsuper")
+                if not lsort.superSort:
+                    noMatch = True
+                    break
+                (lsort, lpolarity) = joinWithSuper(lsort, lpolarity)
+            if noMatch:
+                continue
+            (lower,upper,_) = rsort.instanceRanges[rindex]
+            try:
+                rpolarity[lindex] = lpolarity
+            except:
+                rpolarity = {} # TODO this shit right here
+                rpolarity[lindex] = lpolarity
+            if lower <= lindex and lindex <= upper:
+                newInstances[(rsort, rindex)] = (mAnd(lexpr, SMTLib.SMT_EQ(rsort.instances[rindex], 
+                                                                              SMTLib.SMT_IntConst(lindex))), rpolarity)
+    fixPolarities(newInstances)
+    print(newInstances)
+    sys.exit("AAA")
+    return ExprArg(newInstances, nonsupered=True)
+    
+    '''
     newInstanceSorts = []
     for l in left.getInstanceSorts():
         (curr_left_sort, curr_left_mask) = l
@@ -166,7 +209,7 @@ def joinWithClafer(left, right):
                         prevClause = newMask.get(i)
                         newMask.put(i, mOr(prevClause, SMTLib.SMT_And(left_sort.isOn(left_mask.get(j)), 
                                                     SMTLib.SMT_EQ(right_sort.instances[i], SMTLib.SMT_IntConst(j)))))
-            '''CAREFUL!!! '''
+            #CAREFUL!!!
             if newMask.size() == 0:
                 #print(left)
                 #print(right)
@@ -178,16 +221,16 @@ def joinWithClafer(left, right):
         for j in mask.keys():
             mask.put(j, SMTLib.SMT_If(mask.get(j), sort.instances[j], SMTLib.SMT_IntConst(sort.parentInstances)))
     return ExprArg(newInstanceSorts)
+    '''
 
 def computeJoin(joinList):
     left = joinList.pop(0) 
     while joinList:
         right = joinList.pop(0)
-        rightJoinPoint = right.getInstanceSort(0)
-        if isinstance(rightJoinPoint, PrimitiveType):
-            if rightJoinPoint == "parent":
+        if isinstance(right, PrimitiveArg):
+            if right.getValue() == "parent":
                 left = joinWithParent(left)
-            elif rightJoinPoint == "ref":
+            elif right.getValue() == "ref":
                 left = joinWithRef(left)
         else:
             left = joinWithClafer(left, right)
