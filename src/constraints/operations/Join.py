@@ -151,8 +151,6 @@ def joinWithClafer(left, right):
     newInstances = {}
     leftInstances = left.getInstances(nonsupered=True)
     rightInstances = right.getInstances(nonsupered=True)
-    print(left)
-    print(right)
     for (lsort, lindex) in leftInstances.keys():
         (lexpr, lpolarity) = leftInstances[(lsort,lindex)]
         if lpolarity == Common.DEFINITELY_OFF:
@@ -170,7 +168,7 @@ def joinWithClafer(left, right):
                 (lsort, lpolarity) = joinWithSuper(lsort, lpolarity)
             if noMatch:
                 continue
-            (lower,upper,_) = rsort.instanceRanges[rindex]
+            (lower,upper,rextra) = rsort.instanceRanges[rindex]
             try:
                 rpolarity[lindex] = lpolarity
             except:
@@ -181,7 +179,7 @@ def joinWithClafer(left, right):
                                                                               SMTLib.SMT_IntConst(lindex))), rpolarity)
     fixPolarities(newInstances)
     print(newInstances)
-    sys.exit("AAA")
+    sys.exit("join exit")
     return ExprArg(newInstances, nonsupered=True)
     
     '''

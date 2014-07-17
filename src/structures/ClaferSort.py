@@ -74,6 +74,7 @@ class  ClaferSort(object):
         self.full = None
         self.marked = False
         self.instanceRanges = []
+        self.knownPolarities = []
         self.indexInSuper = 0
         self.indexInHighestSuper = 0
         self.highestSuperSort = self
@@ -95,6 +96,7 @@ class  ClaferSort(object):
         else:
             self.parent = self.parentStack[-1]
             self.parentInstances = self.parent.numInstances
+        self.beneathAnAbstract = self.element.isAbstract or (True in [(p.element.isAbstract) for p in self.parentStack])
     
     
     #should get longest numInstances for getBits
@@ -246,7 +248,7 @@ class  ClaferSort(object):
             return (0,0,False)
         
         if self.lowerCardConstraint == 0:
-            upper = self.parentInstances # this is new upper = self.numInstances
+            upper = self.parentInstances 
         else:
             upper = index // self.lowerCardConstraint
         upper = min(upper, self.parentInstances)
@@ -273,20 +275,51 @@ class  ClaferSort(object):
                     extraAbsenceConstraint = True
         return (lower, upper, extraAbsenceConstraint)
     
+   
+    def fixAbstractFields(self):
+        for i in range(self.numInstances):
+            (l,h,_) = self.instanceRanges[i]
+            polarity = Common.DEFINITELY_OFF
+            all_on_flag = True
+            for j in range(l,min(self.parentInstances,h+1)):
+                par_polarity = self.parent.knownPolarities[j]
+                if not par_polarity == Common.DEFINITELY_ON:
+                    all_on_flag = False
+                if par_polarity == Common.UNKNOWN:
+                    polarity = Common.UNKNOWN
+            if all_on_flag:
+                polarity = Common.DEFINITELY_ON
+            self.knownPolarities.append(polarity)
+            if polarity == Common.DEFINITELY_ON:
+                if h == self.parentInstances:
+                    h = h - 1
+                self.instanceRanges[i] = (l,h,False)
+        for f in self.fields:
+            f.fixAbstractFields()
+        
+    def fixAbstractExtraConstraints(self):
+        #sets the known_polarities of abstracts and their fields, and patches extraAbsenceConstraints
+        self.knownPolarities = [0 for i in range(self.numInstances)]
+        for sub in self.subs:
+            if not sub.knownPolarities:
+                sub.fixAbstractExtraConstraints()
+            for i in range(sub.numInstances):
+                sub_pol = sub.knownPolarities[i]
+                currIndexInSuper = sub.indexInSuper + i
+                self.knownPolarities[currIndexInSuper] = sub_pol
+                (l,h,e) = self.instanceRanges[currIndexInSuper]
+                if sub_pol == Common.DEFINITELY_ON:
+                    if h == self.parentInstances:
+                        h = h - 1
+                    self.instanceRanges[currIndexInSuper] = (l,h,False)
+        for f in self.fields:
+            f.fixAbstractFields()
+        
+    def computeKnownPolarities(self):
+        self.knownPolarities = [self.known_polarity(i) for i in range(self.numInstances)]
+    
     def getInstanceRanges(self):
         self.instanceRanges = [self.getInstanceRange(i) for i in range(self.numInstances)]
-        '''
-        if self.subs:
-            for i in self.subs:
-                if not i.marked:
-                    i.getInstanceRanges()
-                    i.marked = True
-                    for j in range(len(i.instanceRanges)):
-                        (sublower, subupper, subExtraCons) = i.instanceRanges[j]
-                        i.indexInSuper + j
-            self.marked=True
-        '''
-        self.marked = True
     
     def createInstancesConstraintsAndFunctions(self):
         for i in range(self.numInstances):
@@ -311,10 +344,10 @@ class  ClaferSort(object):
                     self.constraints.addInstanceConstraint(constraint)
             
             #sorted parent pointers (only consider things that are not part of an abstract)
-            if(not self.element.isAbstract and not (True in [(p.element.isAbstract) for p in self.parentStack])):
+            if not self.beneathAnAbstract:
                 #print(self.element)
                 if i != self.numInstances - 1:
-                    self.constraints.addInstanceConstraint(SMTLib.SMT_LE(self.instances[i],self.instances[i+1]))    
+                    self.constraints.addInstanceConstraint(SMTLib.SMT_LE(self.instances[i],self.instances[i+1]))
         if not self.parent:
             return 
         #if the parent is not live, then no child can point to it  
@@ -411,15 +444,16 @@ class  ClaferSort(object):
     
     def addSubSortConstraints(self, sub):
         #the super cannot exist without the sub, and vice-versa
-        oldSubIndex = self.currentSubIndex
-        sub.indexInSuper = oldSubIndex
-        self.currentSubIndex = self.currentSubIndex + sub.numInstances
+        
         for i in range(sub.numInstances):
             self.constraints.addInheritanceConstraint(SMTLib.SMT_And(SMTLib.SMT_Implies(self.isOn(i + sub.indexInSuper), sub.isOn(i)),
                                          SMTLib.SMT_Implies(sub.isOn(i),self.isOn(i + sub.indexInSuper))))
     
     def addSubSort(self, sub):
         self.subs.append(sub)
+        oldSubIndex = self.currentSubIndex
+        sub.indexInSuper = oldSubIndex
+        self.currentSubIndex = self.currentSubIndex + sub.numInstances
         
         
     def addField(self, claferSort):

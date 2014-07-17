@@ -72,9 +72,14 @@ class ClaferModel(object):
     
     def createInstancesConstraintsAndFunctions(self):
         for i in self.cfr_sorts.values():
-            if not i.marked:
-                i.getInstanceRanges()
-        
+            i.getInstanceRanges()
+        for i in self.cfr_sorts.values():
+            if not i.beneathAnAbstract:
+                i.computeKnownPolarities()
+        for i in self.cfr_sorts.values():
+            if i.element.isAbstract:
+                i.fixAbstractExtraConstraints()
+                
         for i in self.cfr_sorts.values():
             i.createInstancesConstraintsAndFunctions()
     
