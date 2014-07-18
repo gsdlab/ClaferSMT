@@ -106,30 +106,30 @@ def op_eq(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    
     (left_sort, left_mask) = left.getInstanceSort(0)
     (right_sort, right_mask) = right.getInstanceSort(0)
     #numeric equality case
     if isinstance(left_sort, IntSort) or isinstance(right_sort, IntSort) or isinstance(left_sort, RealSort) or isinstance(right_sort, RealSort):
         return BoolArg([SMTLib.SMT_EQ(SMTLib.SMT_Sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]),
                          SMTLib.SMT_Sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()]))])
-    #TODO string equality case...probably bogus 
+    #TODO string equality case...probably bogus
+    #TODO possibly can eliminate base trivial cases (i.e. auto-aggregate DEF_OFF/DEF_ON cases 
     elif isinstance(left_sort, StringSort) or isinstance(right_sort, StringSort):
         return BoolArg([SMTLib.SMT_EQ(left_mask.get(0), right_mask.get(0))])
     #clafer-set equality case
     else:
         cond = []
         matches = getSetInstancePairs(left,right)
-        sys.exit("TODO EQUALS")
         for ((lexpr, lpol),(rexpr, rpol)) in matches.values():
-            if lpol == Common.DEFINITELY_OFF or rpol == Common.DEFINITELY_ON:
+            if lpol == Common.DEFINITELY_OFF and rpol == Common.DEFINITELY_OFF:
                 continue
-            elif lpol == Common.DEFINITELY_ON:
-                cond.append(rexpr)
+            elif lpol == Common.DEFINITELY_OFF:
+                cond.append(SMTLib.SMT_Not(rexpr))
+            elif rpol == Common.DEFINITELY_OFF:
+                cond.append(SMTLib.SMT_Not(lexpr))
             else:
-                #lpol is unknown and rpol is off or unknown
-                #almost the same as op_difference below
                 cond.append(SMTLib.SMT_Implies(lexpr, rexpr))
+                cond.append(SMTLib.SMT_Implies(rexpr, lexpr))
         return BoolArg([mAnd(*cond)])
         '''
         cond = []
@@ -340,22 +340,24 @@ def op_card(arg):
     assert isinstance(arg, ExprArg)
     
     instances = []
-    matches = arg.getInstances().values()#getSetInstancePairs(arg)
+    matches = getSetInstancePairs(arg)
     #TODO int card case
     known_card = 0
-    for (entries,polarity) in matches:
+    for (instance,_) in matches:
+        (expr, polarity) = instance
         if polarity == Common.DEFINITELY_ON:
             known_card = known_card + 1
         else:
-            instances.append(SMTLib.SMT_If(mOr(*entries), SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
+            instances.append(SMTLib.SMT_If(expr, SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
+    instances.append(SMTLib.SMT_IntConst(known_card))
+    return IntArg(SMTLib.SMT_Sum(instances))
     '''
     for i in arg.getInstanceSorts():
         (sort, _) = i
         if isinstance(sort, IntSort):
             instances = instances + [i for i in sort.cardinalityMask.values()]
     '''
-    instances.append(SMTLib.SMT_IntConst(known_card))
-    return IntArg(SMTLib.SMT_Sum(instances))
+    
     '''
     instances = []
     for i in arg.getInstanceSorts():
@@ -440,7 +442,21 @@ def op_union(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
+    if left.ints or right.ints:
+        sys.exit("TODO ints union")
+    matches = getSetInstancePairs(left,right)
+    newInstances = {}
+    for (sort,index) in matches.keys():
+        key = (sort,index)
+        ((lexpr,lpol),(rexpr,rpol)) = matches[(sort,index)]
+        if rpol == Common.DEFINITELY_OFF and lpol == Common.DEFINITELY_OFF:
+            continue
+        else:
+            new_expr = mOr(lexpr,rexpr)
+            newInstances[key] = (new_expr, Common.aggregate_polarity(lpol, rpol))
+    return ExprArg(newInstances)
     
+    '''
     sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.getInstanceSorts()])
     sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.getInstanceSorts()])
     newInstanceSorts = []
@@ -475,7 +491,7 @@ def op_union(left,right):
                 putIfNotMatched(sort, newMask, i, Common.min2(l.get(i), r.get(i)), matches)
             newInstanceSorts.append((sort, newMask))
     return ExprArg(newInstanceSorts)
-                
+    '''
 
 def int_set_intersection(left_sort, left_mask, right_sort, right_mask):
     newMask = Mask()
@@ -506,6 +522,20 @@ def op_intersection(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
+    if left.ints or right.ints:
+        sys.exit("TODO ints intersection")
+    matches = getSetInstancePairs(left,right)
+    newInstances = {}
+    for (sort,index) in matches.keys():
+        key = (sort,index)
+        ((lexpr,lpol),(rexpr,rpol)) = matches[(sort,index)]
+        if rpol == Common.DEFINITELY_OFF or lpol == Common.DEFINITELY_OFF:
+            continue
+        else:
+            new_expr = mAnd(lexpr,rexpr)
+            newInstances[key] = (new_expr, Common.aggregate_polarity(lpol, rpol))
+    return ExprArg(newInstances)
+    '''
     sortedL = sorted([(sort, mask.copy()) for (sort,mask) in left.getInstanceSorts()])
     sortedR = sorted([(sort, mask.copy()) for (sort,mask) in right.getInstanceSorts()])
 
@@ -538,6 +568,7 @@ def op_intersection(left,right):
                                     added_matches + [(True,0,(left_sort,newMask))])
         newInstanceSorts.append((left_sort,newMask))
     return ExprArg(newInstanceSorts)
+    '''
 
 def int_set_difference(leftIntSort, rightIntSort):
     (_,(left_sort, left_mask)) = leftIntSort
