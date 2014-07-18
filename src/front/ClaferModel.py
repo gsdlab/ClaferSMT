@@ -287,11 +287,15 @@ class ClaferModel(object):
         self.clock.tack("printing")
     
     def assertConstraints(self):
+        self.clock.tick("Asserting basic constraints")
         for i in self.cfr_sorts.values():
             i.constraints.assertConstraints(self)
         self.join_constraints.assertConstraints(self)
+        self.clock.tock("Asserting basic constraints")
+        self.clock.tick("Asserting bracketed constraints")
         for i in self.smt_bracketed_constraints:
             i.assertConstraints(self)
+        self.clock.tock("Asserting bracketed constraints")
     
     def printConstraints(self):
         if not (Options.MODE == Common.DEBUG and Options.PRINT_CONSTRAINTS):
