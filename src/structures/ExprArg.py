@@ -4,6 +4,7 @@ Created on Oct 21, 2013
 @author: ezulkosk
 '''
 from common import Assertions, SMTLib, Common
+from common.Common import mOr
 from structures.ClaferSort import BoolSort, IntSort, PrimitiveType, RealSort, \
     StringSort
 import sys
@@ -56,23 +57,25 @@ class ExprArg():
         if nonsupered or self.hasBeenSupered:
             return self.clafers
         else:
-            sys.exit("getInstances not yet")
+            #sys.exit("getInstances not yet")
             newClafers = {}
-            for (sort, index, polarity) in self.clafers:
+            for (sort, index) in self.clafers.keys():
                 #TODO if the currPolarity is already DEFINITELY_ON, don't add anything new
+                (expr, polarity) = self.clafers[(sort,index)]
                 if polarity == Common.DEFINITELY_OFF:
                     continue
                 key = (sort.highestSuperSort, sort.indexInHighestSuper + index)
-                (currEntryList, currPolarity) = self.clafers.get(key, ([], Common.DEFINITELY_OFF))
-                currEntryList.append((sort,index))
-                newClafers[key] = (currEntryList, Common.aggregate_polarity(currPolarity, polarity))
+                if polarity == Common.DEFINITELY_ON:
+                    newClafers[key] = (SMTLib.SMT_BoolConst(True), Common.DEFINITELY_ON)
+                    continue
+                (currEntry, currPolarity) = newClafers.get(key, (SMTLib.SMT_BoolConst(False), Common.DEFINITELY_OFF))
+                currEntry = mOr(currEntry, expr)
+                newClafers[key] = (currEntry, Common.aggregate_polarity(currPolarity, polarity))
             self.clafers = newClafers
             self.hasBeenSupered = True 
         return self.clafers
     
     
-    def finish(self):
-        return self.instanceSorts[0][1].get(0)
       
     def __str__(self):
         return (str(self.getInstances(nonsupered=True))) 
@@ -140,8 +143,12 @@ class BoolArg(ExprArg):
     def __repr__(self):
         return (str(self.bool)) 
     
+    #TODO delete one of getBool/finish (probably delete finish)
+    def finish(self):
+        return self.bool[0]
+    
     def getBool(self):
-        return self.bool
+        return self.bool[0]
  
 class StringArg(ExprArg):
     def __init__(self, instances):
@@ -158,37 +165,23 @@ class JoinArg(ExprArg):
     def __init__(self, left, right):
         self.left = left
         self.right = right
-        self.instanceSorts = []
+        self.instances = []
     
     def checkIfJoinIsComputed(self):
         import constraints.operations.Join as Join
-        if not self.instanceSorts:
+        if not self.instances:
             joinList = self.flattenJoin()
-            self.instanceSorts = Join.computeJoin(joinList)
+            self.instances = Join.computeJoin(joinList)
     
-    def getInstanceSorts(self):
+    def getInstances(self):
         self.checkIfJoinIsComputed()
-        return self.instanceSorts
-    
-    def getInstanceSort(self, index):
-        self.checkIfJoinIsComputed()
-        return self.instanceSorts[index]
+        return self.instances
        
     def flattenJoin(self, joinList=[]):
         return self.left.flattenJoin([]) + joinList + self.right.flattenJoin([])
     
     
-    def clone(self):
-        if not self.instanceSorts:
-            return JoinArg(self.left.clone(), self.right.clone())
-        newInstanceSorts = []
-        for i in self.instanceSorts:
-            if isinstance(i, PrimitiveType):
-                newInstanceSorts.append(i)
-            else:    
-                (sort, mask) = i
-                newInstanceSorts.append((sort, mask.copy()))
-        return ExprArg([], newInstanceSorts)
+
       
     def __str__(self):
         return ("join: " + str(self.left.getInstanceSorts())+ str(self.right.getInstanceSorts()))

@@ -128,10 +128,10 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         if(self.inConstraint):
             self.currentConstraint.addOperator(element.operation)   
            
-    # assume their is only one sort in the decl at this time, which is true of my old version of clafer
+    # assume there is only one sort in the decl at this time, ok for now
     def createAllLocalsCombinations(self, localDecls, exprArg, isDisjunct, isSymmetric):
-        (sort, mask) = exprArg.getInstanceSort(0)
-        my_range = list(mask.keys())
+        instances = exprArg.getInstances()
+        my_range = list(instances.keys())
         integer_combinations = itertools.permutations(my_range, len(localDecls))
         
         localInstances = []
@@ -139,11 +139,12 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         
         
         for i in integer_combinations: 
+            sys.exit("TODO local combos")
             list_of_ints = list(i)
             set_of_ints = set(list_of_ints)
             if isDisjunct and (len(set_of_ints) != len(list_of_ints)):
                 continue
-            localInstances.append([ExprArg([(sort, Mask(sort, [list_of_ints[j]]))]
+            localInstances.append([ExprArg([(sort, Mask(sort, [list_of_ints[j]], nonsupered=True))]
                                            ) for j in range(len(list_of_ints))])
             ifConstraints.append(mAnd(*[sort.isOn(mask.get(j)) for j in list_of_ints]))
             

@@ -54,7 +54,7 @@ def joinWithParent(arg):
         (sort, mask) = i
         for j in mask.keys():
             mask.put(j, SMTLib.SMT_If(mask.get(j), sort.instances[j], SMTLib.SMT_IntConst(sort.parentInstances)))
-    return ExprArg(newInstanceSorts)
+    return ExprArg(newInstanceSorts, nonsupered=True)
 
 
 def addPrimitive(newSort, newMask, oldSort, oldMask, index, wasEmpty=False):
@@ -98,7 +98,7 @@ def joinWithPrimitive(arg):
                 addPrimitive(newSort, newMask, sort, mask, i)         
             newInstanceSorts.append((newSort, newMask)) #should change the "int", but not sure how yet
             Assertions.nonEmptyMask(newMask)
-    return ExprArg(newInstanceSorts)
+    return ExprArg(newInstanceSorts, nonsupered=True)
     
     
 '''
@@ -113,7 +113,7 @@ def joinWithClaferRef(arg):
         tempRefs = []
         newMask = alreadyExists(sort.refSort, newInstanceSorts)
         if isinstance(sort.refSort, PrimitiveType):
-            return joinWithPrimitive(ExprArg([(sort, mask)]))
+            return joinWithPrimitive(ExprArg([(sort, mask)],nonsupered=True))
         for j in mask.keys():
             tempRefs.append(SMTLib.SMT_If(sort.isOn(mask.get(j)),
                                sort.refs[j], SMTLib.SMT_IntConst(sort.refSort.numInstances)))
@@ -126,7 +126,7 @@ def joinWithClaferRef(arg):
         (sort, mask) = i
         for j in mask.keys():
             mask.put(j, SMTLib.SMT_If(mask.get(j), sort.instances[j], SMTLib.SMT_IntConst(sort.parentInstances)))
-    return ExprArg(newInstanceSorts)
+    return ExprArg(newInstanceSorts, nonsupered=True)
     
 def joinWithRef(arg): 
     (sort, _) = arg.instanceSorts[0]
@@ -204,7 +204,7 @@ def joinWithClafer(left, right):
             if lower <= lindex and lindex <= upper:
                 newInstances[(rsort, rindex)] = (rexpr, rpolarity)
     newInstances = flattenInstances(newInstances)
-    print(newInstances)
+    #print(newInstances)
     #sys.exit("join exit")
     return ExprArg(newInstances, nonsupered=True)
     
@@ -258,8 +258,7 @@ def computeJoin(joinList):
                 left = joinWithRef(left)
         else:
             left = joinWithClafer(left, right)
-    print(left.getInstances(nonsupered=True))
-    return left.getInstances(nonsupered=True)
+    return left.getInstances()
 
 def op_join(left,right):
     '''
