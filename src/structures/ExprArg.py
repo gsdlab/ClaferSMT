@@ -52,10 +52,11 @@ class ExprArg():
         #only used when reifying joins
         return [self]
         
-    def getInstances(self, nonsupered=True):
+    def getInstances(self, nonsupered=False):
         if nonsupered or self.hasBeenSupered:
             return self.clafers
         else:
+            sys.exit("getInstances not yet")
             newClafers = {}
             for (sort, index, polarity) in self.clafers:
                 #TODO if the currPolarity is already DEFINITELY_ON, don't add anything new

@@ -141,11 +141,35 @@ def joinWithRef(arg):
         return joinWithClaferRef(arg)
 
 
-def fixPolarities(instances):
+def flattenInstances(instances):
     '''
     sets the new polarities to corresponding ternary values
     '''
-    print(instances)
+    #print(instances)
+    for (sort, index) in instances.keys():
+        final_expr = mOr(SMTLib.SMT_BoolConst(True))
+        (l,h,e) = sort.instanceRanges[index]
+        (exprs, pols) = instances[(sort,index)]
+        final_polarity = Common.DEFINITELY_OFF
+        all_on = True
+        for i in range(l, h+1):
+            currExpr = exprs.get(i)
+            currPol = pols.get(i)
+            if not currPol:
+                all_on = False
+                continue
+            elif currPol == Common.UNKNOWN:
+                all_on = False
+                final_polarity = Common.UNKNOWN
+                final_expr = mOr(final_expr, currExpr)
+            else:
+                final_expr = mOr(final_expr, currExpr)
+        if all_on:
+            final_polarity = Common.DEFINITELY_ON
+            final_expr = SMTLib.SMT_BoolConst(True)
+        instances[(sort,index)] = (final_expr, final_polarity)       
+    #print(instances)
+    return instances
 
 def joinWithClafer(left, right):
     newInstances = {}
@@ -171,15 +195,17 @@ def joinWithClafer(left, right):
             (lower,upper,rextra) = rsort.instanceRanges[rindex]
             try:
                 rpolarity[lindex] = lpolarity
+                rexpr[lindex] = mAnd(lexpr, SMTLib.SMT_EQ(rsort.instances[rindex], SMTLib.SMT_IntConst(lindex)))
             except:
                 rpolarity = {} # TODO this shit right here
+                rexpr = {}
                 rpolarity[lindex] = lpolarity
+                rexpr[lindex] = mAnd(lexpr, SMTLib.SMT_EQ(rsort.instances[rindex], SMTLib.SMT_IntConst(lindex)))
             if lower <= lindex and lindex <= upper:
-                newInstances[(rsort, rindex)] = (mAnd(lexpr, SMTLib.SMT_EQ(rsort.instances[rindex], 
-                                                                              SMTLib.SMT_IntConst(lindex))), rpolarity)
-    fixPolarities(newInstances)
+                newInstances[(rsort, rindex)] = (rexpr, rpolarity)
+    newInstances = flattenInstances(newInstances)
     print(newInstances)
-    sys.exit("join exit")
+    #sys.exit("join exit")
     return ExprArg(newInstances, nonsupered=True)
     
     '''
@@ -232,11 +258,8 @@ def computeJoin(joinList):
                 left = joinWithRef(left)
         else:
             left = joinWithClafer(left, right)
-    for i in left.getInstanceSorts():
-        (_, mask) = i
-        Assertions.nonEmptyMask(mask)
-    Assertions.nonEmpty(left.getInstanceSorts())
-    return left.getInstanceSorts()
+    print(left.getInstances(nonsupered=True))
+    return left.getInstances(nonsupered=True)
 
 def op_join(left,right):
     '''

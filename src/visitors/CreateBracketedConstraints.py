@@ -133,7 +133,6 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         (sort, mask) = exprArg.getInstanceSort(0)
         my_range = list(mask.keys())
         integer_combinations = itertools.permutations(my_range, len(localDecls))
-    
         
         localInstances = []
         ifConstraints = []
