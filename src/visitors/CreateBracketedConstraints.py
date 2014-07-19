@@ -154,6 +154,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     # not fully implemented
     def declpexpVisit(self, element):
         if Options.BREAK_QUANTIFIER_SYMMETRY:
+            #TODO actually do this...
             sys.exit("BREAK_QUANTIFIER_SYMMETRY still unimplemented.")
             symmetryChecker = CheckFunctionSymmetry(self.cfr)
             visitors.Visitor.visit(symmetryChecker, element.bodyParentExp)
@@ -163,7 +164,6 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             isSymmetric = False
         num_args = 0
         if element.declaration:
-             
             visitors.Visitor.visit(self, element.declaration.body.iExp[0])
             if not self.currentConstraint.stack:
                 return
@@ -176,9 +176,9 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
                                                                                  isSymmetric)
                 if len(combinations) == 0:
                     if element.quantifier == "Some":
-                        self.currentConstraint.stack.append([BoolArg([SMTLib.SMT_Bool(False)])])
+                        self.currentConstraint.stack.append([BoolArg(SMTLib.SMT_Bool(False))])
                     elif element.quantifier == "All":
-                        self.currentConstraint.stack.append([BoolArg([SMTLib.SMT_Bool(True)])])
+                        self.currentConstraint.stack.append([BoolArg(SMTLib.SMT_Bool(True))])
                     return
                 num_args = len(combinations[0])
                 num_combinations = len(combinations)

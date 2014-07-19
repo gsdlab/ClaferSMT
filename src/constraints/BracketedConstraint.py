@@ -6,8 +6,7 @@ Created on Apr 29, 2013
 from common import Assertions, Common, SMTLib
 from constraints import Constraints
 from constraints.Constraints import GenericConstraints
-from constraints.operations import Join, Numeric, String, Quantifier, Boolean, \
-    Set
+from constraints.operations import Join, Numeric, String, Quantifier, Boolean, Set
 from structures.ExprArg import BoolArg
 import sys
 
@@ -133,7 +132,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
         quantFunction = getQuantifier(quantifier)
         cond = quantFunction(localStack, ifConstraints)
         Assertions.nonEmpty(cond)
-        self.stack.append([BoolArg([cond])])
+        self.stack.append([BoolArg(cond)])
         
         
     def extend(self, args):
@@ -175,10 +174,10 @@ class BracketedConstraint(Constraints.GenericConstraints):
             thisClafer = self.claferStack[-1]
             for i in range(thisClafer.numInstances):
                 if thisClafer.numInstances == len(expr):
-                    self.addConstraint(SMTLib.SMT_Implies(thisClafer.isOn(thisClafer.instances[i]), expr[i].finish()))
+                    self.addConstraint(SMTLib.SMT_Implies(thisClafer.isOn(thisClafer.instances[i]), expr[i].getBool()))
                 #hack for now
                 else:
-                    self.addConstraint(SMTLib.SMT_Implies(thisClafer.isOn(thisClafer.instances[i]), expr[0].finish()))
+                    self.addConstraint(SMTLib.SMT_Implies(thisClafer.isOn(thisClafer.instances[i]), expr[0].getBool()))
         else:
             for i in expr:
                 self.addConstraint(i.getBool())

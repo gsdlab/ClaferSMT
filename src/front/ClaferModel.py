@@ -88,6 +88,12 @@ class ClaferModel(object):
             if i.superSort:
                 i.superSort.addSubSort(i)     
     
+    def fixSubSortIndices(self):
+        for i in self.cfr_sorts.values():
+            i.currentSubIndex = 0
+            for sub in i.subs:
+                i.setSubSortIndex(sub)
+    
     def addSubSortConstraints(self):
         for i in self.cfr_sorts.values():
             if i.superSort:
@@ -182,8 +188,8 @@ class ClaferModel(object):
             
             """ Initializing ClaferSorts and their instances. """
             Visitor.visit(Initialize.Initialize(self), self.module)
+            self.fixSubSortIndices()
             self.createInstancesConstraintsAndFunctions()
-            
             
             
             

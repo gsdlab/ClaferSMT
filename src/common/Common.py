@@ -79,11 +79,10 @@ def mAnd(*args):
     newArgs = []
     for i in args:
         if i:
-            if isinstance(i, SMTLib.SMT_BoolConst):
-                if str(i) == "True":
-                    continue
-                else:
-                    return SMTLib.SMT_BoolConst(False)
+            if str(i) == "True":
+                continue
+            if str(i) == "False":
+                return SMTLib.SMT_BoolConst(False)
             newArgs.append(i)
     if len(newArgs) == 0:
         return SMTLib.SMT_BoolConst(True)

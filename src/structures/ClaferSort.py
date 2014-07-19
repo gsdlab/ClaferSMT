@@ -109,7 +109,6 @@ class  ClaferSort(object):
         return None
     
     def initialize(self):
-        #TODO this should just use the current value of numInstances...
         (_, upper) = self.element.glCard
         self.numInstances = upper.value
         self.instances = SMTLib.SMT_IntVector(self.element.uid,self.numInstances, 
@@ -454,7 +453,11 @@ class  ClaferSort(object):
         oldSubIndex = self.currentSubIndex
         sub.indexInSuper = oldSubIndex
         self.currentSubIndex = self.currentSubIndex + sub.numInstances
-        
+      
+    def setSubSortIndex(self, sub):
+        oldSubIndex = self.currentSubIndex
+        sub.indexInSuper = oldSubIndex
+        self.currentSubIndex = self.currentSubIndex + sub.numInstances
         
     def addField(self, claferSort):
         self.fields.append(claferSort)

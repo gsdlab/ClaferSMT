@@ -56,6 +56,7 @@ def addMatchValues(matches, instances, left=True):
     #print(instanceSorts)
     for (sort, index) in instances.keys():
         (expr,polarity) = instances[(sort,index)]
+        #!!!
         default = (SMTLib.SMT_BoolConst(False), Common.DEFINITELY_OFF)
         (prev_left, prev_right) = matches.get((sort,index), (default,default))
         if left:
@@ -92,8 +93,6 @@ def getSetInstancePairs(left,right=None):
     #print(matches.values())
     return matches
     
-        
-    
 def op_eq(left,right):
     '''
     :param left:
@@ -106,91 +105,105 @@ def op_eq(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
+    cond = []
+    #int equality case
+    lints = [(e,c) for (e,c) in left.getInts() if str(c) != "False"]
+    rints = [(e,c) for (e,c) in right.getInts() if str(c) != "False"]
+    if lints or rints:
+        for (e,c) in lints:
+            #exists r in R s.t. e == r
+            expr = mOr(*[mAnd(rc, SMTLib.SMT_EQ(e,r)) for (r,rc) in rints]) 
+            if str(c) != "True":
+                expr = SMTLib.SMT_Implies(c, expr)
+            cond.append(expr)        
+        for (e,c) in rints:
+            #exists l in L s.t. e == l
+            expr = mOr(*[mAnd(lc, SMTLib.SMT_EQ(e,l)) for (l,lc) in lints]) 
+            if str(c) != "True":
+                expr = SMTLib.SMT_Implies(c, expr)
+            cond.append(expr)    
+    #clafer-set equality case
+    matches = getSetInstancePairs(left,right)
+    for ((lexpr, lpol),(rexpr, rpol)) in matches.values():
+        if lpol == Common.DEFINITELY_OFF and rpol == Common.DEFINITELY_OFF:
+            continue
+        elif lpol == Common.DEFINITELY_OFF:
+            cond.append(SMTLib.SMT_Not(rexpr))
+        elif rpol == Common.DEFINITELY_OFF:
+            cond.append(SMTLib.SMT_Not(lexpr))
+        else:
+            cond.append(SMTLib.SMT_Implies(lexpr, rexpr))
+            cond.append(SMTLib.SMT_Implies(rexpr, lexpr))
+    return BoolArg(mAnd(*cond))
+    '''
+    cond = []
+    matches = getSetInstancePairs(left,right)
+    for (l,r) in matches.values():
+        if l == []:
+            cond.append(SMTLib.SMT_Not(SMTLib.SMT_Or(*r)))
+        elif r == []:
+            cond.append(SMTLib.SMT_Not(SMTLib.SMT_Or(*l)))
+        else:
+            lval = SMTLib.SMT_Or(*l)
+            rval = SMTLib.SMT_Or(*r)
+            cond.append(SMTLib.SMT_Implies(lval, rval))
+            cond.append(SMTLib.SMT_Implies(rval, lval))
+
+    return BoolArg([mAnd(*cond)])
+    '''
+    '''
     (left_sort, left_mask) = left.getInstanceSort(0)
     (right_sort, right_mask) = right.getInstanceSort(0)
     #numeric equality case
     if isinstance(left_sort, IntSort) or isinstance(right_sort, IntSort) or isinstance(left_sort, RealSort) or isinstance(right_sort, RealSort):
-        return BoolArg([SMTLib.SMT_EQ(SMTLib.SMT_Sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]),
-                         SMTLib.SMT_Sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()]))])
-    #TODO string equality case...probably bogus
-    #TODO possibly can eliminate base trivial cases (i.e. auto-aggregate DEF_OFF/DEF_ON cases 
+        return BoolArg(SMTLib.SMT_EQ(SMTLib.SMT_Sum(*[left_mask.values() for (_, left_mask) in left.getInstanceSorts()]),
+                         SMTLib.SMT_Sum(*[right_mask.values() for (_, right_mask) in right.getInstanceSorts()])))
+    
     elif isinstance(left_sort, StringSort) or isinstance(right_sort, StringSort):
-        return BoolArg([SMTLib.SMT_EQ(left_mask.get(0), right_mask.get(0))])
-    #clafer-set equality case
-    else:
-        cond = []
-        matches = getSetInstancePairs(left,right)
-        for ((lexpr, lpol),(rexpr, rpol)) in matches.values():
-            if lpol == Common.DEFINITELY_OFF and rpol == Common.DEFINITELY_OFF:
-                continue
-            elif lpol == Common.DEFINITELY_OFF:
-                cond.append(SMTLib.SMT_Not(rexpr))
-            elif rpol == Common.DEFINITELY_OFF:
-                cond.append(SMTLib.SMT_Not(lexpr))
+    return BoolArg(SMTLib.SMT_EQ(left_mask.get(0), right_mask.get(0)))
+    cond = []
+    for i in sortedL:
+        (left_sort, left_mask) = i
+        matches = getClaferMatch(left_sort, sortedR)
+        for j in matches:
+            (leftIsSub, transform, (right_sort,right_mask)) = j
+            if leftIsSub:
+                sub_sort = left_sort
+                sub_mask = left_mask
+                super_mask = right_mask
+                super_sort = right_sort
+                unmatchedSub = unmatchedL
+                unmatchedSuper = unmatchedR
             else:
-                cond.append(SMTLib.SMT_Implies(lexpr, rexpr))
-                cond.append(SMTLib.SMT_Implies(rexpr, lexpr))
-        return BoolArg([mAnd(*cond)])
-        '''
-        cond = []
-        matches = getSetInstancePairs(left,right)
-        for (l,r) in matches.values():
-            if l == []:
-                cond.append(SMTLib.SMT_Not(SMTLib.SMT_Or(*r)))
-            elif r == []:
-                cond.append(SMTLib.SMT_Not(SMTLib.SMT_Or(*l)))
-            else:
-                lval = SMTLib.SMT_Or(*l)
-                rval = SMTLib.SMT_Or(*r)
-                cond.append(SMTLib.SMT_Implies(lval, rval))
-                cond.append(SMTLib.SMT_Implies(rval, lval))
-
-        return BoolArg([mAnd(*cond)])
-        '''
-        '''
-        cond = []
-        for i in sortedL:
-            (left_sort, left_mask) = i
-            matches = getClaferMatch(left_sort, sortedR)
-            for j in matches:
-                (leftIsSub, transform, (right_sort,right_mask)) = j
-                if leftIsSub:
-                    sub_sort = left_sort
-                    sub_mask = left_mask
-                    super_mask = right_mask
-                    super_sort = right_sort
-                    unmatchedSub = unmatchedL
-                    unmatchedSuper = unmatchedR
+                sub_sort = right_sort
+                sub_mask = right_mask
+                super_mask = left_mask
+                super_sort = left_sort
+                unmatchedSub = unmatchedR
+                unmatchedSuper = unmatchedL
+            #unmatched extension
+            unmatchedSubMask = find(sub_sort, unmatchedSub)
+            unmatchedSuperMask = find(super_sort, unmatchedSuper)
+            for i in sub_mask.keys():
+                unmatchedSubMask.remove(i)
+                unmatchedSuperMask.remove(i+transform)
+            #end unmatched extension
+            for k in sub_mask.keys():
+                if not super_mask.get(k + transform):
+                    cond.append(sub_sort.isOff(sub_mask.get(k)))
                 else:
-                    sub_sort = right_sort
-                    sub_mask = right_mask
-                    super_mask = left_mask
-                    super_sort = left_sort
-                    unmatchedSub = unmatchedR
-                    unmatchedSuper = unmatchedL
-                #unmatched extension
-                unmatchedSubMask = find(sub_sort, unmatchedSub)
-                unmatchedSuperMask = find(super_sort, unmatchedSuper)
-                for i in sub_mask.keys():
-                    unmatchedSubMask.remove(i)
-                    unmatchedSuperMask.remove(i+transform)
-                #end unmatched extension
-                for k in sub_mask.keys():
-                    if not super_mask.get(k + transform):
-                        cond.append(sub_sort.isOff(sub_mask.get(k)))
-                    else:
-                        cond.append(SMTLib.SMT_And(SMTLib.SMT_Implies(sub_sort.isOn(sub_mask.get(k)),
-                                            super_sort.isOn(super_mask.get(k + transform))),
-                                        SMTLib.SMT_Implies(super_sort.isOn(super_mask.get(k + transform)),
-                                            sub_sort.isOn(sub_mask.get(k)))))
-        #unmatched extension
-        for i in unmatchedL + unmatchedR:
-            (sort, mask) = i
-            for j in mask.keys():
-                cond.append(sort.isOff(mask.get(j)))
-        return BoolArg([mAnd(*cond)])
-        ''' 
-        
+                    cond.append(SMTLib.SMT_And(SMTLib.SMT_Implies(sub_sort.isOn(sub_mask.get(k)),
+                                        super_sort.isOn(super_mask.get(k + transform))),
+                                    SMTLib.SMT_Implies(super_sort.isOn(super_mask.get(k + transform)),
+                                        sub_sort.isOn(sub_mask.get(k)))))
+    #unmatched extension
+    for i in unmatchedL + unmatchedR:
+        (sort, mask) = i
+        for j in mask.keys():
+            cond.append(sort.isOff(mask.get(j)))
+    return BoolArg([mAnd(*cond)])
+    ''' 
+    
             
 def op_ne(left,right):
     '''
@@ -211,10 +224,6 @@ def op_ne(left,right):
             mask.put(j, SMTLib.SMT_Not(mask.get(j)))
     return expr
     
-
-
-
-
 def op_implies(left,right):
     '''
     :param left:
@@ -228,10 +237,8 @@ def op_implies(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     
-    #integer equality case
-    #boolean equality case
     '''
-    TODO int boolean case
+    
     (left_sort, left_mask) = left.getInstanceSort(0)
     (right_sort, right_mask) = right.getInstanceSort(0)
     if isinstance(left_sort, BoolSort) or isinstance(right_sort, BoolSort):
@@ -242,7 +249,8 @@ def op_implies(left,right):
     #clafer-set equality case
     if left.ints:
         sys.exit("Ints TODO")
-    
+    if isinstance(left, BoolArg) and isinstance(right, BoolArg):
+        return BoolArg(SMTLib.SMT_Implies(left.getBool(), right.getBool()))
     cond = []
     matches = getSetInstancePairs(left,right)
     for ((lexpr, lpol),(rexpr, rpol)) in matches.values():
@@ -254,7 +262,7 @@ def op_implies(left,right):
             #lpol is unknown and rpol is off or unknown
             #almost the same as op_difference below
             cond.append(SMTLib.SMT_Implies(lexpr, rexpr))
-    return BoolArg([mAnd(*cond)])
+    return BoolArg(mAnd(*cond))
     '''
     cond = []
     for i in sortedL:
@@ -343,7 +351,7 @@ def op_card(arg):
     matches = getSetInstancePairs(arg)
     #TODO int card case
     known_card = 0
-    for (instance,_) in matches:
+    for (instance,_) in matches.values():
         (expr, polarity) = instance
         if polarity == Common.DEFINITELY_ON:
             known_card = known_card + 1
@@ -701,7 +709,7 @@ def op_nin(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     expr = op_in(left,right)
-    return BoolArg([SMTLib.SMT_Not(expr.pop_value())])
+    return BoolArg(SMTLib.SMT_Not(expr.pop_value()))
 
 def op_domain_restriction(l,r):
     pass

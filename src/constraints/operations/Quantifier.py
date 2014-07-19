@@ -3,8 +3,9 @@ Created on Jul 14, 2014
 
 @author: ezulkosk
 '''
-from common import SMTLib
+from common import SMTLib, Common
 from common.Common import mOr, mAnd
+import sys
 
 def getQuantifierConditionList(exprs):
     '''
@@ -16,11 +17,14 @@ def getQuantifierConditionList(exprs):
     for i in exprs:
         for expr in i:
             condList = []
-            for k in expr.getInstanceSorts():
-                (sort, mask) = k
-                for l in mask.keys():
-                    condList.append(sort.isOn(mask.get(l)))
-
+            for k in expr.getInstances().values():
+                (e, pol) = k
+                if pol != Common.DEFINITELY_ON:
+                    condList.append(e)
+                else:
+                    condList.append(SMTLib.SMT_BoolConst(True))
+                    break
+            assert(len(condList)<=1)#TODO REMOVE
             finalList.append(mOr(*condList))
     return finalList
 

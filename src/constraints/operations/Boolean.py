@@ -20,7 +20,7 @@ def op_not(arg):
     assert isinstance(arg, ExprArg)
     (_, mask) = arg.getInstanceSort(0)
     val = mask.pop_value()
-    return BoolArg([SMTLib.SMT_Not(val)])
+    return BoolArg(SMTLib.SMT_Not(val))
 
 def op_and(left,right):
     '''
@@ -38,7 +38,7 @@ def op_and(left,right):
     (_, right_mask) = right.getInstanceSort(0)
     lval = left_mask.pop_value()
     rval = right_mask.pop_value()
-    return BoolArg([mAnd(lval, rval)])  
+    return BoolArg(mAnd(lval, rval))  
 
 def op_or(left,right):
     '''
@@ -56,7 +56,7 @@ def op_or(left,right):
     (_, right_mask) = right.getInstanceSort(0)
     lval = left_mask.pop_value()
     rval = right_mask.pop_value()
-    return BoolArg([mOr(lval, rval)])  
+    return BoolArg(mOr(lval, rval))  
 
 def op_xor(left,right):
     '''
@@ -74,7 +74,7 @@ def op_xor(left,right):
     (_, right_mask) = right.getInstanceSort(0)
     lval = left_mask.pop_value()
     rval = right_mask.pop_value()
-    return BoolArg([SMTLib.SMT_Xor(lval, rval)])  
+    return BoolArg(SMTLib.SMT_Xor(lval, rval))  
 
 def op_equivalence(left,right):
     '''
@@ -94,7 +94,7 @@ def op_equivalence(left,right):
     rightResult = op_implies(rightcopy, leftcopy)
     lval = leftResult.getValue()
     rval = rightResult.getValue()
-    cond = [SMTLib.SMT_And(lval, rval)]
+    cond = SMTLib.SMT_And(lval, rval)
     return BoolArg(cond)
 
 def op_ifthenelse(cond, ifExpr, elseExpr):
@@ -116,5 +116,5 @@ def op_ifthenelse(cond, ifExpr, elseExpr):
     (_, cond_mask) = cond.getInstanceSort(0)
     (_, if_mask) = ifExpr.getInstanceSort(0)
     (_, else_mask) = elseExpr.getInstanceSort(0)
-    
-    return BoolArg([SMTLib.SMT_If(cond_mask.pop_value(), if_mask.pop_value(), else_mask.pop_value())])
+    return BoolArg(SMTLib.SMT_If(cond_mask.pop_value(), if_mask.pop_value(), else_mask.pop_value()))
+

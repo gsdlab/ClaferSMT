@@ -22,9 +22,9 @@ def op_add(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    lval = left.getInstances()[0]
-    rval = right.getInstances()[0]
-    return BoolArg(SMTLib.SMT_Plus(lval, rval))  
+    lval = left.getInt()
+    rval = right.getInt()
+    return IntArg(SMTLib.SMT_Plus(lval, rval))  
 
 def op_sub(left,right):
     '''
@@ -38,9 +38,9 @@ def op_sub(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    lval = left.getInstances()[0]
-    rval = right.getInstances()[0]
-    return BoolArg(SMTLib.SMT_Minus(lval, rval))  
+    lval = left.getInt()
+    rval = right.getInt()
+    return IntArg(SMTLib.SMT_Minus(lval, rval))  
 
 def op_mul(left,right):
     '''
@@ -54,9 +54,9 @@ def op_mul(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    lval = left.getInstances()[0]
-    rval = right.getInstances()[0]
-    return BoolArg(SMTLib.SMT_Times(lval, rval))  
+    lval = left.getInt()
+    rval = right.getInt()
+    return IntArg(SMTLib.SMT_Times(lval, rval))  
 
 #integer division
 def op_div(left,right):
@@ -70,8 +70,8 @@ def op_div(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    lval = left.getInstances()[0]
-    rval = right.getInstances()[0]
+    lval = left.getInt()
+    rval = right.getInt()
     return IntArg(SMTLib.SMT_Divide(lval, rval)
                    if((not isinstance(lval, SMTLib.SMT_IntConst)) or (not isinstance(rval, SMTLib.SMT_IntConst)))
                              else SMTLib.SMT_IntDivide(lval, rval))
@@ -85,8 +85,8 @@ def op_un_minus(arg):
     
     Negates arg.
     '''
-    assert isinstance(arg, ExprArg)
-    val = arg.getInstances()[0]
+    assert isinstance(arg, IntArg)
+    val = arg.getInt()
     return IntArg(SMTLib.SMT_Neg(val))  
    
 def op_sum(arg):
@@ -102,7 +102,7 @@ def op_sum(arg):
     for i in arg.getInstanceSorts():
         (_, mask) = i
         all_vals.append(getArithValue(list(mask.values())))
-    return IntArg([getArithValue(all_vals)])
+    return IntArg(getArithValue(all_vals))
 
 def op_lt(left,right):
     '''
@@ -116,8 +116,8 @@ def op_lt(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    lval = left.getInstances()[0]
-    rval = right.getInstances()[0]
+    lval = left.getInt()
+    rval = right.getInt()
     return BoolArg(SMTLib.SMT_LT(lval, rval))  
         
 def op_le(left,right):
@@ -132,8 +132,8 @@ def op_le(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    lval = left.getInstances()[0]
-    rval = right.getInstances()[0]
+    lval = left.getInt()
+    rval = right.getInt()
     return BoolArg(SMTLib.SMT_LE(lval, rval))  
 
 def op_gt(left,right):
@@ -163,3 +163,4 @@ def op_ge(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return op_le(right, left)
+

@@ -12,7 +12,7 @@ import sys
 
 
 class ExprArg():
-    def __init__(self, instances = {}, nonsupered=True):
+    def __init__(self, instances = {}, nonsupered=False):
         '''
         :param instanceSorts: The list of sorts that are actually in instances.
         :type instancesSorts: [(:class:`~common.ClaferSort`, Mask)]
@@ -57,10 +57,8 @@ class ExprArg():
         if nonsupered or self.hasBeenSupered:
             return self.clafers
         else:
-            #sys.exit("getInstances not yet")
             newClafers = {}
             for (sort, index) in self.clafers.keys():
-                #TODO if the currPolarity is already DEFINITELY_ON, don't add anything new
                 (expr, polarity) = self.clafers[(sort,index)]
                 if polarity == Common.DEFINITELY_OFF:
                     continue
@@ -75,15 +73,20 @@ class ExprArg():
             self.hasBeenSupered = True 
         return self.clafers
     
+    def getInts(self):
+        return self.ints
     
+    def getInt(self):
+        #print(self)
+        return self.ints[0][0]
       
     def __str__(self):
-        return (str(self.getInstances(nonsupered=True))) 
+        return (str(self.getInstances(nonsupered=True)) + str(self.ints)) 
      
     def __repr__(self):
-        return (str(self.getInstances(nonsupered=True))) 
+        return (str(self.getInstances(nonsupered=True)) + str(self.ints)) 
 
-class PrimitiveArg(): 
+class PrimitiveArg(ExprArg): 
     '''
     only used to hold 'ref' or 'parent'
     '''
@@ -102,11 +105,17 @@ class IntArg(ExprArg):
         Convenience class that extends ExprArg and holds an integer instance.
         '''
         ExprArg.__init__(self)
-        self.ints = [instance]
-        self.cardinalityMask.append(SMTLib.SMT_IntConst(1))
-        
-    def getInstances(self):
+        self.ints = [(instance, True)]
+        #self.cardinalityMask.append(SMTLib.SMT_IntConst(1))
+    
+    def getInt(self):
+        return self.ints[0][0]    
+    
+    def getInts(self):
         return self.ints
+    
+    def getInstances(self):
+        return {}
     
     def __str__(self):
         return (str(self.ints)) 
@@ -143,12 +152,8 @@ class BoolArg(ExprArg):
     def __repr__(self):
         return (str(self.bool)) 
     
-    #TODO delete one of getBool/finish (probably delete finish)
-    def finish(self):
-        return self.bool[0]
-    
     def getBool(self):
-        return self.bool[0]
+        return self.bool
  
 class StringArg(ExprArg):
     def __init__(self, instances):
@@ -166,28 +171,36 @@ class JoinArg(ExprArg):
         self.left = left
         self.right = right
         self.instances = []
+        ExprArg.__init__(self)
     
     def checkIfJoinIsComputed(self):
         import constraints.operations.Join as Join
         if not self.instances:
             joinList = self.flattenJoin()
-            self.instances = Join.computeJoin(joinList)
+            return Join.computeJoin(joinList)
     
-    def getInstances(self):
-        self.checkIfJoinIsComputed()
-        return self.instances
+    def getInstances(self, nonsupered=False):
+        exprArg = self.checkIfJoinIsComputed()
+        return exprArg.getInstances(nonsupered)
+        #return self.instances
        
     def flattenJoin(self, joinList=[]):
         return self.left.flattenJoin([]) + joinList + self.right.flattenJoin([])
     
-    
+    def getInt(self):
+        exprArg = self.checkIfJoinIsComputed()
+        return exprArg.getInt()
+        
+        
 
       
     def __str__(self):
-        return ("join: " + str(self.left.getInstanceSorts())+ str(self.right.getInstanceSorts()))
+        return (str(self.getInstances(nonsupered=True)) + str(self.ints)) 
+        #return ("join: " + str(self.left.getInstanceSorts())+ str(self.right.getInstanceSorts()))
     
     def __repr__(self):
-        return ("join: " + str(self.getInstanceSorts())+ str(self.getInstanceSorts()))
+        return (str(self.getInstances(nonsupered=True)) + str(self.ints)) 
+        #return ("join: " + str(self.getInstanceSorts())+ str(self.getInstanceSorts()))
     
 
        
