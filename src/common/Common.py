@@ -76,8 +76,13 @@ def mAnd(*args):
     Helper Function to simplify formulas passed to Z3, but mostly to make debugging output more comprehensible.
     Only applies the And function if there are actually multiple arguments.
     '''
+    args = list(args)
     newArgs = []
-    for i in args:
+    while(args):
+        i = args.pop()
+        if isinstance(i, SMTLib.SMT_And):
+            for j in i.children():
+                args.append(j)
         if i:
             if str(i) == "True":
                 continue
@@ -95,8 +100,15 @@ def mOr(*args):
     '''
     Similar to mAnd
     '''
+    args = list(args)
     newArgs = []
-    for i in args:
+    while(args):
+        i = args.pop()
+        if isinstance(i, SMTLib.SMT_Or):
+            #print(i)
+            for j in i.children():
+                #print(j)
+                args.append(j)
         if i:
             if isinstance(i, SMTLib.SMT_BoolConst):
                 if str(i) == "False":

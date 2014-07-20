@@ -3,7 +3,7 @@ Created on May 14, 2014
 
 @author: ezulkosk
 '''
-from common import Common
+from common import Common, SMTLib
 from solvers.BaseSolver import BaseSolver
 from z3 import *
 
@@ -112,6 +112,7 @@ class Z3Converter():
         return Xor(l,r)
     
     def and_expr(self, expr):
+        #SMTLib.toStr(expr)
         newList = [i.convert(self) for i in expr.list]
         return And(*newList)
 

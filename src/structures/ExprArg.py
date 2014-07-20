@@ -12,7 +12,7 @@ import sys
 
 
 class ExprArg():
-    def __init__(self, instances = {}, nonsupered=False):
+    def __init__(self, instances = None, nonsupered=False):
         '''
         :param instanceSorts: The list of sorts that are actually in instances.
         :type instancesSorts: [(:class:`~common.ClaferSort`, Mask)]
@@ -22,7 +22,10 @@ class ExprArg():
         #key: (highestSuperSort, indexInHighestSuper), if supered (see below)
         #value: ([BoolSort b], polarity), b evaluates to true if the instance is on, list needs to be converted to OR
         #polarity: a *PYTHON* int, either DEFINITELY_ON, DEFINITELY_OFF, UNKNOWN
-        self.clafers = instances
+        if not instances:
+            self.clafers = {}
+        else:
+            self.clafers = instances
         self.ints = []
         self.bool = None
         self.cardinalityMask = []

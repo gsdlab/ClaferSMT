@@ -257,7 +257,6 @@ class ClaferModel(object):
         
         debug_print("Getting models.")  
         self.clock.tick("Get Models")
-        print("GETTTTING")
         models = self.get_models(Options.NUM_INSTANCES)
         self.clock.tock("Get Models")
         print(self.clock)
@@ -400,7 +399,6 @@ class ClaferModel(object):
                 m = self.solver.model()
                 #if count ==0:
                 #print(m)
-                print(count)
                 result.append(m)
                 # Create a new constraint that blocks the current model
                 #print(m)
