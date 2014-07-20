@@ -280,7 +280,10 @@ class  ClaferSort(object):
             (l,h,_) = self.instanceRanges[i]
             polarity = Common.DEFINITELY_OFF
             all_on_flag = True
-            for j in range(l,min(self.parentInstances,h+1)):
+            for j in range(l,h+1):
+                if j >= self.parentInstances:
+                    all_on_flag = False
+                    continue
                 par_polarity = self.parent.knownPolarities[j]
                 if not par_polarity == Common.DEFINITELY_ON:
                     all_on_flag = False
@@ -369,7 +372,7 @@ class  ClaferSort(object):
                                                    SMTLib.SMT_IntConst(0)))
         for i in range(len(self.summs)):
             if self.summs[i]:
-                self.summs[i] = SMTLib.SMT_Sum(*[self.summs[i]])
+                self.summs[i] = SMTLib.createSum(*[self.summs[i]])
             else:
                 self.summs[i] = SMTLib.SMT_IntConst(0)
         for i in range(self.parentInstances):
@@ -490,7 +493,7 @@ class BoolSort():
         '''
         Returns a Boolean Constraint stating whether or not the instance at the given index is *off*.
         '''
-        return SMTLib.SMT_Not(self.isOn(arg))
+        return SMTLib.createNot(self.isOn(arg))
     
     def __lt__(self, other):
         return not isinstance(other, BoolSort())
@@ -569,7 +572,7 @@ class IntSort():
         '''
         Returns a Boolean Constraint stating whether or not the instance at the given index is *off*.
         '''
-        return SMTLib.SMT_Not(self.isOn(arg))
+        return SMTLib.createNot(self.isOn(arg))
     
     def getNextIndex(self):
         self.index = self.index + 1
@@ -608,7 +611,7 @@ class RealSort():
         '''
         Returns a Boolean Constraint stating whether or not the instance at the given index is *off*.
         '''
-        return SMTLib.SMT_Not(self.isOn(arg))
+        return SMTLib.createNot(self.isOn(arg))
     
     def getNextIndex(self):
         self.index = self.index + 1

@@ -79,7 +79,6 @@ class ClaferModel(object):
         for i in self.cfr_sorts.values():
             if i.element.isAbstract:
                 i.fixAbstractExtraConstraints()
-                
         for i in self.cfr_sorts.values():
             i.createInstancesConstraintsAndFunctions()
     
@@ -190,9 +189,7 @@ class ClaferModel(object):
             Visitor.visit(Initialize.Initialize(self), self.module)
             self.fixSubSortIndices()
             self.createInstancesConstraintsAndFunctions()
-            
-            
-            
+              
             #for i in self.cfr_sorts.values():
             #    standard_print(str(i) + " : "+ str(i.numInstances))
             
@@ -241,23 +238,32 @@ class ClaferModel(object):
             Converters.printZ3StrConstraints(self)
             Z3Str.clafer_to_z3str("z3str_in")
             return 1
+        #TODO Z3 object caching!
         
         #for i in self.smt_bracketed_constraints:
         #    for j in i.constraints:
         #        print(SMTLib.toStr(j))
+        
+        #for i in self.cfr_sorts.values():
+        #    print(i)
+        #    print(i.instanceRanges)
+        
+        debug_print("Printing constraints.") 
+        self.printConstraints()
         
         #sys.exit("DONE")
         self.clock.tick("Asserting Constraints")
         debug_print("Asserting constraints.")
         self.assertConstraints()     
         self.clock.tock("Asserting Constraints")
+        print("Cache Hits: " + str(self.solver.converter.num_hit))
+        print("Cache Misses: " + str(self.solver.converter.num_miss))
         
         if Options.SOLVER == "smt2":
             self.solver.printConstraints()
             sys.exit()
         
-        debug_print("Printing constraints.") 
-        self.printConstraints()
+        
         #sys.exit()
         
         debug_print("Getting models.")  

@@ -38,9 +38,8 @@ class CheckForGoals(VisitorTemplate.VisitorTemplate):
         expr = bracketedConstraintsVisitor.objectiveVisit(element.exp.iExp[0].elements[0])
         if isinstance(expr[0], JoinArg):
             expr = operations.Join.computeJoin(expr)
-        mask = expr[0][1]
-        valueList = [i for i in mask.values()]
-        self.cfr.objectives.append((op, SMTLib.SMT_Sum(valueList)))
+        valueList = [SMTLib.createIf(c, i, SMTLib.SMT_IntConst(0)) for (i,c) in expr.getInts()]
+        self.cfr.objectives.append((op, SMTLib.createSum(valueList)))
     
 
             

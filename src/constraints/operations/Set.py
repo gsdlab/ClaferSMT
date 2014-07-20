@@ -53,7 +53,6 @@ def addMatchValues(matches, instances, left=True):
     '''
     Ignores PrimitiveSorts
     '''
-    #print(instanceSorts)
     for (sort, index) in instances.keys():
         (expr,polarity) = instances[(sort,index)]
         #!!!
@@ -128,9 +127,9 @@ def op_eq(left,right):
         if lpol == Common.DEFINITELY_OFF and rpol == Common.DEFINITELY_OFF:
             continue
         elif lpol == Common.DEFINITELY_OFF:
-            cond.append(SMTLib.SMT_Not(rexpr))
+            cond.append(SMTLib.createNot(rexpr))
         elif rpol == Common.DEFINITELY_OFF:
-            cond.append(SMTLib.SMT_Not(lexpr))
+            cond.append(SMTLib.createNot(lexpr))
         else:
             cond.append(SMTLib.SMT_Implies(lexpr, rexpr))
             cond.append(SMTLib.SMT_Implies(rexpr, lexpr))
@@ -219,7 +218,7 @@ def op_ne(left,right):
     assert isinstance(right, ExprArg)
     expr = op_eq(left, right)
     b = expr.getBool()
-    return BoolArg(SMTLib.SMT_Not(b))
+    return BoolArg(SMTLib.createNot(b))
     
 def op_implies(left,right):
     '''
@@ -330,7 +329,12 @@ def getNextInstanceSort(left, right):
     else: 
         return []
 
-
+def compute_int_set(instances):
+    cons = []
+    for index in range(len(instances)):
+        (i,c) = instances[index]
+        cons.append(mAnd(c, *[mOr(SMTLib.createNot(jc), SMTLib.SMT_NE(j,i)) for (j, jc) in instances[0:index]]))
+    return cons
 
 def op_card(arg):
     '''
@@ -346,8 +350,15 @@ def op_card(arg):
     
     instances = []
     matches = getSetInstancePairs(arg)
-    #TODO int card case
     known_card = 0
+    if arg.ints:
+        card_cons = compute_int_set(arg.ints)
+        for i in card_cons:
+            if isinstance(i, SMTLib.SMT_BoolConst):
+                if i.value:
+                    known_card = known_card + 1
+            else:
+                instances.append(SMTLib.SMT_If(i, SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
     for (instance,_) in matches.values():
         (expr, polarity) = instance
         if polarity == Common.DEFINITELY_ON:
@@ -355,7 +366,7 @@ def op_card(arg):
         else:
             instances.append(SMTLib.SMT_If(expr, SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))
     instances.append(SMTLib.SMT_IntConst(known_card))
-    return IntArg(SMTLib.SMT_Sum(instances))
+    return IntArg(SMTLib.createSum(instances))
     '''
     for i in arg.getInstanceSorts():
         (sort, _) = i
@@ -618,7 +629,7 @@ def op_difference(left,right):
             #rpol is unknown, lpol is unknown or on => new_pol is UNKNOWN
             #cases (0, 0), (1, 0)
             #if right is not on, then left, else sort.isOff
-            new_expr = SMTLib.SMT_If(SMTLib.SMT_Not(rexpr), lexpr, sort.parentInstances)
+            new_expr = SMTLib.SMT_If(SMTLib.createNot(rexpr), lexpr, sort.parentInstances)
             newInstances[key] = (new_expr, Common.UNKNOWN)
     return ExprArg(newInstances)
 
@@ -706,7 +717,7 @@ def op_nin(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     expr = op_in(left,right)
-    return BoolArg(SMTLib.SMT_Not(expr.pop_value()))
+    return BoolArg(SMTLib.createNot(expr.pop_value()))
 
 def op_domain_restriction(l,r):
     pass

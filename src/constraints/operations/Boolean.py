@@ -18,9 +18,8 @@ def op_not(arg):
     Boolean negation of arg.
     '''
     assert isinstance(arg, ExprArg)
-    (_, mask) = arg.getInstanceSort(0)
-    val = mask.pop_value()
-    return BoolArg(SMTLib.SMT_Not(val))
+    val = arg.getBool()
+    return BoolArg(SMTLib.createNot(val))
 
 def op_and(left,right):
     '''
@@ -34,10 +33,8 @@ def op_and(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    (_, left_mask) = left.getInstanceSort(0)
-    (_, right_mask) = right.getInstanceSort(0)
-    lval = left_mask.pop_value()
-    rval = right_mask.pop_value()
+    lval = left.getBool()
+    rval = right.getBool()
     return BoolArg(mAnd(lval, rval))  
 
 def op_or(left,right):
@@ -52,10 +49,8 @@ def op_or(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    (_, left_mask) = left.getInstanceSort(0)
-    (_, right_mask) = right.getInstanceSort(0)
-    lval = left_mask.pop_value()
-    rval = right_mask.pop_value()
+    lval = left.getBool()
+    rval = right.getBool()
     return BoolArg(mOr(lval, rval))  
 
 def op_xor(left,right):
@@ -70,10 +65,8 @@ def op_xor(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    (_, left_mask) = left.getInstanceSort(0)
-    (_, right_mask) = right.getInstanceSort(0)
-    lval = left_mask.pop_value()
-    rval = right_mask.pop_value()
+    lval = left.getBool()
+    rval = right.getBool()
     return BoolArg(SMTLib.SMT_Xor(lval, rval))  
 
 def op_equivalence(left,right):

@@ -49,7 +49,7 @@ def getTestSet():
           (this_integer_relation, 1),
           (equal_references, 2),
           (all_alls, 1),
-          (all_threes, 1),
+          (all_threes, 0),
           (simple_real, 1),
           (zoo, INFINITE)
          ]

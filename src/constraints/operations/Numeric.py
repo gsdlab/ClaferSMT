@@ -8,7 +8,7 @@ from structures.ExprArg import ExprArg, IntArg, BoolArg
 import sys
 
 def getArithValue(vals):
-    return SMTLib.SMT_Sum(vals)
+    return SMTLib.createSum(vals)
 
 def op_add(left,right):
     '''
@@ -87,7 +87,7 @@ def op_un_minus(arg):
     '''
     assert isinstance(arg, IntArg)
     val = arg.getInt()
-    return IntArg(SMTLib.SMT_Neg(val))  
+    return IntArg(SMTLib.createNeg(val))  
    
 def op_sum(arg):
     '''

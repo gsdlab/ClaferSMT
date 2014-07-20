@@ -184,7 +184,9 @@ class JoinArg(ExprArg):
     
     def getInstances(self, nonsupered=False):
         exprArg = self.checkIfJoinIsComputed()
-        return exprArg.getInstances(nonsupered)
+        self.ints = [i for i in exprArg.ints]
+        self.instances = exprArg.getInstances(nonsupered)
+        return self.instances
         #return self.instances
        
     def flattenJoin(self, joinList=[]):

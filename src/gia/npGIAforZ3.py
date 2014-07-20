@@ -292,6 +292,7 @@ class GuidedImprovementAlgorithm(object):
                 dominationConjunction.append(SMTLib.SMT_GT(dominatedByMetric,
                                                            SMTLib.SMT_IntConst(model.eval(dominatedByMetric.convert(self.cfr.solver.converter))))) 
             else:
+                #print(model.eval(dominatedByMetric.convert(self.cfr.solver.converter)))
                 dominationConjunction.append(SMTLib.SMT_LT(dominatedByMetric, 
                                                            SMTLib.SMT_IntConst(model.eval(dominatedByMetric.convert(self.cfr.solver.converter)))))
             for AtLeastEqualInOtherMetric in self.metrics_variables:
