@@ -43,7 +43,7 @@ def joinWithParent(arg):
 def joinWithPrimitive(newArg, sort, index, expr, pol):
     ref = sort.refs[index]
     if sort.refSort == "integer":
-        prim_list = newArg.ints
+        prim_list = newArg.getInts()
     elif sort.refSort == "real":
         #TODO reals aren't working
         prim_list = newArg.reals

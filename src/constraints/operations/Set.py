@@ -250,7 +250,7 @@ def op_implies(left,right):
         return BoolArg([int_set_in((left_sort, left_mask), (right_sort, right_mask))])
     '''
     #clafer-set equality case
-    if left.ints:
+    if left.getInts():
         sys.exit("FIXME Implies")
     if isinstance(left, BoolArg) and isinstance(right, BoolArg):
         return BoolArg(SMTLib.SMT_Implies(left.getBool(), right.getBool()))
@@ -353,8 +353,8 @@ def op_card(arg):
     instances = []
     matches = getSetInstancePairs(arg)
     known_card = 0
-    if arg.ints:
-        card_cons = compute_int_set(arg.ints)
+    if arg.getInts():
+        card_cons = compute_int_set(arg.getInts())
         for i in card_cons:
             if isinstance(i, SMTLib.SMT_BoolConst):
                 if i.value:
@@ -460,7 +460,7 @@ def op_union(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    if left.ints or right.ints:
+    if left.getInts() or right.getInts():
         sys.exit("FIXME ints union")
     matches = getSetInstancePairs(left,right)
     newInstances = {}
@@ -540,7 +540,7 @@ def op_intersection(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    if left.ints or right.ints:
+    if left.getInts() or right.getInts():
         sys.exit("FIXME ints intersection")
     matches = getSetInstancePairs(left,right)
     newInstances = {}
@@ -614,7 +614,7 @@ def op_difference(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    if left.ints or right.ints:
+    if left.getInts() or right.getInts():
         sys.exit("FIXME ints diff")
     matches = getSetInstancePairs(left,right)
     newInstances = {}

@@ -93,18 +93,24 @@ def op_sum(arg):
     '''
     :param arg:
     :type arg: :class:`~ExprArg`
-    :returns: :class:`~IntArg` 
+    :returns: :class:`~IntArg`
+     
     Computes the sum of all integer instances in arg. May not match the semantics of the Alloy backend.
     '''
     #sys.exit("FIXME sum need to figure out new semantics of cardinalityMasks")
     assert isinstance(arg, ExprArg)
-    for i in arg.ints:
-        pass
+    sum_list = []
+    for (e,c) in arg.getInts():
+        sum_list.append(SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)))
+    return IntArg(SMTLib.createSum(sum_list))    
+       
+    ''' 
     all_vals = []
     for i in arg.getInstanceSorts():
         (_, mask) = i
         all_vals.append(getArithValue(list(mask.values())))
     return IntArg(getArithValue(all_vals))
+    '''
 
 def op_lt(left,right):
     '''
