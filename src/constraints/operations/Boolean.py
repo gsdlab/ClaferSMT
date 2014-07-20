@@ -88,7 +88,7 @@ def op_equivalence(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return BoolArg(SMTLib.SMT_And(op_implies(left, right).getBool(), op_implies(right,left).getBool()))
+    return BoolArg(mAnd(op_implies(left, right).getBool(), op_implies(right,left).getBool()))
 
 def op_ifthenelse(cond, ifExpr, elseExpr):
     '''

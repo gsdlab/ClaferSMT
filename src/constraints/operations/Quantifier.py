@@ -31,7 +31,7 @@ def getQuantifierConditionList(exprs):
 def quant_some(exprs, ifConstraints):
     condList = getQuantifierConditionList(exprs)
     if ifConstraints:
-        condList = [SMTLib.SMT_And(i, j) for i,j in zip(ifConstraints, condList)]
+        condList = [mAnd(i, j) for i,j in zip(ifConstraints, condList)]
     return mOr(*condList)
 
 def quant_all(exprs, ifConstraints):
@@ -48,8 +48,8 @@ def quant_all(exprs, ifConstraints):
 def quant_no(exprs, ifConstraints):
     condList = getQuantifierConditionList(exprs)
     if ifConstraints:
-        condList = [SMTLib.SMT_And(i, j) for i,j in zip(ifConstraints, condList)]
-    return SMTLib.SMT_Not(SMTLib.SMT_Or(*condList))
+        condList = [mAnd(i, j) for i,j in zip(ifConstraints, condList)]
+    return SMTLib.SMT_Not(mOr(*condList))
 
 EXPR = ""
 EXPR2 = ""
@@ -60,7 +60,7 @@ def quant_one(exprs, ifConstraints):
     '''
     condList = getQuantifierConditionList(exprs)
     if ifConstraints:
-        condList = [SMTLib.SMT_And(i, j) for i,j in zip(ifConstraints, condList)]
+        condList = [mAnd(i, j) for i,j in zip(ifConstraints, condList)]
     exprList = []
     for i in range(len(condList)):
         exprList.append(SMTLib.SMT_If(condList[i], SMTLib.SMT_IntConst(1), SMTLib.SMT_IntConst(0)))

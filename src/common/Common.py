@@ -83,6 +83,7 @@ def mAnd(*args):
         if isinstance(i, SMTLib.SMT_And):
             for j in i.children():
                 args.append(j)
+            continue
         if i:
             if str(i) == "True":
                 continue
@@ -109,6 +110,7 @@ def mOr(*args):
             for j in i.children():
                 #print(j)
                 args.append(j)
+            continue
         if i:
             if isinstance(i, SMTLib.SMT_BoolConst):
                 if str(i) == "False":

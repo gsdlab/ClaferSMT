@@ -1,9 +1,9 @@
 abstract Book
-	author ->> Author +
-//		[ Book in this.book ]
-		[this.book]
+	author -> Author +
+		[ Book in this.book ]
+//		[this.book]
 
 abstract Author
-	 book ->> Book +
-B : Book 1
-A : Author 3
+	 book -> Book +
+B : Book 5
+A : Author 6

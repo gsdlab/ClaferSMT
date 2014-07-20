@@ -1,6 +1,7 @@
 
-numCalls = 0
+import sys
 
+numCalls = 0
 def toStr(root, indent=0):
     global numCalls
     numCalls += 1

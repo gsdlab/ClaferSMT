@@ -242,6 +242,11 @@ class ClaferModel(object):
             Z3Str.clafer_to_z3str("z3str_in")
             return 1
         
+        #for i in self.smt_bracketed_constraints:
+        #    for j in i.constraints:
+        #        print(SMTLib.toStr(j))
+        
+        #sys.exit("DONE")
         self.clock.tick("Asserting Constraints")
         debug_print("Asserting constraints.")
         self.assertConstraints()     
