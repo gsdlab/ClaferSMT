@@ -218,11 +218,8 @@ def op_ne(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     expr = op_eq(left, right)
-    for i in expr.getInstanceSorts():
-        (_, mask) = i
-        for j in mask.keys():
-            mask.put(j, SMTLib.SMT_Not(mask.get(j)))
-    return expr
+    b = expr.getBool()
+    return BoolArg(SMTLib.SMT_Not(b))
     
 def op_implies(left,right):
     '''

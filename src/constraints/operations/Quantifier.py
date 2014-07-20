@@ -24,7 +24,7 @@ def getQuantifierConditionList(exprs):
                 else:
                     condList.append(SMTLib.SMT_BoolConst(True))
                     break
-            assert(len(condList)<=1)#TODO REMOVE
+            #assert(len(condList)<=1)#TODO REMOVE
             finalList.append(mOr(*condList))
     return finalList
 
@@ -35,10 +35,15 @@ def quant_some(exprs, ifConstraints):
     return mOr(*condList)
 
 def quant_all(exprs, ifConstraints):
+    bigIf = mAnd(*ifConstraints)
+    cond = SMTLib.SMT_Implies(bigIf, mAnd(*[i[0].getBool() for i in exprs]))
+    return cond
+    '''
     condList = getQuantifierConditionList(exprs)
     if ifConstraints:
         condList = [SMTLib.SMT_Implies(i, j) for i,j in zip(ifConstraints, condList)]
     return mAnd(*condList)
+    '''
 
 def quant_no(exprs, ifConstraints):
     condList = getQuantifierConditionList(exprs)

@@ -139,14 +139,22 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         
         
         for i in integer_combinations: 
-            sys.exit("TODO local combos")
             list_of_ints = list(i)
             set_of_ints = set(list_of_ints)
             if isDisjunct and (len(set_of_ints) != len(list_of_ints)):
                 continue
-            localInstances.append([ExprArg([(sort, Mask(sort, [list_of_ints[j]], nonsupered=True))]
-                                           ) for j in range(len(list_of_ints))])
-            ifConstraints.append(mAnd(*[sort.isOn(mask.get(j)) for j in list_of_ints]))
+            
+            ifList = []
+            locallocalInstances = []
+            for (sort,index) in list_of_ints:
+                exprArg = ExprArg(instances={}, nonsupered=True)
+                exprArg.addBasedOnPolarity(sort, index, sort.isOn(index))
+                ifList.append(sort.isOn(index))
+                locallocalInstances.append(exprArg)
+            localInstances.append(locallocalInstances)
+            #localInstances.append(ExprArg([(sort, Mask(sort, [list_of_ints[j]], nonsupered=True))]
+            #                           ) for j in range(len(list_of_ints))])
+            ifConstraints.append(mAnd(*ifList))
             
         return (localInstances, ifConstraints)
      

@@ -190,6 +190,10 @@ class JoinArg(ExprArg):
     def getInt(self):
         exprArg = self.checkIfJoinIsComputed()
         return exprArg.getInt()
+    
+    def getInts(self):
+        exprArg = self.checkIfJoinIsComputed()
+        return exprArg.getInts()
         
         
 

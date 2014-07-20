@@ -88,14 +88,7 @@ def op_equivalence(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    leftcopy = left.clone()
-    rightcopy = right.clone()
-    leftResult = op_implies(left, right)
-    rightResult = op_implies(rightcopy, leftcopy)
-    lval = leftResult.getValue()
-    rval = rightResult.getValue()
-    cond = SMTLib.SMT_And(lval, rval)
-    return BoolArg(cond)
+    return BoolArg(SMTLib.SMT_And(op_implies(left, right).getBool(), op_implies(right,left).getBool()))
 
 def op_ifthenelse(cond, ifExpr, elseExpr):
     '''

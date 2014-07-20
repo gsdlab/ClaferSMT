@@ -131,7 +131,6 @@ class BracketedConstraint(Constraints.GenericConstraints):
         ifConstraints.reverse()
         quantFunction = getQuantifier(quantifier)
         cond = quantFunction(localStack, ifConstraints)
-        Assertions.nonEmpty(cond)
         self.stack.append([BoolArg(cond)])
         
         

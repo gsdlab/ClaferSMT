@@ -135,6 +135,9 @@ def run():
             if expected_model_count == Options.INFINITE and Options.NUM_INSTANCES < 0:
                 #will change it back after the test runs
                 Options.NUM_INSTANCES = 5
+            else:
+                Options.NUM_INSTANCES = 20
+            
             module = file.getModule()
             print_separate("Attempting: " + str(file.__name__))
             clock.tick("Total Z3 Run Time")
