@@ -328,11 +328,12 @@ class  ClaferSort(object):
             (lower, upper, extraAbsenceConstraint) = self.instanceRanges[i]
             
             #lower == upper case (simpler)
-            if lower == upper:
-                constraint = SMTLib.SMT_EQ(self.instances[i], SMTLib.SMT_IntConst(upper))
+            if lower == upper:     
+                constraint = SMTLib.SMT_EQ(self.instances[i], SMTLib.SMT_IntConst(upper))  
                 if extraAbsenceConstraint:
                     self.constraints.addInstanceConstraint(SMTLib.SMT_Or(self.isOff(i), constraint))
                 else:
+                    #TODO self.instances[i] = SMTLib.SMT_IntConst(lower)
                     self.constraints.addInstanceConstraint(constraint)
             else:
                 #parent pointer is >= lower

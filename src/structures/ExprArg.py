@@ -27,6 +27,7 @@ class ExprArg():
         else:
             self.clafers = instances
         self.ints = []
+        self.reals = []
         self.bool = None
         self.cardinalityMask = []
         #if true, contains clafer instances that are possibly not represented by their highest ancestor (so joins aren't broken)
@@ -163,7 +164,7 @@ class StringArg(ExprArg):
         '''
         Convenience class that extends ExprArg and holds an integer instance.
         '''
-        #TODO
+        #TODO strings
         sort = StringSort()
         for i in range(len(instances)):
             sort.cardinalityMask.put(i, SMTLib.SMT_IntConst(1))

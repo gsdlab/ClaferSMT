@@ -91,7 +91,14 @@ def getSetInstancePairs(left,right=None):
         matches = addMatchValues(matches, right.getInstances(), left=False)
     #print(matches.values())
     return matches
-    
+
+def compute_int_set(instances):
+    cons = []
+    for index in range(len(instances)):
+        (i,c) = instances[index]
+        cons.append(mAnd(c, *[mOr(SMTLib.createNot(jc), SMTLib.SMT_NE(j,i)) for (j, jc) in instances[0:index]]))
+    return cons 
+   
 def op_eq(left,right):
     '''
     :param left:
@@ -244,7 +251,7 @@ def op_implies(left,right):
     '''
     #clafer-set equality case
     if left.ints:
-        sys.exit("Ints TODO")
+        sys.exit("FIXME Implies")
     if isinstance(left, BoolArg) and isinstance(right, BoolArg):
         return BoolArg(SMTLib.SMT_Implies(left.getBool(), right.getBool()))
     cond = []
@@ -329,12 +336,7 @@ def getNextInstanceSort(left, right):
     else: 
         return []
 
-def compute_int_set(instances):
-    cons = []
-    for index in range(len(instances)):
-        (i,c) = instances[index]
-        cons.append(mAnd(c, *[mOr(SMTLib.createNot(jc), SMTLib.SMT_NE(j,i)) for (j, jc) in instances[0:index]]))
-    return cons
+
 
 def op_card(arg):
     '''
@@ -459,7 +461,7 @@ def op_union(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     if left.ints or right.ints:
-        sys.exit("TODO ints union")
+        sys.exit("FIXME ints union")
     matches = getSetInstancePairs(left,right)
     newInstances = {}
     for (sort,index) in matches.keys():
@@ -539,7 +541,7 @@ def op_intersection(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     if left.ints or right.ints:
-        sys.exit("TODO ints intersection")
+        sys.exit("FIXME ints intersection")
     matches = getSetInstancePairs(left,right)
     newInstances = {}
     for (sort,index) in matches.keys():
@@ -613,7 +615,7 @@ def op_difference(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     if left.ints or right.ints:
-        sys.exit("TODO ints diff")
+        sys.exit("FIXME ints diff")
     matches = getSetInstancePairs(left,right)
     newInstances = {}
     for (sort,index) in matches.keys():
@@ -720,7 +722,7 @@ def op_nin(left,right):
     return BoolArg(SMTLib.createNot(expr.pop_value()))
 
 def op_domain_restriction(l,r):
-    pass
+    sys.exit("Domain Restriction")
 
 def op_range_restriction(l,r):
-    pass
+    sys.exit("Range Restriction")

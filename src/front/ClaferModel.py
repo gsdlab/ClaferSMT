@@ -238,7 +238,6 @@ class ClaferModel(object):
             Converters.printZ3StrConstraints(self)
             Z3Str.clafer_to_z3str("z3str_in")
             return 1
-        #TODO Z3 object caching!
         
         #for i in self.smt_bracketed_constraints:
         #    for j in i.constraints:

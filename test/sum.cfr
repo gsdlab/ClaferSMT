@@ -1,7 +1,7 @@
-total -> int = sum F.c
-
+total ->> int = sum F.c
+//[total = A.c + B.c + C.c +D.c +E.c]
 abstract F
-  c: int
+  c ->> int
 
 abstract G : F
 
@@ -12,9 +12,9 @@ A : F
 B : F
   [c = 2]
   C : F
-    [c = 3]
+    [c = 2]
 
 D : G
-  [c = 4]
+  [c = 1]
   E : G
-    [c = 5]
+    [c = 1]

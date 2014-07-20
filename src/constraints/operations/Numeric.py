@@ -96,8 +96,10 @@ def op_sum(arg):
     :returns: :class:`~IntArg` 
     Computes the sum of all integer instances in arg. May not match the semantics of the Alloy backend.
     '''
-    sys.exit("sum TODO need to figure out new semantics of cardinalityMasks")
+    #sys.exit("FIXME sum need to figure out new semantics of cardinalityMasks")
     assert isinstance(arg, ExprArg)
+    for i in arg.ints:
+        pass
     all_vals = []
     for i in arg.getInstanceSorts():
         (_, mask) = i

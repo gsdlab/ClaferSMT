@@ -43,14 +43,19 @@ def joinWithParent(arg):
 def joinWithPrimitive(newArg, sort, index, expr, pol):
     ref = sort.refs[index]
     if sort.refSort == "integer":
-        #do not need to check if already in set.
-        #if bag, no need. if set, pairwise uniqueness will be added eventually
-        if pol == Common.DEFINITELY_ON:
-            newArg.ints.append((ref, True))
-        elif pol == Common.UNKNOWN:
-            newArg.ints.append((ref, expr))
+        prim_list = newArg.ints
+    elif sort.refSort == "real":
+        #TODO reals aren't working
+        prim_list = newArg.reals
     else:
-        sys.exit("TODO string real")
+        sys.exit("TODO string")
+    #do not need to check if already in set.
+    #if bag, no need. if set, pairwise uniqueness will be added eventually
+    if pol == Common.DEFINITELY_ON:
+        prim_list.append((ref, True))
+    elif pol == Common.UNKNOWN:
+        prim_list.append((ref, expr))
+    
     
 '''
 ASSUME SIMPLE JOINS
@@ -65,12 +70,12 @@ def joinWithClaferRef(arg):
             (sort, index) = joinWithSuper(sort, index)
         if isinstance(sort.refSort, PrimitiveType):
             joinWithPrimitive(newArg,sort,index,expr,pol)
-        for i in range(sort.refSort.numInstances):
-            (prev_expr, _) = newArg.getInstances(nonsupered=True).get((sort.refSort,i), (SMTLib.SMT_BoolConst(False), Common.DEFINITELY_OFF))
-            newArg.getInstances(nonsupered=True)[(sort.refSort,i)] = (mOr(prev_expr, mAnd(expr, 
-                                                            SMTLib.SMT_EQ(sort.refs[index], SMTLib.SMT_IntConst(i))
-                                                            )), Common.UNKNOWN)
-        #newArg[(sort,index)] = (expr, pol)
+        else:
+            for i in range(sort.refSort.numInstances):
+                (prev_expr, _) = newArg.getInstances(nonsupered=True).get((sort.refSort,i), (SMTLib.SMT_BoolConst(False), Common.DEFINITELY_OFF))
+                newArg.getInstances(nonsupered=True)[(sort.refSort,i)] = (mOr(prev_expr, mAnd(expr, 
+                                                                SMTLib.SMT_EQ(sort.refs[index], SMTLib.SMT_IntConst(i))
+                                                                )), Common.UNKNOWN)
     return newArg
     '''
     newInstanceSorts = []
