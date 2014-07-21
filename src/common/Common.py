@@ -61,6 +61,13 @@ BOUND = 600
 METRICS_MAXIMIZE = 1
 METRICS_MINIMIZE = 2
 
+def evalForNum(model, expr):
+    strval = str(model.eval(expr))
+    try:
+        val = int(strval)
+    except:
+        val = float(strval)
+    return val
 
 def isBoolConst(b):
     return isinstance(b, SMTLib.SMT_BoolConst) or isinstance(b, bool)
@@ -132,14 +139,18 @@ def preventSameModel(cfr, solver, model):
     #from constraints import Operations
     #print(model.eval(Operations.EXPR))
     #print(model.eval(Operations.EXPR2))
+    #print(model)
     block = []
     for i in cfr.cfr_sorts.values():
         for j in i.instances:
-            block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(model[j.var])))
+            block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(int(str(model[j.var])))))
+            #print(str(i) + " " + str(j) + " : " + str(model[j.var]) + " " + str(id(j.var)))
         if i.refs:
             for j in i.refs:
                 block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(model[j.var])))
 
+    #for i in block:
+    #    SMTLib.toStr(i)
     if block == []:
         #input was an empty clafer model (no concretes)
         solver.add(SMTLib.SMT_BoolConst(False))

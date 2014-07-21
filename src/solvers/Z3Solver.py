@@ -70,13 +70,32 @@ class Z3Converter():
     
 
     def checkCache(self, op, children, sort = True):
+        #TODO 
+        #return (False, 1)
+        new_children = []
+        #print(children)
+        for i in children:
+            #print(str(i) + str(i.__class__))
+            try:
+                if isinstance(i, str):
+                    j = i
+                else:
+                    j = int(i)#i.value
+                #print(j)
+            except:
+                #print(i)
+                j = id(i)
+            new_children.append(j)
+        children = new_children
+        #print("New children: " + str(children))
+        #children = [i if isinstance(i,int) else id(i) for i in children]
         if sort:
             #can only sort children for certain operations
-            children = sorted([id(i) for i in children])
-        else:
-            children = [id(i) for i in children]
+            children = sorted(children)
         children.append(op)
         tup_key = tuple(children)
+        #print(children)
+        
         expr = self.expr_cache.get(tup_key)
         if(expr):
             #cache hit!
@@ -105,7 +124,8 @@ class Z3Converter():
         #print("NEl: " + str(l))
         #print("NEr: " + str(r))
         (hit, result) = self.checkCache("NE", [l,r])
-        if hit:   
+        if hit: 
+            #print(str(l) + " " + str(r) + " : " +  str(result))  
             return result
         else:
             return self.cache(l != r, result)
@@ -186,6 +206,11 @@ class Z3Converter():
             val = i.convert(self)
             if not val:
                 return False
+            elif Common.isBoolConst(val):
+                if val:
+                    continue
+                else:
+                    return False
             else:
                 newList.append(val)
         if not newList:
@@ -198,17 +223,26 @@ class Z3Converter():
 
     def or_expr(self, expr):
         newList = []
+        #for i in expr.list:
+        #    SMTLib.toStr(i)
         for i in expr.list:
             val = i.convert(self)
             if not val:
                 continue
+            elif Common.isBoolConst(val):
+                if val:
+                    continue
+                else:
+                    return False
             else:
                 newList.append(val)
         if not newList:
             return False
+        #print(newList)
         (hit, result) = self.checkCache("Or", newList)
         if hit:   
             return result
+            print("MADE IT")
         else:
             return self.cache(Or(*newList), result)
     

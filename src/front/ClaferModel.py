@@ -370,7 +370,7 @@ class ClaferModel(object):
             outfilename = str("giaoutput").strip()#"npGIA_" + str(sys.argv[1]).strip() + ".csv"
     
             ParetoFront = GIAAlgorithmNP.ExecuteGuidedImprovementAlgorithm(outfilename)
-            if not Options.MODE == Common.TEST and not Options.MODE == Common.EXPERIMENT:
+            if not Options.SUPPRESS_MODELS:
                 if not ParetoFront:
                     standard_print("UNSAT")
                 for i in ParetoFront:
@@ -412,7 +412,7 @@ class ClaferModel(object):
                 result.append(m)
                 # Create a new constraint that blocks the current model
                 #print(m)
-                if not Options.MODE == Common.TEST and not Options.MODE == Common.EXPERIMENT:
+                if not Options.SUPPRESS_MODELS:
                     self.printVars(m)
                 preventSameModel(self, self.solver, m)
                 count += 1

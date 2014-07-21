@@ -243,6 +243,8 @@ class GuidedImprovementAlgorithm(object):
         local_count_unsat_calls += 1
         return prev_solution, local_count_sat_calls, local_count_unsat_calls
 
+    
+
     def ConstraintNotDominatedByX(self, model):
         """
         Creates a constraint preventing search in dominated regions.
@@ -250,9 +252,9 @@ class GuidedImprovementAlgorithm(object):
         DisjunctionOrLessMetrics  = list()
         for i in range(len(self.metrics_variables)):
             if self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
-                DisjunctionOrLessMetrics.append(SMTLib.SMT_GT(self.metrics_variables[i], SMTLib.SMT_IntConst(model.eval(self.metrics_variables[i].convert(self.cfr.solver.converter)))))#model[self.metrics_variables[i]])
+                DisjunctionOrLessMetrics.append(SMTLib.SMT_GT(self.metrics_variables[i], SMTLib.SMT_IntConst(Common.evalForNum(model, self.metrics_variables[i].convert(self.cfr.solver.converter)))))#model[self.metrics_variables[i]])
             else :
-                DisjunctionOrLessMetrics.append(SMTLib.SMT_LT(self.metrics_variables[i], SMTLib.SMT_IntConst(model.eval(self.metrics_variables[i].convert(self.cfr.solver.converter)))))#model[self.metrics_variables[i]])
+                DisjunctionOrLessMetrics.append(SMTLib.SMT_LT(self.metrics_variables[i], SMTLib.SMT_IntConst(Common.evalForNum(model, self.metrics_variables[i].convert(self.cfr.solver.converter)))))#model[self.metrics_variables[i]])
         return SMTLib.SMT_Or(*DisjunctionOrLessMetrics)
 
 
@@ -263,7 +265,7 @@ class GuidedImprovementAlgorithm(object):
         """
         EqualMetrics  = list()
         for i in range(len(self.metrics_variables)):
-            EqualMetrics.append(SMTLib.SMT_EQ(self.metrics_variables[i], model.eval(self.metrics_variables[i])))
+            EqualMetrics.append(SMTLib.SMT_EQ(self.metrics_variables[i], Common.evalForNum(model, self.metrics_variables[i])))
         return SMTLib.SMT_And(EqualMetrics)
 
     def get_metric_values(self, model):
@@ -290,19 +292,19 @@ class GuidedImprovementAlgorithm(object):
             if  self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
                 #print(model.eval(dominatedByMetric))
                 dominationConjunction.append(SMTLib.SMT_GT(dominatedByMetric,
-                                                           SMTLib.SMT_IntConst(model.eval(dominatedByMetric.convert(self.cfr.solver.converter))))) 
+                                                           SMTLib.SMT_IntConst(Common.evalForNum(model, dominatedByMetric.convert(self.cfr.solver.converter))))) 
             else:
                 #print(model.eval(dominatedByMetric.convert(self.cfr.solver.converter)))
                 dominationConjunction.append(SMTLib.SMT_LT(dominatedByMetric, 
-                                                           SMTLib.SMT_IntConst(model.eval(dominatedByMetric.convert(self.cfr.solver.converter)))))
+                                                           SMTLib.SMT_IntConst(Common.evalForNum(model, dominatedByMetric.convert(self.cfr.solver.converter)))))
             for AtLeastEqualInOtherMetric in self.metrics_variables:
                 if j != i:
                     if self.metrics_objective_direction[j] == Common.METRICS_MAXIMIZE:
                         dominationConjunction.append(SMTLib.SMT_GE(AtLeastEqualInOtherMetric,
-                                                                   SMTLib.SMT_IntConst(model.eval(AtLeastEqualInOtherMetric.convert(self.cfr.solver.converter)))))
+                                                                   SMTLib.SMT_IntConst(Common.evalForNum(model, AtLeastEqualInOtherMetric.convert(self.cfr.solver.converter)))))
                     else:
                         dominationConjunction.append(SMTLib.SMT_LE(AtLeastEqualInOtherMetric,
-                                                                   SMTLib.SMT_IntConst(model.eval(AtLeastEqualInOtherMetric.convert(self.cfr.solver.converter)))))              
+                                                                   SMTLib.SMT_IntConst(Common.evalForNum(model, AtLeastEqualInOtherMetric.convert(self.cfr.solver.converter)))))              
                 j = 1 + j
             i = 1 + i    
             dominationDisjunction.append(SMTLib.SMT_And(*dominationConjunction))         

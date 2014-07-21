@@ -37,6 +37,8 @@ def getTestSet():
     my_tests = [ 
           (multiple_joins, 1),
           (bracketedconstraint_this, 6),
+          #]
+    
           (this_dot_parent, 2),
           (arithmetic, 2),
           (relations, 1),
@@ -50,10 +52,9 @@ def getTestSet():
           (equal_references, 2),
           (all_alls, 1),
           (all_threes, 0),
-          (simple_real, 1),
           (zoo, INFINITE)
          ]
-
+    
     positive_tests = [
         (books_tutorial,INFINITE),
         (constraints,INFINITE),
@@ -100,12 +101,13 @@ def getTestSet():
                     (optimization_ssap, 1)
                     ]
 
-    string_tests = [
+    string_real_tests = [
                 (check_unique_ref_names_with_inheritance, 1),
                 (i18, 2),
                 (i40_integers_strings_assignment, 6),
                 (i40textequality, 1),
-                (subtypingprimitivetypes, 1)
+                (subtypingprimitivetypes, 1),
+                (simple_real, 1),
                 ]
     
     if Options.TEST_SET == Common.MY_TESTS:
@@ -135,8 +137,8 @@ def run():
             if expected_model_count == Options.INFINITE and Options.NUM_INSTANCES < 0:
                 #will change it back after the test runs
                 Options.NUM_INSTANCES = 5
-            else:
-                Options.NUM_INSTANCES = 20
+            #else:
+            #    Options.NUM_INSTANCES = 20
             
             module = file.getModule()
             print_separate("Attempting: " + str(file.__name__))

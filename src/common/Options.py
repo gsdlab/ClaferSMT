@@ -55,6 +55,7 @@ OUTPUT_MODE=""
 PRODUCE_UNSAT_CORE = False
 USE_BITVECTORS = False
 IGNORE_GOALS = False
+SUPPRESS_MODELS = False
 
 SCOPE_FILE = ""
 SCOPE_MAP_FILE = ""
@@ -140,6 +141,7 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--produceunsatcore', dest='produceunsatcore', default=False, const = True, action='store_const', help='produce unsat core for UNSAT specifications')
     parser.add_argument('--usebitvectors', dest='usebitvectors', default=False, const = True, action='store_const', help='Use bitvectors to represent clafer instances')
     parser.add_argument('--ignoregoals', dest='ignoregoals', default=False, const = True, action='store_const', help='Ignore optimization objectives (for testing purposes)')
+    parser.add_argument('--suppressmodels', dest='suppressmodels', default=False, const = True, action='store_const', help='Do not output satisfying solutions (for test mode)')
     parser.add_argument('--scopefile', default="", dest='scopefile', help='Scope file produced by `clafer --meta-data`. Requires the map file as well.')
     parser.add_argument('--scopemapfile', default="", dest='scopemapfile', help='Scope map file produced by `clafer --meta-data`. Requires the scope file as well.')
     
@@ -236,7 +238,8 @@ def setCommandLineOptions(learner = False):
     SCOPE_FILE = args.scopefile
     global SCOPE_MAP_FILE
     SCOPE_MAP_FILE = args.scopemapfile
-    
+    global SUPPRESS_MODELS
+    SUPPRESS_MODELS = args.suppressmodels
     return args    
     
         
