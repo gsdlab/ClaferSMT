@@ -13,7 +13,13 @@ class DeclPExp(object):
         self.declaration = declaration
         self.bodyParentExp = bodyParentExp
         
-        
+    def toString(self, level):
+        s = self.quantifier + " "
+        if self.declaration:
+            s+=  self.declaration.toString(level+1) + " | "
+        s += self.bodyParentExp.toString(level+1)
+        return s
+    
     def __str__(self):
         return str(self.declaration)
     

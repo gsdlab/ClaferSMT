@@ -5,6 +5,7 @@ Created on Jul 14, 2014
 '''
 from common import SMTLib, Common
 from common.Common import mOr, mAnd
+from structures.ExprArg import BoolArg
 import sys
 
 def getQuantifierConditionList(exprs):
@@ -16,6 +17,9 @@ def getQuantifierConditionList(exprs):
     finalList = []
     for i in exprs:
         for expr in i:
+            if isinstance(expr, BoolArg):
+                finalList.append(expr.getBool())
+                continue
             condList = []
             for k in expr.getInstances().values():
                 (e, pol) = k

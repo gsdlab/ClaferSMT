@@ -71,7 +71,7 @@ class Z3Converter():
 
     def checkCache(self, op, children, sort = True):
         #TODO 
-        #return (False, 1)
+        return (False, 1)
         new_children = []
         #print(children)
         for i in children:
@@ -83,7 +83,7 @@ class Z3Converter():
                     j = int(i)#i.value
                 #print(j)
             except:
-                #print(i)
+                print(i)
                 j = id(i)
             new_children.append(j)
         children = new_children

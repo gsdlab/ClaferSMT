@@ -62,7 +62,11 @@ METRICS_MAXIMIZE = 1
 METRICS_MINIMIZE = 2
 
 def evalForNum(model, expr):
-    strval = str(model.eval(expr))
+    val = model.eval(expr)
+    if not val:
+        return val
+    else:
+        strval = str(val)
     try:
         val = int(strval)
     except:
@@ -143,14 +147,21 @@ def preventSameModel(cfr, solver, model):
     block = []
     for i in cfr.cfr_sorts.values():
         for j in i.instances:
-            block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(int(str(model[j.var])))))
-            #print(str(i) + " " + str(j) + " : " + str(model[j.var]) + " " + str(id(j.var)))
+            block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(int(str(model[j.var])))))#evalForNum(model, j.var))))
+            #print(str(j) + " : " + str(evalForNum(model, j.var)))# + " " + str(id(j.var)))
         if i.refs:
             for j in i.refs:
-                block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(model[j.var])))
+                #print(model[j.var])
+                #print(str(j) + " : " + str(evalForNum(model, j.var)) + " : " + str(model[j.var]))
+                val = model[j.var]
+                if not val:
+                    continue
+                else:
+                    block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(val)))#evalForNum(model, j.var))))
 
     #for i in block:
     #    SMTLib.toStr(i)
+    #print(block)
     if block == []:
         #input was an empty clafer model (no concretes)
         solver.add(SMTLib.SMT_BoolConst(False))

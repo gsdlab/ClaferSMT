@@ -167,6 +167,7 @@ class ClaferModel(object):
         '''
         Converts Clafer constraints to Z3 constraints.
         '''
+        #TODO caching for ASIL subexpressions. Do set equals first. Cache nonsupered joins.
         try:
             self.clock.tick("translation")
             
