@@ -186,8 +186,6 @@ class Z3Converter():
             val = i.convert(self)
             if not val:
                 return False
-            #elif str(val) == "True":
-            #    continue
             else:
                 newList.append(val)
         if not newList:
@@ -204,8 +202,6 @@ class Z3Converter():
             val = i.convert(self)
             if not val:
                 continue
-            elif str(val) == "True":
-                return True
             else:
                 newList.append(val)
         if not newList:
