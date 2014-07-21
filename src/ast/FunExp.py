@@ -30,6 +30,13 @@ class FunExp(object):
         return self.__str__()
     
     def toString(self, level):
-        return str(self)
+        from constraints.BracketedConstraint import ClaferToZ3OperationsMap
+        arity = ClaferToZ3OperationsMap[self.operation][0]
+        if arity == 1:
+            return self.operation + str(self.elements[0].toString(level+1) )
+        elif arity == 2:
+            return self.elements[0].toString(level+1) + " " + self.operation + " " + str(self.elements[1].toString(level+1) )
+        else:
+            return self.operation + str(self.elements[0].toString(level+1) ) + str(self.elements[1].toString(level+1) ) + str(self.elements[2].toString(level+1) )
     
     

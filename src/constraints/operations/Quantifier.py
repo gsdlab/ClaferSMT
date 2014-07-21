@@ -39,8 +39,15 @@ def quant_some(exprs, ifConstraints):
     return mOr(*condList)
 
 def quant_all(exprs, ifConstraints):
-    bigIf = mAnd(*ifConstraints)
-    cond = SMTLib.SMT_Implies(bigIf, mAnd(*[i[0].getBool() for i in exprs]))
+    
+    
+    if ifConstraints:
+        cond = mAnd(*[SMTLib.SMT_Implies(i, j[0].getBool()) for i,j in zip(ifConstraints,exprs)])
+    else:
+        cond = mAnd(*[i[0].getBool() for i in exprs])
+    #if ifConstraints:
+    #    bigIf = mAnd(*ifConstraints)
+    #    cond = SMTLib.SMT_Implies(bigIf, cond)
     return cond
     '''
     condList = getQuantifierConditionList(exprs)

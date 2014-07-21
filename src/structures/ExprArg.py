@@ -39,6 +39,9 @@ class ExprArg():
         #TODO expand to reals, strings
     
     
+    def add(self, key, expr):
+        self.clafers[key] = expr
+    
     def addBasedOnPolarity(self, sort, index, expr):
         #DOES NOT SUPER
         polarity = sort.known_polarity(index)
@@ -80,9 +83,9 @@ class ExprArg():
     def getInts(self):
         return self.ints
     
-    def getInt(self):
+    #def getInt(self):
         #print(self)
-        return self.ints[0][0]
+    #    return self.ints[0][0]
       
     def __str__(self):
         return (str(self.getInstances(nonsupered=True)) + str(self.ints)) 
@@ -112,8 +115,8 @@ class IntArg(ExprArg):
         self.ints = [(instance, True)]
         #self.cardinalityMask.append(SMTLib.SMT_IntConst(1))
     
-    def getInt(self):
-        return self.ints[0][0]    
+    #def getInt(self):
+    #    return self.ints[0][0]    
     
     def getInts(self):
         return self.ints
@@ -174,28 +177,28 @@ class JoinArg(ExprArg):
     def __init__(self, left, right):
         self.left = left
         self.right = right
-        self.instances = []
-        ExprArg.__init__(self)
+        #self.instances = None
+        ExprArg.__init__(self, nonsupered=True)
     
     def checkIfJoinIsComputed(self, nonsupered=False):
         import constraints.operations.Join as Join
-        if not self.instances:
+        if not self.clafers:
             joinList = self.flattenJoin()
             exprArg = Join.computeJoin(joinList)
             self.ints = [i for i in exprArg.ints]
-            self.instances = exprArg.getInstances(nonsupered)
+            self.clafers = exprArg.getInstances(nonsupered)
     
     def getInstances(self, nonsupered=False):
         exprArg = self.checkIfJoinIsComputed(nonsupered=False)
-        return self.instances
+        return self.clafers
         #return self.instances
        
     def flattenJoin(self, joinList=[]):
         return self.left.flattenJoin([]) + joinList + self.right.flattenJoin([])
     
-    def getInt(self):
-        exprArg = self.checkIfJoinIsComputed()
-        return self.ints[0][0]#getInt()
+    #def getInt(self):
+    #    exprArg = self.checkIfJoinIsComputed()
+    #    return self.ints[0][0]#getInt()
     
     def getInts(self):
         exprArg = self.checkIfJoinIsComputed()

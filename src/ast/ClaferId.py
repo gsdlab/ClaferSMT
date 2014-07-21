@@ -23,7 +23,7 @@ class ClaferId(object):
         return self.id
     
     def toString(self, level):
-        print('\t' * level + "A")
+        return( self.id)
         
     def __repr__(self):
         return self.id

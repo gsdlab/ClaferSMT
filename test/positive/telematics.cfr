@@ -29,8 +29,8 @@ abstract display : comp
 
 abstract plaECU : ECU
     `display 1..2
-        [server = parent
-         !options.cache]
+         [server = parent]
+         [!options.cache]
 
 ECU1 : plaECU
 

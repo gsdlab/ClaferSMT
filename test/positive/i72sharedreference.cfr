@@ -8,7 +8,7 @@ abstract WaitingLine
     participants -> Person * 
 
 BusLine : WaitingLine
-    [ JohnDoe in participants
+    [ JohnDoe in participants 
       MaryJane in participants ]
 
 JohnAndMaryLine : WaitingLine

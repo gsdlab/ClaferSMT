@@ -38,7 +38,7 @@ def joinWithParent(arg):
                 new_pol = Common.aggregate_polarity(old_pol, Common.UNKNOWN)
                 new_expr = mOr(old_expr, mAnd(expr, SMTLib.SMT_EQ(sort.instances[index], SMTLib.SMT_IntConst(i))))
             newInstances[(sort.parent, i)] = (new_expr, new_pol)
-    return ExprArg(newInstances)
+    return ExprArg(newInstances, nonsupered=True)
 
 def joinWithPrimitive(newArg, sort, index, expr, pol):
     ref = sort.refs[index]

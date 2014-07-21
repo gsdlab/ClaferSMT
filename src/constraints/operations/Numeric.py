@@ -22,8 +22,12 @@ def op_add(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    lval = left.getInt()
-    rval = right.getInt()
+    lval = left.getInts()
+    lval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in lval]
+    lval = SMTLib.createSum(lval)
+    rval = right.getInts()
+    rval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in rval]
+    rval = SMTLib.createSum(rval)
     return IntArg(SMTLib.SMT_Plus(lval, rval))  
 
 def op_sub(left,right):
@@ -38,8 +42,12 @@ def op_sub(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    lval = left.getInt()
-    rval = right.getInt()
+    lval = left.getInts()
+    lval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in lval]
+    lval = SMTLib.createSum(lval)
+    rval = right.getInts()
+    rval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in rval]
+    rval = SMTLib.createSum(rval)
     return IntArg(SMTLib.SMT_Minus(lval, rval))  
 
 def op_mul(left,right):
@@ -54,9 +62,16 @@ def op_mul(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    lval = left.getInt()
-    rval = right.getInt()
+    lval = left.getInts()
+    lval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in lval]
+    lval = SMTLib.createSum(lval)
+    rval = right.getInts()
+    rval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in rval]
+    rval = SMTLib.createSum(rval)
     return IntArg(SMTLib.SMT_Times(lval, rval))  
+
+    
+
 
 #integer division
 def op_div(left,right):
@@ -70,8 +85,12 @@ def op_div(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    lval = left.getInt()
-    rval = right.getInt()
+    lval = left.getInts()
+    lval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in lval]
+    lval = SMTLib.createSum(lval)
+    rval = right.getInts()
+    rval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in rval]
+    rval = SMTLib.createSum(rval)
     return IntArg(SMTLib.SMT_Divide(lval, rval)
                    if((not isinstance(lval, SMTLib.SMT_IntConst)) or (not isinstance(rval, SMTLib.SMT_IntConst)))
                              else SMTLib.SMT_IntDivide(lval, rval))
@@ -86,8 +105,10 @@ def op_un_minus(arg):
     Negates arg.
     '''
     assert isinstance(arg, IntArg)
-    val = arg.getInt()
-    return IntArg(SMTLib.createNeg(val))  
+    val = arg.getInts()
+    val = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in val]
+    val_sum = SMTLib.createSum(val)
+    return IntArg(SMTLib.createNeg(val_sum))  
    
 def op_sum(arg):
     '''
@@ -123,9 +144,13 @@ def op_lt(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    lval = left.getInt()
-    rval = right.getInt()
-    return BoolArg(SMTLib.SMT_LT(lval, rval))  
+    lval = left.getInts()
+    lval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in lval]
+    rval = right.getInts()
+    rval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in rval]
+    lsum = SMTLib.createSum(lval)
+    rsum = SMTLib.createSum(rval)
+    return BoolArg(SMTLib.SMT_LT(lsum, rsum))  
         
 def op_le(left,right):
     '''
@@ -139,9 +164,13 @@ def op_le(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    lval = left.getInt()
-    rval = right.getInt()
-    return BoolArg(SMTLib.SMT_LE(lval, rval))  
+    lval = left.getInts()
+    lval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in lval]
+    rval = right.getInts()
+    rval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in rval]
+    lsum = SMTLib.createSum(lval)
+    rsum = SMTLib.createSum(rval)
+    return BoolArg(SMTLib.SMT_LE(lsum, rsum))  
 
 def op_gt(left,right):
     '''

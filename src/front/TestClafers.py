@@ -72,7 +72,7 @@ def getTestSet():
         (i188sumquantifier,INFINITE),
         (i19,INFINITE),
         (i205refdisambiguationII,INFINITE),
-        (i23,INFINITE),
+        (i23,4),
         (i49_parentReduce, 1),
         (i49_resolve_ancestor,INFINITE),
         (i50_stop_following_references, 1),

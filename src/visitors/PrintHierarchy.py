@@ -185,7 +185,13 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                 self.tree.addNode((sort, sort.instances[j]), parentInstance)
                 if sort.refSort:
                     if isinstance(sort.refSort, PrimitiveType) and (sort.refSort == "integer" or sort.refSort == "string" or sort.refSort == "real"):
-                        self.tree.addRef((sort, sort.instances[j]), (sort.refSort, self.model.eval(sort.refs[j].var)))
+                        #for i in sort.refs:
+                        #    print(i)
+                        #print("AA" + str(sort.refs[j].var))
+                        if not sort.refs[j].var:
+                            self.tree.addRef((sort, sort.instances[j]),(sort.refSort, "Unrestricted"))
+                        else:                  
+                            self.tree.addRef((sort, sort.instances[j]),(sort.refSort, self.model.eval(sort.refs[j].var)))
                     else:
                         self.tree.addRef((sort, sort.instances[j]),(sort.refSort, self.model.eval(sort.refs[j].var))) #str(sort.refSort.element.getNonUniqueID()) + 
                         # "__"+ str(self.model.eval(sort.refs[j])))

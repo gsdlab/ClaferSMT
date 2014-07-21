@@ -149,10 +149,12 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             ifList = []
             locallocalInstances = []
             for (sort,index) in list_of_ints:
-                exprArg = ExprArg(instances={}, nonsupered=True)
-                exprArg.addBasedOnPolarity(sort, index, sort.isOn(index))
-                ifList.append(sort.isOn(index))
-                locallocalInstances.append(exprArg)
+                localExprArg = ExprArg(instances={}, nonsupered=True)
+                #localExprArg.addBasedOnPolarity(sort, index, sort.isOn(index))
+                (e,p) = exprArg.getInstances()[(sort,index)]
+                localExprArg.add((sort,index),(e,p))
+                ifList.append(e)
+                locallocalInstances.append(localExprArg)
             localInstances.append(locallocalInstances)
             #localInstances.append(ExprArg([(sort, Mask(sort, [list_of_ints[j]], nonsupered=True))]
             #                           ) for j in range(len(list_of_ints))])

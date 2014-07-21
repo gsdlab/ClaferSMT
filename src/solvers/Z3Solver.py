@@ -83,7 +83,7 @@ class Z3Converter():
                     j = int(i)#i.value
                 #print(j)
             except:
-                print(i)
+                #print(i)
                 j = id(i)
             new_children.append(j)
         children = new_children

@@ -153,7 +153,11 @@ def preventSameModel(cfr, solver, model):
             for j in i.refs:
                 #print(model[j.var])
                 #print(str(j) + " : " + str(evalForNum(model, j.var)) + " : " + str(model[j.var]))
-                val = model[j.var]
+                try:
+                    val = model[j.var]
+                except:
+                    #happens if a primitive ref is totally unrestricted
+                    continue 
                 if not val:
                     continue
                 else:
