@@ -18,9 +18,7 @@ import sys
 import visitors.Visitor
 
 
-claferStack = []  # used to determine where the constraint is in the clafer hierarchy
-inConstraint = False  # true if within a constraint
-currentConstraint = None  # holds the constraint currently being traversed
+
 
 
 class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
@@ -40,6 +38,10 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         :param cfr: The Clafer model.
         :type cfr: :class:`~common.ClaferModel`
         '''
+        self.claferStack = []  # used to determine where the constraint is in the clafer hierarchy
+        self.inConstraint = False  # true if within a constraint
+        self.currentConstraint = None  # holds the constraint currently being traversed
+        
         VisitorTemplate.VisitorTemplate.__init__(self)
         self.inConstraint = inConstraint
         self.currentConstraint = None
@@ -81,10 +83,10 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         if not self.cfr.isUsed(str(element)):
             return 
         visitors.Visitor.visit(self, element.supers)
-        claferStack.append(self.cfr.getSort(element.uid))
+        self.claferStack.append(self.cfr.getSort(element.uid))
         for i in element.elements:
             visitors.Visitor.visit(self, i)
-        claferStack.pop()
+        self.claferStack.pop()
     
     def claferidVisit(self, element):
         if(self.inConstraint):
@@ -116,7 +118,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.inConstraint = True
         debug_print(self.BRACKETEDCONSCOUNT)
         self.BRACKETEDCONSCOUNT = self.BRACKETEDCONSCOUNT + 1
-        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.cfr, element, claferStack)
+        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.cfr, element, self.claferStack)
         visitors.Visitor.visit(self, element.exp)
         self.currentConstraint.endProcessing()
         self.currentConstraint = None

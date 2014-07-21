@@ -177,16 +177,16 @@ class JoinArg(ExprArg):
         self.instances = []
         ExprArg.__init__(self)
     
-    def checkIfJoinIsComputed(self):
+    def checkIfJoinIsComputed(self, nonsupered=False):
         import constraints.operations.Join as Join
         if not self.instances:
             joinList = self.flattenJoin()
-            return Join.computeJoin(joinList)
+            exprArg = Join.computeJoin(joinList)
+            self.ints = [i for i in exprArg.ints]
+            self.instances = exprArg.getInstances(nonsupered)
     
     def getInstances(self, nonsupered=False):
-        exprArg = self.checkIfJoinIsComputed()
-        self.ints = [i for i in exprArg.ints]
-        self.instances = exprArg.getInstances(nonsupered)
+        exprArg = self.checkIfJoinIsComputed(nonsupered=False)
         return self.instances
         #return self.instances
        
@@ -195,11 +195,11 @@ class JoinArg(ExprArg):
     
     def getInt(self):
         exprArg = self.checkIfJoinIsComputed()
-        return exprArg.getInt()
+        return self.ints[0][0]#getInt()
     
     def getInts(self):
         exprArg = self.checkIfJoinIsComputed()
-        return exprArg.getInts()
+        return self.ints#getInts()
         
         
 

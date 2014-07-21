@@ -14,7 +14,6 @@ class Clock():
     :var event_map: Maps the beginning and end of events.
     '''
     isBroken = False
-    event_map = {}
     
     
     def __init__(self):
@@ -24,6 +23,7 @@ class Clock():
         if not Options.PROFILING:
             self.isBroken = True
         self.map = {}
+        self.event_map = {}
         self.completed_event_map = {}
     
     def tick(self, event):

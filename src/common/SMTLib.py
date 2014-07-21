@@ -212,6 +212,9 @@ class SMT_EQ():
 
     def __str__(self):
         return "=="
+
+def createNE(l, r):
+    createNot(SMT_EQ(l,r))
     
 class SMT_NE():
     def __init__(self, l, r):

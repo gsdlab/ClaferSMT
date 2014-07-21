@@ -205,7 +205,7 @@ class ClaferModel(object):
             
             debug_print("Creating group cardinality constraints.")
             self.createGroupCardConstraints()
-            
+                        
             debug_print("Creating bracketed constraints.")
             Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
             
@@ -352,7 +352,7 @@ class ClaferModel(object):
     def GIA(self, desired_number_of_models):
         metrics_objective_direction = []
         metrics_variables = []
-        
+
         for i in self.objectives:
             (pol, var) = i
             metrics_objective_direction.append(pol)

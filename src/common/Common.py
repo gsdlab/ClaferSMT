@@ -62,6 +62,9 @@ METRICS_MAXIMIZE = 1
 METRICS_MINIMIZE = 2
 
 
+def isBoolConst(b):
+    return isinstance(b, SMTLib.SMT_BoolConst) or isinstance(b, bool)
+
 def readJSONFile(file_name):
     '''
     Takes a file name (str) and returns a json dump 

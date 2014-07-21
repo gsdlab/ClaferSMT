@@ -97,7 +97,6 @@ def op_sum(arg):
      
     Computes the sum of all integer instances in arg. May not match the semantics of the Alloy backend.
     '''
-    #sys.exit("FIXME sum need to figure out new semantics of cardinalityMasks")
     assert isinstance(arg, ExprArg)
     sum_list = []
     for (e,c) in arg.getInts():

@@ -61,10 +61,13 @@ class Z3Solver(BaseSolver):
 
 class Z3Converter():
 
+    def __init__(self):
+        self.num_hit = 0
+        self.num_miss = 0
+        self.expr_cache = {}
+
     #keys are sorted tuples of children id's, with the op name as the last element
-    num_hit = 0
-    num_miss = 0
-    expr_cache = {}
+    
 
     def checkCache(self, op, children, sort = True):
         if sort:
@@ -183,8 +186,8 @@ class Z3Converter():
             val = i.convert(self)
             if not val:
                 return False
-            elif str(val) == "True":
-                continue
+            #elif str(val) == "True":
+            #    continue
             else:
                 newList.append(val)
         if not newList:
