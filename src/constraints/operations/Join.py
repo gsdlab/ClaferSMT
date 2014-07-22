@@ -3,10 +3,9 @@ Created on Jul 14, 2014
 
 @author: ezulkosk
 '''
-from common import SMTLib, Assertions, Options, Common
+from common import SMTLib, Common
 from common.Common import mOr, mAnd
-from structures.ClaferSort import IntSort, StringSort, RealSort, PrimitiveType, \
-    ClaferSort
+from structures.ClaferSort import PrimitiveType
 from structures.ExprArg import ExprArg, JoinArg, PrimitiveArg
 import sys
 
@@ -77,30 +76,7 @@ def joinWithClaferRef(arg):
                                                                 SMTLib.SMT_EQ(sort.refs[index], SMTLib.SMT_IntConst(i))
                                                                 )), Common.UNKNOWN)
     return newArg
-    '''
-    newInstanceSorts = []
-    for i in arg.getInstanceSorts():
-        (sort, mask) = i
-        while not sort.refSort:
-            (sort, mask) = joinWithSuper(sort, mask)
-        tempRefs = []
-        newMask = alreadyExists(sort.refSort, newInstanceSorts)
-        if isinstance(sort.refSort, PrimitiveType):
-            return joinWithPrimitive(ExprArg([(sort, mask)],nonsupered=True))
-        for j in mask.keys():
-            tempRefs.append(SMTLib.SMT_If(sort.isOn(mask.get(j)),
-                               sort.refs[j], SMTLib.SMT_IntConst(sort.refSort.numInstances)))
-        for j in range(sort.refSort.numInstances):
-            clause = mOr(*[SMTLib.SMT_EQ(k, SMTLib.SMT_IntConst(j)) for k in tempRefs])
-            newMask.put(j, mOr(newMask.get(j), clause))
-        newInstanceSorts.append((sort.refSort, newMask))
-        Assertions.nonEmptyMask(newMask)
-    for i in newInstanceSorts:
-        (sort, mask) = i
-        for j in mask.keys():
-            mask.put(j, SMTLib.SMT_If(mask.get(j), sort.instances[j], SMTLib.SMT_IntConst(sort.parentInstances)))
-    return ExprArg(newInstanceSorts, nonsupered=True)
-    '''
+    
 def joinWithRef(arg): 
     instances = arg.getInstances(nonsupered=True)
     newArg = ExprArg(nonsupered=True)
@@ -123,10 +99,9 @@ def flattenInstances(instances):
     '''
     sets the new polarities to corresponding ternary values
     '''
-    #print(instances)
     for (sort, index) in instances.keys():
         final_expr = mOr(SMTLib.SMT_BoolConst(False))
-        (l,h,e) = sort.instanceRanges[index]
+        (l,h,_) = sort.instanceRanges[index]
         (exprs, pols) = instances[(sort,index)]
         final_polarity = Common.DEFINITELY_OFF
         all_on = True
@@ -147,7 +122,6 @@ def flattenInstances(instances):
             final_polarity = Common.DEFINITELY_ON
             final_expr = SMTLib.SMT_BoolConst(True)
         instances[(sort,index)] = (final_expr, final_polarity)       
-    #print(instances)
     return instances
 
 
@@ -160,7 +134,7 @@ def joinWithClafer(left, right):
         if lpolarity == Common.DEFINITELY_OFF:
             continue
         for (rsort, rindex) in rightInstances.keys():
-            (rexpr, rpolarity) = rightInstances[(rsort,rindex)]
+            (_rexpr, rpolarity) = rightInstances[(rsort,rindex)]
             if rpolarity == Common.DEFINITELY_OFF:
                 continue
             noMatch = False
@@ -171,7 +145,7 @@ def joinWithClafer(left, right):
                 (lsort, lindex) = joinWithSuper(lsort, lindex)
             if noMatch:
                 continue
-            (lower,upper,rextra) = rsort.instanceRanges[rindex]
+            (lower,upper,_) = rsort.instanceRanges[rindex]
             
             (new_rexpr, new_rpol) = newInstances.get((rsort,rindex), ({},{}))
             new_rpol[lindex] = lpolarity
@@ -179,8 +153,6 @@ def joinWithClafer(left, right):
             if lower <= lindex and lindex <= upper:
                 newInstances[(rsort, rindex)] = (new_rexpr, new_rpol)
     newInstances = flattenInstances(newInstances)
-    #print(newInstances)
-    #sys.exit("join exit")
     return ExprArg(newInstances, nonsupered=True)
     
 def computeJoin(joinList):

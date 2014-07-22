@@ -131,12 +131,10 @@ class Clock():
                 experiment_print("Merge: " + str(merge))  
                 experiment_print("Longest Consumer Plus Merge: " + str(longestConsumerPlusMerge))  
                 experiment_print("")  
-            cfr.metric = longestConsumerPlusMerge
-            #experiment_print(self)  
+            cfr.metric = longestConsumerPlusMerge 
             return
      
     def hackUnsat(self, starttime):
-        #print("B")
         self.completed_event_map["unsattime"] = time.clock() - starttime   
     
     def __str__(self):

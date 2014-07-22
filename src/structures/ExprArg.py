@@ -3,10 +3,8 @@ Created on Oct 21, 2013
 
 @author: ezulkosk
 '''
-from common import Assertions, SMTLib, Common
+from common import SMTLib, Common
 from common.Common import mOr
-from structures.ClaferSort import BoolSort, IntSort, PrimitiveType, RealSort, \
-    StringSort
 import sys
 
 
@@ -34,8 +32,7 @@ class ExprArg():
         if nonsupered:
             self.hasBeenSupered = False
         else:
-            self.hasBeenSupered = True
-        
+            self.hasBeenSupered = True 
         #TODO expand to reals, strings
     
     
@@ -82,11 +79,7 @@ class ExprArg():
     
     def getInts(self):
         return self.ints
-    
-    #def getInt(self):
-        #print(self)
-    #    return self.ints[0][0]
-      
+          
     def __str__(self):
         return (str(self.getInstances(nonsupered=True)) + str(self.ints)) 
      
@@ -113,10 +106,6 @@ class IntArg(ExprArg):
         '''
         ExprArg.__init__(self)
         self.ints = [(instance, True)]
-        #self.cardinalityMask.append(SMTLib.SMT_IntConst(1))
-    
-    #def getInt(self):
-    #    return self.ints[0][0]    
     
     def getInts(self):
         return self.ints
@@ -129,17 +118,6 @@ class IntArg(ExprArg):
      
     def __repr__(self):
         return (str(self.ints)) 
-        
-class RealArg(ExprArg):
-    def __init__(self, instances):
-        '''
-        Convenience class that extends ExprArg and holds an integer instance.
-        '''
-        sys.exit("TODO realarg")
-        sort = RealSort()
-        for i in range(len(instances)):
-            sort.cardinalityMask.put(i, SMTLib.SMT_IntConst(1))
-        #self.instanceSorts = [(sort, Mask.createIntMask(instances))]
         
         
 class BoolArg(ExprArg):
@@ -162,16 +140,7 @@ class BoolArg(ExprArg):
     def getBool(self):
         return self.bool
  
-class StringArg(ExprArg):
-    def __init__(self, instances):
-        '''
-        Convenience class that extends ExprArg and holds an integer instance.
-        '''
-        #TODO strings
-        sort = StringSort()
-        for i in range(len(instances)):
-            sort.cardinalityMask.put(i, SMTLib.SMT_IntConst(1))
-        #self.instanceSorts = [(sort, Mask.createIntMask(instances))]
+
 
 class JoinArg(ExprArg):
     def __init__(self, left, right):
@@ -189,32 +158,18 @@ class JoinArg(ExprArg):
             self.clafers = exprArg.getInstances(nonsupered)
     
     def getInstances(self, nonsupered=False):
-        exprArg = self.checkIfJoinIsComputed(nonsupered=False)
+        self.checkIfJoinIsComputed(nonsupered=False)
         return self.clafers
-        #return self.instances
        
     def flattenJoin(self, joinList=[]):
         return self.left.flattenJoin([]) + joinList + self.right.flattenJoin([])
     
-    #def getInt(self):
-    #    exprArg = self.checkIfJoinIsComputed()
-    #    return self.ints[0][0]#getInt()
-    
     def getInts(self):
-        exprArg = self.checkIfJoinIsComputed()
+        self.checkIfJoinIsComputed()
         return self.ints#getInts()
-        
-        
 
-      
     def __str__(self):
         return (str(self.getInstances(nonsupered=True)) + str(self.ints)) 
-        #return ("join: " + str(self.left.getInstanceSorts())+ str(self.right.getInstanceSorts()))
     
     def __repr__(self):
         return (str(self.getInstances(nonsupered=True)) + str(self.ints)) 
-        #return ("join: " + str(self.getInstanceSorts())+ str(self.getInstanceSorts()))
-    
-
-       
-       

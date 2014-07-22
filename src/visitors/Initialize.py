@@ -4,7 +4,6 @@ Created on Nov 6, 2013
 @author: ezulkosk
 '''
 from visitors import VisitorTemplate
-import ast
 import visitors
 
 class Initialize(VisitorTemplate.VisitorTemplate):
@@ -23,8 +22,6 @@ class Initialize(VisitorTemplate.VisitorTemplate):
 
     
     def claferVisit(self, element):
-        #if not self.cfr.isUsed(str(element)):
-        #    return 
         self.cfr.cfr_sorts[element.uid].initialize()
         for i in element.elements:
             visitors.Visitor.visit(self, i)

@@ -5,8 +5,6 @@ Created on Oct 30, 2013
 '''
 import sys
 
-
-
 class SimpleTree():
     
     def __init__(self):
@@ -24,17 +22,12 @@ class SimpleTree():
         for i in l:
             ((currsort, currinst), _) = i
             if sort == currsort and str(inst) == str(currinst):
-                #print("found: "  + str(parent) + str(currinst))
                 return i
         return None
     
     def addNode(self, node, parent):
         if parent:
             parchildren = self.findParentInList(parent, self.nodes)
-            #print("B")
-            #print(parchildren)
-            #print(parent)
-            #print(str(parchildren))
             if parchildren:  
                 (_, children) = parchildren
                 children.append(node)
@@ -44,13 +37,12 @@ class SimpleTree():
         self.nodes.append((node,[]))
     
     def addRef(self, node, ref):
-        #import visitors.PrintHierarchy
         parchildren = self.findParentInList(node, self.refs)
         if parchildren:
             (_, children) = parchildren
             children.append(ref)
         else:
-            self.refs.append((node, [ref])) #[node] = [visitors.PrintHierarchy.removePrefix(ref)]
+            self.refs.append((node, [ref]))
     
     def addChild(self, node, child):
         (_,c) = self.findParentInNodes(node, self.nodes)

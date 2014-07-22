@@ -3,10 +3,8 @@ Created on Nov 7, 2013
 
 @author: ezulkosk
 '''
-from common import Options, Common
 from common.Common import METRICS_MAXIMIZE, METRICS_MINIMIZE
-from structures.ClaferSort import ClaferSort
-from visitors import VisitorTemplate, Visitor, CreateSorts
+from visitors import VisitorTemplate, Visitor
 import sys
 import visitors
 
@@ -45,8 +43,6 @@ def run(cfr_inst, parameters=None, non_modelstats=[]):
         print("Num Optional Card: " + str(numOptionalCard))
         print("Num Mandatory Card: " + str(numMandatoryCard))
     
-    
-    
 ''' ---------------------------------------------------------------'''    
     
 def getNumTopLevelClafers(cfr_inst):
@@ -77,7 +73,6 @@ def getNumXorGCard(cfr_inst):
 def getNumOptionalGCard(cfr_inst):
     numOpts = 0
     for i in cfr_inst.cfr_sorts.values():
-        #print(str(i) + str(i.lowerGCard))
         if i.lowerGCard == 1 and i.upperGCard == -1:
             numOpts = numOpts + 1
     return numOpts
@@ -85,7 +80,6 @@ def getNumOptionalGCard(cfr_inst):
 def getNumAnyGCard(cfr_inst):
     numAnys = 0
     for i in cfr_inst.cfr_sorts.values():
-        #print(str(i) + str(i.lowerGCard))
         if i.lowerGCard == 0 and i.upperGCard == -1:
             numAnys = numAnys + 1
     return numAnys
@@ -96,7 +90,6 @@ def getNumAnyGCard(cfr_inst):
 def getNumMandatoryCard(cfr_inst):
     numMandatory = 0
     for i in cfr_inst.cfr_sorts.values():
-        #print(str(i) + str(i.lowerCardConstraint) + " " + str(i.upperCardConstraint))
         if i.lowerCardConstraint == 1 and i.upperCardConstraint == 1:
             numMandatory = numMandatory + 1
     return numMandatory
@@ -104,7 +97,6 @@ def getNumMandatoryCard(cfr_inst):
 def getNumOptionalCard(cfr_inst):
     numOptional = 0
     for i in cfr_inst.cfr_sorts.values():
-        #print(str(i) + str(i.lowerGCard))
         if i.lowerCardConstraint == 0 and i.upperCardConstraint == 1:
             numOptional = numOptional + 1
     return numOptional

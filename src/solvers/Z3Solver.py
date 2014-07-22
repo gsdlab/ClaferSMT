@@ -3,9 +3,9 @@ Created on May 14, 2014
 
 @author: ezulkosk
 '''
-from common import Common, SMTLib
+from common import Common
 from solvers.BaseSolver import BaseSolver
-from z3 import *
+from z3 import sat, And, Xor, Or, Implies, Not, z3, If, Sum, BitVec, Real, Bool, Int
 
 class Z3Solver(BaseSolver):
     def __init__(self):
@@ -25,7 +25,6 @@ class Z3Solver(BaseSolver):
         self.solver.add(constraint)
     
     def check(self, unsat_core_trackers=None):
-        #print(unsat_core_trackers)
         if unsat_core_trackers:
             if self.solver.check(unsat_core_trackers) == sat:
                 return Common.SAT
@@ -37,10 +36,9 @@ class Z3Solver(BaseSolver):
             return Common.UNSAT
         
     def setOptions(self):
-        self.solver.set(auto_config=False)
         #self.solver.help()
+        self.solver.set(auto_config=False)
         self.solver.set(unsat_core=True)
-        #self.solver.set("qi_profile",True)
         self.solver.set(model_completion=True)
         
     def model(self):
@@ -67,34 +65,25 @@ class Z3Converter():
         self.expr_cache = {}
 
     #keys are sorted tuples of children id's, with the op name as the last element
-    
-
     def checkCache(self, op, children, sort = True):
-        #TODO actually fix this...
+        #TODO actually fix this, some kind of hashing problem
         return (False, 1)
         new_children = []
-        #print(children)
         for i in children:
-            #print(str(i) + str(i.__class__))
             try:
                 if isinstance(i, str):
                     j = i
                 else:
-                    j = int(i)#i.value
-                #print(j)
+                    j = int(i)
             except:
-                #print(i)
                 j = id(i)
             new_children.append(j)
         children = new_children
-        #print("New children: " + str(children))
-        #children = [i if isinstance(i,int) else id(i) for i in children]
         if sort:
             #can only sort children for certain operations
             children = sorted(children)
         children.append(op)
         tup_key = tuple(children)
-        #print(children)
         
         expr = self.expr_cache.get(tup_key)
         if(expr):
@@ -121,11 +110,8 @@ class Z3Converter():
     def ne_expr(self, expr):
         l = expr.left.convert(self)
         r = expr.right.convert(self)
-        #print("NEl: " + str(l))
-        #print("NEr: " + str(r))
         (hit, result) = self.checkCache("NE", [l,r])
         if hit: 
-            #print(str(l) + " " + str(r) + " : " +  str(result))  
             return result
         else:
             return self.cache(l != r, result)
@@ -200,7 +186,6 @@ class Z3Converter():
         return Xor(l,r)
     
     def and_expr(self, expr):
-        #SMTLib.toStr(expr)
         newList = []
         for i in expr.list:
             val = i.convert(self)
@@ -223,8 +208,6 @@ class Z3Converter():
 
     def or_expr(self, expr):
         newList = []
-        #for i in expr.list:
-        #    SMTLib.toStr(i)
         for i in expr.list:
             val = i.convert(self)
             if not val:
@@ -238,11 +221,9 @@ class Z3Converter():
                 newList.append(val)
         if not newList:
             return False
-        #print(newList)
         (hit, result) = self.checkCache("Or", newList)
         if hit:   
             return result
-            print("MADE IT")
         else:
             return self.cache(Or(*newList), result)
     

@@ -10,9 +10,6 @@ from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from visitors import PrintHierarchy, Visitor
 import multiprocessing
-import sys
-
-
 
           
 def model_to_string(cfr, model):
@@ -26,7 +23,6 @@ class GIAConsumer(multiprocessing.Process):
         multiprocessing.Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
-#         self.CurrentNotDomConstraints_queuelist = CurrentNotDomConstraints_queuelist
         self.timeQueue = timeQueue 
         self.cfr = cfr
         self.solver = s
@@ -73,9 +69,7 @@ class GIAConsumer(multiprocessing.Process):
                 else:  
                     prev_solution = self.GIAAlgorithm.s.model()
                     self.GIAAlgorithm.s.push()
-                    NextParetoPoint, local_count_sat_calls, local_count_unsat_calls = self.GIAAlgorithm.ranToParetoFront(prev_solution)
-                    #print(local_count_sat_calls)
-                    #print(local_count_unsat_calls)
+                    NextParetoPoint, _local_count_unsat_calls, _local_count_unsat_calls = self.GIAAlgorithm.ranToParetoFront(prev_solution)
                     self.addParetoPoints(NextParetoPoint)
                     metric_values = self.GIAAlgorithm.get_metric_values(NextParetoPoint)
                     self.result_queue.put((model_to_string(self.cfr, NextParetoPoint), metric_values))
@@ -95,7 +89,6 @@ class StandardConsumer(multiprocessing.Process):
         multiprocessing.Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
-#         self.CurrentNotDomConstraints_queuelist = CurrentNotDomConstraints_queuelist
         self.timeQueue = timeQueue 
         self.cfr = cfr
         self.solver = s

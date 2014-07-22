@@ -8,7 +8,6 @@ from common import SMTLib
 import imp
 import json
 import subprocess
-import sys
 
 NORMAL = 0
 DEBUG = 1
@@ -39,7 +38,7 @@ def aggregate_polarity(p1, p2):
 #tests
 MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
-STRING_TESTS = 3 #tests that involve strings / string constraints
+STRING_REALS_TESTS = 3 #tests that involve strings / string constraints
 OPTIMIZATION_TESTS = 4
 ALL_TESTS = 5
 
@@ -140,19 +139,12 @@ def mOr(*args):
         return SMTLib.SMT_Or(*newArgs)
 
 def preventSameModel(cfr, solver, model):
-    #from constraints import Operations
-    #print(model.eval(Operations.EXPR))
-    #print(model.eval(Operations.EXPR2))
-    #print(model)
     block = []
     for i in cfr.cfr_sorts.values():
         for j in i.instances:
-            block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(int(str(model[j.var])))))#evalForNum(model, j.var))))
-            #print(str(j) + " : " + str(evalForNum(model, j.var)))# + " " + str(id(j.var)))
+            block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(int(str(model[j.var])))))
         if i.refs:
             for j in i.refs:
-                #print(model[j.var])
-                #print(str(j) + " : " + str(evalForNum(model, j.var)) + " : " + str(model[j.var]))
                 try:
                     val = model[j.var]
                 except:
@@ -161,13 +153,9 @@ def preventSameModel(cfr, solver, model):
                 if not val:
                     continue
                 else:
-                    block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(val)))#evalForNum(model, j.var))))
+                    block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(val)))
 
-    #for i in block:
-    #    SMTLib.toStr(i)
-    #print(block)
     if block == []:
-        #input was an empty clafer model (no concretes)
         solver.add(SMTLib.SMT_BoolConst(False))
     else:
         solver.add(SMTLib.SMT_Or(*block))

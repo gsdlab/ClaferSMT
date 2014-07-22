@@ -117,7 +117,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
     def addArg(self, arg):
         self.stack.append(arg)
        
-    #clean     
+    #TODO clean     
     def addQuantifier(self, quantifier, num_args, num_combinations, ifconstraints):
         localStack = []
         ifConstraints = []

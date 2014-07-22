@@ -6,7 +6,6 @@ Created on Jul 14, 2014
 from common import SMTLib, Common
 from common.Common import mOr, mAnd
 from structures.ExprArg import BoolArg
-import sys
 
 def getQuantifierConditionList(exprs):
     '''
@@ -28,7 +27,6 @@ def getQuantifierConditionList(exprs):
                 else:
                     condList.append(SMTLib.SMT_BoolConst(True))
                     break
-            #assert(len(condList)<=1)#TODO REMOVE
             finalList.append(mOr(*condList))
     return finalList
 
@@ -45,16 +43,7 @@ def quant_all(exprs, ifConstraints):
         cond = mAnd(*[SMTLib.SMT_Implies(i, j[0].getBool()) for i,j in zip(ifConstraints,exprs)])
     else:
         cond = mAnd(*[i[0].getBool() for i in exprs])
-    #if ifConstraints:
-    #    bigIf = mAnd(*ifConstraints)
-    #    cond = SMTLib.SMT_Implies(bigIf, cond)
     return cond
-    '''
-    condList = getQuantifierConditionList(exprs)
-    if ifConstraints:
-        condList = [SMTLib.SMT_Implies(i, j) for i,j in zip(ifConstraints, condList)]
-    return mAnd(*condList)
-    '''
 
 def quant_no(exprs, ifConstraints):
     condList = getQuantifierConditionList(exprs)

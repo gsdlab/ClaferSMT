@@ -3,20 +3,16 @@ Created on Jan 13, 2014
 
 @author: ezulkosk
 '''
-from ast import IntegerLiteral
-from common import Options, Common, SMTLib
+from common import Common, SMTLib
 from constraints import operations
 from structures.ExprArg import JoinArg
-from visitors import VisitorTemplate, Visitor, CreateBracketedConstraints
-import visitors
+from visitors import VisitorTemplate, CreateBracketedConstraints
 
 
 class CheckForGoals(VisitorTemplate.VisitorTemplate):
     '''
     :var cfr: (:class:`~common.Z3Instance`) The Z3 solver.
     '''
-    
-    
     def __init__(self, cfr):
         '''
         :param cfr: The Clafer model.
@@ -27,7 +23,6 @@ class CheckForGoals(VisitorTemplate.VisitorTemplate):
     '''
     may need to fix for 3..*
     '''
-    
     def goalVisit(self, element):
         bracketedConstraintsVisitor = CreateBracketedConstraints.CreateBracketedConstraints(self)
         op = element.exp.iExp[0].operation

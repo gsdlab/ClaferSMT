@@ -5,10 +5,9 @@ Created on April 27, 2013
 
 '''
 from common import Common, Options
-from front import TestClafers, ModelStats
+from front import TestClafers
 from front.ClaferModel import ClaferModel
 import cProfile
-import imp
 import sys
 
     

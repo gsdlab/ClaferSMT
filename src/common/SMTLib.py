@@ -1,6 +1,4 @@
 
-import sys
-
 numCalls = 0
 def toStr(root, indent=0):
     global numCalls
@@ -72,7 +70,6 @@ class SMT_Or():
             if isinstance(i, bool) and i:
                 self.list = [SMT_BoolConst(True)]
         self.list = [i for i in self.list if not isinstance(i, bool)]
-        #print(self.list)
 
     def children(self):
         return self.list

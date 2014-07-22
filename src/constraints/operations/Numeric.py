@@ -5,7 +5,6 @@ Created on Jul 14, 2014
 '''
 from common import SMTLib
 from structures.ExprArg import ExprArg, IntArg, BoolArg
-import sys
 
 def getArithValue(vals):
     return SMTLib.createSum(vals)
@@ -70,9 +69,6 @@ def op_mul(left,right):
     rval = SMTLib.createSum(rval)
     return IntArg(SMTLib.SMT_Times(lval, rval))  
 
-    
-
-
 #integer division
 def op_div(left,right):
     '''
@@ -123,14 +119,6 @@ def op_sum(arg):
     for (e,c) in arg.getInts():
         sum_list.append(SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)))
     return IntArg(SMTLib.createSum(sum_list))    
-       
-    ''' 
-    all_vals = []
-    for i in arg.getInstanceSorts():
-        (_, mask) = i
-        all_vals.append(getArithValue(list(mask.values())))
-    return IntArg(getArithValue(all_vals))
-    '''
 
 def op_lt(left,right):
     '''

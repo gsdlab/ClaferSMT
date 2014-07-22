@@ -99,8 +99,8 @@ def op_ifthenelse(cond, ifExpr, elseExpr):
     assert isinstance(ifExpr, ExprArg)
     assert isinstance(elseExpr, ExprArg)
     
-    (_, cond_mask) = cond.getInstanceSort(0)
-    (_, if_mask) = ifExpr.getInstanceSort(0)
-    (_, else_mask) = elseExpr.getInstanceSort(0)
-    return BoolArg(SMTLib.SMT_If(cond_mask.pop_value(), if_mask.pop_value(), else_mask.pop_value()))
+    condVal = cond.getBool()
+    ifExprVal = ifExpr.getBool()
+    elseExprVal = elseExpr.getBool()
+    return BoolArg(SMTLib.SMT_If(condVal, ifExprVal, elseExprVal))
 

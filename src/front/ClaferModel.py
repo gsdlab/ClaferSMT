@@ -6,7 +6,7 @@ Created on Apr 30, 2013
 
 from ast.IntegerLiteral import IntegerLiteral
 from common import Common, Options, Clock, SMTLib
-from common.Common import preventSameModel, load, METRICS_MAXIMIZE
+from common.Common import preventSameModel, load
 from common.Exceptions import UnusedAbstractException
 from common.Options import debug_print, standard_print
 from constraints import Constraints
@@ -14,7 +14,7 @@ from front import Z3Str, ModelStats
 from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
     GuidedImprovementAlgorithm
 from parallel import ParSolver
-from solvers import Z3Solver, Converters, BaseSolver
+from solvers import Converters, BaseSolver
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
     SetScopes, AdjustAbstracts, CheckForGoals
@@ -158,7 +158,7 @@ class ClaferModel(object):
 
     def isUsed(self, element):
         ab = self.cfr_sorts.get(str(element))
-        if (not ab.element.isAbstract) or ab.scope_summ != 0:# self.cfr_sorts.get(str(element)):
+        if (not ab.element.isAbstract) or ab.scope_summ != 0:
             return True
         return False
     
@@ -187,6 +187,7 @@ class ClaferModel(object):
             self.setScopes()
             
             """ Initializing ClaferSorts and their instances. """
+            #TODO Clean this up.
             Visitor.visit(Initialize.Initialize(self), self.module)
             self.fixSubSortIndices()
             self.createInstancesConstraintsAndFunctions()
@@ -224,10 +225,7 @@ class ClaferModel(object):
         '''
         :param module: The Clafer AST
         :type module: Module
-        
-         and computes models.
         '''
-        
         if Options.MODE == Common.PRELOAD:
             return 0
     
@@ -240,32 +238,20 @@ class ClaferModel(object):
             Z3Str.clafer_to_z3str("z3str_in")
             return 1
         
-        #for i in self.smt_bracketed_constraints:
-        #    for j in i.constraints:
-        #        print(SMTLib.toStr(j))
-        
-        #for i in self.cfr_sorts.values():
-        #    print(i)
-        #    print(i.instanceRanges)
-        
         debug_print("Printing constraints.") 
         self.printConstraints()
-        
-        #sys.exit("DONE")
+
         self.clock.tick("Asserting Constraints")
         debug_print("Asserting constraints.")
         self.assertConstraints()     
         self.clock.tock("Asserting Constraints")
-        print("Cache Hits: " + str(self.solver.converter.num_hit))
-        print("Cache Misses: " + str(self.solver.converter.num_miss))
+        #print("Cache Hits: " + str(self.solver.converter.num_hit))
+        #print("Cache Misses: " + str(self.solver.converter.num_miss))
         
         if Options.SOLVER == "smt2":
             self.solver.printConstraints()
             sys.exit()
-        
-        
-        #sys.exit()
-        
+  
         debug_print("Getting models.")  
         self.clock.tick("Get Models")
         models = self.get_models(Options.NUM_INSTANCES)
@@ -275,7 +261,7 @@ class ClaferModel(object):
         
         if Options.LEARNING_ENVIRONMENT == "sharcnet":
             print(Options.SPLIT + str(Options.NUM_SPLIT))
-            sys.exit("FIX SHARCNET")
+            sys.exit("TODO FIX SHARCNET")
              
         return self.num_models
         
@@ -317,7 +303,6 @@ class ClaferModel(object):
     def printConstraints(self):
         if not (Options.MODE == Common.DEBUG and Options.PRINT_CONSTRAINTS):
             return
-        #print(self.solver.sexpr())
         for i in self.cfr_sorts.values():
             i.constraints.debug_print()
         self.join_constraints.debug_print()
@@ -368,7 +353,7 @@ class ClaferModel(object):
             GIAAlgorithmNP = GuidedImprovementAlgorithm(self, self.solver, metrics_variables, \
                     metrics_objective_direction, [], options=GIAOptionsNP) 
             '''featurevars instead of []'''
-            outfilename = str("giaoutput").strip()#"npGIA_" + str(sys.argv[1]).strip() + ".csv"
+            outfilename = str("giaoutput").strip()
     
             ParetoFront = GIAAlgorithmNP.ExecuteGuidedImprovementAlgorithm(outfilename)
             if not Options.SUPPRESS_MODELS:
@@ -376,7 +361,6 @@ class ClaferModel(object):
                     standard_print("UNSAT")
                 for i in ParetoFront:
                     self.printVars(i)
-            #count = count + 1
             return ParetoFront
         else:
             parSolver = ParSolver.ParSolver(self, self.module, self.solver, metrics_variables, metrics_objective_direction)

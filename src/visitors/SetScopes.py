@@ -5,9 +5,7 @@ Created on Nov 10, 2013
 '''
 from ast.IntegerLiteral import IntegerLiteral
 from common import Options
-from common.Exceptions import UnusedAbstractException
 from visitors import VisitorTemplate
-import ast
 import visitors
 
 class SetScopes(VisitorTemplate.VisitorTemplate):
@@ -22,10 +20,8 @@ class SetScopes(VisitorTemplate.VisitorTemplate):
     '''
     may need to fix for 3..*
     '''
-    
     def claferVisit(self, element):
         (lower, upper) = element.card
-        #(glower, _) = element.glCard
         upper = upper.value
         glower = self.glStack[-1] * lower.value
         if upper == -1:

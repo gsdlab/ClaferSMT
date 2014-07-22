@@ -18,21 +18,15 @@ class Constraints():
             SMTLib.toStr(constraint)
 
         if Options.PRODUCE_UNSAT_CORE:
-            
-            #p = SMTLib.SMT_Bool(str(self.assertID) + "_" + str(Common.getConstraintUID()))
             p = cfr.solver.convert(SMTLib.SMT_Bool("bool" + str(Common.getConstraintUID()) + "_" + str(self.assertID)))
             cfr.unsat_core_trackers.append(p)
             cfr.low_level_unsat_core_trackers[str(p)] = constraint
             cfr.unsat_map[str(p)] = self
-            #print(p)
-            #SMTLib.toStr(constraint)
             cfr.solver.add(SMTLib.SMT_Implies(p, constraint, unsat_core_implies=True))
         else:
             cfr.solver.add(constraint)
         
     def convert(self, f_n, constraint):
-        #print("#####")
-        #print(constraint)
         f_n.write(Converters.obj_to_string(constraint) + "\n")
         
 
@@ -42,7 +36,6 @@ class GenericConstraints(Constraints):
         self.assertID = ident
         
     def addConstraint(self, c):
-        #SMTLib.toStr(c)
         self.constraints.append(c)
     
     def addAll(self, c):
@@ -79,10 +72,8 @@ class ClaferConstraints(Constraints):
         self.inheritance_constraints = []
         self.ref_constraints = []
 
-    def addConstraint(self, list, c):
-        #print("A")
-        #SMTLib.toStr(c)
-        list.append(c)
+    def addConstraint(self, l, c):
+        l.append(c)
 
     def addInstanceConstraint(self,c,constraintConditional=True):
         if constraintConditional:
@@ -161,12 +152,11 @@ def interpretClaferSort(claferSort):
     return clafer  + ", on line " + getLineFromPos(claferSort.element.pos) +  "."
                 
 def interpretUnsatCore(cfr, bool_id):
-    #print(bool_id)
     cid = bool_id.split("_", 1)[1]
     SMTLib.toStr(cfr.low_level_unsat_core_trackers[bool_id])
     if cid.startswith("BC"):
         bc = cfr.unsat_map[bool_id]
-        retString = "[ " + bc.element.toString(1) + " ]" #+ text
+        retString = "[ " + bc.element.toString(1) + " ]" 
         return retString
     else:
         claferSort = cfr.cfr_sorts.get(cid)
