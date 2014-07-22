@@ -392,35 +392,24 @@ class ClaferModel(object):
     def standard_get_models(self, desired_number_of_models):
         result = []
         count = 0
-        #print(self.solver.sexpr())
         self.clock.tick("first model")
-        #for i in self.solver.assertions():
-        #    print(i)
         while True:
             self.clock.tick("unsat")
-            #print("AAAAA" + str(self.unsat_core_trackers))
-            #print( self.solver.check(self.unsat_core_trackers) )
-            #print(self.solver.check())
-            #print(self.solver.solver.unsat_core())
             if (Options.MODE != Common.DEBUG and not(Options.PRODUCE_UNSAT_CORE) and self.solver.check() == Common.SAT and count != desired_number_of_models) or \
                 (Options.MODE != Common.DEBUG and Options.PRODUCE_UNSAT_CORE and self.solver.check(self.unsat_core_trackers) == Common.SAT and count != desired_number_of_models) or \
                 (Options.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == Common.SAT and count != desired_number_of_models):
                 if count == 0:
                     self.clock.tock("first model")
                 m = self.solver.model()
-                #if count ==0:
-                #print(m)
                 result.append(m)
                 # Create a new constraint that blocks the current model
-                #print(m)
                 if not Options.SUPPRESS_MODELS:
                     self.printVars(m)
                 preventSameModel(self, self.solver, m)
                 count += 1
             else:
-                if count == 0 and Options.PRODUCE_UNSAT_CORE:# Options.MODE == Common.DEBUG and count == 0:
+                if count == 0 and Options.PRODUCE_UNSAT_CORE:
                     self.clock.tock("unsat")
-                    #debug_print(self.solver.check(self.unsat_core_trackers))
                     debug_print("UNSAT")
                     core = self.solver.unsat_core()
                     debug_print(str(len(core)) + " constraints in unsat core: \n")
@@ -439,7 +428,6 @@ class ClaferModel(object):
                 print("No more instances")
         while True:
             ch = input("ClaferZ3 > ")
-            #print(ch)
             ch = ch.strip()
             if ch == 'n':
                 models = self.standard_get_models(1)
