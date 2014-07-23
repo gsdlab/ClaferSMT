@@ -151,7 +151,7 @@ def setCommandLineOptions(learner = False):
     
     args = parser.parse_args()
     if args.version:
-        print("ClaferZ3 0.3.6.04-04-2014")
+        print("ClaferSMT 0.3.6.1")
         sys.exit()
     if not args.file and not (args.mode in ['experiment', 'test', 'one', 'all'] or learner):
         parser.print_help()
