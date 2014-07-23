@@ -278,6 +278,7 @@ class ClaferModel(object):
         print(self.clock)
         self.num_models = len(models)
         
+        print(self.clock)
         if Options.LEARNING_ENVIRONMENT == "sharcnet":
             print(Options.SPLIT + str(Options.NUM_SPLIT))
             sys.exit("TODO FIX SHARCNET")

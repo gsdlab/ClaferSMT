@@ -21,8 +21,17 @@ Getting the Clafer SMT Backend
 Regardless of the installation method, the following are required:
 
 * [Python 3](https://www.python.org/download/releases/3.4.1/) v3.4.1
+  * On Windows, `pip` is included in Python3 installation by default
+  * On Linux, to install `pip3` execute `sudo apt-get install python3-pip`
+  * On Mac, `pip3` is included in Python3 installation by default
+* [bintrees](https://bitbucket.org/mozman/bintrees)
+  * On Windows: `pip install bintrees` (make sure it is installed for Python 3).
+  * On Linux/Mac: `sudo pip3 install bintrees`
+  * (optional): Remove the warning messages from bintrees' imports.
 * [Clafer Compiler](https://github.com/gsdlab/clafer) v0.3.6.1
   * Required for compiling Clafer files (`.cfr`) into the Clafer Python IR format (`.py`), so that they can be run using the tool.
+* [Z3 SMT Solver](http://z3.codeplex.com/) v4.2.3
+  * included in the binary distribution
 
 ### Installation from binaries
 
@@ -38,12 +47,9 @@ Dependencies
 
 * [Z3 SMT Solver](http://z3.codeplex.com/) v4.2.3
   * install to `<z3 install directory>` of your choice
-* [bintrees](https://bitbucket.org/mozman/bintrees)
-  * pip install bintrees (make sure it is installed for Python 3).
-  * (optional): Remove the warning messages from bintrees' imports.
 
 1. install the dependencies
-2. open the command line terminal. On Windows, open MinGW.
+2. open the command line terminal. On Windows, open MinGW/MSYS.
 3. in some `<source directory>` of your choice, execute 
   * `git clone git://github.com/gsdlab/ClaferSMT.git`
 4. in `<source directory>/ClaferSMT`, execute
@@ -56,27 +62,15 @@ Usage
 
 ### Command-line Usage
 
-First, compile a Clafer model `model.cfr` into Clafer Python IR format as follows
+ClaferSMT can be used directly from source code using the script `claferSMTsrc.sh` (only included in source code).
+From binary distribution:
 
-```
-clafer -m python model.cfr
-```
-
-This will produce `model.py` file in the same directory as the input `.cfr` file.
-
-Next, either execute
-
-```
-./claferSMT.sh model.py
-```
-
-when using source code, or 
-
-```
-python claferSMT.egg model.py
-```
-
-when using the egg.
+* On Linux: `./claferSMT.sh <model[.cfr|.py]> <options>`
+  * the script sets the `LD_LIBRARY_PATH` to `pwd` so that the `libz3.so` can be located
+* On Windows: `python ClaferSMT.egg <model[.cfr|.py]> <options>` or the same as on Linux
+  * should be executed in the same folder as the `libz3.dll` so that it can be found
+* On Mac: `python3 ClaferSMT.egg <model[.cfr|.py]> <options>` or the same as on Linux
+  * should be executed in the same folder as the `libz3.dylib` so that it can be found
 
 Help printed by `--help`
 

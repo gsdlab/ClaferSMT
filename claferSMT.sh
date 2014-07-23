@@ -1,8 +1,11 @@
 #!/bin/bash
 
-export PYTHONPATH=.:./src::$PYTHONPATH
+# Run ClaferSMT.egg
 
-# First, compile the .cfr file into the Clafer Python IR format .py
-# clafer -sm python $name
+export LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH
+export PATH=`pwd`:$PATH
+PYTHON3=python3
 
-python -OO src/front/ClaferRun.py $@
+if [ "$OS" = "Windows_NT" ]; then PYTHON3=python; fi
+
+"$PYTHON3" ClaferSMT.egg $@
