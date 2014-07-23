@@ -7,8 +7,6 @@ from common import SMTLib, Common
 from common.Common import mOr
 import sys
 
-
-
 class ExprArg():
     def __init__(self, instances = None, nonsupered=False):
         '''
@@ -96,8 +94,18 @@ class PrimitiveArg(ExprArg):
     def isPrimitive(self):
         return True
     
+    def flattenJoin(self, joinList):
+        #only used when reifying joins
+        return [self]
+    
     def getValue(self):
         return self.value
+    
+    def __str__(self):
+        return self.value
+    
+    def __repr__(self):
+        return self.__str__()
                
 class IntArg(ExprArg):
     def __init__(self, instance):
@@ -143,22 +151,34 @@ class BoolArg(ExprArg):
 
 
 class JoinArg(ExprArg):
-    def __init__(self, left, right):
+    def __init__(self, left, right, cfr=None):
         self.left = left
         self.right = right
+        self.cfr = cfr
         #self.instances = None
         ExprArg.__init__(self, nonsupered=True)
     
-    def checkIfJoinIsComputed(self, nonsupered=False):
+    def checkIfJoinIsComputed(self, nonsupered=False, getAllKeys = False):
         import constraints.operations.Join as Join
         if not self.clafers:
             joinList = self.flattenJoin()
-            exprArg = Join.computeJoin(joinList)
+            if getAllKeys:
+                #TODO CLEAN
+                (exprArg,all_keys) = Join.computeJoin(joinList, self.cfr, getAllKeys)
+            else:
+                exprArg = Join.computeJoin(joinList, self.cfr, getAllKeys)
             self.ints = [i for i in exprArg.ints]
             self.clafers = exprArg.getInstances(nonsupered)
+            if not nonsupered:
+                self.hasBeenSupered = True
+        if getAllKeys:
+            #print(all_keys)
+            return all_keys
     
     def getInstances(self, nonsupered=False):
         self.checkIfJoinIsComputed(nonsupered=False)
+        if not nonsupered and not self.hasBeenSupered:
+            super(JoinArg, self).getInstances()
         return self.clafers
        
     def flattenJoin(self, joinList=[]):

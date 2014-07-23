@@ -17,7 +17,7 @@ from parallel import ParSolver
 from solvers import Converters, BaseSolver
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
-    SetScopes, AdjustAbstracts, CheckForGoals
+    SetScopes, AdjustAbstracts, CheckForGoals, CreateSimpleBracketedConstraints
 import sys
 import traceback
 
@@ -56,6 +56,7 @@ class ClaferModel(object):
         self.unsat_core_trackers = []
         self.low_level_unsat_core_trackers = {}
         self.unsat_map = {}
+        self.join_cache = {} # cache to store join expression (asil optimization)
         self.translate()
     
     def createGroupCardConstraints(self):
@@ -207,9 +208,26 @@ class ClaferModel(object):
             
             debug_print("Creating group cardinality constraints.")
             self.createGroupCardConstraints()
-                        
+            
+            #debug_print("Creating bracketed constraints.")
+            #self.bracketedConstraintsPreview = CreateSimpleBracketedConstraints.CreateSimpleBracketedConstraints(self)
+            #Visitor.visit(self.bracketedConstraintsPreview, self.module)  
+                      
             debug_print("Creating bracketed constraints.")
+            bcVisitor = CreateBracketedConstraints.CreateBracketedConstraints(self)
+            #for i in self.bracketedConstraintsPreview.setEqualityConstraints:
+            #    bcVisitor.constraintVisit(None, i)
+            #print("ABOVE")
+            #for i in self.join_cache.keys():
+            #    print(str(i))# + " : " + str(self.join_cache[i]))
+            #print("BELOW")
+            #bcVisitor.constraintVisit(None, self.bracketedConstraintsPreview.otherConstraints[3])
+            #sys.exit("ABOVE!!!!!!!!")
+            #for i in self.bracketedConstraintsPreview.otherConstraints:
+                #print(i.stringRep)    
+                #bcVisitor.constraintVisit(None, i)
             Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
+            
             
             debug_print("Checking for goals.")
             if not Options.IGNORE_GOALS:
@@ -234,7 +252,8 @@ class ClaferModel(object):
             return 0
     
         if Options.STRING_CONSTRAINTS:
-            Converters.printZ3StrConstraints(self)
+            sys.exit("TODO string constraints")
+            #Converters.printZ3StrConstraints(self)
             Z3Str.clafer_to_z3str("z3str_in")
             return 1
         
@@ -379,9 +398,9 @@ class ClaferModel(object):
         self.clock.tick("first model")
         while True:
             self.clock.tick("unsat")
-            if (Options.MODE != Common.DEBUG and not(Options.PRODUCE_UNSAT_CORE) and self.solver.check() == Common.SAT and count != desired_number_of_models) or \
-                (Options.MODE != Common.DEBUG and Options.PRODUCE_UNSAT_CORE and self.solver.check(self.unsat_core_trackers) == Common.SAT and count != desired_number_of_models) or \
-                (Options.MODE == Common.DEBUG and self.solver.check(self.unsat_core_trackers) == Common.SAT and count != desired_number_of_models):
+            if (Options.MODE != Common.DEBUG and not(Options.PRODUCE_UNSAT_CORE)and count != desired_number_of_models and self.solver.check() == Common.SAT ) or \
+                (Options.MODE != Common.DEBUG and Options.PRODUCE_UNSAT_CORE and count != desired_number_of_models and self.solver.check(self.unsat_core_trackers) == Common.SAT ) or \
+                (Options.MODE == Common.DEBUG and count != desired_number_of_models and  self.solver.check(self.unsat_core_trackers) == Common.SAT ):
                 if count == 0:
                     self.clock.tock("first model")
                 m = self.solver.model()
@@ -389,7 +408,7 @@ class ClaferModel(object):
                 # Create a new constraint that blocks the current model
                 if not Options.SUPPRESS_MODELS:
                     self.printVars(m)
-                preventSameModel(self, self.solver, m)
+                preventSameModel(self, self.solver, m)  
                 count += 1
             else:
                 if count == 0 and Options.PRODUCE_UNSAT_CORE:

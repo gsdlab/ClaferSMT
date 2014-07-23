@@ -51,7 +51,7 @@ ClaferToZ3OperationsMap = {
                            ":>"          : (2, Set.op_range_restriction),
                            "."           : (2, Join.op_join),
                            #Ternary Ops
-                           "ifthenelse"  : (3, Boolean.op_ifthenelse),
+                           "=>else"  : (3, Boolean.op_ifthenelse),
                            #String Ops
                            "concat"      : (2, String.op_concat),
                            "length"      : (1, String.op_length),
@@ -106,6 +106,10 @@ class BracketedConstraint(Constraints.GenericConstraints):
         GenericConstraints.__init__(self, ident)
         self.element = element
         self.cfr = cfr
+        self.stringRep = "" #created by CreateSimpleBracketedConstraints (* MAY NOT LOOK LIKE ACTUAL CONSTRANTS! *)
+        self.cacheJoins = False
+        self.cache =  {} # The actual join cache (see op_eq)
+        
         self.claferStack = [i for i in claferStack]
         self.stack = []
         self.locals = {}
@@ -160,7 +164,15 @@ class BracketedConstraint(Constraints.GenericConstraints):
             for j in extendedArgs:
                 tempExprs.append(j[i])
             finalExprs.append(tempExprs)
-        finalExprs = [operator(*finalExprs[i]) for i in range(len(finalExprs))]
+        if operation == "=" and self.cacheJoins:
+            finalExprs = [operator(*finalExprs[i], cacheJoins=True, bc=self) for i in range(len(finalExprs))]
+            for i in self.cache.keys():
+                self.cfr.join_cache[i] = self.cache[i]
+            self.cache = {}
+        elif operation == ".": #and self.cacheJoins:
+            finalExprs = [operator(*finalExprs[i], cfr=self.cfr) for i in range(len(finalExprs))]
+        else:
+            finalExprs = [operator(*finalExprs[i]) for i in range(len(finalExprs))]
         Assertions.nonEmpty(finalExprs)
         self.stack.append(finalExprs)
     

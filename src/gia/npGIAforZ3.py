@@ -127,6 +127,7 @@ class GuidedImprovementAlgorithm(object):
             tmpNotDominatedByFirstParetoPoint = self.ConstraintNotDominatedByX(FirstParetoPoint)
             self.s.add(tmpNotDominatedByFirstParetoPoint)
             start_time = time()
+            
             while(self.s.check() == Common.SAT and not(len(ParetoFront) == self.options.num_models)):
                 count_sat_calls += 1                             
                 prev_solution = self.s.model()

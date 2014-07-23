@@ -1,6 +1,6 @@
 // This is the example used in the tutorial to introduce Clafer
 
-abstract date //: string
+abstract date : string
   // cannot currently specify that the format of the value should be, for example, "dd/mm/yyyy"
 
 enum NorthAmericanCountry = Canada | USA

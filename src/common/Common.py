@@ -8,6 +8,7 @@ from common import SMTLib
 import imp
 import json
 import subprocess
+import sys
 
 NORMAL = 0
 DEBUG = 1
@@ -71,6 +72,32 @@ def evalForNum(model, expr):
     except:
         val = float(strval)
     return val
+
+def computeCacheKeys(flattenedJoin):
+    #print("FLATTENED:")
+    first = flattenedJoin.pop(0)
+    key = list(first.clafers.keys())
+    key = sorted(key)
+    #print(key)
+    firstkeys = [key]
+    sort = key[0][0]
+    while sort.superSort:
+        index = sort.indexInSuper
+        newkey = []
+        for (s,i) in key:
+            newkey.append((s.superSort, i + index))
+        firstkeys.append(newkey)
+        sort = sort.superSort
+    #print(firstkeys)
+    #sys.exit()
+    for j in flattenedJoin:
+        try:
+            currKey = j.value
+        except:
+            currKey = str(list(j.clafers.keys())[0][0])
+        firstkeys = [key + [currKey] for key in firstkeys]
+    #print(firstkeys)
+    return [tuple(key) for key in firstkeys]
 
 def isBoolConst(b):
     return isinstance(b, SMTLib.SMT_BoolConst) or isinstance(b, bool)

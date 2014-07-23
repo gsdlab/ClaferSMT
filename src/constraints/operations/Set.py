@@ -5,12 +5,13 @@ Created on Nov 1, 2013
 '''
 from common import Common, SMTLib
 from common.Common import mAnd, mOr
-from structures.ExprArg import ExprArg, IntArg, BoolArg
+from structures.ExprArg import ExprArg, IntArg, BoolArg, JoinArg
 import sys
 
-    
+
 def getClaferMatch(key, my_list):
     '''
+    TODO REMOVE
     Returns the entries in my_list that correspond to either sub or super sorts of key,
     specifically a list of tuples [(bool, int, (sort, Mask))],
     where bool is True iff the key is the subsort,
@@ -43,6 +44,7 @@ def getClaferMatch(key, my_list):
     return matches
 
 def find(key, l):
+    #TODO REMOVE
     for i in l:
         (sort, mask) =  i
         if sort == key:
@@ -85,7 +87,7 @@ def compute_int_set(instances):
         cons.append(mAnd(c, *[mOr(SMTLib.createNot(jc), SMTLib.SMT_NE(j,i)) for (j, jc) in instances[0:index]]))
     return cons 
    
-def op_eq(left,right):
+def op_eq(left,right, cacheJoins=False, bc = None):
     '''
     :param left:
     :type left: :class:`~ExprArg`
@@ -97,6 +99,40 @@ def op_eq(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
+    if cacheJoins and bc:
+        #TODO CLEAN
+        left_key = None
+        right_key = None
+        keys = []
+        #asil allocation speedup, if both sides are sets, we can perform expression substitution in other constraints
+        #bc is the bracketed constraint to put the cache
+        
+        for i in [left,right]:
+            if isinstance(i, JoinArg):
+                newkeys = Common.computeCacheKeys(i.flattenJoin())
+                
+                #print(tuple(key))
+                keys = keys + newkeys
+                #need to return all keys during the progress of join, add flag?
+                #get the all keys
+                all_keys = i.checkIfJoinIsComputed(nonsupered=True, getAllKeys = True)
+                #print(keys)
+                #print(all_keys)
+                keys = keys+all_keys
+                #sys.exit()
+                #print()
+            #print("GGGG right" + str(right.__class__))
+            #print(right.clafers)
+        if len(left.clafers) != len(right.clafers):
+            minJoinVal = left.clafers if len(left.clafers) < len(right.clafers) else right.clafers
+            for i in keys:
+                #TODO make more robust (e.g. if multiple equalities exist for the same join key, aggregate expressions
+                bc.cache[i] = ExprArg(minJoinVal)
+                #print(i)
+                #print(minJoinVal)
+                #print(str(len(minJoinVal)) + "  " + str(len(left.clafers)) + "  " + str(len(right.clafers)))
+        #print(str(len(left.clafers)) + " " + str(len(right.clafers)))
+    
     cond = []
     #int equality case
     lints = [(e,c) for (e,c) in left.getInts() if str(c) != "False"]

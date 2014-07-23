@@ -15,10 +15,6 @@ import itertools
 import sys
 import visitors.Visitor
 
-
-
-
-
 class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     '''
     :var self.currentConstraint: (:mod:`~constraints.BracketedConstraint`) Holds the constraint currently being traversed. 
@@ -39,7 +35,6 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.claferStack = []  # used to determine where the constraint is in the clafer hierarchy
         self.inConstraint = False  # true if within a constraint
         self.currentConstraint = None  # holds the constraint currently being traversed
-        
         VisitorTemplate.VisitorTemplate.__init__(self)
         self.inConstraint = inConstraint
         self.currentConstraint = None
@@ -107,13 +102,18 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
                 # localdecl case
                 expr = self.currentConstraint.locals[element.id]
                 self.currentConstraint.addArg(expr)
-   
-    def constraintVisit(self, element):
+
+    def constraintVisit(self, element, previouslyBuilt = None):
         self.inConstraint = True
         debug_print(self.BRACKETEDCONSCOUNT)
         self.BRACKETEDCONSCOUNT = self.BRACKETEDCONSCOUNT + 1
-        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.cfr, element, self.claferStack)
-        visitors.Visitor.visit(self, element.exp)
+        if previouslyBuilt:
+            print(previouslyBuilt.stringRep)
+            self.currentConstraint = previouslyBuilt
+            visitors.Visitor.visit(self, self.currentConstraint.element.exp)
+        else:
+            self.currentConstraint = BracketedConstraint.BracketedConstraint(self.cfr, element, self.claferStack)
+            visitors.Visitor.visit(self, element.exp)
         self.currentConstraint.endProcessing()
         self.currentConstraint = None
         self.inConstraint = False

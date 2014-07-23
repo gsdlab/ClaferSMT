@@ -154,21 +154,60 @@ def joinWithClafer(left, right):
                 newInstances[(rsort, rindex)] = (new_rexpr, new_rpol)
     newInstances = flattenInstances(newInstances)
     return ExprArg(newInstances, nonsupered=True)
-    
-def computeJoin(joinList):
-    left = joinList.pop(0) 
+
+
+def checkKeys(joinList, cfr = None):
+    cfr = None
+    if cfr:
+        cache = cfr.join_cache
+        if len(joinList) > 4:
+            print(joinList)
+        for i in range(len(joinList), 0, -1):
+            currList = joinList[0:i]
+            keys = Common.computeCacheKeys(currList)
+            #
+            #print(keys)
+            for k in keys:
+                val = cache.get(k, False)
+                if val:
+                    #print("HIT")
+                    #print(k)
+                    #print(val)
+                    #TODO CANNOT JUST RETURN, REMOVE FIRST I KEYS, AND DO BELOW
+                    #FIGURE OUT THE != case
+                    return (val, i)
+    return (None, -1)
+
+def computeJoin(joinList, cfr = None, getAllKeys = False):
+    #TODO CLEAN
+    left = [joinList.pop(0)]
+    all_keys = [] #used for caching need to do at bottom of function, not checkkeys
     while joinList:
+        (val, rindex) = checkKeys(left + joinList, cfr)
+        if rindex != -1:
+            left = [val]
+            for _ in range(rindex-1):
+                joinList.pop(0)
+        #left = joinList.pop(0) 
+        if not joinList:
+            break
         right = joinList.pop(0)
         if isinstance(right, PrimitiveArg):
             if right.getValue() == "parent":
-                left = joinWithParent(left)
+                left = [joinWithParent(left[0])]
             elif right.getValue() == "ref":
-                left = joinWithRef(left)
+                left = [joinWithRef(left[0])]
         else:
-            left = joinWithClafer(left, right)
-    return left
+            left = [joinWithClafer(left[0], right)]
+        if getAllKeys:
+            all_keys = all_keys + Common.computeCacheKeys(left + joinList)
+    #print(all_keys)
+    if getAllKeys:
+        return (left[0], all_keys)
+    else:
+        return left[0]
 
-def op_join(left,right):
+def op_join(left,right, cfr = None):
     '''
     :param left:
     :type left: :class:`~ExprArg`
@@ -183,10 +222,10 @@ def op_join(left,right):
     
     >>> A . (B . C)
     
-    and we are currently processing (B . C), we do no processing. Once we have the *full* join (A . B . C), we 
+    and we are currently processing (B . C), we do no work. Once we have the *full* join (A . B . C), we 
     use the associativity of well-formed joins to make processing much easier. All joins *should* be well-formed;
     bad joins should be caught by the Clafer front-end.
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    return JoinArg(left, right) 
+    return JoinArg(left, right, cfr) 
