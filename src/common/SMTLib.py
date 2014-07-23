@@ -1,12 +1,19 @@
 
 numCalls = 0
-
 def toStr(root, indent=0):
     global numCalls
     numCalls += 1
     print(indent * "  " + str(root))
     for i in root.children():
         toStr(i, indent + 1)
+
+def createIf(b,t,f):
+    if str(b) == "True":
+        return t
+    elif str(b) == "False":
+        return f
+    else:
+        return SMT_If(b,t,f)
 
 class SMT_If():
     def __init__(self, b, t, f):
@@ -87,6 +94,14 @@ class SMT_Xor():
     def __str__(self):
         return "Xor"
 
+def createNot(e):
+    if str(e) == "True":
+        return SMT_BoolConst(False)
+    elif str(e) == "False":
+        return SMT_BoolConst(True)
+    else:
+        return SMT_Not(e)
+
 class SMT_Not():
     def __init__(self, e):
         self.value = e
@@ -101,6 +116,11 @@ class SMT_Not():
         return "Not"
 
 
+def createNeg(e):
+    if isinstance(e, SMT_IntConst):
+        return SMT_IntConst(-e.value)
+    else:
+        return SMT_Neg(e)
 
 class SMT_Neg():
 
@@ -190,6 +210,9 @@ class SMT_EQ():
 
     def __str__(self):
         return "=="
+
+def createNE(l, r):
+    createNot(SMT_EQ(l,r))
     
 class SMT_NE():
     def __init__(self, l, r):
@@ -204,6 +227,13 @@ class SMT_NE():
 
     def __str__(self):
         return "!="
+
+def createSum(l):
+    if len(l) == 1:
+        return l[0]
+    else:
+        return SMT_Sum(l)
+    
         
 class SMT_Sum():
     def __init__(self, l):

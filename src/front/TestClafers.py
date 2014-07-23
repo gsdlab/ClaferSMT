@@ -7,7 +7,6 @@ from common import Options, Common
 from common.Clock import Clock
 from common.Options import INFINITE
 from front.ClaferModel import ClaferModel
-import sys
 import traceback
 
 SEPARATOR = "========================================================" 
@@ -17,7 +16,7 @@ def print_separate(x):
 def getTestSet():   
     from test import i188sumquantifier, multiple_joins, bracketedconstraint_this, \
         this_dot_parent, arithmetic, relations, boolean_connectives, union, \
-        simple_abstract, some, simple_set, integer_refs, higher_inheritance, \
+        simple_abstract, some, integer_refs, higher_inheritance, \
         this_integer_relation, equal_references, all_alls, all_threes, zoo, \
         books_tutorial, check_unique_ref_names_with_inheritance, constraints, \
         enforcingInverseReferences, i101, i10, i121comments, i122CVL, i126empty, \
@@ -26,17 +25,16 @@ def getTestSet():
         i49_parentReduce, i49_resolve_ancestor, i50_stop_following_references, i55, \
         i57navParent, i61cardinalities, i70, i71, i72sharedreference, \
         i78_transitiveclosure, i83individualscope, i98_toplevelreferences, layout, \
-        negative, paths, personRelatives, person_tutorial, resolution, simp, \
-        subtypingprimitivetypes, telematics, test_neg_typesystem, simple_books, \
-        one_plus_one_equals_one, scope_test, trivial, trivial2, mypaths, \
-        AADL_simplified_with_lists, teststring, testunion, simple_real, Phone, \
-        int_ref_set, phpscript, iso, maximize, two_objective_min, two_objective_max, \
-        Cruise, small, cc_examplemod, minmax, cc_example, optimization_ssap
+        negative, paths, personRelatives, person_tutorial, resolution,  \
+        subtypingprimitivetypes, telematics, test_neg_typesystem,  minmax, cc_example, \
+        optimization_ssap, simple_real
     
     
     my_tests = [ 
           (multiple_joins, 1),
           (bracketedconstraint_this, 6),
+          #]
+    
           (this_dot_parent, 2),
           (arithmetic, 2),
           (relations, 1),
@@ -49,11 +47,10 @@ def getTestSet():
           (this_integer_relation, 1),
           (equal_references, 2),
           (all_alls, 1),
-          (all_threes, 1),
-          (simple_real, 1),
+          (all_threes, 0),
           (zoo, INFINITE)
          ]
-
+    
     positive_tests = [
         (books_tutorial,INFINITE),
         (constraints,INFINITE),
@@ -71,7 +68,7 @@ def getTestSet():
         (i188sumquantifier,INFINITE),
         (i19,INFINITE),
         (i205refdisambiguationII,INFINITE),
-        (i23,INFINITE),
+        (i23,4),
         (i49_parentReduce, 1),
         (i49_resolve_ancestor,INFINITE),
         (i50_stop_following_references, 1),
@@ -100,12 +97,13 @@ def getTestSet():
                     (optimization_ssap, 1)
                     ]
 
-    string_tests = [
+    string_reals_tests = [
                 (check_unique_ref_names_with_inheritance, 1),
                 (i18, 2),
                 (i40_integers_strings_assignment, 6),
                 (i40textequality, 1),
-                (subtypingprimitivetypes, 1)
+                (subtypingprimitivetypes, 1),
+                (simple_real, 1),
                 ]
     
     if Options.TEST_SET == Common.MY_TESTS:
@@ -114,6 +112,8 @@ def getTestSet():
         return positive_tests
     elif Options.TEST_SET == Common.OPTIMIZATION_TESTS:
         return optimization_tests
+    elif Options.TEST_SET == Common.STRING_REALS_TESTS:
+        return string_reals_tests
     elif Options.TEST_SET == Common.ALL_TESTS:
         return my_tests + positive_tests + optimization_tests
         
@@ -135,6 +135,7 @@ def run():
             if expected_model_count == Options.INFINITE and Options.NUM_INSTANCES < 0:
                 #will change it back after the test runs
                 Options.NUM_INSTANCES = 5
+            
             module = file.getModule()
             print_separate("Attempting: " + str(file.__name__))
             clock.tick("Total Z3 Run Time")

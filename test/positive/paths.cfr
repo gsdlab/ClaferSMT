@@ -24,3 +24,4 @@ Bob : Person
 
 Carol : Person
 	[ age = 1 ]
+	//[ parents ]

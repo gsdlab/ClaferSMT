@@ -6,8 +6,8 @@ abstract date : string
 enum NorthAmericanCountry = Canada | USA
 
 abstract Person
-    Name : string
-    Surname : string
+    Name //: string
+    Surname //: string
     DateOfBirth : date
     or Gender
         Male
@@ -17,31 +17,31 @@ abstract Person
         Married
         Divorced
       Address
-        Street : string
-              UnitNo : string ?
-        City : string
+        Street// : string
+              UnitNo ? //: string ?
+        City //: string
         Country -> NorthAmericanCountry
         PostalCode : string
 
 JohnDoe : Person
-    [ Name = "John"
-      Surname = "Doe"
-      DateOfBirth = "01/02/1985"
+    [ Name //= "John"
+      Surname //= "Doe"
+      DateOfBirth //= "01/02/1985"
       Male
       Married
-      Street = "123 Main St."
-      City = "Great Town"
+      Street //= "123 Main St."
+      City //= "Great Town"
       Country = Canada
-      PostalCode = "A1B 2C3" ]
+      PostalCode ]//= "A1B 2C3" ]
 
 abstract Student  : Person
-    StudentId : string
+    StudentId //: string
 
 abstract WaitingLine 
     participants -> Person * 
 
 MaryJane : Student
-   [ StudentId = "MJ13421354" ]
+   [ StudentId ]//= "MJ13421354" ]
 
 BusLine : WaitingLine
     [ JohnDoe in participants

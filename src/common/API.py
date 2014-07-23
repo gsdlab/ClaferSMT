@@ -11,7 +11,6 @@ zero_pos = ((IntegerLiteral.IntegerLiteral(0),IntegerLiteral.IntegerLiteral(0)),
             (IntegerLiteral.IntegerLiteral(0),IntegerLiteral.IntegerLiteral(0)))
 
 def createArg(arg_id, clafersort = None):
-        #Exp.Exp()), ( iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id="c14_F_sort_0", isTop=True)]
         return Exp.Exp(expType="Argument", exptype="Set", parentId="", pos=zero_pos, \
                        iExpType="IClaferId", iExp=[ClaferId.ClaferId(moduleName="", my_id=arg_id, isTop=False, claferSort=clafersort)]) 
     
@@ -21,8 +20,8 @@ def createLocalDecl(arg):
 def createInteger(arg):
     return IntegerLiteral.IntegerLiteral(int(arg))
 
-def createDeclaration(locals, sort):
-    return Declaration.Declaration(isDisjunct=False, localDeclarations=locals,  body=
+def createDeclaration(local, sort):
+    return Declaration.Declaration(isDisjunct=False, localDeclarations=local,  body=
     Exp.Exp(expType="Body", exptype="Set", parentId="", pos=zero_pos, iExpType="IClaferId", \
             iExp=[ClaferId.ClaferId(moduleName="", my_id=sort, isTop=True)]))
 
@@ -58,10 +57,3 @@ def createNot(self, arg):
 
 def createSome(self, decl):
     return DeclPExp.DeclPExp(quantifier="Some", declaration=decl, bodyParentExp=None)
-    '''
-    if not topSome:
-        topSome = some
-    if currSome:
-        currSome.bodyParentExp = some
-    currSome = some
-    '''

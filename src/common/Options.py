@@ -5,7 +5,6 @@ Created on Oct 6, 2013
 '''
 
 from common import Common
-from optparse import OptionParser
 import argparse
 import sys
 
@@ -25,11 +24,7 @@ import sys
 * Fix bag problem for everything, (look at ints for correct)
 '''
 
-'''
-POSITIVE TEST SUITE RUN WITH A GLOBAL_SCOPE OF 6.
-'''
-
-GLOBAL_SCOPE = 1#this obviously has to change
+GLOBAL_SCOPE = 1
 
 MODE = Common.NORMAL # Common.[EXPERIMENT | MODELSTATS | NORMAL | DEBUG | TEST | ONE | ALL], where ONE outputs one model from each test
 SOLVER = "z3"
@@ -38,14 +33,13 @@ PRINT_CONSTRAINTS = True
 STRING_CONSTRAINTS = False
 GOAL = False
 NUM_INSTANCES = 10 # -1 to produce all instances
-INFINITE = -1 #best variable name.
+INFINITE = -1 
 PROFILING = True # True to output the translation time, and time to get first model
 CPROFILING = False #invokes the standard python profiling method (see Z3Run.py)
 BREAK_QUANTIFIER_SYMMETRY = False
 EXTEND_ABSTRACT_SCOPES = True
 FILE = ""
 TEST_SET = Common.MY_TESTS 
-DIMACS_FILE="dimacs"
 UNIQUE_NAMES = False
 SHOW_INHERITANCE = False
 DELIMETER=""
@@ -54,6 +48,12 @@ MAGNIFYING_GLASS = False
 OUTPUT_MODE=""
 PRODUCE_UNSAT_CORE = False
 USE_BITVECTORS = False
+IGNORE_GOALS = False
+SUPPRESS_MODELS = False
+
+SCOPE_FILE = ""
+SCOPE_MAP_FILE = ""
+
 
 ''' parallel options '''
 CORES=1
@@ -85,12 +85,10 @@ modeMap = {
 testMap = {
            'edstests'     : Common.MY_TESTS,
            'positive'     : Common.POSITIVE_TESTS,
-           'string'       : Common.STRING_TESTS,
+           'string'       : Common.STRING_REALS_TESTS,
            'optimization' : Common.OPTIMIZATION_TESTS,
            'all'          : Common.ALL_TESTS
            }
-
-
 
 def debug_print(string):
     '''
@@ -104,7 +102,6 @@ def standard_print(string):
     Prints the string if **not** in TEST mode.
     '''
     if(MODE != Common.TEST and MODE != Common.EXPERIMENT):
-        #print("ASDF")
         print(string)
         
 def experiment_print(string=""):
@@ -123,7 +120,6 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--numinstances', '-n', dest='numinstances', type=int, default='1', help='the number of models to be displayed (-1 for all)')
     parser.add_argument('--globalscope', '-g', dest='globalscope', type=int, default='1', help='the global scope for unbounded clafers (note that this does not match regular clafer)')
     parser.add_argument('--testset', '-t', dest='test_set', default='edstests', help='The test set to be used for modes [experiment | test | one | all], or the number of tests to generate')#,
-                        #choices=['edstests', 'positive', 'string'])
     parser.add_argument('--stringconstraints' , '-s', default=False, dest='stringconstraints',action='store_const',  const=True,  help='Flag to output to Z3-Str format instead')
     parser.add_argument('--solver', dest='solver', default='z3', choices=['z3', 'cvc4', 'smt2'], help='Backend solver')
     parser.add_argument('--printuniquenames', '-u', default=False, dest='unique_names',action='store_const',  const=True,  help='Print clafers with unique prefixes')
@@ -134,6 +130,10 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--magnifyingglass', default=False, dest='magnifying_glass',action='store_const',  const=True,  help='Print equally optimal solutions if optimizing')
     parser.add_argument('--produceunsatcore', dest='produceunsatcore', default=False, const = True, action='store_const', help='produce unsat core for UNSAT specifications')
     parser.add_argument('--usebitvectors', dest='usebitvectors', default=False, const = True, action='store_const', help='Use bitvectors to represent clafer instances')
+    parser.add_argument('--ignoregoals', dest='ignoregoals', default=False, const = True, action='store_const', help='Ignore optimization objectives (for testing purposes)')
+    parser.add_argument('--suppressmodels', dest='suppressmodels', default=False, const = True, action='store_const', help='Do not output satisfying solutions (for test mode)')
+    parser.add_argument('--scopefile', default="", dest='scopefile', help='Scope file produced by `clafer --meta-data`. Requires the map file as well.')
+    parser.add_argument('--scopemapfile', default="", dest='scopemapfile', help='Scope map file produced by `clafer --meta-data`. Requires the scope file as well.')
     
     ''' parallel '''
     parser.add_argument('--cores', '-c', dest='cores', type=int, default='1', help='the number of cores for parallel processing')
@@ -222,7 +222,14 @@ def setCommandLineOptions(learner = False):
     SOLVER = args.solver.strip()
     global PRODUCE_UNSAT_CORE
     PRODUCE_UNSAT_CORE = args.produceunsatcore    
-    
+    global IGNORE_GOALS
+    IGNORE_GOALS = args.ignoregoals
+    global SCOPE_FILE
+    SCOPE_FILE = args.scopefile
+    global SCOPE_MAP_FILE
+    SCOPE_MAP_FILE = args.scopemapfile
+    global SUPPRESS_MODELS
+    SUPPRESS_MODELS = args.suppressmodels
     return args    
     
         

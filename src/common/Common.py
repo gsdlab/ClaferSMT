@@ -6,8 +6,9 @@ Created on Apr 28, 2013
 
 from common import SMTLib
 import imp
-import sys
+import json
 import subprocess
+import sys
 
 NORMAL = 0
 DEBUG = 1
@@ -20,10 +21,25 @@ EXPERIMENT = 7
 ECLIPSE = 8
 PRELOAD = 9
 
+#canBeOff conditionals
+DEFINITELY_OFF = -1
+UNKNOWN = 0
+DEFINITELY_ON = 1
+
+
+def aggregate_polarity(p1, p2):
+    #unknown or unknown => unknown
+    #unknown or off => unknown
+    #unknown or on => on
+    #...
+    #on or off => on
+    return max(p1, p2)
+
+
 #tests
 MY_TESTS = 1 # my tests from debugging
 POSITIVE_TESTS = 2 # tests from test/positive in the Clafer repository
-STRING_TESTS = 3 #tests that involve strings / string constraints
+STRING_REALS_TESTS = 3 #tests that involve strings / string constraints
 OPTIMIZATION_TESTS = 4
 ALL_TESTS = 5
 
@@ -45,8 +61,54 @@ BOUND = 600
 METRICS_MAXIMIZE = 1
 METRICS_MINIMIZE = 2
 
+def evalForNum(model, expr):
+    val = model.eval(expr)
+    if not val:
+        return val
+    else:
+        strval = str(val)
+    try:
+        val = int(strval)
+    except:
+        val = float(strval)
+    return val
 
+def computeCacheKeys(flattenedJoin):
+    #print("FLATTENED:")
+    first = flattenedJoin.pop(0)
+    key = list(first.clafers.keys())
+    key = sorted(key)
+    #print(key)
+    firstkeys = [key]
+    sort = key[0][0]
+    while sort.superSort:
+        index = sort.indexInSuper
+        newkey = []
+        for (s,i) in key:
+            newkey.append((s.superSort, i + index))
+        firstkeys.append(newkey)
+        sort = sort.superSort
+    #print(firstkeys)
+    #sys.exit()
+    for j in flattenedJoin:
+        try:
+            currKey = j.value
+        except:
+            currKey = str(list(j.clafers.keys())[0][0])
+        firstkeys = [key + [currKey] for key in firstkeys]
+    #print(firstkeys)
+    return [tuple(key) for key in firstkeys]
 
+def isBoolConst(b):
+    return isinstance(b, SMTLib.SMT_BoolConst) or isinstance(b, bool)
+
+def readJSONFile(file_name):
+    '''
+    Takes a file name (str) and returns a json dump 
+    '''
+    file = open(file_name)
+    j = json.load(file)
+    return j
 
 def mAnd(*args):
     '''
@@ -54,12 +116,22 @@ def mAnd(*args):
     Helper Function to simplify formulas passed to Z3, but mostly to make debugging output more comprehensible.
     Only applies the And function if there are actually multiple arguments.
     '''
+    args = list(args)
     newArgs = []
-    for i in args:
+    while(args):
+        i = args.pop()
+        if isinstance(i, SMTLib.SMT_And):
+            for j in i.children():
+                args.append(j)
+            continue
         if i:
+            if str(i) == "True":
+                continue
+            if str(i) == "False":
+                return SMTLib.SMT_BoolConst(False)
             newArgs.append(i)
     if len(newArgs) == 0:
-        return True
+        return SMTLib.SMT_BoolConst(True)
     elif len(newArgs) == 1:
         return newArgs[0]
     else:
@@ -69,31 +141,48 @@ def mOr(*args):
     '''
     Similar to mAnd
     '''
+    args = list(args)
     newArgs = []
-    for i in args:
+    while(args):
+        i = args.pop()
+        if isinstance(i, SMTLib.SMT_Or):
+            #print(i)
+            for j in i.children():
+                #print(j)
+                args.append(j)
+            continue
         if i:
+            if isinstance(i, SMTLib.SMT_BoolConst):
+                if str(i) == "False":
+                    continue
+                else:
+                    return SMTLib.SMT_BoolConst(True)
             newArgs.append(i)
     if len(newArgs) == 0:
-        return False
+        return SMTLib.SMT_BoolConst(False)
     elif len(newArgs) == 1:
         return newArgs[0]
     else:
         return SMTLib.SMT_Or(*newArgs)
 
 def preventSameModel(cfr, solver, model):
-    #from constraints import Operations
-    #print(model.eval(Operations.EXPR))
-    #print(model.eval(Operations.EXPR2))
     block = []
     for i in cfr.cfr_sorts.values():
         for j in i.instances:
-            block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(model[j.var])))
+            block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(int(str(model[j.var])))))
         if i.refs:
             for j in i.refs:
-                block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(model[j.var])))
+                try:
+                    val = model[j.var]
+                except:
+                    #happens if a primitive ref is totally unrestricted
+                    continue 
+                if not val:
+                    continue
+                else:
+                    block.append(SMTLib.SMT_NE(j, SMTLib.SMT_IntConst(val)))
 
     if block == []:
-        #input was an empty clafer model (no concretes)
         solver.add(SMTLib.SMT_BoolConst(False))
     else:
         solver.add(SMTLib.SMT_Or(*block))

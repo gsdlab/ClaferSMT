@@ -4,12 +4,7 @@ Created on Nov 1, 2013
 @author: ezulkosk
 '''
 
-from common import Common
-from common.Common import mAnd
-from constraints import BracketedConstraint
-from structures.ExprArg import ExprArg, Mask, BoolArg, IntArg
 from visitors import VisitorTemplate
-import itertools
 import visitors.Visitor
 
 
@@ -62,8 +57,6 @@ class CheckFunctionSymmetry(VisitorTemplate.VisitorTemplate):
     
     Determines if all functions in the given subtree are symmetric functions. If so, we can optimize.
     '''
-    
-    
     def __init__(self, cfr, inConstraint=False):
         '''
         :param cfr: The Clafer model.
@@ -74,15 +67,10 @@ class CheckFunctionSymmetry(VisitorTemplate.VisitorTemplate):
         self.visitedLocalDecl = False
         self.cfr = cfr
 
-
     def localdeclarationVisit(self, element):
         pass
-
 
     #look at all locals returned from left and right and compare
     def funexpVisit(self, element):
         for i in element.elements:
             visitors.Visitor.visit(self, i)
-        
-        
-           

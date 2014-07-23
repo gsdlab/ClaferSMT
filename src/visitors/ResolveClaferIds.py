@@ -3,7 +3,6 @@ Created on May 31, 2013
 
 @author: ezulkosk
 '''
-from constraints import BracketedConstraint
 from visitors import VisitorTemplate
 import visitors.Visitor
 
@@ -32,7 +31,6 @@ class ResolveClaferIds(VisitorTemplate.VisitorTemplate):
     
     def claferVisit(self, element):
         self.claferStack.append(self.cfr.cfr_sorts[element.uid])
-        #visitors.Visitor.visit(self,element.supers)
         for i in element.elements:
             visitors.Visitor.visit(self, i)
         self.claferStack.pop()
@@ -44,7 +42,6 @@ class ResolveClaferIds(VisitorTemplate.VisitorTemplate):
             element.claferSort = self.claferStack[-1]
         else:
             if(not element.id in self.cfr.cfr_sorts):
-                #local variable decl
                 return
             element.claferSort = self.cfr.cfr_sorts[element.id]
     
