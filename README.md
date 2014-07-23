@@ -21,13 +21,6 @@ Getting the Clafer SMT Backend
 Regardless of the installation method, the following are required:
 
 * [Python 3](https://www.python.org/download/releases/3.4.1/) v3.4.1
-  * On Windows, `pip` is included in Python3 installation by default
-  * On Linux, to install `pip3` execute `sudo apt-get install python3-pip`
-  * On Mac, `pip3` is included in Python3 installation by default
-* [bintrees](https://bitbucket.org/mozman/bintrees)
-  * On Windows: `pip install bintrees` (make sure it is installed for Python 3).
-  * On Linux/Mac: `sudo pip3 install bintrees`
-  * (optional): Remove the warning messages from bintrees' imports.
 * [Clafer Compiler](https://github.com/gsdlab/clafer) v0.3.6.1
   * Required for compiling Clafer files (`.cfr`) into the Clafer Python IR format (`.py`), so that they can be run using the tool.
 * [Z3 SMT Solver](http://z3.codeplex.com/) v4.2.3
