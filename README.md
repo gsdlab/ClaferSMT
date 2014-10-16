@@ -54,6 +54,11 @@ Dependencies
   * `make` - this will produce `ClaferSMT.egg`, which contains Z3.
   * `make install to=<target directory>`
 
+Integration with Sublime Text 2/3
+-------------------------------
+
+See [ClaferToolsST](https://github.com/gsdlab/ClaferToolsST)
+
 Usage
 =====
 
