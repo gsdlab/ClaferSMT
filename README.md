@@ -1,7 +1,7 @@
 ClaferSMT
 =========
 
-v0.3.6.2
+v0.3.7
 
 Instance generator and multi-objective optimizer based on SMT solvers (currently Microsoft Z3) for Clafer.
 
@@ -20,15 +20,15 @@ Getting the Clafer SMT Backend
 
 Regardless of the installation method, the following are required:
 
-* [Python 3](https://www.python.org/download/releases/3.4.1/) v3.4.1
-* [Clafer Compiler](https://github.com/gsdlab/clafer) v0.3.6.1
+* [Python 3](https://www.python.org/download/releases/3.4.2/) v3.4.2
+* [Clafer Compiler](https://github.com/gsdlab/clafer) v0.3.7
   * Required for compiling Clafer files (`.cfr`) into the Clafer Python IR format (`.py`), so that they can be run using the tool.
-* [Z3 SMT Solver](http://z3.codeplex.com/) v4.2.3
+* [Z3 SMT Solver](http://z3.codeplex.com/) v4.3.2.9d221c037a95
   * included in the binary distribution
 
 ### Installation from binaries
 
-Binary distributions of the release 0.3.6.1 of Clafer Tools for Windows, Mac, and Linux, 
+Binary distributions of the release 0.3.7 of Clafer Tools for Windows, Mac, and Linux, 
 can be downloaded from [Clafer Tools - Binary Distributions](http://http://gsd.uwaterloo.ca/clafer-tools-binary-distributions). 
 
 1. download the binaries and unpack `<target directory>` of your choice
@@ -38,8 +38,12 @@ can be downloaded from [Clafer Tools - Binary Distributions](http://http://gsd.u
 
 Dependencies
 
-* [Z3 SMT Solver](http://z3.codeplex.com/) v4.2.3
-  * install to `<z3 install directory>` of your choice
+* Z3 SMT Solver v4.3.2.9d221c037a95
+  * [Z3 for Windows](http://z3.codeplex.com/downloads/get/874940) x86
+  * [Z3 for Ubuntu](http://z3.codeplex.com/downloads/get/875919) x64
+  * [Z3 for OS X](http://z3.codeplex.com/downloads/get/875918) x64
+  * this particular version has been tested. The latest one from Oct 15, 2014 does not work.
+  * unzip to `<z3 install directory>` of your choice
 
 1. install the dependencies
 2. open the command line terminal. On Windows, open MinGW/MSYS.
@@ -64,6 +68,8 @@ From binary distribution:
   * should be executed in the same folder as the `libz3.dll` so that it can be found
 * On Mac: `python3 ClaferSMT.egg <model[.cfr|.py]> <options>` or the same as on Linux
   * should be executed in the same folder as the `libz3.dylib` so that it can be found
+
+NOTE: when giving a `.cfr` model as argument, the Clafer compiler executable must be in the PATH because it's called to produce the `.py` file.
 
 Help printed by `--help`
 
