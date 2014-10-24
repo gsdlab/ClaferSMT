@@ -38,11 +38,11 @@ can be downloaded from [Clafer Tools - Binary Distributions](http://http://gsd.u
 
 Dependencies
 
-* Z3 SMT Solver v4.3.2.9d221c037a95
-  * [Z3 for Windows](http://z3.codeplex.com/downloads/get/874940) x86
-  * [Z3 for Ubuntu](http://z3.codeplex.com/downloads/get/875919) x64
-  * [Z3 for OS X](http://z3.codeplex.com/downloads/get/875918) x64
-  * this particular version has been tested. The latest one from Oct 15, 2014 does not work.
+* Z3 SMT Solver v4.3.2.4ea3ed7e273a
+  * [Z3 for Windows](https://z3.codeplex.com/downloads/get/918997) x86
+  * [Z3 for Ubuntu](https://z3.codeplex.com/downloads/get/918996) x64
+  * [Z3 for OS X](https://z3.codeplex.com/downloads/get/918993) x64
+  * this particular version has been tested. The latest one from Oct 24, 2014 does not work.
   * unzip to `<z3 install directory>` of your choice
 
 1. install the dependencies
