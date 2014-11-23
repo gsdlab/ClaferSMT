@@ -163,8 +163,6 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
                     self.tree.addRoot((sort,sort.instances[j]))
                     parentInstance = None 
                 if parent:
-                    #print(self.model.eval(sort.instances[j]))
-                    #print(sort.parent.instances[int(str(self.model.eval(sort.instances[j])))])
                     parentInstance = (sort.parent, sort.parent.instances[int(str(self.model.eval(sort.instances[j].var)))])
                     
                 else:

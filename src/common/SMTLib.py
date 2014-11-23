@@ -8,6 +8,17 @@ def toStr(root, indent=0):
     for i in root.children():
         toStr(i, indent + 1)
 
+def createIf(b,t,f):
+    if str(b) == "True":
+        return t
+    elif str(b) == "False":
+        return f
+    else:
+        return SMT_If(b,t,f)
+
+class BoolType():
+    pass
+
 class SMT_If():
     def __init__(self, b, t, f):
         self.bool_expr = b
@@ -23,7 +34,7 @@ class SMT_If():
     def __str__(self):
         return "If"
 
-class SMT_Implies():
+class SMT_Implies(BoolType):
     def __init__(self, l, r, unsat_core_implies=False):
         self.left = l
         self. right = r
@@ -39,7 +50,7 @@ class SMT_Implies():
     def __str__(self):
         return "Implies"
         
-class SMT_And():
+class SMT_And(BoolType):
     def __init__(self, *l):
         self.list = l
         for i in self.list:
@@ -56,7 +67,7 @@ class SMT_And():
     def __str__(self):
         return "And"
         
-class SMT_Or():
+class SMT_Or(BoolType):
     def __init__(self, *l):
         self.list = l
         for i in self.list:
@@ -73,7 +84,7 @@ class SMT_Or():
     def __str__(self):
         return "Or"
 
-class SMT_Xor():
+class SMT_Xor(BoolType):
     def __init__(self, l, r):
         self.left = l
         self.right = r
@@ -87,7 +98,15 @@ class SMT_Xor():
     def __str__(self):
         return "Xor"
 
-class SMT_Not():
+def createNot(e):
+    if str(e) == "True":
+        return SMT_BoolConst(False)
+    elif str(e) == "False":
+        return SMT_BoolConst(True)
+    else:
+        return SMT_Not(e)
+
+class SMT_Not(BoolType):
     def __init__(self, e):
         self.value = e
 
@@ -116,7 +135,7 @@ class SMT_Neg():
     def __str__(self):
         return "-"
 
-class SMT_LE():
+class SMT_LE(BoolType):
     def __init__(self, l, r):
         self.left = l
         self.right = r
@@ -131,7 +150,7 @@ class SMT_LE():
     def __str__(self):
         return "<="
     
-class SMT_GE():
+class SMT_GE(BoolType):
     def __init__(self, l, r):
         self.left = l
         self.right = r
@@ -145,7 +164,7 @@ class SMT_GE():
     def __str__(self):
         return ">="
         
-class SMT_LT():
+class SMT_LT(BoolType):
     def __init__(self, l, r):
         self.left = l
         self.right = r
@@ -159,7 +178,7 @@ class SMT_LT():
     def __str__(self):
         return "<"
     
-class SMT_GT():
+class SMT_GT(BoolType):
     def __init__(self, l, r):
         self.left = l
         self.right = r
@@ -173,7 +192,7 @@ class SMT_GT():
     def __str__(self):
         return ">"
     
-class SMT_EQ():
+class SMT_EQ(BoolType):
     def __init__(self, l, r):
         self.left = l
         self. right = r
@@ -191,7 +210,7 @@ class SMT_EQ():
     def __str__(self):
         return "=="
     
-class SMT_NE():
+class SMT_NE(BoolType):
     def __init__(self, l, r):
         self.left = l
         self.right = r
@@ -251,7 +270,7 @@ class SMT_IntConst():
     def __str__(self):
         return str(self.value)
     
-class SMT_BoolConst():
+class SMT_BoolConst(BoolType):
     def __init__(self, val):
         self.value = val
 
@@ -293,7 +312,7 @@ class SMT_RealConst():
     def __str__(self):
         return str(self.value)
         
-class SMT_Bool():
+class SMT_Bool(BoolType):
     def __init__(self, v):
         self.id = v
         self.var = None

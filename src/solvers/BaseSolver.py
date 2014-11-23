@@ -8,11 +8,13 @@ import sys
 
 
 def getSolver():
-    from solvers import Z3Solver, SMTLibSolver
+    from solvers import Z3Solver, SMTLib2Solver, SMTLib1Solver
     if Options.SOLVER == "z3":
         return Z3Solver.Z3Solver()
     elif Options.SOLVER == "smt2":
-        return SMTLibSolver.SMTLibSolver()
+        return SMTLib2Solver.SMTLib2Solver()
+    elif Options.SOLVER == "smt1":
+        return SMTLib1Solver.SMTLib1Solver()
 
 
 class BaseSolver():

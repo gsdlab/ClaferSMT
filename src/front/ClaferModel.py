@@ -224,7 +224,7 @@ class ClaferModel(object):
         self.assertConstraints()     
         self.clock.tock("Asserting Constraints")
         
-        if Options.SOLVER == "smt2":
+        if Options.SOLVER == "smt2" or Options.SOLVER == "smt1":
             self.solver.printConstraints()
             sys.exit()
         

@@ -3,7 +3,7 @@ Created on Oct 21, 2013
 
 @author: ezulkosk
 '''
-from bintrees.avltree import AVLTree
+
 from common import Assertions, SMTLib
 from structures.ClaferSort import BoolSort, IntSort, PrimitiveType, RealSort, \
     StringSort

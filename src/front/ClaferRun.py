@@ -19,6 +19,7 @@ def run(args):
     
     Starting point for ClaferSMT.
     '''
+    
     if Options.MODE == Common.TEST:
         TestClafers.run()
     elif Options.MODE == Common.ONE:
