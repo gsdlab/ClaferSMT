@@ -19,7 +19,10 @@ class Declaration(object):
         return self.body
     
     def toString(self, level):
-        print("A")
+        s = ""
+        if self.isDisjunct:
+            s = "disj "
+        return s + " ".join([i.toString(level+1) for i in self.localDeclarations]) + " : " + self.body.toString(level+1)
         
     def __repr__(self):
         return self.__str__()

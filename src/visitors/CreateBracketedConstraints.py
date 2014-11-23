@@ -8,20 +8,12 @@ from common import Common, Options, SMTLib
 from common.Common import mAnd
 from common.Options import debug_print
 from constraints import BracketedConstraint
-from structures.ClaferSort import PrimitiveType
-from structures.ExprArg import ExprArg, Mask, BoolArg, IntArg, RealArg, \
-    StringArg
+from structures.ExprArg import ExprArg, BoolArg, IntArg, PrimitiveArg
 from visitors import VisitorTemplate
 from visitors.CheckFunctionSymmetry import CheckFunctionSymmetry
 import itertools
 import sys
 import visitors.Visitor
-
-
-claferStack = []  # used to determine where the constraint is in the clafer hierarchy
-inConstraint = False  # true if within a constraint
-currentConstraint = None  # holds the constraint currently being traversed
-
 
 class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     '''
@@ -40,6 +32,9 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         :param cfr: The Clafer model.
         :type cfr: :class:`~common.ClaferModel`
         '''
+        self.claferStack = []  # used to determine where the constraint is in the clafer hierarchy
+        self.inConstraint = False  # true if within a constraint
+        self.currentConstraint = None  # holds the constraint currently being traversed
         VisitorTemplate.VisitorTemplate.__init__(self)
         self.inConstraint = inConstraint
         self.currentConstraint = None
@@ -57,7 +52,6 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.inConstraint = True
         self.currentConstraint = BracketedConstraint.BracketedConstraint(self.cfr, [])
         self.funexpVisit(element)
-        #return self.currentConstraint.stack.pop()
         self.currentConstraint.endProcessing(addToZ3=False)
         return self.currentConstraint.constraints.pop()
         
@@ -81,37 +75,45 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         if not self.cfr.isUsed(str(element)):
             return 
         visitors.Visitor.visit(self, element.supers)
-        claferStack.append(self.cfr.getSort(element.uid))
+        self.claferStack.append(self.cfr.getSort(element.uid))
         for i in element.elements:
             visitors.Visitor.visit(self, i)
-        claferStack.pop()
+        self.claferStack.pop()
     
     def claferidVisit(self, element):
         if(self.inConstraint):
             if element.id == "this":
                 exprArgList = []
                 for i in range(element.claferSort.numInstances):
-                    exprArgList.append(ExprArg([(element.claferSort, Mask(element.claferSort, [i]))]))
+                    exprArg = ExprArg(instances={}, nonsupered=True)
+                    exprArg.addBasedOnPolarity(element.claferSort, i, element.claferSort.isOn(i))
+                    exprArgList.append(exprArg)
                 self.currentConstraint.addArg(exprArgList)
             elif element.id == "ref":
-                self.currentConstraint.addArg([ExprArg([PrimitiveType("ref")])])
+                self.currentConstraint.addArg([PrimitiveArg("ref")])
             elif element.id == "parent":
-                self.currentConstraint.addArg([ExprArg([PrimitiveType("parent")])])
+                self.currentConstraint.addArg([PrimitiveArg("parent")])
             elif element.claferSort:  
-                self.currentConstraint.addArg([ExprArg([(element.claferSort,
-                                                        Mask(element.claferSort, [i for i in range(element.claferSort.numInstances)],copy=False, potentiallyEmpty=True))])])
+                exprArg = ExprArg(instances={}, nonsupered=True)
+                for i in range(element.claferSort.numInstances):
+                    exprArg.addBasedOnPolarity(element.claferSort, i, element.claferSort.isOn(i))
+                self.currentConstraint.addArg([exprArg])
             else:
                 # localdecl case
                 expr = self.currentConstraint.locals[element.id]
-                # expr = [expr[i].clone() for i in range(len(expr))]
                 self.currentConstraint.addArg(expr)
-   
-    def constraintVisit(self, element):
+
+    def constraintVisit(self, element, previouslyBuilt = None):
         self.inConstraint = True
         debug_print(self.BRACKETEDCONSCOUNT)
         self.BRACKETEDCONSCOUNT = self.BRACKETEDCONSCOUNT + 1
-        self.currentConstraint = BracketedConstraint.BracketedConstraint(self.cfr, element, claferStack)
-        visitors.Visitor.visit(self, element.exp)
+        if previouslyBuilt:
+            print(previouslyBuilt.stringRep)
+            self.currentConstraint = previouslyBuilt
+            visitors.Visitor.visit(self, self.currentConstraint.element.exp)
+        else:
+            self.currentConstraint = BracketedConstraint.BracketedConstraint(self.cfr, element, self.claferStack)
+            visitors.Visitor.visit(self, element.exp)
         self.currentConstraint.endProcessing()
         self.currentConstraint = None
         self.inConstraint = False
@@ -122,12 +124,11 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         if(self.inConstraint):
             self.currentConstraint.addOperator(element.operation)   
            
-    # assume their is only one sort in the decl at this time, which is true of my old version of clafer
+    # assume there is only one sort in the decl at this time, ok for now
     def createAllLocalsCombinations(self, localDecls, exprArg, isDisjunct, isSymmetric):
-        (sort, mask) = exprArg.getInstanceSort(0)
-        my_range = list(mask.keys())
+        instances = exprArg.getInstances()
+        my_range = list(instances.keys())
         integer_combinations = itertools.permutations(my_range, len(localDecls))
-    
         
         localInstances = []
         ifConstraints = []
@@ -138,9 +139,17 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             set_of_ints = set(list_of_ints)
             if isDisjunct and (len(set_of_ints) != len(list_of_ints)):
                 continue
-            localInstances.append([ExprArg([(sort, Mask(sort, [list_of_ints[j]]))]
-                                           ) for j in range(len(list_of_ints))])
-            ifConstraints.append(mAnd(*[sort.isOn(mask.get(j)) for j in list_of_ints]))
+            
+            ifList = []
+            locallocalInstances = []
+            for (sort,index) in list_of_ints:
+                localExprArg = ExprArg(instances={}, nonsupered=True)
+                (e,p) = exprArg.getInstances()[(sort,index)]
+                localExprArg.add((sort,index),(e,p))
+                ifList.append(e)
+                locallocalInstances.append(localExprArg)
+            localInstances.append(locallocalInstances)
+            ifConstraints.append(mAnd(*ifList))
             
         return (localInstances, ifConstraints)
      
@@ -148,6 +157,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     # not fully implemented
     def declpexpVisit(self, element):
         if Options.BREAK_QUANTIFIER_SYMMETRY:
+            #TODO actually do this...
             sys.exit("BREAK_QUANTIFIER_SYMMETRY still unimplemented.")
             symmetryChecker = CheckFunctionSymmetry(self.cfr)
             visitors.Visitor.visit(symmetryChecker, element.bodyParentExp)
@@ -157,7 +167,6 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
             isSymmetric = False
         num_args = 0
         if element.declaration:
-             
             visitors.Visitor.visit(self, element.declaration.body.iExp[0])
             if not self.currentConstraint.stack:
                 return
@@ -170,9 +179,9 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
                                                                                  isSymmetric)
                 if len(combinations) == 0:
                     if element.quantifier == "Some":
-                        self.currentConstraint.stack.append([BoolArg([SMTLib.SMT_Bool(False)])])
+                        self.currentConstraint.stack.append([BoolArg(SMTLib.SMT_Bool(False))])
                     elif element.quantifier == "All":
-                        self.currentConstraint.stack.append([BoolArg([SMTLib.SMT_Bool(True)])])
+                        self.currentConstraint.stack.append([BoolArg(SMTLib.SMT_Bool(True))])
                     return
                 num_args = len(combinations[0])
                 num_combinations = len(combinations)
@@ -203,14 +212,17 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
     
     def integerliteralVisit(self, element):
         if(self.inConstraint):
-            self.currentConstraint.addArg([IntArg([SMTLib.SMT_IntConst(element.value)])])
+            self.currentConstraint.addArg([IntArg(SMTLib.SMT_IntConst(element.value))])
         
     def realliteralVisit(self, element):
+        sys.exit("TODO real literal")
         if(self.inConstraint):
-            self.currentConstraint.addArg([RealArg([SMTLib.SMT_RealConst(element.value)])])
+            pass
+            #self.currentConstraint.addArg([RealArg([SMTLib.SMT_RealConst(element.value)])])
         
     def stringliteralVisit(self, element):
+        sys.exit("TODO string literal visit")
         stringID = Common.STRCONS_SUB + str(Common.getStringUID())
         Common.string_map[stringID] = element.value
-        self.currentConstraint.addArg([StringArg([SMTLib.SMT_Int(stringID)])])  # element.value])])
+        #self.currentConstraint.addArg([StringArg([SMTLib.SMT_Int(stringID)])])  # element.value])])
     

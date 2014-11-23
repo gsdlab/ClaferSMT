@@ -28,7 +28,6 @@ def is_power2(num):
     return num != 0 and ((num & (num - 1)) == 0)
 
 def getZ3Feature(feature, expr):
-    #print("B")
     if(str(expr) == feature):
         return expr
     for child in expr.children():

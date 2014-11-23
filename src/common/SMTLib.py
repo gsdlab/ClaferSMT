@@ -1,6 +1,5 @@
 
 numCalls = 0
-
 def toStr(root, indent=0):
     global numCalls
     numCalls += 1
@@ -106,7 +105,9 @@ def createNot(e):
     else:
         return SMT_Not(e)
 
+
 class SMT_Not(BoolType):
+
     def __init__(self, e):
         self.value = e
 
@@ -120,6 +121,11 @@ class SMT_Not(BoolType):
         return "Not"
 
 
+def createNeg(e):
+    if isinstance(e, SMT_IntConst):
+        return SMT_IntConst(-e.value)
+    else:
+        return SMT_Neg(e)
 
 class SMT_Neg():
 
@@ -209,6 +215,9 @@ class SMT_EQ(BoolType):
 
     def __str__(self):
         return "=="
+
+def createNE(l, r):
+    createNot(SMT_EQ(l,r))
     
 class SMT_NE(BoolType):
     def __init__(self, l, r):
@@ -223,6 +232,13 @@ class SMT_NE(BoolType):
 
     def __str__(self):
         return "!="
+
+def createSum(l):
+    if len(l) == 1:
+        return l[0]
+    else:
+        return SMT_Sum(l)
+    
         
 class SMT_Sum():
     def __init__(self, l):

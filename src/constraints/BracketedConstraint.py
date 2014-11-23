@@ -6,8 +6,7 @@ Created on Apr 29, 2013
 from common import Assertions, Common, SMTLib
 from constraints import Constraints
 from constraints.Constraints import GenericConstraints
-from constraints.operations import Join, Numeric, String, Quantifier, Boolean, \
-    Set
+from constraints.operations import Join, Numeric, String, Quantifier, Boolean, Set
 from structures.ExprArg import BoolArg
 import sys
 
@@ -52,7 +51,7 @@ ClaferToZ3OperationsMap = {
                            ":>"          : (2, Set.op_range_restriction),
                            "."           : (2, Join.op_join),
                            #Ternary Ops
-                           "ifthenelse"  : (3, Boolean.op_ifthenelse),
+                           "=>else"  : (3, Boolean.op_ifthenelse),
                            #String Ops
                            "concat"      : (2, String.op_concat),
                            "length"      : (1, String.op_length),
@@ -107,6 +106,10 @@ class BracketedConstraint(Constraints.GenericConstraints):
         GenericConstraints.__init__(self, ident)
         self.element = element
         self.cfr = cfr
+        self.stringRep = "" #created by CreateSimpleBracketedConstraints (* MAY NOT LOOK LIKE ACTUAL CONSTRANTS! *)
+        self.cacheJoins = False
+        self.cache =  {} # The actual join cache (see op_eq)
+        
         self.claferStack = [i for i in claferStack]
         self.stack = []
         self.locals = {}
@@ -118,7 +121,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
     def addArg(self, arg):
         self.stack.append(arg)
        
-    #clean     
+    #TODO clean     
     def addQuantifier(self, quantifier, num_args, num_combinations, ifconstraints):
         localStack = []
         ifConstraints = []
@@ -132,8 +135,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
         ifConstraints.reverse()
         quantFunction = getQuantifier(quantifier)
         cond = quantFunction(localStack, ifConstraints)
-        Assertions.nonEmpty(cond)
-        self.stack.append([BoolArg([cond])])
+        self.stack.append([BoolArg(cond)])
         
         
     def extend(self, args):
@@ -145,7 +147,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
             if len(i) != maxInstances:
                 if len(i) != 1:
                     sys.exit("Bug in BracketedConstraint." + str(i))
-                extendedArgs.append([i[0].clone() for _ in range(maxInstances)])
+                extendedArgs.append([i[0] for _ in range(maxInstances)])
             else:
                 extendedArgs.append(i)
         return (maxInstances, extendedArgs)
@@ -162,7 +164,15 @@ class BracketedConstraint(Constraints.GenericConstraints):
             for j in extendedArgs:
                 tempExprs.append(j[i])
             finalExprs.append(tempExprs)
-        finalExprs = [operator(*finalExprs[i]) for i in range(len(finalExprs))]
+        if operation == "=" and self.cacheJoins:
+            finalExprs = [operator(*finalExprs[i], cacheJoins=True, bc=self) for i in range(len(finalExprs))]
+            for i in self.cache.keys():
+                self.cfr.join_cache[i] = self.cache[i]
+            self.cache = {}
+        elif operation == ".": #and self.cacheJoins:
+            finalExprs = [operator(*finalExprs[i], cfr=self.cfr) for i in range(len(finalExprs))]
+        else:
+            finalExprs = [operator(*finalExprs[i]) for i in range(len(finalExprs))]
         Assertions.nonEmpty(finalExprs)
         self.stack.append(finalExprs)
     
@@ -175,15 +185,13 @@ class BracketedConstraint(Constraints.GenericConstraints):
             thisClafer = self.claferStack[-1]
             for i in range(thisClafer.numInstances):
                 if thisClafer.numInstances == len(expr):
-                    self.addConstraint(SMTLib.SMT_Implies(thisClafer.isOn(thisClafer.instances[i]), expr[i].finish()))
+                    self.addConstraint(SMTLib.SMT_Implies(thisClafer.isOn(thisClafer.instances[i]), expr[i].getBool()))
                 #hack for now
                 else:
-                    self.addConstraint(SMTLib.SMT_Implies(thisClafer.isOn(thisClafer.instances[i]), expr[0].finish()))
+                    self.addConstraint(SMTLib.SMT_Implies(thisClafer.isOn(thisClafer.instances[i]), expr[0].getBool()))
         else:
             for i in expr:
-                for j in i.getInstanceSorts():
-                    (_, mask) = j
-                    self.addConstraint(mask.pop_value())
+                self.addConstraint(i.getBool())
         if addToZ3:
             self.cfr.smt_bracketed_constraints.append(self)
         

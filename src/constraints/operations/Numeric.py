@@ -6,18 +6,8 @@ Created on Jul 14, 2014
 from common import SMTLib
 from structures.ExprArg import ExprArg, IntArg, BoolArg
 
-def checkForAriths(instances):
-    for i in instances:
-        if not isinstance(i, SMTLib.SMT_IntConst):
-            return True
-    return False
-
 def getArithValue(vals):
-    if checkForAriths(vals):
-        val = SMTLib.SMT_Sum(vals)
-    else:
-        val = SMTLib.SMT_Sum(vals)
-    return val
+    return SMTLib.createSum(vals)
 
 def op_add(left,right):
     '''
@@ -31,12 +21,13 @@ def op_add(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    (_, left_mask) = left.getInstanceSort(0)
-    (_, right_mask) = right.getInstanceSort(0)
-    
-    lval = getArithValue(list(left_mask.values()))
-    rval = getArithValue(list(right_mask.values()))
-    return IntArg([SMTLib.SMT_Plus(lval, rval)])
+    lval = left.getInts()
+    lval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in lval]
+    lval = SMTLib.createSum(lval)
+    rval = right.getInts()
+    rval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in rval]
+    rval = SMTLib.createSum(rval)
+    return IntArg(SMTLib.SMT_Plus(lval, rval))  
 
 def op_sub(left,right):
     '''
@@ -50,11 +41,13 @@ def op_sub(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    (_, left_mask) = left.getInstanceSort(0)
-    (_, right_mask) = right.getInstanceSort(0)
-    lval = getArithValue(list(left_mask.values()))
-    rval = getArithValue(list(right_mask.values()))
-    return IntArg([SMTLib.SMT_Minus(lval,rval)])
+    lval = left.getInts()
+    lval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in lval]
+    lval = SMTLib.createSum(lval)
+    rval = right.getInts()
+    rval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in rval]
+    rval = SMTLib.createSum(rval)
+    return IntArg(SMTLib.SMT_Minus(lval, rval))  
 
 def op_mul(left,right):
     '''
@@ -68,11 +61,13 @@ def op_mul(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    (_, left_mask) = left.getInstanceSort(0)
-    (_, right_mask) = right.getInstanceSort(0)
-    lval = getArithValue(list(left_mask.values()))
-    rval = getArithValue(list(right_mask.values()))
-    return IntArg([SMTLib.SMT_Times(lval, rval)])
+    lval = left.getInts()
+    lval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in lval]
+    lval = SMTLib.createSum(lval)
+    rval = right.getInts()
+    rval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in rval]
+    rval = SMTLib.createSum(rval)
+    return IntArg(SMTLib.SMT_Times(lval, rval))  
 
 #integer division
 def op_div(left,right):
@@ -82,18 +77,19 @@ def op_div(left,right):
     :param right:
     :type right: :class:`~ExprArg`
     :returns: :class:`~IntArg` 
-    
     Returns left / right.
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    (_, left_mask) = left.getInstanceSort(0)
-    (_, right_mask) = right.getInstanceSort(0)
-    lval = getArithValue(list(left_mask.values()))
-    rval = getArithValue(list(right_mask.values()))
-    return IntArg([SMTLib.SMT_Divide(lval, rval)]
+    lval = left.getInts()
+    lval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in lval]
+    lval = SMTLib.createSum(lval)
+    rval = right.getInts()
+    rval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in rval]
+    rval = SMTLib.createSum(rval)
+    return IntArg(SMTLib.SMT_Divide(lval, rval)
                    if((not isinstance(lval, SMTLib.SMT_IntConst)) or (not isinstance(rval, SMTLib.SMT_IntConst)))
-                             else [SMTLib.SMT_IntDivide(lval, rval)])
+                             else SMTLib.SMT_IntDivide(lval, rval))
     
     
 def op_un_minus(arg):
@@ -104,25 +100,25 @@ def op_un_minus(arg):
     
     Negates arg.
     '''
-    assert isinstance(arg, ExprArg)
-    (_, mask) = arg.getInstanceSort(0)
-    val = getArithValue(list(mask.values()))
-    return IntArg([SMTLib.SMT_Neg(val)])
+    assert isinstance(arg, IntArg)
+    val = arg.getInts()
+    val = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in val]
+    val_sum = SMTLib.createSum(val)
+    return IntArg(SMTLib.createNeg(val_sum))  
    
 def op_sum(arg):
     '''
     :param arg:
     :type arg: :class:`~ExprArg`
-    :returns: :class:`~IntArg` 
-    
+    :returns: :class:`~IntArg`
+     
     Computes the sum of all integer instances in arg. May not match the semantics of the Alloy backend.
     '''
     assert isinstance(arg, ExprArg)
-    all_vals = []
-    for i in arg.getInstanceSorts():
-        (_, mask) = i
-        all_vals.append(getArithValue(list(mask.values())))
-    return IntArg([getArithValue(all_vals)])
+    sum_list = []
+    for (e,c) in arg.getInts():
+        sum_list.append(SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)))
+    return IntArg(SMTLib.createSum(sum_list))    
 
 def op_lt(left,right):
     '''
@@ -136,11 +132,13 @@ def op_lt(left,right):
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    (_, left_mask) = left.getInstanceSort(0)
-    (_, right_mask) = right.getInstanceSort(0)
-    lval = SMTLib.SMT_Sum(left_mask.values())
-    rval = SMTLib.SMT_Sum(right_mask.values())
-    return BoolArg([SMTLib.SMT_LT(lval, rval)])  
+    lval = left.getInts()
+    lval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in lval]
+    rval = right.getInts()
+    rval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in rval]
+    lsum = SMTLib.createSum(lval)
+    rsum = SMTLib.createSum(rval)
+    return BoolArg(SMTLib.SMT_LT(lsum, rsum))  
         
 def op_le(left,right):
     '''
@@ -149,16 +147,18 @@ def op_le(left,right):
     :param right:
     :type right: :class:`~ExprArg`
     :returns: :class:`~BoolArg` 
-    
+    Invariant: left and right have exactly one int
     Ensures that the left <= right.
     '''
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
-    (_, left_mask) = left.getInstanceSort(0)
-    (_, right_mask) = right.getInstanceSort(0)
-    lval = SMTLib.SMT_Sum(left_mask.values())
-    rval = SMTLib.SMT_Sum(right_mask.values())
-    return BoolArg([SMTLib.SMT_LE(lval, rval)])  
+    lval = left.getInts()
+    lval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in lval]
+    rval = right.getInts()
+    rval = [SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)) for (e,c) in rval]
+    lsum = SMTLib.createSum(lval)
+    rsum = SMTLib.createSum(rval)
+    return BoolArg(SMTLib.SMT_LE(lsum, rsum))  
 
 def op_gt(left,right):
     '''
@@ -187,3 +187,4 @@ def op_ge(left,right):
     assert isinstance(left, ExprArg)
     assert isinstance(right, ExprArg)
     return op_le(right, left)
+

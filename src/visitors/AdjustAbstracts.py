@@ -3,16 +3,10 @@ Created on Nov 11, 2013
 
 @author: ezulkosk
 '''
-from ast.Clafer import Clafer
 from ast.IntegerLiteral import IntegerLiteral
 from common import Options
 from common.Exceptions import UnusedAbstractException
-from pip.backwardcompat import reduce
-from structures.ClaferSort import ClaferSort
 from visitors import VisitorTemplate, Visitor
-import ast
-import operator
-import sys
 import visitors
 
 
@@ -51,9 +45,6 @@ class AdjustAbstracts(VisitorTemplate.VisitorTemplate):
         (glower, gupper) = element.glCard
         upper = upper.value
         sort = self.cfr.cfr_sorts[element.uid]
-        #print(element)
-        #print(gupper)
-        #print(sort.scope_summ)
         
         if sort.scope_summ >= 0 and sort.element.isAbstract:
             self.glStack.append(sort.scope_summ)
@@ -64,53 +55,30 @@ class AdjustAbstracts(VisitorTemplate.VisitorTemplate):
             else:
                 total = 1
                 for i in sort.parentStack:
-                    (l,u) = i.element.glCard
+                    (_l,u) = i.element.glCard
                     total = total * u.value 
                 newScope = total * sort.scope_summ
             element.glCard = (lower, IntegerLiteral(newScope))
             self.glStack.append(newScope)
-        #elif sort.unbounded and isinstance(sort.refSort, ClaferSort) and sort.refSort.scope_summ >= 0:
-        #    if self.glStack:
-        #        newScope = sort.refSort.scope_summ * self.glStack[-1]
-        #    else:
-         #       newScope = sort.refSort.scope_summ
-            #if newScope != gupper:
-            #    self.hasChanged = True
-        #    element.glCard = (lower, IntegerLiteral(newScope))
-        #    self.glStack.append(newScope)
         elif not self.glStack:
             self.glStack.append(gupper.value)
         elif sort.unbounded:
             glower = self.glStack[-1] * lower.value
             element.glCard = (glower, IntegerLiteral(max(glower, Options.GLOBAL_SCOPE)))
             self.glStack.append(max(Options.GLOBAL_SCOPE, glower))
-            #print(sort.element.uid + str(sort.element.glCard) + " " + str(sort))
         else:
             newScope = upper * self.glStack[-1]
             element.glCard = (lower, IntegerLiteral(newScope))
             self.glStack.append(newScope)
-            #print(newScope)
         for i in element.elements:
             visitors.Visitor.visit(self, i)
         self.glStack.pop()
-        '''
-        sort = self.cfr.cfr_sorts[element.uid]
-        newScope = reduce(operator.mul, self.scopeStack, 1)
-        (_, u) = element.card
-        if sort.numInstances != newScope and self.scopeStack and u.value != -1:
-            sort.numInstances = self.scopeStack[-1] * u.value
-        self.scopeStack.append(sort.numInstances)
-        for i in element.elements:
-            visitors.Visitor.visit(self, i)
-        self.scopeStack.pop()    
-        '''
         
 def setAbstractScopes(cfr):
     hasChanged = False
     flag = False
     for i in cfr.cfr_sorts.values():
-        #print(i.refSort)
-        if i.element.isAbstract:# or (i.refSort and isinstance(i.refSort, ClaferSort)):
+        if i.element.isAbstract: 
             if i.element.isAbstract:
                 currAbs = i
             else:
@@ -126,11 +94,7 @@ def setAbstractScopes(cfr):
                 flag = True   
              
             if upper.value != summ and not flag:
-                #print(i)
-                #print(str(upper) + " " + str(summ))
                 hasChanged = True
-            #i.numInstances = summ#max(summ, Options.GLOBAL_SCOPE)#summ #temp
-            #i.upperCardConstraint = summ
             i.scope_summ = summ
             if summ == 0:
                 continue
@@ -142,8 +106,7 @@ def adjustAbstractsFixedPoint(cfr):
     while hasChanged:
         hasChanged = setAbstractScopes(cfr)
         for i in cfr.cfr_sorts.values():
-            if i.element.isAbstract: #or (isinstance(i.refSort, ClaferSort)
-                                    #    and i.refSort.element.isAbstract):
+            if i.element.isAbstract:  
                 adj = AdjustAbstracts(cfr)
                 Visitor.visit(adj, i.element)
                 if adj.hasChanged:

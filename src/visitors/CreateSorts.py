@@ -7,7 +7,6 @@ Created on Apr 28, 2013
 
 from structures.ClaferSort import ClaferSort
 from visitors import VisitorTemplate
-import common.Common
 import visitors.Visitor
 
 class CreateSorts(VisitorTemplate.VisitorTemplate):
@@ -31,7 +30,6 @@ class CreateSorts(VisitorTemplate.VisitorTemplate):
         '''
         visitors.Visitor.visit(self,element.supers)
         sort = ClaferSort(element, self.cfr, self.stack)
-        #print(element.uid)
         self.cfr.addSort(element.uid, sort)  
         self.stack.append(sort)
         for i in element.elements:

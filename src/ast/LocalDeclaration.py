@@ -10,8 +10,12 @@ class LocalDeclaration(object):
     '''
 
 
+    
     def __init__(self, element):
         self.element = element
+        
+    def toString(self, level):
+        return self.element
         
     def __str__(self):
         return self.element

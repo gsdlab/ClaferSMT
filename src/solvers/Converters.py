@@ -3,24 +3,16 @@ Created on Nov 21, 2013
 
 @author: ezulkosk
 '''
-from common import Common, Options
-from structures.SimpleGraph import Graph
-from z3 import BoolRef, ArithRef, IntNumRef, Tactic
-from z3consts import *
-from z3core import *
-import io
-import operator
-import sys
+#from common import Common
 import z3
-
+#from z3core import *
+from z3core import Z3_benchmark_to_smtlib_string, Ast
 
 def convertToSMTLib(f, status="unknown", name="benchmark", logic=""):
     '''
     SMTLIB
     '''
     assertions = f.assertions()
-    #for i in assertions:
-    #    print(i)
     num_assertions = len(assertions)
     v = (Ast * num_assertions)()
     for i in range(num_assertions):
@@ -34,6 +26,7 @@ def convertToSMTLib(f, status="unknown", name="benchmark", logic=""):
 ###################################
 '''
 
+'''
 def printZ3StrConstraints(cfr):
     f_n = open("z3str_in", 'w')
     f_n.write("(set-option :auto-config true)\n")
@@ -94,7 +87,7 @@ def strprint(c):
                 arity = 2
             elif op in ["Substring", "Replace"]:
                 arity = 3
-            for i in range(arity):
+            for _ in range(arity):
                 arg = array.pop(0)
                 if arg.startswith(Common.STRCONS_SUB):
                     retStr = retStr + " " + strprint(Common.string_map[arg])
@@ -150,3 +143,4 @@ _z3_precedence = {
     Z3_OP_LE : 8, Z3_OP_LT : 8, Z3_OP_GE : 8, Z3_OP_GT : 8, Z3_OP_EQ : 8, Z3_OP_SLEQ : 8, Z3_OP_SLT : 8, Z3_OP_SGEQ : 8, Z3_OP_SGT : 8,
     Z3_OP_IFF : 8
     }
+'''

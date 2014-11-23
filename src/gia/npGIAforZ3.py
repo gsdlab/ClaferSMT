@@ -2,7 +2,6 @@
 from common import Common, SMTLib
 from common.Common import preventSameModel
 from time import time
-import random
 from solvers import BaseSolver
 
 
@@ -65,21 +64,14 @@ class GuidedImprovementAlgorithm(object):
         equivalentSolutions = []
         equalConstraint = self.ConstraintEqualToX(point)
         self.s.add(equalConstraint)
-        #print(count)
         preventSameModel(self.cfr, self.s, point)
-        #print(self.s.check()==sat)
-        while(self.s.check() == Common.SAT and not(len(equivalentSolutions) + count == self.options.num_models)):
-            #print("in")
-            #count_sat_calls += 1
-#                 self.GIALogger.logEndCall(True, model = self.s.model(), statistics = self.s.statistics())                              
+        while(self.s.check() == Common.SAT and not(len(equivalentSolutions) + count == self.options.num_models)):                          
             solution = self.s.model()
             preventSameModel(self.cfr, self.s, solution)
             equivalentSolutions.append(solution)
             
         self.s.pop()
-        return equivalentSolutions
-#           
-          
+        return equivalentSolutions    
 
     def addParetoPoints(self, ParetoFront, point):
         ParetoFront.append(point)
@@ -88,7 +80,7 @@ class GuidedImprovementAlgorithm(object):
 
     def replicateSolver(self, solver, num_consumers):
         solvers = []
-        for i in range(num_consumers):
+        for _ in range(num_consumers):
             newSolver = BaseSolver.getSolver()
             for j in solver.assertions():
                 newSolver.add(j)
@@ -107,11 +99,9 @@ class GuidedImprovementAlgorithm(object):
         count_unsat_calls = 0
         if self.options.magnifying_glass:
             self.s.push()
-        #self.GIALogger.logStartCall()
         if self.s.check() == Common.SAT:
             count_sat_calls += 1
-            prev_solution = self.s.model()
-            #self.GIALogger.logEndCall(True, model=prev_solution, statistics = self.s.statistics())            
+            prev_solution = self.s.model()          
             self.s.push()
             FirstParetoPoint, local_count_sat_calls, local_count_unsat_calls = self.ranToParetoFront(prev_solution)
             end_time = time()
@@ -120,8 +110,6 @@ class GuidedImprovementAlgorithm(object):
             count_paretoPoints += 1
             
             ParetoFront = self.addParetoPoints(ParetoFront, FirstParetoPoint)
-            #ParetoFront.append(FirstParetoPoint)
-            # RecordPoint
             strNextParetoPoint = list((d.name(), str(FirstParetoPoint[d])) for d in FirstParetoPoint.decls())
             if RECORDPOINT:
                 outputFile = open(outfilename, 'a')
@@ -133,17 +121,15 @@ class GuidedImprovementAlgorithm(object):
                                           '\n')
                 finally:
                     outputFile.close()
-                ##    
-                    
+
             self.s.pop()
 
             tmpNotDominatedByFirstParetoPoint = self.ConstraintNotDominatedByX(FirstParetoPoint)
-#             self.GIALogger.logStartCall(tmpNotDominatedByFirstParetoPoint)
             self.s.add(tmpNotDominatedByFirstParetoPoint)
             start_time = time()
+            
             while(self.s.check() == Common.SAT and not(len(ParetoFront) == self.options.num_models)):
-                count_sat_calls += 1
-#                 self.GIALogger.logEndCall(True, model = self.s.model(), statistics = self.s.statistics())                              
+                count_sat_calls += 1                             
                 prev_solution = self.s.model()
                 self.s.push()
                 NextParetoPoint, local_count_sat_calls, local_count_unsat_calls = self.ranToParetoFront(prev_solution)
@@ -151,7 +137,6 @@ class GuidedImprovementAlgorithm(object):
                 count_sat_calls += local_count_sat_calls
                 count_unsat_calls += local_count_unsat_calls
                 count_paretoPoints += 1
-                #ParetoFront.append(NextParetoPoint)
                 ParetoFront = self.addParetoPoints(ParetoFront, NextParetoPoint)
                 
                 # RecordPoint
@@ -165,21 +150,13 @@ class GuidedImprovementAlgorithm(object):
                                               str(strNextParetoPoint) + ',' +
                                               '\n')
                     finally:
-                        outputFile.close()
-                ##    
+                        outputFile.close() 
                 self.s.pop()
-#                 ParetoFront.append(NextParetoPoint)
-#                 if self.options.incrementallyprintparetopoints == True:
-#                     self.print_solution(NextParetoPoint)
                 tmpNotDominatedByNextParetoPoint = self.ConstraintNotDominatedByX(NextParetoPoint)
-#                 self.GIALogger.logStartCall(tmpNotDominatedByNextParetoPoint)
                 self.s.add(tmpNotDominatedByNextParetoPoint)
-                start_time = time()
-#             self.GIALogger.logEndCall(False, statistics = self.s.statistics())                
-#         else :
+                start_time = time()              
         count_unsat_calls += 1
-            #self.GIALogger.logEndCall(False, statistics = self.s.statistics())            
-            
+
         end_time = time()
         
         if self.options.magnifying_glass:
@@ -188,8 +165,6 @@ class GuidedImprovementAlgorithm(object):
                 equivalentSolutions = self.genEquivalentSolutions(i, len(ParetoFront))
                 ParetoFront = ParetoFront + equivalentSolutions
         
-        
-#         print count_paretoPoints, count_sat_calls, count_sat_calls, end_time - start_time
         outputFile = open(outfilename, 'a')
         try:
             outputFile.writelines(str(count_paretoPoints) + ',' +
@@ -243,6 +218,8 @@ class GuidedImprovementAlgorithm(object):
         local_count_unsat_calls += 1
         return prev_solution, local_count_sat_calls, local_count_unsat_calls
 
+    
+
     def ConstraintNotDominatedByX(self, model):
         """
         Creates a constraint preventing search in dominated regions.
@@ -250,9 +227,9 @@ class GuidedImprovementAlgorithm(object):
         DisjunctionOrLessMetrics  = list()
         for i in range(len(self.metrics_variables)):
             if self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
-                DisjunctionOrLessMetrics.append(SMTLib.SMT_GT(self.metrics_variables[i], SMTLib.SMT_IntConst(model.eval(self.metrics_variables[i].convert(self.cfr.solver.converter)))))#model[self.metrics_variables[i]])
+                DisjunctionOrLessMetrics.append(SMTLib.SMT_GT(self.metrics_variables[i], SMTLib.SMT_IntConst(Common.evalForNum(model, self.metrics_variables[i].convert(self.cfr.solver.converter)))))#model[self.metrics_variables[i]])
             else :
-                DisjunctionOrLessMetrics.append(SMTLib.SMT_LT(self.metrics_variables[i], SMTLib.SMT_IntConst(model.eval(self.metrics_variables[i].convert(self.cfr.solver.converter)))))#model[self.metrics_variables[i]])
+                DisjunctionOrLessMetrics.append(SMTLib.SMT_LT(self.metrics_variables[i], SMTLib.SMT_IntConst(Common.evalForNum(model, self.metrics_variables[i].convert(self.cfr.solver.converter)))))#model[self.metrics_variables[i]])
         return SMTLib.SMT_Or(*DisjunctionOrLessMetrics)
 
 
@@ -263,7 +240,7 @@ class GuidedImprovementAlgorithm(object):
         """
         EqualMetrics  = list()
         for i in range(len(self.metrics_variables)):
-            EqualMetrics.append(SMTLib.SMT_EQ(self.metrics_variables[i], model.eval(self.metrics_variables[i])))
+            EqualMetrics.append(SMTLib.SMT_EQ(self.metrics_variables[i], Common.evalForNum(model, self.metrics_variables[i])))
         return SMTLib.SMT_And(EqualMetrics)
 
     def get_metric_values(self, model):
@@ -288,24 +265,21 @@ class GuidedImprovementAlgorithm(object):
             dominationConjunction = []
             j = 0
             if  self.metrics_objective_direction[i] == Common.METRICS_MAXIMIZE:
-                #print(model.eval(dominatedByMetric))
                 dominationConjunction.append(SMTLib.SMT_GT(dominatedByMetric,
-                                                           SMTLib.SMT_IntConst(model.eval(dominatedByMetric.convert(self.cfr.solver.converter))))) 
+                                                           SMTLib.SMT_IntConst(Common.evalForNum(model, dominatedByMetric.convert(self.cfr.solver.converter))))) 
             else:
                 dominationConjunction.append(SMTLib.SMT_LT(dominatedByMetric, 
-                                                           SMTLib.SMT_IntConst(model.eval(dominatedByMetric.convert(self.cfr.solver.converter)))))
+                                                           SMTLib.SMT_IntConst(Common.evalForNum(model, dominatedByMetric.convert(self.cfr.solver.converter)))))
             for AtLeastEqualInOtherMetric in self.metrics_variables:
                 if j != i:
                     if self.metrics_objective_direction[j] == Common.METRICS_MAXIMIZE:
                         dominationConjunction.append(SMTLib.SMT_GE(AtLeastEqualInOtherMetric,
-                                                                   SMTLib.SMT_IntConst(model.eval(AtLeastEqualInOtherMetric.convert(self.cfr.solver.converter)))))
+                                                                   SMTLib.SMT_IntConst(Common.evalForNum(model, AtLeastEqualInOtherMetric.convert(self.cfr.solver.converter)))))
                     else:
                         dominationConjunction.append(SMTLib.SMT_LE(AtLeastEqualInOtherMetric,
-                                                                   SMTLib.SMT_IntConst(model.eval(AtLeastEqualInOtherMetric.convert(self.cfr.solver.converter)))))              
+                                                                   SMTLib.SMT_IntConst(Common.evalForNum(model, AtLeastEqualInOtherMetric.convert(self.cfr.solver.converter)))))              
                 j = 1 + j
             i = 1 + i    
             dominationDisjunction.append(SMTLib.SMT_And(*dominationConjunction))         
         constraintDominateX = SMTLib.SMT_Or(*dominationDisjunction)
-        #print(constraintDominateX)
-        #sys.exit()
-        return constraintDominateX#.convert(self.cfr.solver.converter)
+        return constraintDominateX

@@ -5,7 +5,6 @@ From the Z3-Str project, slightly adapted to fit into ClaferZ3.
 '''
 
 import sys
-import getopt
 import time
 import os
 import subprocess
