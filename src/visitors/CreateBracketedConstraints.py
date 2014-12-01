@@ -119,6 +119,7 @@ class CreateBracketedConstraints(VisitorTemplate.VisitorTemplate):
         self.inConstraint = False
     
     def funexpVisit(self, element):
+        
         for i in element.elements:
             visitors.Visitor.visit(self, i)
         if(self.inConstraint):
