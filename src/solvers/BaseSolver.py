@@ -3,19 +3,24 @@ Created on May 14, 2014
 
 @author: ezulkosk
 '''
-from common import Options
 import sys
 
+from common import Options
 
-def getSolver():
+
+def getSolver(cfr=None):
     from solvers import Z3Solver, SMTLib2Solver, SMTLib1Solver
+    from solvers.walksmt import WalkZ3
     if Options.SOLVER == "z3":
         return Z3Solver.Z3Solver()
     elif Options.SOLVER == "smt2":
         return SMTLib2Solver.SMTLib2Solver()
     elif Options.SOLVER == "smt1":
         return SMTLib1Solver.SMTLib1Solver()
-
+    elif Options.SOLVER == "walkz3":
+        return WalkZ3.WalkZ3Solver(cfr)
+    else:
+        sys.exit(Options.SOLVER + " broken.")
 
 class BaseSolver():
     

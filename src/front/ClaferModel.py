@@ -41,7 +41,7 @@ class ClaferModel(object):
         self.module = module
         self.smt_bracketed_constraints = []
         self.cfr_sorts = {}
-        self.solver = BaseSolver.getSolver()
+        self.solver = BaseSolver.getSolver(self)
         self.setOptions()
         self.clock = Clock.Clock()
         self.objectives = []
@@ -193,9 +193,6 @@ class ClaferModel(object):
             self.fixSubSortIndices()
             self.createInstancesConstraintsAndFunctions()
               
-            #for i in self.cfr_sorts.values():
-            #    standard_print(str(i) + " : "+ str(i.numInstances))
-            
             debug_print("Creating cardinality constraints.")
             self.createCardinalityConstraints()
             
@@ -208,24 +205,8 @@ class ClaferModel(object):
             
             debug_print("Creating group cardinality constraints.")
             self.createGroupCardConstraints()
-            
-            #debug_print("Creating bracketed constraints.")
-            #self.bracketedConstraintsPreview = CreateSimpleBracketedConstraints.CreateSimpleBracketedConstraints(self)
-            #Visitor.visit(self.bracketedConstraintsPreview, self.module)  
                       
             debug_print("Creating bracketed constraints.")
-            bcVisitor = CreateBracketedConstraints.CreateBracketedConstraints(self)
-            #for i in self.bracketedConstraintsPreview.setEqualityConstraints:
-            #    bcVisitor.constraintVisit(None, i)
-            #print("ABOVE")
-            #for i in self.join_cache.keys():
-            #    print(str(i))# + " : " + str(self.join_cache[i]))
-            #print("BELOW")
-            #bcVisitor.constraintVisit(None, self.bracketedConstraintsPreview.otherConstraints[3])
-            #sys.exit("ABOVE!!!!!!!!")
-            #for i in self.bracketedConstraintsPreview.otherConstraints:
-                #print(i.stringRep)    
-                #bcVisitor.constraintVisit(None, i)
             Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
             
             
@@ -399,9 +380,11 @@ class ClaferModel(object):
         self.clock.tick("first model")
         while True:
             self.clock.tick("unsat")
-            if (Options.MODE != Common.DEBUG and not(Options.PRODUCE_UNSAT_CORE)and count != desired_number_of_models and self.solver.check() == Common.SAT ) or \
+            if (count != desired_number_of_models and ((self.solver.check() == Common.SAT) or \
+                (Options.MODE != Common.DEBUG and not(Options.PRODUCE_UNSAT_CORE)and count != desired_number_of_models and self.solver.check() == Common.SAT ) or \
                 (Options.MODE != Common.DEBUG and Options.PRODUCE_UNSAT_CORE and count != desired_number_of_models and self.solver.check(self.unsat_core_trackers) == Common.SAT ) or \
-                (Options.MODE == Common.DEBUG and count != desired_number_of_models and  self.solver.check(self.unsat_core_trackers) == Common.SAT ):
+                (Options.MODE == Common.DEBUG and count != desired_number_of_models and  self.solver.check(self.unsat_core_trackers) == Common.SAT ))):
+                
                 if count == 0:
                     self.clock.tock("first model")
                 m = self.solver.model()

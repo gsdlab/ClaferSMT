@@ -3,9 +3,13 @@ Created on May 14, 2014
 
 @author: ezulkosk
 '''
+import sys
+
+from z3 import sat, And, Xor, Or, Implies, Not, z3, If, Sum, BitVec, Real, Bool, Int
+
 from common import Common
 from solvers.BaseSolver import BaseSolver
-from z3 import sat, And, Xor, Or, Implies, Not, z3, If, Sum, BitVec, Real, Bool, Int
+
 
 class Z3Solver(BaseSolver):
     def __init__(self):
@@ -22,6 +26,7 @@ class Z3Solver(BaseSolver):
         '''
         Adds a pre-converted constraint. Should be avoided when possible.
         '''
+        sys.exit("This is used?!")
         self.solver.add(constraint)
     
     def check(self, unsat_core_trackers=None):
