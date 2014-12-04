@@ -116,6 +116,7 @@ def op_sum(arg):
     '''
     assert isinstance(arg, ExprArg)
     sum_list = []
+    ints = arg.getInts()
     for (e,c) in arg.getInts():
         sum_list.append(SMTLib.createIf(c, e, SMTLib.SMT_IntConst(0)))
     return IntArg(SMTLib.createSum(sum_list))    

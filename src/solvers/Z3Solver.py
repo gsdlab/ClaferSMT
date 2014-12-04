@@ -8,6 +8,7 @@ import sys
 from z3 import sat, And, Xor, Or, Implies, Not, z3, If, Sum, BitVec, Real, Bool, Int
 
 from common import Common
+from common.SMTLib import toStr
 from solvers.BaseSolver import BaseSolver
 
 
@@ -68,7 +69,7 @@ class Z3Converter():
         self.num_hit = 0
         self.num_miss = 0
         self.expr_cache = {}
-
+    
     #keys are sorted tuples of children id's, with the op name as the last element
     def checkCache(self, op, children, sort = True):
         #TODO actually fix this, some kind of hashing problem
@@ -279,6 +280,9 @@ class Z3Converter():
         l = expr.left.convert(self)
         r = expr.right.convert(self)
         (hit, result) = self.checkCache("Divide", [l,r], sort=False)
+        if r == 0:
+            return 0
+            #sys.exit()
         if hit:   
             return result
         else:

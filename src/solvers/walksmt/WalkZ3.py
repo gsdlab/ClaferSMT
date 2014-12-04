@@ -19,6 +19,8 @@ class WalkZ3Solver(Z3Solver):
     def __init__(self, cfr):
         #TODO fix multiple instances
         self.cfr = cfr
+        self.MAX_TRIES = 100000000000000000000
+        self.MAX_FLIPS = 100000000000000000000
         self.solver = z3.Solver()
         self.converter = Z3Converter()
         self.goal = z3.Goal()
@@ -164,71 +166,68 @@ class WalkZ3Solver(Z3Solver):
         return True
     
     def walksmt(self):
+        
         res = self.preprocess()
         if not res:
             return Common.UNSAT
-        asn_list = self.initial_assignment()
         learned_clauses = []
-        #TODO: For max_tries...
-        while(True):
-            self.boolean_abstraction_solver.push()
-            self.boolean_abstraction_solver.append(z3.And(asn_list))
-            for i in learned_clauses:
-                #TODO: reuse vars..
-                self.add_and_track(self.boolean_abstraction_solver, i, z3.Or(i))
-            status = self.boolean_abstraction_solver.check(self.trackers)
-            if status == z3.sat:
-                #TODO: can we do this more incrementally?
-                tsolver = z3.Solver()
-                tsolver_map = {}
-                for i in range(len(asn_list)):
-                    c = asn_list[i]
-                    if c.decl().name() == "not":
-                        lit = z3.Not(self.bool_to_atom_list[i])
-                    else:
-                        lit = self.bool_to_atom_list[i]
-                    #print(lit)
-                    #TODO Use boolean abstraction map so clauses can be added
-                    tracker_name = 'p' + str(i)
-                    tracker = Bool(tracker_name)
-                    tsolver_map[tracker_name] = lit
-                    tsolver.assert_and_track(lit, tracker)
-                                             
-                    #self.add_and_track(tsolver, [lit], lit)
-                    #tsolver.add(lit)
-                tstatus = tsolver.check(self.trackers)
-                #TODO Cleanup trackers
-                if tstatus == z3.sat:
-                    #print("TSAT")
-                    #TODO: Get model
-                    self.tsolver = tsolver
-                    return Common.SAT
-                else:
-                    new_clause = []
-                    for i in tsolver.unsat_core():
-                        lit = tsolver_map[i.decl().name()]
-                        if lit.decl().name() == "not":
-                            atom = lit.children()[0]
-                            is_not = True
+        for i in range(self.MAX_TRIES):
+            asn_list = self.initial_assignment()
+            for i in range(self.MAX_FLIPS):
+                self.boolean_abstraction_solver.push()
+                self.boolean_abstraction_solver.append(z3.And(asn_list))
+                for i in learned_clauses:
+                    #TODO: reuse vars..
+                    self.add_and_track(self.boolean_abstraction_solver, i, z3.Or(i))
+                status = self.boolean_abstraction_solver.check(self.trackers)
+                if status == z3.sat:
+                    #TODO: can we do this more incrementally?
+                    tsolver = z3.Solver()
+                    tsolver_map = {}
+                    for i in range(len(asn_list)):
+                        c = asn_list[i]
+                        if c.decl().name() == "not":
+                            lit = z3.Not(self.bool_to_atom_list[i])
                         else:
-                            atom = lit
-                            is_not = False
-                        b = self.atom_hash_map[atom.hash()]
-                        new_clause.append(b if is_not else z3.Not(b))
-                    #print(new_clause)
-                    learned_clauses.append(new_clause)
-            else:
-                #boolean abstraction -- unsat case
-                print(self.boolean_abstraction_solver.unsat_core())
-                tracker = random.choice(self.boolean_abstraction_solver.unsat_core())
-                
-                num = int(str(tracker).replace("track",""))
-                clause = self.track_map[num]
-                print(clause)
-                lit = random.choice(clause)
-                self.next_truth_assignment(lit, asn_list)
-            self.boolean_abstraction_solver.pop()
-    
+                            lit = self.bool_to_atom_list[i]
+                        tracker_name = 'p' + str(i)
+                        tracker = Bool(tracker_name)
+                        tsolver_map[tracker_name] = lit
+                        tsolver.assert_and_track(lit, tracker)
+                    tstatus = tsolver.check(self.trackers)
+                    #TODO Cleanup trackers
+                    if tstatus == z3.sat:
+                        print("TSAT")
+                        #TODO: Get model
+                        self.tsolver = tsolver
+                        return Common.SAT
+                    else:
+                        print("TUNSAT")
+                        new_clause = []
+                        for i in tsolver.unsat_core():
+                            lit = tsolver_map[i.decl().name()]
+                            if lit.decl().name() == "not":
+                                atom = lit.children()[0]
+                                is_not = True
+                            else:
+                                atom = lit
+                                is_not = False
+                            b = self.atom_hash_map[atom.hash()]
+                            new_clause.append(b if is_not else z3.Not(b))
+                        #print(new_clause)
+                        learned_clauses.append(new_clause)
+                else:
+                    #boolean abstraction -- unsat case
+                    #print(self.boolean_abstraction_solver.unsat_core())
+                    tracker = random.choice(self.boolean_abstraction_solver.unsat_core())
+                    
+                    num = int(str(tracker).replace("track",""))
+                    clause = self.track_map[num]
+                    #print(clause)
+                    lit = random.choice(clause)
+                    self.next_truth_assignment(lit, asn_list)
+                self.boolean_abstraction_solver.pop()
+        sys.exit("Timeout for SLS. TODO: make this an exception")
     
     #####################################################
         
