@@ -33,6 +33,7 @@ class WalkZ3Solver(Z3Solver):
         self.next_bool_num = 0
         self.cache_hits = 0
         self.cnf_tactic = z3.Then('simplify', 'tseitin-cnf', 'propagate-values')
+        
 
     def add(self, constraint):
         self.goal.add(constraint.convert(self.converter))
