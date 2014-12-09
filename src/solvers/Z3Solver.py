@@ -281,8 +281,6 @@ class Z3Converter():
         r = expr.right.convert(self)
         (hit, result) = self.checkCache("Divide", [l,r], sort=False)
         if isinstance(r, int) and r == 0:
-            print(r.__class__)
-            print(r)
             return 0
             #sys.exit()
         if hit:   
