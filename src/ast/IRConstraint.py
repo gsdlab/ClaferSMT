@@ -15,7 +15,7 @@ class IRConstraint(object):
         self.exp = exp
         
     def __str__(self):
-        return self.exp
+        return str(self.exp)
     
     def toString(self, level):
         return self.exp.toString(level)

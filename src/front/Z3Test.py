@@ -12,7 +12,13 @@ if __name__ == '__main__':
     c = z3.Bool("c")
     
     s = z3.Solver()
-    s.add(z3.Implies(z3.Not(z3.And(a, b)), z3.Not(z3.And(z3.Not(b), c))))
-    s.add(z3.Not(z3.Implies(c, b)))
+    s.add(z3.Not(z3.And(b, c)))
     print(s.check())
     print(s.model())
+    m = s.model()
+    for i in m:
+        print(m[i])
+        block = (m[i])
+        block = (i != m[i])
+        if strblock == True:
+            print(block)

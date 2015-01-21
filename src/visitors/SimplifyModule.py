@@ -7,7 +7,7 @@ import visitors.Visitor
 
 class SimplifyModule(object):
     '''
-    *see:* :class:`visitors.Visitor`
+    *see:* :class:`visitors`
     '''
     def __init__(self):
         pass

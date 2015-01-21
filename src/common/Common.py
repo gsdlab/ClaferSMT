@@ -61,6 +61,13 @@ BOUND = 600
 METRICS_MAXIMIZE = 1
 METRICS_MINIMIZE = 2
 
+def stripPrefix(s):
+    try:
+        return s.split('_', maxsplit=1)[1]
+    except:
+        return s
+    
+
 def evalForNum(model, expr):
     val = model.eval(expr)
     if not val:

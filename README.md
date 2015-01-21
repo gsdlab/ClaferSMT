@@ -48,10 +48,10 @@ Dependencies
 1. install the dependencies
 2. open the command line terminal. On Windows, open MinGW/MSYS.
 3. in some `<source directory>` of your choice, execute 
-  * `git clone git://github.com/gsdlab/ClaferSMT.git`
+  * `git clone git://github.com/gsdlab/git`
 4. in `<source directory>/ClaferSMT`, execute
   * `make init z3bin=<z3 install directory>/bin`
-  * `make` - this will produce `ClaferSMT.egg`, which contains Z3.
+  * `make` - this will produce `egg`, which contains Z3.
   * `make install to=<target directory>`
 
 Integration with Sublime Text 2/3
@@ -67,11 +67,11 @@ Usage
 ClaferSMT can be used directly from source code using the script `claferSMTsrc.sh` (only included in source code).
 From binary distribution:
 
-* On Linux: `./claferSMT.sh <model[.cfr|.py]> <options>`
+* On Linux: `./sh <model[.cfr|.py]> <options>`
   * the script sets the `LD_LIBRARY_PATH` to `pwd` so that the `libz3.so` can be located
-* On Windows: `python ClaferSMT.egg <model[.cfr|.py]> <options>` or the same as on Linux
+* On Windows: `python egg <model[.cfr|.py]> <options>` or the same as on Linux
   * should be executed in the same folder as the `libz3.dll` so that it can be found
-* On Mac: `python3 ClaferSMT.egg <model[.cfr|.py]> <options>` or the same as on Linux
+* On Mac: `python3 egg <model[.cfr|.py]> <options>` or the same as on Linux
   * should be executed in the same folder as the `libz3.dylib` so that it can be found
 
 NOTE: when giving a `.cfr` model as argument, the Clafer compiler executable must be in the PATH because it's called to produce the `.py` file.
@@ -79,8 +79,8 @@ NOTE: when giving a `.cfr` model as argument, the Clafer compiler executable mus
 Help printed by `--help`
 
 ```
-$ python claferSMT.egg --help
-usage: claferSMT.egg [-h]
+$ python egg --help
+usage: egg [-h]
                      [--mode {experiment,modelstats,normal,debug,test,one,repl,all}]
                      [--printconstraints] [--profiling] [--cprofiling]
                      [--numinstances NUMINSTANCES] [--globalscope GLOBALSCOPE]

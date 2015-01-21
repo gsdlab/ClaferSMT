@@ -16,7 +16,7 @@ def run(args):
     :param args: Python output file of the Clafer compiler. Generated with argument "-m python".
     :type args: file
     
-    Starting point for ClaferSMT.
+    Starting point for 
     '''
     
     if Options.MODE == Common.TEST:

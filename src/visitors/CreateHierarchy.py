@@ -4,9 +4,10 @@ Created on May 1, 2013
 @author: ezulkosk
 '''
 
+import visitors, ast
+
 from visitors import VisitorTemplate
-import ast
-import visitors
+
 
 class CreateHierarchy(VisitorTemplate.VisitorTemplate):
     '''

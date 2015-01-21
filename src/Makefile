@@ -6,6 +6,6 @@ endif
 
 all:
 	# Create the Egg
-	rm -f ../ClaferSMT.egg
+	rm -f ../egg
 	$(PYTHON3) -m compileall .
-	zip -r9 ../ClaferSMT.egg . -x Makefile
+	zip -r9 ../egg . -x Makefile
