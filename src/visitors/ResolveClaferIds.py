@@ -3,7 +3,7 @@ Created on May 31, 2013
 
 @author: ezulkosk
 '''
-from constraints import BracketedConstraint
+
 from visitors import VisitorTemplate
 import visitors.Visitor
 

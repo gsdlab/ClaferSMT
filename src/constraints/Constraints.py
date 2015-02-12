@@ -4,7 +4,7 @@ Created on Oct 3, 2013
 @author: ezulkosk
 '''
 from common import Common, Options, SMTLib
-from solvers import Converters
+
 
 
 class Constraints():
@@ -29,11 +29,6 @@ class Constraints():
             cfr.solver.add(SMTLib.SMT_Implies(p, constraint, unsat_core_implies=True))
         else:
             cfr.solver.add(constraint)
-        
-    def convert(self, f_n, constraint):
-        #print("#####")
-        #print(constraint)
-        f_n.write(Converters.obj_to_string(constraint) + "\n")
         
 
 class GenericConstraints(Constraints): 

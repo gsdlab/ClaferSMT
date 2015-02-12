@@ -9,10 +9,7 @@ from common import Common, Options, Clock, Alloy
 from common.Exceptions import UnusedAbstractException
 from common.Options import debug_print, standard_print
 from constraints import Translator, Constraints
-from gia.npGIAforZ3 import GuidedImprovementAlgorithmOptions, \
-    GuidedImprovementAlgorithm
-from visitors import Visitor, CreateSorts, CreateHierarchy, \
-    CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
+from visitors import Visitor, CreateSorts, CreateHierarchy, ResolveClaferIds, PrintHierarchy, Initialize, \
     SetScopes, AdjustAbstracts, CheckForGoals
 from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real, Int, \
     Goal, tactics, tactic_description, Tactic, SolverFor
@@ -41,16 +38,11 @@ class UnscopedInstance(object):
         self.constraints = []
         #self.solver = SolverFor("QF_LIA")
         self.solver = z3.Solver()#z3.Then('simplify', 'qe', 'smt').solver()
-        #for i in z3.tactics():
-        #    print(str(i) + ": " + z3.tactic_description(i))
-        #print(z3.tactics())
         self.setOptions()
         self.clock = Clock.Clock()
         self.objectives = []
         self.goal = Goal()
         self.translator = Translator.Translator(self)
-        #print(self.solver.help())
-        #print(get_version_string())
         
         """ Create simple objects used to store Z3 constraints. """
         self.join_constraints = Constraints.GenericConstraints("Z3Instance")
@@ -169,22 +161,7 @@ class UnscopedInstance(object):
             for i in self.cfr_sorts.values():
                 if not i.superSort:
                     print(str(i) + " : " + str(m[i.sort]))
-            '''
-            for i in self.cfr_sorts.values():
-                if not i.superSort:
-                    #print(i.sort)
-                    print(str(i) + " : ")
-                    for j in i.bounded_consts:
-                        if str(m.eval(i.isOn(j))) == "True":
-                            #print(m.eval(i.isOn(j)))
-                            print(str(j))
-            for i in self.cfr_sorts.values():
-                if i.superSort: 
-                    print(i)
-                    for j in Alloy.T(i).bounded_consts:
-                        if str(m.eval(i.isName(j))) == "True":
-                            print(str(j))
-            '''
+
         except UnusedAbstractException as e:
             print(str(e))
             return 0

@@ -9,8 +9,8 @@ import imp
 import sys
 
 from common import Common, Options
-from front import TestClafers, ModelStats, UnscopedInstance, parser
-from front.ClaferModel import ClaferModel
+from front import UnscopedInstance, parser
+
 
 
 def run(args):
@@ -20,18 +20,11 @@ def run(args):
     
     Starting point for ClaferSMT.
     '''
-    if Options.MODE == Common.TEST:
-        TestClafers.run()
-    elif Options.MODE == Common.ONE:
-        TestClafers.runForOne()
-    elif Options.MODE == Common.ALL:
-        TestClafers.runForAll()
-    elif Options.MODE in [Common.NORMAL, Common.EXPERIMENT, Common.DEBUG, Common.REPL, Common.MODELSTATS]:
-        file = Options.FILE
-        module = Common.parse(file)
-        model = UnscopedInstance.UnscopedInstance(module)
-        #model = ClaferModel(module)
-        model.run()
+    file = Options.FILE
+    module = Common.parse(file)
+    model = UnscopedInstance.UnscopedInstance(module)
+    #model = ClaferModel(module)
+    model.run()
        
 def main():
     Options.setCommandLineOptions()

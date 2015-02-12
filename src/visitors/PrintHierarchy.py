@@ -6,7 +6,7 @@ Created on May 31, 2013
 
 from common import Options
 from structures.ClaferSort import PrimitiveType
-from structures.SimpleTree import SimpleTree
+
 from visitors import VisitorTemplate
 import visitors
 
@@ -43,7 +43,7 @@ class PrintHierarchy(VisitorTemplate.VisitorTemplate):
         '''
         self.cfr = cfr
         self.model = model
-        self.tree = SimpleTree()
+
         self.pickledInstance = []
     
     
