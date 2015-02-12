@@ -127,6 +127,8 @@ class UnscopedInstance(object):
             """ Create a ClaferSort associated with each Clafer. """  
             Visitor.visit(CreateSorts.CreateSorts(self), self.module)
             
+            print(self.cfr_sorts)
+            
             """ Resolve any 'parent' or 'this' ClaferID's. """
             Visitor.visit(ResolveClaferIds.ResolveClaferIds(self), self.module)
             
@@ -138,6 +140,8 @@ class UnscopedInstance(object):
           
             debug_print("Scopeless Initialization")
             Visitor.visit(Initialize.Scopeless_Initialize(self), self.module)
+            
+            sys.exit()
             
             #no overlapping subs
             for i in self.cfr_sorts.values():      

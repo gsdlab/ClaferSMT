@@ -9,7 +9,7 @@ import imp
 import sys
 
 from common import Common, Options
-from front import UnscopedInstance, parser
+from front import UnscopedInstance
 
 
 
