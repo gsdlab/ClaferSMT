@@ -136,7 +136,8 @@ def max2(l,r):
     '''
     return SMTLib.SMT_If(SMTLib.SMT_LE(l, r), r, l)
 
-def load(file):
+
+def parse(file):
     if file.endswith(".cfr"):
         print("Running 'clafer --mode=python " + str(file) + "' first.")
         try:
@@ -147,4 +148,3 @@ def load(file):
     file = imp.load_source("module", str(file))
     module = file.getModule()
     return module
-    

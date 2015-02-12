@@ -4,8 +4,11 @@ Created on Apr 30, 2013
 @author: ezulkosk
 '''
 
+import sys
+import traceback
+
 from common import Common, Options, Clock, SMTLib
-from common.Common import preventSameModel, load, METRICS_MAXIMIZE
+from common.Common import preventSameModel, METRICS_MAXIMIZE, parse
 from common.Exceptions import UnusedAbstractException
 from common.Options import debug_print, standard_print
 from constraints import Constraints
@@ -17,8 +20,6 @@ from solvers import Z3Solver, Converters, BaseSolver
 from visitors import Visitor, CreateSorts, CreateHierarchy, \
     CreateBracketedConstraints, ResolveClaferIds, PrintHierarchy, Initialize, \
     SetScopes, AdjustAbstracts, CheckForGoals
-import sys
-import traceback
 
 
 class TracePrints(object):
@@ -395,7 +396,7 @@ class ClaferModel(object):
                 if not models:
                     print("No more instances")
             elif ch == 'r':
-                load(Options.FILE)
+                parse(Options.FILE)
             elif ch.startswith('i'):
                 args = ch.split()
                 if self.check_repl_input(args):
@@ -403,7 +404,7 @@ class ClaferModel(object):
                     Options.GLOBAL_SCOPE = Options.GLOBAL_SCOPE + inc
                     print("Global scope increased to " + str(Options.GLOBAL_SCOPE))
                     Common.FIRST_REPL_LOOP = False
-                    load(Options.FILE)
+                    parse(Options.FILE)
             elif ch.startswith('s'):
                 args = ch.split()
                 if self.check_repl_input(args):
@@ -411,7 +412,7 @@ class ClaferModel(object):
                     Options.GLOBAL_SCOPE = scope
                     print("Global scope set to " + str(Options.GLOBAL_SCOPE))
                     Common.FIRST_REPL_LOOP = False
-                    load(Options.FILE)
+                    parse(Options.FILE)
             elif ch == 'q':
                 sys.exit()
             elif ch == 'h':

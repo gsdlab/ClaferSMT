@@ -4,14 +4,15 @@ Created on April 27, 2013
 @author: ezulkosk
 
 '''
-from common import Common, Options
-from front import TestClafers, ModelStats, UnscopedInstance
-from front.ClaferModel import ClaferModel
 import cProfile
 import imp
 import sys
 
-    
+from common import Common, Options
+from front import TestClafers, ModelStats, UnscopedInstance, parser
+from front.ClaferModel import ClaferModel
+
+
 def run(args):
     '''
     :param args: Python output file of the Clafer compiler. Generated with argument "-m python".
@@ -27,7 +28,7 @@ def run(args):
         TestClafers.runForAll()
     elif Options.MODE in [Common.NORMAL, Common.EXPERIMENT, Common.DEBUG, Common.REPL, Common.MODELSTATS]:
         file = Options.FILE
-        module = Common.load(file)
+        module = Common.parse(file)
         model = UnscopedInstance.UnscopedInstance(module)
         #model = ClaferModel(module)
         model.run()
