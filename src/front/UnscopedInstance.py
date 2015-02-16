@@ -4,22 +4,21 @@ Created on Apr 30, 2013
 @author: ezulkosk
 '''
 
-from ast.IntegerLiteral import IntegerLiteral
-from common import Common, Options, Clock, Alloy
-from common.Exceptions import UnusedAbstractException
-from common.Options import debug_print, standard_print
-from constraints import Translator, Constraints
-from visitors import Visitor, CreateSorts, CreateHierarchy, ResolveClaferIds, PrintHierarchy, Initialize, \
-    SetScopes, AdjustAbstracts, CheckForGoals
-from z3 import Solver, set_option, sat, is_array, Or, Real, And, is_real, Int, \
-    Goal, tactics, tactic_description, Tactic, SolverFor
-from z3consts import Z3_UNINTERPRETED_SORT
-from z3types import Z3Exception
+
 import sys
 import time
+
+from z3 import set_option, sat
 import z3
 
+from common import Common, Options, Clock, Alloy
+from common.Exceptions import UnusedAbstractException
+from constraints import Translator, Constraints
+from jsir.IR import Abstract
 
+
+
+INDENT="  "
 
 class UnscopedInstance(object):
     
@@ -28,73 +27,22 @@ class UnscopedInstance(object):
 
     Stores and instantiates all necessary constraints for the ClaferZ3 model.
     '''
-    def __init__(self, module):
+    def __init__(self, model):
         Common.reset() #resets variables if in test mode
-        self.EMPTYSTRING = Int("EMPTYSTRING")
-        self.module = module
+        self.model = model
         self.cfr_bracketed_constraints = []
-        self.cfr_sorts = {}
-        self.relations = {}
-        self.constraints = []
         #self.solver = SolverFor("QF_LIA")
         self.solver = z3.Solver()#z3.Then('simplify', 'qe', 'smt').solver()
         self.setOptions()
         self.clock = Clock.Clock()
         self.objectives = []
-        self.goal = Goal()
         self.translator = Translator.Translator(self)
+        
         
         """ Create simple objects used to store Z3 constraints. """
         self.join_constraints = Constraints.GenericConstraints("Z3Instance")
-        
-        """ 
-        Used to map constraints in the UNSAT core to Boolean variables.
-        Will eventually be used to map UNSAT core back to the Clafer model.
-        """
-        self.unsat_core_trackers = []
-        self.unsat_map = {}
-    
-    def createGroupCardConstraints(self):
-        for i in self.cfr_sorts.values():
-            i.addGroupCardConstraints()
-            
-    def createRefConstraints(self):
-        for i in self.cfr_sorts.values():
-            i.addRefConstraints()
-            
-    def createCardinalityConstraints(self):
-        for i in self.cfr_sorts.values():
-            i.createCardinalityConstraints()
-    
-    def mapColonClafers(self):
-        for i in self.cfr_sorts.values():
-            if i.superSort:
-                i.superSort.addSubSort(i)     
-    
-    def addSubSortConstraints(self):
-        for i in self.cfr_sorts.values():
-            if i.superSort:
-                i.superSort.addSubSortConstraints(i)     
-    
-    def getScope(self, sort):
-        if sort.element.isAbstract:
-            summ = 0
-            for i in sort.subs:
-                summ = summ + self.getScope(i)
-            return summ
-        else:
-            (_, upper) = sort.element.glCard
-            return upper.value#sort.numInstances 
-    
-    def findUnusedAbstracts(self):
-        for i in self.cfr_sorts.values():
-            if i.element.isAbstract:
-                summ = 0
-                for j in i.subs:
-                    summ = summ + self.getScope(j)
-                if summ == 0:
-                    raise UnusedAbstractException(i.element.uid)
-    
+
+
     def setOptions(self):
         """
         Sets basic options for the Z3 solver.
@@ -114,6 +62,53 @@ class UnscopedInstance(object):
             set_option(max_args=1000)
         set_option(auto_config=False)
     
+    
+    
+    
+    def print_children(self, m, p, i, indent = 0):
+        for c in p.children:
+            rname = Alloy.getRelationName(c, p)
+            r = self.model.relations[rname]
+            for ci in m[Alloy.T(c).sort]:
+                if str(m.eval(r(ci,i))) == "True":
+                    print(INDENT*indent + str(c.name+ "$" + str(c.print_count)))
+                    c.print_count += 1
+                    self.print_children(m, c, ci, indent+1)
+                    
+    
+    def print_instance_h(self, m, c):
+        for i in m[Alloy.T(c).sort]:
+            if str(m.eval(c.isName(i))) == "True":
+                print(c.name + "$" + str(c.print_count))
+                c.print_count += 1
+                self.print_children(m, c, i, indent=1)
+             
+    
+    def print_instance(self, m):
+        print("\nINSTANCE\n")
+        for c in self.model.clafers:
+            if not c.parent and not isinstance(c, Abstract):
+                self.print_instance_h(m, c)
+                
+                
+                    #print(m[Alloy.T(c).sort])
+        return       
+        sys.exit()
+        
+        for r in self.model.relations.values():
+            print(m[r])
+            domains = []
+            for i in range(r.arity()):
+                domains.append(r.domain(i))
+            print(domains)
+            for i in m[domains[0]]:
+                print(i)
+            
+            sys.exit()
+            
+            print(m[i])
+        pass
+    
     def run(self):
         '''
         :param module: The Clafer AST
@@ -124,32 +119,32 @@ class UnscopedInstance(object):
         try:
             self.clock.tick("translation")
             
-            """ Create a ClaferSort associated with each Clafer. """  
-            Visitor.visit(CreateSorts.CreateSorts(self), self.module)
+            '''
+            Declares sort if top level,
+            Creates isName and isA,
+            Creates 2 consts per sort
+            No child wo/parent
+            '''
+            for i in self.model.clafers:
+                i.scopeless_initialize(self.model)
             
-            print(self.cfr_sorts)
-            
-            """ Resolve any 'parent' or 'this' ClaferID's. """
-            Visitor.visit(ResolveClaferIds.ResolveClaferIds(self), self.module)
-            
-            """ Add subclafers to the *fields* variable in the corresponding parent clafer. Also handles supers and refs. """
-            Visitor.visit(CreateHierarchy.CreateHierarchy(self), self.module)
-            
-            debug_print("Mapping colon clafers.")
-            self.mapColonClafers()
-          
-            debug_print("Scopeless Initialization")
-            Visitor.visit(Initialize.Scopeless_Initialize(self), self.module)
-            
-            sys.exit()
-            
-            #no overlapping subs
-            for i in self.cfr_sorts.values():      
-                if i.subs:
-                    Alloy.noOverlappingSubs(self, i)
+            '''
+            No overlapping subs 
+            '''
+            for i in self.model.clafers:      
+                if i.subs and len(i.subs) >= 2:
+                    Alloy.noOverlappingSubs(self.model, i)
+                    
+            for i in self.model.clafers:
+                Alloy.setCard(self.model, i)
 
-            debug_print("Asserting constraints.")
-            self.assertConstraints()  
+            for i in self.model.assertions:
+                #print(i)
+                self.solver.add(i)
+            
+            #self.assertConstraints()  
+            
+            
             start = time.clock()
             print("Solving")
             #print(self.solver.assertions())
@@ -161,10 +156,12 @@ class UnscopedInstance(object):
                 print(self.solver.unsat_core())
                 return
             m = self.solver.model()
+            
+            self.print_instance(m)
             #print(m)
-            for i in self.cfr_sorts.values():
-                if not i.superSort:
-                    print(str(i) + " : " + str(m[i.sort]))
+            
+
+                
 
         except UnusedAbstractException as e:
             print(str(e))

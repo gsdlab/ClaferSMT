@@ -4,10 +4,13 @@ Created on Apr 28, 2013
 @author: ezulkosk
 '''
 
-from common import SMTLib
 import imp
-import sys
 import subprocess
+import sys
+
+from common import SMTLib
+from jsir.IR import Model
+
 
 NORMAL = 0
 DEBUG = 1
@@ -146,5 +149,6 @@ def parse(file):
             print(err)
         file = file[:-4] + ".py"
     file = imp.load_source("module", str(file))
-    module = file.getModule()
-    return module
+    #module = file.getModule()
+    #return module
+    return Model()
