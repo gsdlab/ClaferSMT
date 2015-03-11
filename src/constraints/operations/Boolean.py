@@ -5,8 +5,9 @@ Created on Jul 14, 2014
 '''
 from common import SMTLib
 from common.Common import mAnd, mOr
+from common.SMTLib import toStr
 from constraints.operations.Set import op_implies
-from structures.ExprArg import ExprArg, BoolArg
+from structures.ExprArg import ExprArg, BoolArg, IntArg, JoinArg
 
 
 def op_not(arg):
@@ -100,7 +101,17 @@ def op_ifthenelse(cond, ifExpr, elseExpr):
     assert isinstance(elseExpr, ExprArg)
     
     condVal = cond.getBool()
-    ifExprVal = ifExpr.getBool()
-    elseExprVal = elseExpr.getBool()
-    return BoolArg(SMTLib.SMT_If(condVal, ifExprVal, elseExprVal))
+    if isinstance(ifExpr, IntArg):
+        ifExprVal = ifExpr.getInts()[0][0]
+        elseExprVal = elseExpr.getInts()[0][0]
+        return IntArg(SMTLib.SMT_If(condVal, ifExprVal, elseExprVal))
+    elif isinstance(ifExpr, JoinArg):
+        #TODO make more robust
+        ifExprVal = ifExpr.getInts()[0][0]
+        elseExprVal = elseExpr.getInts()[0][0]
+        return IntArg(SMTLib.SMT_If(condVal, ifExprVal, elseExprVal))
+    else:
+        ifExprVal = ifExpr.getBool()
+        elseExprVal = elseExpr.getBool()
+        return BoolArg(SMTLib.SMT_If(condVal, ifExprVal, elseExprVal))
 

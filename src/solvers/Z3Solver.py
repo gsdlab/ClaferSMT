@@ -3,9 +3,14 @@ Created on May 14, 2014
 
 @author: ezulkosk
 '''
-from common import Common
-from solvers.BaseSolver import BaseSolver
+import sys
+
 from z3 import sat, And, Xor, Or, Implies, Not, z3, If, Sum, BitVec, Real, Bool, Int
+
+from common import Common
+from common.SMTLib import toStr
+from solvers.BaseSolver import BaseSolver
+
 
 class Z3Solver(BaseSolver):
     def __init__(self):
@@ -22,6 +27,7 @@ class Z3Solver(BaseSolver):
         '''
         Adds a pre-converted constraint. Should be avoided when possible.
         '''
+        sys.exit("This is used?!")
         self.solver.add(constraint)
     
     def check(self, unsat_core_trackers=None):
@@ -63,7 +69,7 @@ class Z3Converter():
         self.num_hit = 0
         self.num_miss = 0
         self.expr_cache = {}
-
+    
     #keys are sorted tuples of children id's, with the op name as the last element
     def checkCache(self, op, children, sort = True):
         #TODO actually fix this, some kind of hashing problem
@@ -274,6 +280,9 @@ class Z3Converter():
         l = expr.left.convert(self)
         r = expr.right.convert(self)
         (hit, result) = self.checkCache("Divide", [l,r], sort=False)
+        if isinstance(r, int) and r == 0:
+            return 0
+            #sys.exit()
         if hit:   
             return result
         else:

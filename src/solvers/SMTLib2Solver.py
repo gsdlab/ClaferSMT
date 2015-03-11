@@ -6,7 +6,7 @@ Created on May 31, 2014
 from common.Options import standard_print
 from solvers.BaseSolver import BaseSolver
 import sys
-class SMTLibSolver(BaseSolver):
+class SMTLib2Solver(BaseSolver):
     def __init__(self):
         self.converter = SMTLibConverter()
         self.constraints = []

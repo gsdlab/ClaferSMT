@@ -32,9 +32,9 @@ class CheckForGoals(VisitorTemplate.VisitorTemplate):
             op = Common.METRICS_MAXIMIZE
         expr = bracketedConstraintsVisitor.objectiveVisit(element.exp.iExp[0].elements[0])
         if isinstance(expr[0], JoinArg):
-            #TODO cache stuff here too (pass cfr into computeJoin if caching
+            # TODO cache stuff here too (pass cfr into computeJoin if caching
             expr = operations.Join.computeJoin(expr)
-        valueList = [SMTLib.createIf(c, i, SMTLib.SMT_IntConst(0)) for (i,c) in expr.getInts()]
+        valueList = [SMTLib.createIf(c, i, SMTLib.SMT_IntConst(0)) for (i, c) in expr.getInts()]
         self.cfr.objectives.append((op, SMTLib.createSum(valueList)))
     
 

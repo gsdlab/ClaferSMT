@@ -121,7 +121,7 @@ def setCommandLineOptions(learner = False):
     parser.add_argument('--globalscope', '-g', dest='globalscope', type=int, default='1', help='the global scope for unbounded clafers (note that this does not match regular clafer)')
     parser.add_argument('--testset', '-t', dest='test_set', default='edstests', help='The test set to be used for modes [experiment | test | one | all], or the number of tests to generate')#,
     parser.add_argument('--stringconstraints' , '-s', default=False, dest='stringconstraints',action='store_const',  const=True,  help='Flag to output to Z3-Str format instead')
-    parser.add_argument('--solver', dest='solver', default='z3', choices=['z3', 'cvc4', 'smt2'], help='Backend solver')
+    parser.add_argument('--solver', dest='solver', default='z3', choices=['z3', 'cvc4', 'smt1', 'smt2', 'walkz3'], help='Backend solver')
     parser.add_argument('--printuniquenames', '-u', default=False, dest='unique_names',action='store_const',  const=True,  help='Print clafers with unique prefixes')
     parser.add_argument('--showinheritance', default=False, dest='show_inheritance',action='store_const',  const=True,  help='Show super-clafers explicitly')
     parser.add_argument('--version', '-v', default=False, dest='version',action='store_const',  const=True,  help='Print version number.')

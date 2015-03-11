@@ -9,23 +9,23 @@ class Module(object):
     elements([]): the top level clafers/constraints/goals
     mName(str): module name
     '''
-    
-    
+
+
 
     def __init__(self, mName):
         self.mName = mName
         self.elements = []
-        
-    def addElement(self, element):
+
+    def addChild(self, element):
         self.elements.append(element)
-        
-        
+
+
     def test(self):
         print(1)
-        
+
     def __str__(self):
         return self.mName #+ " " + ', '.join(map(str, self.elements))
-    
+
     def toString(self, level):
         #print("Module Name:" + self.mName)
         for i in self.elements:

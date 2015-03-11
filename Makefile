@@ -21,7 +21,7 @@ init:
 install:
 	mkdir -p $(to)
 	cp -f README.md $(to)/ClaferSMT-README.md
-	cp -f ClaferSMT.egg $(to)	
+	cp -f ClaferSMT.egg $(to)
 	# Windows Z3
 	cp -f libz3.dll $(to)  2>/dev/null || :
 	# Linux Z3

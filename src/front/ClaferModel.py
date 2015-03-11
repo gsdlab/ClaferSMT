@@ -23,17 +23,17 @@ import traceback
 
 
 class TracePrints(object):
-    def __init__(self):    
+    def __init__(self):
         self.stdout = sys.stdout
     def write(self, s):
         self.stdout.write("Writing %r\n" % s)
         traceback.print_stack(file=self.stdout)
 
 class ClaferModel(object):
-    ''' 
+    '''
     :var module: The Clafer AST
 
-    Stores and instantiates all necessary constraints for the ClaferZ3 model.
+    Stores and instantiates all necessary constraints for the ClaferSMT model.
     '''
     def __init__(self, module):
         Common.reset() #resets variables if in test mode
@@ -41,16 +41,16 @@ class ClaferModel(object):
         self.module = module
         self.smt_bracketed_constraints = []
         self.cfr_sorts = {}
-        self.solver = BaseSolver.getSolver()
+        self.solver = BaseSolver.getSolver(self)
         self.setOptions()
         self.clock = Clock.Clock()
         self.objectives = []
         self.delimeter_count = 0
-        
+
         """ Create simple objects used to store Z3 constraints. """
         self.join_constraints = Constraints.GenericConstraints("ClaferModel")
-        
-        """ 
+
+        """
         Used to map constraints in the UNSAT core to Boolean variables.
         """
         self.unsat_core_trackers = []
@@ -58,19 +58,19 @@ class ClaferModel(object):
         self.unsat_map = {}
         self.join_cache = {} # cache to store join expression (asil optimization)
         self.translate()
-    
+
     def createGroupCardConstraints(self):
         for i in self.cfr_sorts.values():
             i.addGroupCardConstraints()
-            
+
     def createRefConstraints(self):
         for i in self.cfr_sorts.values():
             i.addRefConstraints()
-            
+
     def createCardinalityConstraints(self):
         for i in self.cfr_sorts.values():
             i.createCardinalityConstraints()
-    
+
     def createInstancesConstraintsAndFunctions(self):
         for i in self.cfr_sorts.values():
             i.getInstanceRanges()
@@ -82,23 +82,23 @@ class ClaferModel(object):
                 i.fixAbstractExtraConstraints()
         for i in self.cfr_sorts.values():
             i.createInstancesConstraintsAndFunctions()
-    
+
     def mapColonClafers(self):
         for i in self.cfr_sorts.values():
             if i.superSort:
-                i.superSort.addSubSort(i)     
-    
+                i.superSort.addSubSort(i)
+
     def fixSubSortIndices(self):
         for i in self.cfr_sorts.values():
             i.currentSubIndex = 0
             for sub in i.subs:
                 i.setSubSortIndex(sub)
-    
+
     def addSubSortConstraints(self):
         for i in self.cfr_sorts.values():
             if i.superSort:
-                i.superSort.addSubSortConstraints(i)     
-                
+                i.superSort.addSubSortConstraints(i)
+
     def setTopLevelIndices(self):
         for i in self.cfr_sorts.values():
             i.indexInHighestSuper = i.indexInSuper
@@ -128,8 +128,8 @@ class ClaferModel(object):
         else:
             Visitor.visit(SetScopes.SetScopes(self), self.module)
             AdjustAbstracts.adjustAbstractsFixedPoint(self)
-          
-            
+
+
     def getScope(self, sort):
         if sort.element.isAbstract:
             summ = 0
@@ -139,7 +139,7 @@ class ClaferModel(object):
         else:
             (_, upper) = sort.element.glCard
             return upper.value
-    
+
     def findUnusedAbstracts(self):
         for i in self.cfr_sorts.values():
             if i.element.isAbstract:
@@ -148,7 +148,7 @@ class ClaferModel(object):
                     summ = summ + self.getScope(j)
                 if summ == 0:
                     raise UnusedAbstractException(i.element.uid)
-    
+
     def setOptions(self):
         """
         Sets basic options for the Z3 solver.
@@ -162,8 +162,8 @@ class ClaferModel(object):
         if (not ab.element.isAbstract) or ab.scope_summ != 0:
             return True
         return False
-    
-    
+
+
     def translate(self):
         '''
         Converts Clafer constraints to Z3 constraints.
@@ -171,74 +171,55 @@ class ClaferModel(object):
         #TODO caching for ASIL subexpressions. Do set equals first. Cache nonsupered joins.
         try:
             self.clock.tick("translation")
-            
-            """ Create a ClaferSort associated with each Clafer. """  
+
+            """ Create a ClaferSort associated with each Clafer. """
             Visitor.visit(CreateSorts.CreateSorts(self), self.module)
-            
+
             """ Resolve any 'parent' or 'this' ClaferID's. """
             Visitor.visit(ResolveClaferIds.ResolveClaferIds(self), self.module)
-            
+
             """ Add subclafers to the *fields* variable in the corresponding parent clafer. Also handles supers and refs. """
             Visitor.visit(CreateHierarchy.CreateHierarchy(self), self.module)
-            
+
             debug_print("Mapping colon clafers.")
             self.mapColonClafers()
-          
+
             debug_print("Adjusting instances for scopes.")
             self.setScopes()
-            
+
             """ Initializing ClaferSorts and their instances. """
             #TODO Clean this up.
             Visitor.visit(Initialize.Initialize(self), self.module)
             self.fixSubSortIndices()
             self.createInstancesConstraintsAndFunctions()
-              
-            #for i in self.cfr_sorts.values():
-            #    standard_print(str(i) + " : "+ str(i.numInstances))
-            
+
             debug_print("Creating cardinality constraints.")
             self.createCardinalityConstraints()
-            
+
             debug_print("Creating ref constraints.")
             self.createRefConstraints()
-            
+
             debug_print("Adding subsort constraints.")
             self.addSubSortConstraints()
             self.setTopLevelIndices()
-            
+
             debug_print("Creating group cardinality constraints.")
             self.createGroupCardConstraints()
-            
-            #debug_print("Creating bracketed constraints.")
-            #self.bracketedConstraintsPreview = CreateSimpleBracketedConstraints.CreateSimpleBracketedConstraints(self)
-            #Visitor.visit(self.bracketedConstraintsPreview, self.module)  
-                      
+
             debug_print("Creating bracketed constraints.")
-            bcVisitor = CreateBracketedConstraints.CreateBracketedConstraints(self)
-            #for i in self.bracketedConstraintsPreview.setEqualityConstraints:
-            #    bcVisitor.constraintVisit(None, i)
-            #print("ABOVE")
-            #for i in self.join_cache.keys():
-            #    print(str(i))# + " : " + str(self.join_cache[i]))
-            #print("BELOW")
-            #bcVisitor.constraintVisit(None, self.bracketedConstraintsPreview.otherConstraints[3])
-            #sys.exit("ABOVE!!!!!!!!")
-            #for i in self.bracketedConstraintsPreview.otherConstraints:
-                #print(i.stringRep)    
-                #bcVisitor.constraintVisit(None, i)
             Visitor.visit(CreateBracketedConstraints.CreateBracketedConstraints(self), self.module)
-            
-            
+
+
             debug_print("Checking for goals.")
             if not Options.IGNORE_GOALS:
                 Visitor.visit(CheckForGoals.CheckForGoals(self), self.module)
-            
+
             self.clock.tock("translation")
-            
+
         except UnusedAbstractException as e:
             print(str(e))
             return 0
-    
+
     def run(self):
         '''
         :param module: The Clafer AST
@@ -246,58 +227,58 @@ class ClaferModel(object):
         '''
         if Options.MODE == Common.PRELOAD:
             return 0
-    
+
         if Options.MODE == Common.MODELSTATS:
             ModelStats.run(self, self.module)
             return 0
-    
+
         if Options.STRING_CONSTRAINTS:
             sys.exit("TODO string constraints")
             #Converters.printZ3StrConstraints(self)
             Z3Str.clafer_to_z3str("z3str_in")
             return 1
-        
-        debug_print("Printing constraints.") 
+
+        debug_print("Printing constraints.")
         self.printConstraints()
 
         self.clock.tick("Asserting Constraints")
         debug_print("Asserting constraints.")
-        self.assertConstraints()     
+        self.assertConstraints()
         self.clock.tock("Asserting Constraints")
         #print("Cache Hits: " + str(self.solver.converter.num_hit))
         #print("Cache Misses: " + str(self.solver.converter.num_miss))
-        
-        if Options.SOLVER == "smt2":
+
+        if Options.SOLVER == "smt2" or Options.SOLVER == "smt1":
             self.solver.printConstraints()
             sys.exit()
-  
-        debug_print("Getting models.")  
+
+        debug_print("Getting models.")
         self.clock.tick("Get Models")
         models = self.get_models(Options.NUM_INSTANCES)
         self.clock.tock("Get Models")
         print(self.clock)
         self.num_models = len(models)
-        
+
         print(self.clock)
         if Options.LEARNING_ENVIRONMENT == "sharcnet":
             print(Options.SPLIT + str(Options.NUM_SPLIT))
             sys.exit("TODO FIX SHARCNET")
-             
+
         return self.num_models
-        
+
     def printStartDelimeter(self):
         if Options.DELIMETER == Common.STANDARD_DELIMETER:
             standard_print("=== Instance " + str(self.delimeter_count+1) + " Begin ===")
-            
+
             standard_print("")
         else:
             standard_print(Options.DELIMETER)
-    
+
     def printEndDelimeter(self):
         if Options.DELIMETER == Common.STANDARD_DELIMETER:
             standard_print("--- Instance " + str(self.delimeter_count+1) + " End ---")
         self.delimeter_count = self.delimeter_count + 1
-            
+
     def printVars(self, model):
         self.clock.tick("printing")
         self.printStartDelimeter()
@@ -308,7 +289,7 @@ class ClaferModel(object):
         self.printEndDelimeter()
         standard_print("")
         self.clock.tack("printing")
-    
+
     def assertConstraints(self):
         self.clock.tick("Asserting basic constraints")
         for i in self.cfr_sorts.values():
@@ -319,7 +300,7 @@ class ClaferModel(object):
         for i in self.smt_bracketed_constraints:
             i.assertConstraints(self)
         self.clock.tock("Asserting bracketed constraints")
-    
+
     def printConstraints(self):
         if not (Options.MODE == Common.DEBUG and Options.PRINT_CONSTRAINTS):
             return
@@ -329,23 +310,23 @@ class ClaferModel(object):
         for i in self.smt_bracketed_constraints:
             i.debug_print()
         print("Num lines of print: " + str(SMTLib.numCalls))
-        
-    def print_repl_help(self): 
+
+    def print_repl_help(self):
         print("n -- get next model")
         print("r -- reset")
         print("i [num] -- increase (or decrease) the global scope by num (default=+1)")
         print("s num -- set scope to num")
         print("h -- help")
         print("q -- quit")
-        
-        
+
+
     def check_repl_input(self, args):
         if len(args) == 2 and args[0] in ['s', 'i'] and str(int(args[1])) == args[1]:
             return True
         else:
             print("Type h for help")
             return False
-        
+
     def get_models(self, desired_number_of_models):
         if Options.MODE == Common.REPL:
             self.repl()
@@ -353,8 +334,8 @@ class ClaferModel(object):
             return self.standard_get_models(desired_number_of_models)
         else:
             return self.GIA(desired_number_of_models)
-        
-    
+
+
     def GIA(self, desired_number_of_models):
         metrics_objective_direction = []
         metrics_variables = []
@@ -364,17 +345,17 @@ class ClaferModel(object):
             metrics_objective_direction.append(pol)
             metrics_variables.append(var)
 
-        # Non-Parallel    
+        # Non-Parallel
         GIAOptionsNP = GuidedImprovementAlgorithmOptions(verbosity=0, \
             incrementallyWriteLog=False, \
             writeTotalTimeFilename="timefile.csv", \
-            writeRandomSeedsFilename="randomseed.csv", useCallLogs=False, num_models=desired_number_of_models, magnifying_glass=Options.MAGNIFYING_GLASS)    
+            writeRandomSeedsFilename="randomseed.csv", useCallLogs=False, num_models=desired_number_of_models, magnifying_glass=Options.MAGNIFYING_GLASS)
         if Options.CORES == 1:
             GIAAlgorithmNP = GuidedImprovementAlgorithm(self, self.solver, metrics_variables, \
-                    metrics_objective_direction, [], options=GIAOptionsNP) 
+                    metrics_objective_direction, [], options=GIAOptionsNP)
             '''featurevars instead of []'''
             outfilename = str("giaoutput").strip()
-    
+
             ParetoFront = GIAAlgorithmNP.ExecuteGuidedImprovementAlgorithm(outfilename)
             if not Options.SUPPRESS_MODELS:
                 if not ParetoFront:
@@ -384,24 +365,26 @@ class ClaferModel(object):
             return ParetoFront
         else:
             parSolver = ParSolver.ParSolver(self, self.module, self.solver, metrics_variables, metrics_objective_direction)
-            ParetoFront = parSolver.run()   
+            ParetoFront = parSolver.run()
             for i in ParetoFront:
                 self.printStartDelimeter()
                 standard_print(i)
                 standard_print("")
                 self.printEndDelimeter()
             return ParetoFront
-            
-    
+
+
     def standard_get_models(self, desired_number_of_models):
         result = []
         count = 0
         self.clock.tick("first model")
         while True:
             self.clock.tick("unsat")
-            if (Options.MODE != Common.DEBUG and not(Options.PRODUCE_UNSAT_CORE)and count != desired_number_of_models and self.solver.check() == Common.SAT ) or \
+            if (count != desired_number_of_models and ((self.solver.check() == Common.SAT) or \
+                (Options.MODE != Common.DEBUG and not(Options.PRODUCE_UNSAT_CORE)and count != desired_number_of_models and self.solver.check() == Common.SAT ) or \
                 (Options.MODE != Common.DEBUG and Options.PRODUCE_UNSAT_CORE and count != desired_number_of_models and self.solver.check(self.unsat_core_trackers) == Common.SAT ) or \
-                (Options.MODE == Common.DEBUG and count != desired_number_of_models and  self.solver.check(self.unsat_core_trackers) == Common.SAT ):
+                (Options.MODE == Common.DEBUG and count != desired_number_of_models and  self.solver.check(self.unsat_core_trackers) == Common.SAT ))):
+
                 if count == 0:
                     self.clock.tock("first model")
                 m = self.solver.model()
@@ -409,7 +392,7 @@ class ClaferModel(object):
                 # Create a new constraint that blocks the current model
                 if not Options.SUPPRESS_MODELS:
                     self.printVars(m)
-                preventSameModel(self, self.solver, m)  
+                preventSameModel(self, self.solver, m)
                 count += 1
             else:
                 if count == 0 and Options.PRODUCE_UNSAT_CORE:
@@ -424,14 +407,14 @@ class ClaferModel(object):
                 elif count == 0:
                     standard_print("UNSAT")
                 return result
-    
+
     def repl(self):
         if Common.FIRST_REPL_LOOP:
             models = self.standard_get_models(1)
             if not models:
                 print("No more instances")
         while True:
-            ch = input("ClaferZ3 > ")
+            ch = input("ClaferSMT > ")
             ch = ch.strip()
             if ch == 'n':
                 models = self.standard_get_models(1)
@@ -461,17 +444,17 @@ class ClaferModel(object):
                 self.print_repl_help()
             else:
                 print("Type h for help")
-    
-    
+
+
     def getSort(self, uid):
         return self.cfr_sorts.get(uid)
-        
-    def getSorts(self): 
+
+    def getSorts(self):
         '''
         :returns: cfr_sorts
         '''
         return self.cfr_sorts.values()
-        
+
     def addSort(self, sortID, sort):
         '''
         :param sortID: The uid of the Clafer
@@ -480,7 +463,7 @@ class ClaferModel(object):
         :type sort: :mod:`common.ClaferSort`
         '''
         self.cfr_sorts[sortID] = sort
-    
+
     def __str__(self):
         return (str(self.getSorts())) + "\n" +\
             ("\n".join(map(str,self.getConstraints())))

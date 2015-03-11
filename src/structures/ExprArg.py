@@ -3,9 +3,12 @@ Created on Oct 21, 2013
 
 @author: ezulkosk
 '''
+
+
 from common import SMTLib, Common
 from common.Common import mOr
 import sys
+
 
 class ExprArg():
     def __init__(self, instances = None, nonsupered=False):
@@ -162,6 +165,7 @@ class JoinArg(ExprArg):
         import constraints.operations.Join as Join
         if not self.clafers:
             joinList = self.flattenJoin()
+            #print(joinList)
             if getAllKeys:
                 #TODO CLEAN
                 (exprArg,all_keys) = Join.computeJoin(joinList, self.cfr, getAllKeys)
@@ -185,7 +189,12 @@ class JoinArg(ExprArg):
         return self.left.flattenJoin([]) + joinList + self.right.flattenJoin([])
     
     def getInts(self):
+        #print(self.left)
         self.checkIfJoinIsComputed()
+        #if not self.ints:
+            # c0ECU . deployedFrom . ref . c0_wcet . ref
+            #print(self.right)
+            #print("-----")
         return self.ints#getInts()
 
     def __str__(self):
