@@ -21,14 +21,14 @@ init:
 install:
 	mkdir -p $(to)
 	cp -f README.md $(to)/ClaferSMT-README.md
-	cp -f egg $(to)	
+	cp -f ClaferSMT.egg $(to)
 	# Windows Z3
 	cp -f libz3.dll $(to)  2>/dev/null || :
 	# Linux Z3
 	cp -f libz3.so $(to)  2>/dev/null || :
 	# Mac Z3
 	cp -f libz3.dylib $(to)  2>/dev/null || :
-	cp sh $(to)
+	cp claferSMT.sh $(to)
 
 clean:
 	find . -type d -name '__pycache__' -print0 | xargs -0 rm -fr
