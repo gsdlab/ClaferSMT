@@ -38,7 +38,7 @@ class SMT_Implies(BoolType):
         self.left = l
         self. right = r
         self.unsat_core_implies = unsat_core_implies
-        
+
 
     def children(self):
         return [self.left, self.right]
@@ -48,7 +48,7 @@ class SMT_Implies(BoolType):
 
     def __str__(self):
         return "Implies"
-        
+
 class SMT_And(BoolType):
     def __init__(self, *l):
         self.list = l
@@ -59,13 +59,13 @@ class SMT_And(BoolType):
 
     def children(self):
         return self.list
-        
+
     def convert(self, converter):
         return converter.and_expr(self)
 
     def __str__(self):
         return "And"
-        
+
 class SMT_Or(BoolType):
     def __init__(self, *l):
         self.list = l
@@ -90,7 +90,7 @@ class SMT_Xor(BoolType):
 
     def children(self):
         return [self.left, self.right]
-        
+
     def convert(self, converter):
         return converter.xor_expr(self)
 
@@ -113,7 +113,7 @@ class SMT_Not(BoolType):
 
     def children(self):
         return [self.value]
-        
+
     def convert(self, converter):
         return converter.not_expr(self)
 
@@ -145,7 +145,7 @@ class SMT_LE(BoolType):
     def __init__(self, l, r):
         self.left = l
         self.right = r
-        
+
 
     def children(self):
         return [self.left, self.right]
@@ -155,7 +155,7 @@ class SMT_LE(BoolType):
 
     def __str__(self):
         return "<="
-    
+
 class SMT_GE(BoolType):
     def __init__(self, l, r):
         self.left = l
@@ -163,13 +163,13 @@ class SMT_GE(BoolType):
 
     def children(self):
         return [self.left, self.right]
-        
+
     def convert(self, converter):
         return converter.ge_expr(self)
 
     def __str__(self):
         return ">="
-        
+
 class SMT_LT(BoolType):
     def __init__(self, l, r):
         self.left = l
@@ -177,13 +177,13 @@ class SMT_LT(BoolType):
 
     def children(self):
         return [self.left, self.right]
-        
+
     def convert(self, converter):
         return converter.lt_expr(self)
 
     def __str__(self):
         return "<"
-    
+
 class SMT_GT(BoolType):
     def __init__(self, l, r):
         self.left = l
@@ -191,13 +191,13 @@ class SMT_GT(BoolType):
 
     def children(self):
         return [self.left, self.right]
-        
+
     def convert(self, converter):
         return converter.gt_expr(self)
 
     def __str__(self):
         return ">"
-    
+
 class SMT_EQ(BoolType):
     def __init__(self, l, r):
         self.left = l
@@ -209,7 +209,7 @@ class SMT_EQ(BoolType):
 
     def children(self):
         return [self.left, self.right]
-        
+
     def convert(self, converter):
         return converter.eq_expr(self)
 
@@ -218,7 +218,7 @@ class SMT_EQ(BoolType):
 
 def createNE(l, r):
     createNot(SMT_EQ(l,r))
-    
+
 class SMT_NE(BoolType):
     def __init__(self, l, r):
         self.left = l
@@ -226,7 +226,7 @@ class SMT_NE(BoolType):
 
     def children(self):
         return [self.left, self.right]
-        
+
     def convert(self, converter):
         return converter.ne_expr(self)
 
@@ -238,8 +238,8 @@ def createSum(l):
         return l[0]
     else:
         return SMT_Sum(l)
-    
-        
+
+
 class SMT_Sum():
     def __init__(self, l):
         self.list = list(l)
@@ -252,7 +252,7 @@ class SMT_Sum():
 
     def __str__(self):
         return "Sum"
-   
+
 class SMT_Int():
     def __init__(self, uid, bits=None):
         self.bits = bits
@@ -285,7 +285,7 @@ class SMT_IntConst():
 
     def __str__(self):
         return str(self.value)
-    
+
 class SMT_BoolConst(BoolType):
     def __init__(self, val):
         self.value = val
@@ -314,7 +314,7 @@ class SMT_Real():
 
     def __str__(self):
         return self.id
-    
+
 class SMT_RealConst():
     def __init__(self, val):
         self.value = val
@@ -327,7 +327,7 @@ class SMT_RealConst():
 
     def __str__(self):
         return str(self.value)
-        
+
 class SMT_Bool(BoolType):
     def __init__(self, v):
         self.id = v
@@ -335,7 +335,7 @@ class SMT_Bool(BoolType):
 
     def children(self):
         return []
-        
+
     def convert(self, converter):
         if not self.var:
             self.var = converter.bool_var(self)
@@ -348,7 +348,7 @@ class SMT_Plus():
     def __init__(self, l, r):
         self.left = l
         self.right = r
-        
+
 
     def children(self):
         return [self.left, self.right]
@@ -400,7 +400,7 @@ class SMT_Divide():
 
     def __str__(self):
         return "/"
-    
+
 class SMT_IntDivide():
     def __init__(self, l, r):
         self.left = l
@@ -415,10 +415,24 @@ class SMT_IntDivide():
     def __str__(self):
         return "//"
 
+class SMT_IntModulo():
+    def __init__(self, l, r):
+        self.left = l
+        self.right = r
+
+    def children(self):
+        return [self.left, self.right]
+
+    def convert(self, converter):
+        return converter.intdivide_expr(self)
+
+    def __str__(self):
+        return "mod"
+
 def SMT_IntVector(uid, count, bits=None):
     return [SMT_Int(str(uid) + "__" + str(i), bits) for i in range(count)]
-    
+
 def SMT_RealVector(uid, count):
     return [SMT_Real(str(uid) + "__" + str(i)) for i in range(count)]
 
-        
+

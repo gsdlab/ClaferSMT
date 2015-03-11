@@ -25,7 +25,8 @@ ClaferToZ3OperationsMap = {
                            "!"           : (1, Boolean.op_not),
                            "UNARY_MINUS" : (1, Numeric.op_un_minus),
                            "#"           : (1, Set.op_card),
-                           "sum"         : (1, Numeric.op_sum),    
+                           "sum"         : (1, Numeric.op_sum),
+                           "product"         : (1, Numeric.op_product),
                            #Binary Ops
                            "<=>"         : (2, Boolean.op_equivalence),
                            "=>"          : (2, Set.op_implies),
@@ -44,14 +45,15 @@ ClaferToZ3OperationsMap = {
                            "-"           : (2, Numeric.op_sub),
                            "*"           : (2, Numeric.op_mul),
                            "/"           : (2, Numeric.op_div),
+                           "%"           : (2, Numeric.op_mod),
                            "++"          : (2, Set.op_union),
                            "--"          : (2, Set.op_difference),
-                           "&"           : (2, Set.op_intersection),
+                           "**"           : (2, Set.op_intersection),
                            "<:"          : (2, Set.op_domain_restriction),
                            ":>"          : (2, Set.op_range_restriction),
                            "."           : (2, Join.op_join),
                            #Ternary Ops
-                           "=>else"  : (3, Boolean.op_ifthenelse),
+                           "ifthenelse"  : (3, Boolean.op_ifthenelse),
                            #String Ops
                            "concat"      : (2, String.op_concat),
                            "length"      : (1, String.op_length),
@@ -66,8 +68,8 @@ QuantifierMap = {
                "All"           : Quantifier.quant_all,
                "Lone"          : Quantifier.quant_lone,
                "One"           : Quantifier.quant_one,
-               "No"            : Quantifier.quant_no, 
-               "Some"          : Quantifier.quant_some, 
+               "No"            : Quantifier.quant_no,
+               "Some"          : Quantifier.quant_some,
                }
 
 
@@ -76,7 +78,7 @@ def getOperationConversion(op):
     :param op: String representation of Clafer operation.
     :type op: str
     :returns: 2-tuple from ClaferToZ3OperationsMap with the fields:
-    
+
     The 2-tuple has the fields:
         1. arity of the function
         2. function associated with the operator
@@ -88,7 +90,7 @@ def getQuantifier(quant):
     :param op: String representation of Clafer operation.
     :type op: str
     :returns: 2-tuple from ClaferToZ3OperationsMap with the fields:
-    
+
     The 2-tuple has the fields:
         1. arity of the function
         2. function associated with the operator
@@ -100,7 +102,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
     :var stack: ([]) Used to process a tree of expressions.
     Class for creating bracketed Clafer constraints in Z3.
     '''
-    
+
     def __init__(self, cfr, element, claferStack):
         ident = "BC" + str(Common.getConstraintUID()) + ":" + ".".join([str(i.element.uid) for i in claferStack])
         GenericConstraints.__init__(self, ident)
@@ -109,19 +111,19 @@ class BracketedConstraint(Constraints.GenericConstraints):
         self.stringRep = "" #created by CreateSimpleBracketedConstraints (* MAY NOT LOOK LIKE ACTUAL CONSTRANTS! *)
         self.cacheJoins = False
         self.cache =  {} # The actual join cache (see op_eq)
-        
+
         self.claferStack = [i for i in claferStack]
         self.stack = []
         self.locals = {}
         self.value = None
-        
+
     def addLocal(self, uid, expr):
         self.locals[uid] = expr
-    
+
     def addArg(self, arg):
         self.stack.append(arg)
-       
-    #TODO clean     
+
+    #TODO clean
     def addQuantifier(self, quantifier, num_args, num_combinations, ifconstraints):
         localStack = []
         ifConstraints = []
@@ -136,8 +138,8 @@ class BracketedConstraint(Constraints.GenericConstraints):
         quantFunction = getQuantifier(quantifier)
         cond = quantFunction(localStack, ifConstraints)
         self.stack.append([BoolArg(cond)])
-        
-        
+
+
     def extend(self, args):
         maxInstances = 0
         extendedArgs = []
@@ -151,7 +153,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
             else:
                 extendedArgs.append(i)
         return (maxInstances, extendedArgs)
-                
+
     def addOperator(self, operation):
         (arity, operator) = getOperationConversion(operation)
         args = []
@@ -175,7 +177,7 @@ class BracketedConstraint(Constraints.GenericConstraints):
             finalExprs = [operator(*finalExprs[i]) for i in range(len(finalExprs))]
         Assertions.nonEmpty(finalExprs)
         self.stack.append(finalExprs)
-    
+
     def endProcessing(self, addToZ3 = True):
         if not self.stack:
             return
@@ -194,10 +196,10 @@ class BracketedConstraint(Constraints.GenericConstraints):
                 self.addConstraint(i.getBool())
         if addToZ3:
             self.cfr.smt_bracketed_constraints.append(self)
-        
-    
+
+
     def __str__(self):
         return str(self.value)
-    
+
     def __repr__(self):
         return str(self.value)
