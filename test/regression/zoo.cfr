@@ -8,7 +8,7 @@ abstract Animal *
   Leg 4
     Feet
 
-Cat : Animal 4
+Cat : Animal 10
   Whiskers 6
 
 Rhino : Animal 2..*

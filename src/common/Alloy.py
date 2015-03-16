@@ -112,3 +112,7 @@ def noOverlappingSubs(model, s):
     cons = z3.ForAll(p, z3.And(*[z3.Not(z3.And(subs[i].isName(p), subs[j].isName(p))) for i in range(len(subs) - 1) for j in range(i+1, len(subs))]))
     
     model.assertions.append(cons)
+    
+    
+def genConstraint(c):
+    print(c)

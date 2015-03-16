@@ -135,9 +135,13 @@ class UnscopedInstance(object):
                 if i.subs and len(i.subs) >= 2:
                     Alloy.noOverlappingSubs(self.model, i)
                     
+            ''' TODO: Set Cards '''
             for i in self.model.clafers:
                 Alloy.setCard(self.model, i)
-
+                
+            for i in self.model.constraints:
+                Alloy.genConstraint(i)
+                
             for i in self.model.assertions:
                 #print(i)
                 self.solver.add(i)
@@ -158,8 +162,6 @@ class UnscopedInstance(object):
             m = self.solver.model()
             
             self.print_instance(m)
-            #print(m)
-            
 
                 
 
