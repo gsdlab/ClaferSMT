@@ -29,7 +29,7 @@ Regardless of the installation method, the following are required:
 ### Installation from binaries
 
 Binary distributions of the release 0.3.7 of Clafer Tools for Windows, Mac, and Linux, 
-can be downloaded from [Clafer Tools - Binary Distributions](http://http://gsd.uwaterloo.ca/clafer-tools-binary-distributions). 
+can be downloaded from [Clafer Tools - Binary Distributions](http://gsd.uwaterloo.ca/clafer-tools-binary-distributions). 
 
 1. download the binaries and unpack `<target directory>` of your choice
 2. add the `<target directory>` to your system path so that the executables can be found
